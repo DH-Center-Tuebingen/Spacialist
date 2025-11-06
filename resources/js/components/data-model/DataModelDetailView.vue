@@ -1,160 +1,48 @@
 <template>
     <div
         v-if="state.entityAvailable"
-        class="h-100 d-flex flex-column"
+        class="h-100 d-flex flex-column bg-light-dark rounded border border-1 border-gray h-100 overflow-y-auto"
     >
-        <h4>
-            {{ t('main.datamodel.detail.properties.title') }}
-            <small>
-                {{ translateConcept(state.entityType.thesaurus_url) }}
-            </small>
-        </h4>
+        <header class="d-flex flex-row align-items-center justify-content-between gap-3 border-bottom py-2 px-3">
+            <div class="heading d-flex flex-row align-items-center gap-3 h-100">
+                <div
+                    class="rounded"
+                    :style="{
+                        aspectRatio: '1 / 1',
+                        height: '100%',
+                        backgroundColor: `${color} !important` || '#666666',
+                    }"
+                ></div>
+                <h2 class="m-0 fs-regular fw-bold">
+                    {{ translateConcept(state.entityType.thesaurus_url) }}
+                </h2>
+            </div>
+            <div class="toolbar d-flex flex-row align-items-center gap-4">
+                <IconStatsGroup :value="stats" />
+
+                <button
+                    type="button"
+                    class="btn btn-sm p-0"
+                >
+                    <i class="fas fa-fw fa-sliders" />
+                </button>
+            </div>
+        </header>
         <div
             v-if="state.entityType.id"
-            class="col d-flex flex-column"
+            class="col d-flex flex-column position-relative p-3"
         >
-            <form
-                role="form"
-                @submit.prevent="updateEntityType"
-            >
-                <div class="row mb-3">
-                    <div class="offset-3 col row align-items-center">
-                        <div class="form-check form-switch">
-                            <input
-                                id="entity-type-root-toggle"
-                                v-model="state.properties.is_root"
-                                class="form-check-input"
-                                type="checkbox"
-                            >
-                            <label
-                                class="form-check-label"
-                                for="entity-type-root-toggle"
-                            >
-                                {{ t('main.datamodel.detail.properties.top_level') }}
-                            </label>
-                        </div>
-                    </div>
-                    <div class="col align-items-center">
-                        <div class="row align-items-center">
-                            <label
-                                for="entity-color"
-                                style="width: min-content;"
-                            >
-                                {{ t('global.color') }}
-                            </label>
-                            <div class="col align-items-center">
-                                <input
-                                    v-model="state.properties.color"
-                                    type="color"
-                                    class="form-control form-control-color w-100"
-                                >
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- TODO: This should be handled using a @PluginHook from within the map plugin! -->
-                <div
-                    v-if="state.entityType?.layer?.type"
-                    class="mb-3 row"
-                >
-                    <label
-                        for="entity-geometrytype-ro"
-                        class="col-form-label col-md-3 text-end"
-                    >
-                        {{ t('global.geometry_type') }}
-                    </label>
-                    <div class="col-md-9 d-flex align-items-center">
-                        <span>
-                            {{ state.entityType?.layer?.type ?? "" }}
-                        </span>
-                        <!-- <router-link :to="{name: 'ldetail', params: { id: state.entityType.layer.id }}">
-                            {{ t('main.datamodel.detail.manage_layer') }}
-                        </router-link> -->
-                    </div>
-                </div>
-                <div class="mb-2 row">
-                    <label
-                        for="dme-allowed-sub-entity-types-select"
-                        class="col-form-label col-md-3 text-end"
-                    >
-                        {{ t('main.datamodel.detail.properties.sub_types') }}
-                    </label>
-                    <div class="col-md-9">
-                        <multiselect
-                            id="dme-allowed-sub-entity-types-select"
-                            v-model="state.properties.sub_entity_types"
-                            :object="true"
-                            :mode="'tags'"
-                            :label="'thesaurus_url'"
-                            :track-by="'thesaurus_url'"
-                            :value-prop="'id'"
-                            :options="state.minimalEntityTypes"
-                            :close-on-select="false"
-                            :close-on-deelect="false"
-                            :placeholder="t('global.select.placeholder')"
-                        >
-                            <template #option="{ option }">
-                                {{ translateConcept(option.thesaurus_url) }}
-                            </template>
-                            <template #tag="{ option, handleTagRemove, disabled }">
-                                <div class="multiselect-tag">
-                                    {{ translateConcept(option.thesaurus_url) }}
-                                    <span
-                                        v-if="!disabled"
-                                        class="multiselect-tag-remove"
-                                        @click.prevent
-                                        @mousedown.prevent.stop="handleTagRemove(option, $event)"
-                                    >
-                                        <span class="multiselect-tag-remove-icon" />
-                                    </span>
-                                </div>
-                            </template>
-                        </multiselect>
-                        <div class="mt-2 d-flex flex-row gap-2">
-                            <div
-                                class="btn-group"
-                                role="group"
-                            >
-                                <button
-                                    type="button"
-                                    class="btn btn-outline-success btn-sm"
-                                    @click="addAllEntityTypes"
-                                >
-                                    <i class="fas fa-fw fa-tasks" /> {{ t('global.select_all') }}
-                                </button>
-                                <button
-                                    type="button"
-                                    class="btn btn-outline-danger btn-sm"
-                                    @click="removeAllEntityTypes"
-                                >
-                                    <i class="fas fa-fw fa-times" /> {{ t('global.select_none') }}
-                                </button>
-                            </div>
-                            <div class="col" />
-                            <button
-                                type="submit"
-                                class="btn btn-outline-success btn-sm"
-                                :disabled="!state.propertiesDirty || state.propertiesSaving"
-                            >
-                                <i class="fas fa-fw fa-save" /> {{ t('global.save') }}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </form>
-            <hr>
-            <h3>{{ t('main.datamodel.detail.attribute.title') }}</h3>
             <div class="col overflow-hidden flex-grow-1 position-relative">
                 <div
                     v-if="state.entityAttributes.length == 0"
                     class="position-absolute d-flex justify-content-center align-items-center h-100 w-100 rounded text-muted bg-light-dark border border-3 border-secondary border-dashed"
                 >
-                    <h4>Drag attributes here</h4>
+                    <span class="fw-bold fs-heading">Drag attributes here</span>
                 </div>
                 <attribute-list
-                    class="h-100 overflow-y-auto overflow-x-hidden"
+                    class="h-100 overflow-y-auto overflow-x-hidden pt-0"
                     style="padding-bottom: 10rem;"
+                    :disabled="true"
                     :group="{ name: 'attribute-selection', pull: false, put: true }"
                     :attributes="state.entityAttributes"
                     :values="state.entityValues"
@@ -165,7 +53,7 @@
                     @reorder-list="reorderEntityAttribute"
                 >
                     <template #before-container="{ attribute, dragging, hovered }">
-                       <EntityAttributeListControls
+                        <EntityAttributeListControls
                             v-if="hovered && !dragging"
                             :attribute="attribute"
                             class="top-50 translate-middle-y"
@@ -192,11 +80,17 @@
         useRoute,
     } from 'vue-router';
 
+    import { IconStatsGroup } from 'dhc-components'
     import { useI18n } from 'vue-i18n';
+    import { useToast } from '@/plugins/toast.js';
+    import {
+        faCodeMerge,
+        faCubes,
+        faLevelDown,
+        faLevelUp,
+    } from '@fortawesome/free-solid-svg-icons';
 
     import useEntityStore from '@/bootstrap/stores/entity.js';
-
-    import { useToast } from '@/plugins/toast.js';
 
     import {
         getInitialAttributeValue,
@@ -214,47 +108,28 @@
         showRemoveAttribute,
     } from '@/helpers/modal.js';
 
-    import EntityAttributeListControls from './attribute/EntityAttributeListControls.vue';
+    import EntityAttributeListControls from '@/components/attribute/EntityAttributeListControls.vue';
+    import {
+        isRequired as isAttributeRequired,
+        setRequired as setAttributeRequired
+    } from '@/helpers/attribute.js';
+
+    import EntityTypeSettings from '@/components/data-model/EntityTypeSettings.vue';
+
+
 
     export default {
         components: {
-            EntityAttributeListControls
+            EntityAttributeListControls,
+            EntityTypeSettings,
+            IconStatsGroup,
         },
         setup(props, context) {
             const { t } = useI18n();
             const entityStore = useEntityStore();
             const currentRoute = useRoute();
             const toast = useToast();
-            // FETCH
 
-            // FUNCTIONS
-            const updateEntityType = _ => {
-                if(!state.entityType.id) return;
-
-                const et = state.entityType;
-
-                entityStore.updateEntityType(et.id, state.properties).then(_ => {
-                    state.propertiesSaving = true;
-                    const name = translateConcept(state.entityType.thesaurus_url);
-                    toast.$toast(
-                        t('main.datamodel.toasts.updated_type.msg', {
-                            name: name
-                        }),
-                        t('main.datamodel.toasts.updated_type.title'),
-                        {
-                            channel: 'success',
-                        }
-                    );
-                }).finally(_ => {
-                    state.propertiesSaving = false;
-                });
-            };
-            const addAllEntityTypes = _ => {
-                state.properties.sub_entity_types = state.minimalEntityTypes.slice();
-            };
-            const removeAllEntityTypes = _ => {
-                state.properties.sub_entity_types = [];
-            };
             const addAttributeToEntityType = async e => {
                 try {
                     const data = await entityStore.addEntityTypeAttribute(state.entityType.id, e.element.id, e.to + 1);
@@ -284,25 +159,26 @@
                     pivot: attribute.pivot,
                 });
             };
-            const onRequireEntityAttribute = attribute => {
+
+            const onRequireEntityAttribute = async attribute => {
                 if(attribute) {
-                    const isRequired = e.active === true;
+                    const isRequired = !isAttributeRequired(attribute);
                     const metadata = {
                         required: isRequired,
                     };
-                    const attributeId = e.element.id;
-                    const entityAttributeId = e.element.pivot.id;
-                    entityStore.patchEntityMetadata(
+                    await entityStore.patchEntityMetadata(
                         state.entityType.id,
-                        attributeId,
-                        entityAttributeId,
+                        attribute.id,
+                        attribute.pivot.id,
                         metadata,
-                    ).then(_ => {
-                        if(!attribute.pivot.metadata) {
-                            attribute.pivot.metadata = {};
-                        }
-                        attribute.pivot.metadata.required = isRequired;
-                    });
+                    )
+
+                    console.log(attribute.pivot.metadata);
+                    if(!attribute.pivot.metadata) {
+                        attribute.pivot.metadata = {};
+                    }
+
+                    setAttributeRequired(attribute, isRequired);
                 }
             };
             const onRemoveAttributeFromEntityType = (attribute, modal = false) => {
@@ -326,8 +202,8 @@
                     entityStore.removeEntityTypeAttribute(pivotId, entityTypeId);
                 }
             };
-            const reorderEntityAttribute = e => {
-                entityStore.reorderAttributes(currentRoute.params.id, e.element.id, e.from, e.to);
+            const reorderEntityAttribute = ({ element, from, to }) => {
+                entityStore.reorderAttributes(currentRoute.params.id, element, from, to);
             };
 
             const getDefaultPropertyValues = function () {
@@ -350,17 +226,7 @@
                         entityType.sub_entity_types = [];
                     return entityType;
                 }),
-                propertiesDirty: computed(_ => {
-                    if(!state.entityType) return false;
-                    const rootDirty = state.entityType.is_root !== state.properties.is_root;
-                    const colorDirty = state.entityType.color !== state.properties.color;
-                    const subTypesDirty = state.entityType.sub_entity_types.length !== state.properties.sub_entity_types.length ||
-                        state.properties.sub_entity_types.every((v, i) => v.id !== state.entityType.sub_entity_types[i].id);
 
-                    return rootDirty || colorDirty || subTypesDirty;
-                }),
-                propertiesSaving: false,
-                properties: getDefaultPropertyValues(),
                 entityAttributes: computed(_ => getEntityTypeAttributes(currentRoute.params.id)),
                 entityValues: computed(_ => {
                     let data = {};
@@ -386,12 +252,6 @@
                     attributes: [],
                     values: []
                 },
-                minimalEntityTypes: computed(_ => {
-                    return Object.values(entityStore.entityTypes).map(et => ({
-                        id: et.id,
-                        thesaurus_url: et.thesaurus_url
-                    }));
-                }),
                 openedModal: '',
                 modalSelectedAttribute: {},
                 modalSelectedEntityType: {},
@@ -464,26 +324,41 @@
                 }),
             });
 
-            function updateProperties(entityType) {
-                if(entityType && entityType.id) {
-                    state.properties.id = entityType.id;
-                    state.properties.is_root = entityType.is_root;
-                    state.properties.sub_entity_types = entityType.sub_entity_types;
-                    state.properties.color = entityType.color;
-                } else {
-                    state.properties = getDefaultPropertyValues();
-                }
-            }
+            const color = computed(() => {
+                return state.entityType?.color || '#ff00ff';
+            })
 
-            onMounted(() => {
-                updateProperties(state.entityType);
-            });
+            const stats = computed(() => {
+                if(!state.entityType) return [];
 
-            watch(() => state.entityType, (newValue, oldValue) => {
-                if(newValue?.id !== oldValue?.id) {
-                    updateProperties(newValue);
+                const entityType = state.entityType;
+
+                const stats = [
+                    {
+                        icon: faLevelUp,
+                        text: entityType?.parents?.length || 0,
+                    },
+                    {
+                        icon: faLevelDown,
+                        text: entityType?.sub_entity_types?.length || 0,
+                    },
+                    {
+                        icon: faCubes,
+                        text: entityType?.entities_count || 0,
+                    },
+                ];
+
+                if(entityType?.is_root) {
+                    stats.unshift({
+                        icon: faCodeMerge,
+                        iconOnly: true,
+                        color: 'primary',
+                    });
                 }
-            }, { deep: true });
+
+                return stats;
+            })
+
 
             // RETURN
             return {
@@ -491,9 +366,7 @@
                 // HELPERS
                 translateConcept,
                 // LOCAL
-                updateEntityType,
-                addAllEntityTypes,
-                removeAllEntityTypes,
+                color,
                 addAttributeToEntityType,
                 onEditEntityAttribute,
                 onRequireEntityAttribute,
@@ -502,107 +375,8 @@
                 // PROPS
                 // STATE
                 state,
+                stats,
             };
         },
-        // methods: {
-        //     editEntityAttribute(attribute, options) {
-        //         const vm = this;
-        //         if(vm.editEntityAttributeDisabled) return;
-        //         const aid = attribute.id;
-        //         const ctid = attribute.entity_type_id;
-        //         let data = {
-        //             d_attribute: options.attribute.id,
-        //             d_operator: options.operator.id
-        //         };
-        //         data.d_value = vm.getDependencyValue(options.value, options.attribute.datatype);
-        //         $httpQueue.add(() => vm.$http.patch(`/editor/dm/entity_type/${ctid}/attribute/${aid}/dependency`, data).then(function(response) {
-        //             vm.hideEditEntityAttributeModal();
-        //         }));
-        //     },
-        //     onEditEntityAttribute(attribute) {
-        //         const ctid = this.entityType.id;
-        //         this.depends.attributes = this.entityAttributes.filter(function(a) {
-        //             return a.id != attribute.id;
-        //         });
-        //         let attrDependency = {};
-        //         for(let k in this.entityDependencies) {
-        //             const attrDeps = this.entityDependencies[k];
-        //             const dep = attrDeps.find(function(ad) {
-        //                 return ad.dependant == attribute.id;
-        //             });
-        //             if(dep) {
-        //                 attrDependency[k] = dep;
-        //             }
-        //         }
-        //         this.setModalSelectedAttribute(attribute);
-        //         if(Object.keys(attrDependency).length) {
-        //             this.setSelectedDependency(attrDependency);
-        //         }
-        //         this.openedModal = 'edit-entity-attribute-modal';
-        //         this.$modal.show('edit-entity-attribute-modal');
-        //     },
-        //     dependencyAttributeSelected(attribute) {
-        //         const vm = this;
-        //         if(!attribute) {
-        //             vm.depends.values = [];
-        //             return;
-        //         }
-        //         const id = attribute.id;
-        //         switch(attribute.datatype) {
-        //             case 'string-sc':
-        //             case 'string-mc':
-        //                 $httpQueue.add(() => vm.$http.get(`/editor/attribute/${id}/selection`).then(function(response) {
-        //                     vm.depends.values = [];
-        //                     const selections = response.data;
-        //                     if(selections) {
-        //                         for(let i=0; i<selections.length; i++) {
-        //                             vm.depends.values.push(selections[i]);
-        //                         }
-        //                     }
-        //                 }));
-        //                 break;
-        //             default:
-        //                 vm.depends.values = [];
-        //                 break;
-        //         }
-        //     },
-        //     getDependencyValue(valObject, type) {
-        //         switch(type) {
-        //             case 'string-sc':
-        //             case 'string-mc':
-        //                 return valObject.concept_url;
-        //             default:
-        //                 return valObject;
-        //         }
-        //     },
-        //     // Modal Methods
-        //     setSelectedDependency(values) {
-        //         if(!values) return;
-        //         let aid;
-        //         // We have an object with only one key
-        //         // Hacky way to get that key
-        //         for(let k in values) {
-        //             aid = k;
-        //             break;
-        //         }
-        //         this.selectedDependency.attribute = this.entityAttributes.find(function(a) {
-        //             return a.id == aid;
-        //         });
-        //         this.selectedDependency.operator = {id: values[aid].operator};
-        //         if(this.selectedDependency.attribute) {
-        //             switch(this.selectedDependency.attribute.datatype) {
-        //                 case 'string-sc':
-        //                 case 'string-mc':
-        //                     this.selectedDependency.value = {
-        //                         concept_url: values[aid].value
-        //                     };
-        //                     break;
-        //                 default:
-        //                     this.selectedDependency.value = values[aid].value;
-        //                     break;
-        //             }
-        //         }
-        //     },
-        // },
     };
 </script>
