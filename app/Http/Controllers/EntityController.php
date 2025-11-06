@@ -233,6 +233,17 @@ class EntityController extends Controller {
                     }
                     $a->name = $names;
                     break;
+                case 'table':
+                    // Adds a unique key for the request by using the timestamp and the row number.
+                    $rows = json_decode($a->json_val);
+                    for($i = 0; $i < count($rows); $i++) {
+                        $newRow = $rows[$i];
+
+                        $newRow->index = time() . "-" . ($i + 1);
+                        $rows[$i] =  $newRow;
+                    }
+                    $a->json_val = json_encode($rows);
+                    break;
                 default:
                     break;
             }
