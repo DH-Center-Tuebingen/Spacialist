@@ -233,10 +233,18 @@ export function mentionify(value) {
     return newValue;
 }
 
-export function trim(str, charlist) {
-    // Escape all regex-specific characters
-    charlist = charlist.replace(/[()\[\]{}/\\^$*+-?.]/g, '\\$&');
 
-    const seq = new RegExp(`^[${charlist}]+|[${charlist}]+$`, "g");
+/**
+ * Removes whitespace or other characters from the beginning and end of a string
+ * @param {string} str - string to modify 
+ * @param {string} charlist - characters to remove. Defaults to whitespace characters (`Equivalent to JavaScripts RegEx implementation of \s`).
+ * @returns {string} - modified string
+ */
+export function trim(str, charlist = '\\s') {
+    if(charlist !== '\\s') {
+        // Escape all regex-specific characters
+        charlist = charlist.replace(/[\(\)\[\]\{\}\\\^\$\*\+\?\.\|\-]/g, '\\$&');
+    }
+    const seq = new RegExp(`^[${charlist}]+|[${charlist}]+$`, 'g');
     return str.replace(seq, '');
 }
