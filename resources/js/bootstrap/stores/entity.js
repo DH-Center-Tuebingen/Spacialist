@@ -34,7 +34,7 @@ import {
     fetchEntityMetadata,
     getEntity,
     getEntityComments,
-    getEntityData,
+    getEntityDetailsData,
     getEntityParentMetadata,
     getEntityReferences,
     handleModeration,
@@ -258,7 +258,7 @@ export const useEntityStore = defineStore('entity', {
                     } else {
                         const idx = this.tree.findIndex(c => c.rank == node.rank);
                         this.tree.splice(idx, 0, node);
-                        for(let i=idx+1; i<this.tree.length; i++) {
+                        for(let i = idx + 1; i < this.tree.length; i++) {
                             this.tree[i].rank++;
                         }
                     }
@@ -280,7 +280,7 @@ export const useEntityStore = defineStore('entity', {
                             } else {
                                 const idx = parent.children.findIndex(c => c.rank == node.rank);
                                 parent.children.splice(idx, 0, node);
-                                for(let i=idx+1; i<parent.children.length; i++) {
+                                for(let i = idx + 1; i < parent.children.length; i++) {
                                     parent.children[i].rank++;
                                 }
                             }
@@ -611,18 +611,19 @@ export const useEntityStore = defineStore('entity', {
             }
         },
         async setById(entityId) {
-            let entity = this.entities[entityId];
-            if(!entity) {
-                const ids = await getEntityParentMetadata(entityId, ['ids']);
-                await openPath(ids);
-                entity = this.entities[entityId];
-            }
-            if(!entity.parentIds) {
-                const parentMetadata = await getEntityParentMetadata(entityId);
-                this.entities[entityId].parentIds = parentMetadata.parentIds;
-                this.entities[entityId].parentNames = parentMetadata.parentNames;
-                this.entities[entityId].attributeLinks = parentMetadata.attributeLinks;
-            }
+            let entity;
+            // let entity = this.entities[entityId];
+            // if(!entity) {
+            //     const ids = await getEntityParentMetadata(entityId, ['ids']);
+            //     await openPath(ids);
+            //     entity = this.entities[entityId];
+            // }
+            // if(!entity.parentIds) {
+            //     const parentMetadata = await getEntityParentMetadata(entityId);
+            //     this.entities[entityId].parentIds = parentMetadata.parentIds;
+            //     this.entities[entityId].parentNames = parentMetadata.parentNames;
+            //     this.entities[entityId].attributeLinks = parentMetadata.attributeLinks;
+            // }
             if(!can('entity_data_read')) {
                 entity = {
                     ...entity,
@@ -635,9 +636,22 @@ export const useEntityStore = defineStore('entity', {
                 };
                 fillEntityData(entity.data, entity.entity_type_id);
             } else {
-                entity.data = await getEntityData(entityId);
+                // entity.data = await getEntityData(entityId);
+                entity = this.entities[entityId];
+                const entityDetail = await getEntityDetailsData(entityId);
+
+                // If the entity was not yet loaded into the cache, it means it's
+                // an unloaded child entity. Therefore we need to open the path
+                // to that entity.
+                if(!entity) {
+                    await openPath(entityDetail.parentIds);
+                    entity = this.entities[entityId];
+                }
+
+                entity = Object.assign(entity, entityDetail);
+
                 fillEntityData(entity.data, entity.entity_type_id);
-                entity.references = await getEntityReferences(entityId) || {};
+                // entity.references = await getEntityReferences(entityId) || {};
                 for(let k in entity.data) {
                     const curr = entity.data[k];
                     if(curr.attribute) {
@@ -646,6 +660,15 @@ export const useEntityStore = defineStore('entity', {
                             entity.references[key] = [];
                         }
                     }
+                }
+
+
+                // Fetch parent paths if they are not set already.
+                if(!entity.parentIds) {
+                    const parentMetadata = await getEntityParentMetadata(entityId);
+                    entity.parentIds = parentMetadata.parentIds;
+                    entity.parentNames = parentMetadata.parentNames;
+                    entity.attributeLinks = parentMetadata.attributeLinks;
                 }
             }
             this.set(entity);

@@ -39,12 +39,6 @@ class Entity extends Model implements Searchable {
         'rank',
     ];
 
-    protected $appends = [
-        'parentIds',
-        'parentNames',
-        'attributeLinks',
-    ];
-
     protected $casts = [
         'metadata' => 'json',
     ];
@@ -325,10 +319,6 @@ class Entity extends Model implements Searchable {
 
     public function entity_type() {
         return $this->belongsTo('App\EntityType');
-    }
-
-    public function geodata() {
-        return $this->belongsTo('App\Plugins\Map\App\Geodata');
     }
 
     public function root_entity() {

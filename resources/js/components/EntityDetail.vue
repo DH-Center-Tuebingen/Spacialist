@@ -337,7 +337,10 @@
                 class="tab-pane fade h-100 active-entity-detail-panel overflow-hidden"
                 role="tabpanel"
             >
-                <MetadataTab class="mb-auto scroll-y-auto h-100 pe-2" />
+                <MetadataTab
+                    v-if="state.view === 'metadata'"
+                    class="mb-auto scroll-y-auto h-100 pe-2"
+                />
             </div>
 
             <div
@@ -490,7 +493,7 @@
             onDelete: {
                 required: false,
                 type: Function,
-                default: () => { }
+                default: () => {}
             }
         },
         setup(props) {
@@ -501,10 +504,12 @@
             const entityStore = useEntityStore();
 
             // FETCH
-            entityStore.setById(route.params.id).then(_ => {
-                entityStore.getEntityTypeAttributeSelections(state.entity.entity_type_id);
-                state.initFinished = true;
-                updateAllDependencies();
+            onMounted(() => {
+                entityStore.setById(route.params.id).then(_ => {
+                    entityStore.getEntityTypeAttributeSelections(state.entity.entity_type_id);
+                    state.initFinished = true;
+                    updateAllDependencies();
+                });
             });
 
             // DATA
@@ -685,6 +690,7 @@
                     return state.commentLoadingState === 'failed';
                 }),
                 activeUsers: computed(_ => entityStore.getActiveEntityUsers),
+                view: computed(_ => route.query.view || 'attributes-default'),
             });
             const channels = {};
 
@@ -1188,7 +1194,6 @@
                             handleEntityCommentUpdated,
                             handleEntityCommentDeleted,
                         ]);
-                        await entityStore.setById(to.params.id);
                         return true;
                     }
                 } else {

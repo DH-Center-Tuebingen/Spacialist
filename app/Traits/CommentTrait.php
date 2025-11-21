@@ -11,7 +11,8 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 trait CommentTrait
 {
     public function initializeCommentTrait() {
-        $this->withCount[] = 'comments';
+        // Comments are loaded on-demand only
+        // Use withCount('comments') explicitly when needed
     }
 
     public function addComment($data, $user = null, $notify = true, $resourceMetadata = []) {

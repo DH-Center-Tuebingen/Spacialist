@@ -104,6 +104,9 @@ export async function getEntityParentMetadata(id, fields = ['ids', 'names', 'lin
     );
 }
 
+// TODO: Currently not used anymore as getEntityDetailsData is
+//       bundling multiple requests. Decide if we want to remove the api
+//       or keep it for future use.
 export async function getEntityData(id) {
     return await $httpQueue.add(
         () => http.get(`/entity/${id}/data`)
@@ -117,6 +120,24 @@ export async function getEntityData(id) {
     );
 }
 
+export async function getEntityDetailsData(id) {
+    console.trace('getEntityData called for id:', id);
+
+    return await $httpQueue.add(
+        () => http.get(`/entity/${id}/entity_detail`)
+            .then(response => {
+                // PHP returns Array if it is empty
+                if(response.data instanceof Array) {
+                    response.data = {};
+                }
+                return response.data;
+            })
+    );
+}
+
+// TODO: Currently not used anymore as getEntityDetailsData is
+//       bundling multiple requests. Decide if we want to remove the api
+//       or keep it for future use.
 export async function getEntityReferences(id) {
     return await $httpQueue.add(
         () => http.get(`/entity/${id}/reference`)
