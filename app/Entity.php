@@ -2,6 +2,8 @@
 
 namespace App;
 
+use Exception;
+
 use App\AttributeTypes\AttributeBase;
 use App\AttributeTypes\SqlAttribute;
 use App\Exceptions\AmbiguousValueException;
@@ -373,6 +375,8 @@ class Entity extends Model implements Searchable {
         }
 
         DB::commit();
+
+        // TODO: Is this necessary?
         $this->load('user');
         
         return [

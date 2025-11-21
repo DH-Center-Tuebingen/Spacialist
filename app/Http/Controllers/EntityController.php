@@ -810,7 +810,7 @@ class EntityController extends Controller {
             return response()->json([
                 'error' => $e->getMessage(),
             ], $e->getStatusCode());
-        } catch(MalformedContentException $e) {
+        } catch(Exception $e) {
             return response()->json([
                 'error' => $e->getMessage(),
             ], 400);
