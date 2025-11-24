@@ -14,6 +14,7 @@ All notable changes to this project will be documented in this file.
 - **BACKPORT::0.12** Entity metadata is only loaded when accessing the metadata tab
 
 ### Fixed
+- Added migration to make both keys (attribute_id and entity_id) in attribute_values unique to prevent duplicates. The Migration also removes duplicate entries and keeps only the latest entry.
 - Fixed error when updating array based attribute value (AttributeValueId was removed when list was empty and not recreated when list contained values again)
 - **BACKPORT::0.12** Removed redundant calls to the entity endpoint
 - **BACKPORT::0.12** Metadata tab error on submit (unknown variable)
