@@ -503,15 +503,6 @@
             const attributeStore = useAttributeStore();
             const entityStore = useEntityStore();
 
-            // FETCH
-            onMounted(() => {
-                entityStore.setById(route.params.id).then(_ => {
-                    entityStore.getEntityTypeAttributeSelections(state.entity.entity_type_id);
-                    state.initFinished = true;
-                    updateAllDependencies();
-                });
-            });
-
             // DATA
             const attrRefs = ref({});
             const state = reactive({
@@ -675,7 +666,7 @@
                     };
                 }),
                 showBreadcrumb: computed(_ => {
-                    return state.entity.parentIds && state.entity.parentIds.length > 1;
+                    return state.entity.parentNames && state.entity.parentNames.length > 1;
                 }),
                 lastModified: computed(_ => {
                     return state.entity.updated_at || state.entity.created_at;
@@ -1063,9 +1054,14 @@
                 attrRefs.value[grp] = el;
             };
 
-            // ON MOUNTED
-            onMounted(_ => {
-                console.log('entity detail component mounted');
+            const initializeEntity = async id => {
+                await entityStore.setById(id);
+                entityStore.getEntityTypeAttributeSelections(state.entity.entity_type_id);
+                state.initFinished = true;
+                updateAllDependencies();
+            };
+
+            const setupWebsockets = async _ => {
                 channels.entity = joinEntityRoom(route.params.id);
                 listenToList(channels.entity, [
                     handleEntityDataUpdated,
@@ -1079,6 +1075,12 @@
                     handleEntityCommentUpdated,
                     handleEntityCommentDeleted,
                 ]);
+            };
+
+            // ON MOUNTED
+            onMounted(async _ => {
+                await initializeEntity(route.params.id);
+                setupWebsockets();
 
                 let hiddenAttrElem = document.getElementById('hidden-attributes-icon');
                 if(!!hiddenAttrElem) {
@@ -1088,6 +1090,7 @@
                     });
                 }
             });
+
             onBeforeUpdate(_ => {
                 attrRefs.value = {};
                 state.commentLoadingState = 'not';
@@ -1180,20 +1183,13 @@
                         return false;
                     } else {
                         state.hiddenAttributes = {};
-                        leaveEntityRoom(channels.entity);
-                        channels.entity = joinEntityRoom(to.params.id);
-                        listenToList(channels.entity, [
-                            handleEntityDataUpdated,
-                            handleAttributeValueCreated,
-                            handleAttributeValueUpdated,
-                            handleAttributeValueDeleted,
-                            handleEntityReferenceAdded,
-                            handleEntityReferenceUpdated,
-                            handleEntityReferenceDeleted,
-                            handleEntityCommentAdded,
-                            handleEntityCommentUpdated,
-                            handleEntityCommentDeleted,
-                        ]);
+
+                        // setTimeout(async _ => {
+                        //     console.log('Leaving entity room for', route.params.id);
+                        //     leaveEntityRoom(channels.entity);
+                        //     console.log('Entering entity room for', to.params.id);
+                        //     setupWebsockets();
+                        // }, 10);
                         return true;
                     }
                 } else {

@@ -656,7 +656,7 @@ export const useEntityStore = defineStore('entity', {
                     const curr = entity.data[k];
                     if(curr.attribute) {
                         const key = curr.attribute.thesaurus_url;
-                        if(!entity.references[key]) {
+                        if(!entity?.references?.[key]) {
                             entity.references[key] = [];
                         }
                     }

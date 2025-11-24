@@ -245,14 +245,15 @@ class EntityController extends Controller {
         }
 
         $data = $entity->getData();
+        info($data);
 
         return response()->json([
             'data' => $data,
-            'metadata' => $entity->getAllMetadata(),
-            'references' => Reference::getByEntity($id),
-            'parentIds' => $entity->parentIds,
-            'parentNames' => $entity->parentNames,
-            'attributeLinks' => $entity->attributeLinks,
+            // 'metadata' => $entity->getAllMetadata(),
+            // 'references' => Reference::getByEntity($id),
+            // 'parentIds' => $entity->parentIds,
+            // 'parentNames' => $entity->parentNames,
+            // 'attributeLinks' => $entity->attributeLinks,
         ]);
     }
 
