@@ -2,23 +2,19 @@
 All notable changes to this project will be documented in this file.
 
 ## 0.11.2
-## Added
+### Added
 - Added patch exception, when entity_type does not have attribute
 - Added exceptions that contain HTTP status codes for api handling
-## Fixes
-- Fixed error when updating array based attribute value (AttributeValueId was removed when list was empty and not recreated when list contained values again)
+- **BACKPORT::0.12** API endpoint for getting all entity details data in one request: GET::v1/entity/{id}/entity_detail
 ### Changed
 - Alerts can now be dismissed
 - Moved patch logic from EntityController to Models
 - Moved epoch attribute testing from into epoch attribute test
 - Patch attribute endpoint: moved aid param from params obj to top level, as other values were not used 
-## 0.12 - (Luxor)
-### Added
-- **BACKPORT::0.12** API endpoint for getting all entity details data in one request: GET::v1/entity/{id}/entity_detail
-## Changed
 - **BACKPORT::0.12** Entity metadata is only loaded when accessing the metadata tab
 
-## Fixed
+### Fixed
+- Fixed error when updating array based attribute value (AttributeValueId was removed when list was empty and not recreated when list contained values again)
 - **BACKPORT::0.12** Removed redundant calls to the entity endpoint
 - **BACKPORT::0.12** Metadata tab error on submit (unknown variable)
 
