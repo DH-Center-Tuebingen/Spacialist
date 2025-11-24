@@ -16,7 +16,7 @@ All notable changes to this project will be documented in this file.
 ### Added
 - **BACKPORT::0.12** API endpoint for getting all entity details data in one request: GET::v1/entity/{id}/entity_detail
 ## Changed
-- - Now entity metadata is only loaded when accessing the metadata tab
+- **BACKPORT::0.12** Entity metadata is only loaded when accessing the metadata tab
 
 ## Fixed
 - **BACKPORT::0.12** Removed redundant calls to the entity endpoint
