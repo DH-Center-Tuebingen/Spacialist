@@ -187,13 +187,19 @@ export const useEntityStore = defineStore('entity', {
         },
         getEntityTypeColors(state) {
             return id => {
-                if(!id) return {};
-                let colors = state.entityTypeColors[id];
-                if(!colors) {
-                    const entityType = this.getEntityType(id);
-                    const calculatedColors = calculateEntityTypeColors(entityType);
-                    state.entityTypeColors[id] = calculatedColors;
-                    colors = state.entityTypeColors[id];
+                let colors = {
+                    backgroundColor: '#ff00ff',
+                };
+                if(id) {
+                    const cachedColor = state.entityTypeColors[id];
+                    if(cachedColor && Object.keys(cachedColor || {}).length > 0) {
+                        colors = cachedColor;
+                    } else {
+                        const entityType = this.getEntityType(id);
+                        const calculatedColors = calculateEntityTypeColors(entityType);
+                        state.entityTypeColors[id] = calculatedColors;
+                        colors = state.entityTypeColors[id];
+                    }
                 }
                 return colors;
             };

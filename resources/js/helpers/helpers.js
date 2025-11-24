@@ -400,12 +400,13 @@ export function fillEntityData(data, etid) {
 }
 
 // Formula based on https://stackoverflow.com/questions/3942878/how-to-decide-font-color-in-white-or-black-depending-on-background-color/3943023#3943023
-export function calculateEntityTypeColors(entityType, alpha = 0.5) {
-    if(!entityType) return {
-        color: '#000000',
-        // Bootstrap $gray-500
-        backgroundColor: '#adb5bd'
-    };
+export function calculateEntityTypeColors(entityType, alpha = 0.5, defaultColors = {
+    color: '#000000',
+    // Bootstrap $gray-500
+    backgroundColor: '#adb5bd'
+}) {
+
+    if(!entityType) return defaultColors;
 
     let typeColor = null;
     if(entityType?.layer?.color) {
@@ -413,7 +414,7 @@ export function calculateEntityTypeColors(entityType, alpha = 0.5) {
     } else if(entityType.color) {
         typeColor = entityType.color;
     } else {
-        return {};
+        return defaultColors;
     }
     let r, g, b, a;
     [r, g, b] = splitColor(typeColor);
