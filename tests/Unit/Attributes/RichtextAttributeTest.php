@@ -4,22 +4,27 @@ namespace Tests\Unit\Attributes;
 use App\AttributeTypes\RichtextAttribute;
 use App\Exceptions\InvalidDataException;
 use Tests\TestCase;
-use PHPUnit\Framework\Attributes\DataProvider;
 
 // !!!! Currently this test is only testing the fromImport function!!!
 class RichtextAttributeTest extends TestCase {
-    #[DataProvider('truthyProvider')]
+    /**
+     * @dataProvider truthyProvider
+    */
     public function testFromImportTruthy($input) {
         $this->expectNotToPerformAssertions(RichtextAttribute::class);
         RichtextAttribute::fromImport($input);
     }
 
-    #[DataProvider('truthyProvider')]
+    /**
+    * @dataProvider truthyProvider
+    */
     public function testFromImportReturnValues($input, $expected) {
         $this->assertEquals($expected, RichtextAttribute::fromImport($input));
     }
 
-    #[DataProvider('falsyProvider')]
+    /**
+     * @dataProvider falsyProvider
+    */
     public function testFromImportFalsy($input) {
         $this->expectException(InvalidDataException::class);
         RichtextAttribute::fromImport($input);

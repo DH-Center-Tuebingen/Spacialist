@@ -2,18 +2,19 @@
 
 namespace Tests\Feature;
 
+use App\User;
 use Tests\TestCase;
 use Illuminate\Support\Str;
-use PHPUnit\Framework\Attributes\TestDox;
 
 use App\VersionInfo;
 
 class ApiTest extends TestCase
 {
     /**
-	 * @return void
-	 */
-	#[TestDox('GET    / : Get Base App Endpoint')]
+     * @testdox GET    / : Get Base App Endpoint
+     *
+     * @return void
+     */
     public function testApiRoot()
     {
         $response = $this->get('/');
@@ -22,9 +23,10 @@ class ApiTest extends TestCase
     }
 
     /**
-	 * @return void
-	 */
-	#[TestDox('GET    /welcome : Get Welcome Page Endpoint')]
+     * @testdox GET    /welcome : Get Welcome Page Endpoint
+     *
+     * @return void
+     */
     public function testWelcomePage()
     {
         $response = $this->get('/welcome');
@@ -33,9 +35,10 @@ class ApiTest extends TestCase
     }
 
     /**
-	 * @return void
-	 */
-	#[TestDox('GET    /api/v1/pre : Get Pre Endpoint Failed Unauth')]
+     * @testdox GET    /api/v1/pre : Get Pre Endpoint Failed Unauth
+     *
+     * @return void
+     */
     public function testUnauthPreRequest()
     {
         $this->unsetTestUser();
@@ -47,9 +50,10 @@ class ApiTest extends TestCase
     }
 
     /**
-	 * @return void
-	 */
-	#[TestDox('GET    /api/v1/pre : Get Pre Endpoint')]
+     * @testdox GET    /api/v1/pre : Get Pre Endpoint
+     *
+     * @return void
+     */
     public function testAuthPreRequest()
     {
         $response = $this->userRequest()
@@ -83,9 +87,10 @@ class ApiTest extends TestCase
     }
 
     /**
-	 * @return void
-	 */
-	#[TestDox('GET    /api/v1/version : Get Version Endpoint')]
+     * @testdox GET    /api/v1/version : Get Version Endpoint
+     *
+     * @return void
+     */
     public function testVersionRequest()
     {
         $vi = new VersionInfo();

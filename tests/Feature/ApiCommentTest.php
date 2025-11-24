@@ -9,8 +9,6 @@ use Carbon\Carbon;
 use Exception;
 use Tests\Permission;
 use Tests\ResponseTester;
-use PHPUnit\Framework\Attributes\DataProvider;
-use PHPUnit\Framework\Attributes\TestDox;
 
 class ApiCommentTest extends TestCase
 {
@@ -19,8 +17,10 @@ class ApiCommentTest extends TestCase
     //              [[ GET ]]
     // ==========================================
 
-    #[DataProvider('getProvider')]
-    #[TestDox('GET    /api/v1/comment/resource/{id} - Get comments')]
+    /**
+    * @dataProvider getProvider
+    * @testdox GET    /api/v1/comment/resource/{id} - Get comments
+    */
     public function testGetComments($url, $result) {
         $response = $this->userRequest()
             ->get("/api/v1/comment/$url");
@@ -86,8 +86,10 @@ class ApiCommentTest extends TestCase
     //              [[ POST ]]
     // ==========================================
 
-    #[DataProvider('postProvider')]
-    #[TestDox('POST   /api/v1/comment - Post request')]
+    /**
+    * @dataProvider postProvider
+    * @testdox POST   /api/v1/comment - Post request
+    */
     public function testAddComment($url, $input, $result) {
         $response = $this->userRequest()
             ->post("/api/v1/comment", $input);
@@ -170,8 +172,10 @@ class ApiCommentTest extends TestCase
     //              [[ PATCH ]]
     // ==========================================
 
-    #[DataProvider('patchProvider')]
-    #[TestDox('PATCH  /api/v1/comment - Patch request')]
+    /**
+    * @dataProvider patchProvider
+    * @testdox PATCH  /api/v1/comment - Patch request
+    */
     public function testEditComment($id, $url, $input, $result) {
         $response = $this->userRequest()
             ->patch("/api/v1/comment/$id", $input);
@@ -239,8 +243,10 @@ class ApiCommentTest extends TestCase
     //              [[ DELETE ]]
     // ==========================================
 
-    #[DataProvider('deleteProvider')]
-    #[TestDox('DELETE /api/v1/comment/{id} - Delete request')]
+    /**
+    * @dataProvider deleteProvider
+    * @testdox DELETE /api/v1/comment/{id} - Delete request
+    */
     public function testDeleteComment($id, $targetCount)
     {
         $response = $this->userRequest()
@@ -264,20 +270,25 @@ class ApiCommentTest extends TestCase
     //      [[ ADDITIONAL DATA PROVIDERS ]]
     // ==========================================
 
-    #[DataProvider('permissions')]
-    #[TestDox('[[PROVIDER]] Routes Without Permissions')]
+    /**
+     * @dataProvider permissions
+     * @testdox [[PROVIDER]] Routes Without Permissions
+     */
     public function testWithoutPermission($permission) {
         (new ResponseTester($this))->testMissingPermission($permission);
     }
-
-    #[DataProvider('exceptions')]
-    #[TestDox('[[PROVIDER]] Exceptions With Permissions')]
+    /**
+     * @dataProvider exceptions
+     * @testdox [[PROVIDER]] Exceptions With Permissions
+     */
     public function testExceptions($permission) {
         (new ResponseTester($this))->testExceptions($permission);
     }
 
-    #[DataProvider('unprocessable')]
-    #[TestDox('[[PROVIDER]] Unprocessable Entities')]
+    /**
+     * @dataProvider unprocessable
+     * @testdox [[PROVIDER]] Unprocessable Entities
+     */
     public function testUnprocessable($permission, $errors) {
         $response = $this->userRequest()
         ->json($permission->getMethod(), $permission->getUrl(), $permission->getData());

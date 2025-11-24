@@ -19,7 +19,7 @@ class EntityTest extends TestCase
         $entity = Entity::find(2);
         $childrenArray = $entity->getAllChildren();
         $this->assertEquals(4, count($childrenArray));
-        $this->assertArrayIsEqualToArrayOnlyConsideringListOfKeys([
+        $this->assertArraySubset([
             [
                 '_name' => 'Befund 1',
                 '_parent' => 'Site A',
@@ -45,14 +45,7 @@ class EntityTest extends TestCase
                 '_entity_type_id' => 6,
                 12 => 3.5,
             ],
-        ], $childrenArray,
-        [
-            '_name',
-            '_parent',
-            '_entity_type',
-            '_entity_type_id',
-            12,
-        ]);
+        ], $childrenArray);
     }
 
     /**
@@ -72,7 +65,7 @@ class EntityTest extends TestCase
         $this->assertEquals(7, $entity->attributes->count());
         $this->assertEquals(3, count($entity->parentIds));
         $this->assertEquals(3, count($entity->parentNames));
-        $this->assertArrayIsEqualToArrayOnlyConsideringListOfKeys([
+        $this->assertArraySubset([
             [
                 'id' => 2,
                 'pivot' => [
@@ -115,12 +108,11 @@ class EntityTest extends TestCase
                     'dbl_val' => '12.5',
                 ],
             ],
-        ], $entity->attributes->toArray(),
-        ['id', 'pivot']);
-        $this->assertEquals([
+        ], $entity->attributes->toArray());
+        $this->assertArraySubset([
             3, 2, 1
         ], $entity->parentIds);
-        $this->assertEquals([
+        $this->assertArraySubset([
             'Inv. 1234', 'Befund 1', 'Site A'
         ], $entity->parentNames);
     }

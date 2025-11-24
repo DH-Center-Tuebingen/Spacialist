@@ -5,21 +5,26 @@ use App\AttributeTypes\EpochAttribute;
 use App\AttributeValue;
 use App\Exceptions\InvalidDataException;
 use Tests\TestCase;
-use PHPUnit\Framework\Attributes\DataProvider;
 
 class EpochAttributeTest extends TestCase {
-    #[DataProvider('truthyProvider')]
+    /**
+     * @dataProvider truthyProvider
+    */
     public function testFromImportTruthy($input) {
         $this->expectNotToPerformAssertions(EpochAttribute::class);
         EpochAttribute::fromImport($input);
     }
 
-    #[DataProvider('truthyProvider')]
+    /**
+    * @dataProvider truthyProvider
+    */
     public function testFromImportReturnValues($input, $expected) {
         $this->assertEquals($expected, EpochAttribute::fromImport($input));
     }
 
-    #[DataProvider('falsyProvider')]
+    /**
+     * @dataProvider falsyProvider
+    */
     public function testFromImportFalsy($input) {
         $this->expectException(InvalidDataException::class);
         EpochAttribute::fromImport($input);

@@ -6,22 +6,27 @@ use App\AttributeTypes\UserlistAttribute;
 use App\AttributeValue;
 use App\Exceptions\InvalidDataException;
 use Tests\TestCase;
-use PHPUnit\Framework\Attributes\DataProvider;
 
 // !!!! Currently this test is only testing the fromImport function!!!
 class UserlistAttributeTest extends TestCase {
-    #[DataProvider('truthyProvider')]
+    /**
+     * @dataProvider truthyProvider
+    */
     public function testFromImportTruthy($input) {
         $this->expectNotToPerformAssertions(UserlistAttribute::class);
         UserlistAttribute::fromImport($input);
     }
 
-    #[DataProvider('truthyProvider')]
+    /**
+    * @dataProvider truthyProvider
+    */
     public function testFromImportReturnValues($input, $expected) {
         $this->assertEquals($expected, UserlistAttribute::fromImport($input));
     }
 
-    #[DataProvider('falsyProvider')]
+    /**
+     * @dataProvider falsyProvider
+    */
     public function testFromImportFalsy($input) {
         $this->expectException(InvalidDataException::class);
         UserlistAttribute::fromImport($input);

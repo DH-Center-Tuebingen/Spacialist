@@ -7,7 +7,6 @@ use App\Notifications\CommentPosted;
 use App\User;
 use Tests\TestCase;
 use Illuminate\Support\Facades\Hash;
-use PHPUnit\Framework\Attributes\TestDox;
 
 class ApiNotificationTest extends TestCase
 {
@@ -39,9 +38,10 @@ class ApiNotificationTest extends TestCase
     }
 
     /**
-	 * @return void
-	 */
-	#[TestDox('GET    /api/v1/comment/resource/{id}?r=entity : Test get Comments for Resource')]
+     * @testdox GET    /api/v1/comment/resource/{id}?r=entity : Test get Comments for Resource
+     *
+     * @return void
+     */
     public function testResourceComments()
     {
         $data = self::setupData();
@@ -70,9 +70,10 @@ class ApiNotificationTest extends TestCase
     }
 
     /**
-	 * @return void
-	 */
-	#[TestDox('GET    /api/v1/comment/{id}/reply : Test get replies for comment')]
+     * @testdox GET    /api/v1/comment/{id}/reply : Test get replies for comment
+     *
+     * @return void
+     */
     public function testCommentReplies()
     {
         $data = self::setupData();
@@ -98,9 +99,10 @@ class ApiNotificationTest extends TestCase
     }
 
     /**
-	 * @return void
-	 */
-	#[TestDox('POST   /api/v1/comment : Test Add Comment')]
+     * @testdox POST   /api/v1/comment : Test Add Comment
+     *
+     * @return void
+     */
     public function testAddComment()
     {
         $data = self::setupData();
@@ -138,9 +140,10 @@ class ApiNotificationTest extends TestCase
     }
 
     /**
-	 * @return void
-	 */
-	#[TestDox('PATCH  /api/v1/comment/{id} : Test Edit Comment')]
+     * @testdox PATCH  /api/v1/comment/{id} : Test Edit Comment
+     *
+     * @return void
+     */
     public function testUpdateComment()
     {
         $data = self::setupData();
@@ -175,9 +178,10 @@ class ApiNotificationTest extends TestCase
     }
 
     /**
-	 * @return void
-	 */
-	#[TestDox('PATCH  /api/v1/notification/read/{id} : Test mark single notification as read')]
+     * @testdox PATCH  /api/v1/notification/read/{id} : Test mark single notification as read
+     *
+     * @return void
+     */
     public function testMarkNotificationAsRead()
     {
         $data = self::setupData();
@@ -201,9 +205,10 @@ class ApiNotificationTest extends TestCase
     }
 
     /**
-	 * @return void
-	 */
-	#[TestDox('PATCH  /api/v1/notification/read : Test mark array of notifications as read')]
+     * @testdox PATCH  /api/v1/notification/read : Test mark array of notifications as read
+     *
+     * @return void
+     */
     public function testMarkNotificationsAsRead()
     {
         $data = self::setupData();
@@ -231,9 +236,10 @@ class ApiNotificationTest extends TestCase
     }
 
     /**
-	 * @return void
-	 */
-	#[TestDox('PATCH  /api/v1/notification : Test delete notifications')]
+     * @testdox PATCH  /api/v1/notification : Test delete notifications
+     *
+     * @return void
+     */
     public function testDeleteNotifications()
     {
         $data = self::setupData();
@@ -261,9 +267,10 @@ class ApiNotificationTest extends TestCase
     }
 
     /**
-	 * @return void
-	 */
-	#[TestDox('DELETE /api/v1/notification/{id} : Test delete notification')]
+     * @testdox DELETE /api/v1/notification/{id} : Test delete notification
+     *
+     * @return void
+     */
     public function testDeleteNotification()
     {
         $data = self::setupData();
@@ -285,9 +292,10 @@ class ApiNotificationTest extends TestCase
     }
 
     /**
-	 * @return void
-	 */
-	#[TestDox('DELETE /api/v1/comment/{id} : Test delete comment')]
+     * @testdox DELETE /api/v1/comment/{id} : Test delete comment
+     *
+     * @return void
+     */
     public function testDeleteComment()
     {
         $data = self::setupData();

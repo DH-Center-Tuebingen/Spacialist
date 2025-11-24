@@ -4,15 +4,18 @@ namespace Tests\Unit\Attributes;
 
 use App\AttributeTypes\BooleanAttribute;
 use Tests\TestCase;
-use PHPUnit\Framework\Attributes\DataProvider;
 
 class BooleanAttributeTest extends TestCase {
-    #[DataProvider('truthyProvider')]
+    /**
+     * @dataProvider truthyProvider
+     */
     public function testFromImportTruthy($input) {
         $this->assertTrue(BooleanAttribute::fromImport($input));
     }
 
-    #[DataProvider('falsyProvider')]
+    /**
+     * @dataProvider falsyProvider
+     */
     public function testFromImportFalsy($input) {
         $this->assertFalse(BooleanAttribute::fromImport($input));
     }

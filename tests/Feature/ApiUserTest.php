@@ -4,7 +4,6 @@ namespace Tests\Feature;
 
 use Tests\TestCase;
 use Illuminate\Http\UploadedFile;
-use PHPUnit\Framework\Attributes\TestDox;
 
 use App\User;
 use App\Role;
@@ -15,9 +14,10 @@ class ApiUserTest extends TestCase
     // Testing GET requests
 
     /**
-	 * @return void
-	 */
-	#[TestDox('GET    /api/v1/auth/user : Get Auth User')]
+     * @testdox GET    /api/v1/auth/user : Get Auth User
+     *
+     * @return void
+     */
     public function testGetUserEndpoint()
     {
         $user = User::find(1);
@@ -49,9 +49,10 @@ class ApiUserTest extends TestCase
     }
 
     /**
-	 * @return void
-	 */
-	#[TestDox('GET    /api/v1/user : Get All Users')]
+     * @testdox GET    /api/v1/user : Get All Users
+     *
+     * @return void
+     */
     public function testGetUsersEndpoint()
     {
         $user = User::factory()->create();
@@ -88,9 +89,10 @@ class ApiUserTest extends TestCase
     }
 
     /**
-	 * @return void
-	 */
-	#[TestDox('GET    /api/v1/role : Get All Roles')]
+     * @testdox GET    /api/v1/role : Get All Roles
+     *
+     * @return void
+     */
     public function testGetRolesEndpoint()
     {
         $response = $this->userRequest()
@@ -121,9 +123,10 @@ class ApiUserTest extends TestCase
     // Testing POST requests
 
     /**
-	 * @return void
-	 */
-	#[TestDox('GET    /api/v1/auth/login : Login')]
+     * @testdox GET    /api/v1/auth/login : Login
+     *
+     * @return void
+     */
     public function testLoginEndpoint()
     {
         $response = $this->userRequest()
@@ -136,9 +139,10 @@ class ApiUserTest extends TestCase
     }
 
     /**
-	 * @return void
-	 */
-	#[TestDox('GET    /api/v1/auth/login : Login with nickname')]
+     * @testdox GET    /api/v1/auth/login : Login with nickname
+     *
+     * @return void
+     */
     public function testLoginWithNicknameEndpoint()
     {
         $response = $this->userRequest()
@@ -151,9 +155,10 @@ class ApiUserTest extends TestCase
     }
 
     /**
-	 * @return void
-	 */
-	#[TestDox('GET    /api/v1/user : Failed Login')]
+     * @testdox GET    /api/v1/user : Failed Login
+     *
+     * @return void
+     */
     public function testLoginWrongCredentialsEndpoint()
     {
         $response = $this->userRequest()
@@ -169,9 +174,10 @@ class ApiUserTest extends TestCase
     }
 
     /**
-	 * @return void
-	 */
-	#[TestDox('POST   /api/v1/user : Create User')]
+     * @testdox POST   /api/v1/user : Create User
+     *
+     * @return void
+     */
     public function testCreateUserEndpoint()
     {
         $cnt = User::count();
@@ -210,9 +216,10 @@ class ApiUserTest extends TestCase
     }
 
     /**
-	 * @return void
-	 */
-	#[TestDox('POST   /api/v1/user/avatar : Add Avatar')]
+     * @testdox POST   /api/v1/user/avatar : Add Avatar
+     *
+     * @return void
+     */
     public function testCreateAvatarEndpoint()
     {
         $user = User::find(1);
@@ -244,9 +251,10 @@ class ApiUserTest extends TestCase
     }
 
     /**
-	 * @return void
-	 */
-	#[TestDox('POST   /api/v1/role : Create Role')]
+     * @testdox POST   /api/v1/role : Create Role
+     *
+     * @return void
+     */
     public function testCreateRoleEndpoint()
     {
         $cnt = Role::count();
@@ -280,9 +288,10 @@ class ApiUserTest extends TestCase
     }
 
     /**
-	 * @return void
-	 */
-	#[TestDox('POST   /api/v1/auth/logout : Logout')]
+     * @testdox POST   /api/v1/auth/logout : Logout
+     *
+     * @return void
+     */
     public function testLogoutEndpoint()
     {
         $cnt = Role::count();
@@ -304,9 +313,10 @@ class ApiUserTest extends TestCase
     }
 
     /**
-	 * @return void
-	 */
-	#[TestDox('POST   /api/v1/user/avatar : Update User Avatar')]
+     * @testdox POST   /api/v1/user/avatar : Update User Avatar
+     *
+     * @return void
+     */
     public function testUpdateAvatarEndpoint()
     {
         $user = User::find(1);
@@ -323,9 +333,10 @@ class ApiUserTest extends TestCase
     }
 
     /**
-	 * @return void
-	 */
-	#[TestDox('PATCH  /api/v1/user/{id} : Patch User')]
+     * @testdox PATCH  /api/v1/user/{id} : Patch User
+     *
+     * @return void
+     */
     public function testPatchUserEndpoint()
     {
         $user = User::find(1);
@@ -374,9 +385,10 @@ class ApiUserTest extends TestCase
     }
 
     /**
-	 * @return void
-	 */
-	#[TestDox('PATCH  /api/v1/user/{id} : Patch User Metadata')]
+     * @testdox PATCH  /api/v1/user/{id} : Patch User Metadata
+     *
+     * @return void
+     */
     public function testPatchUserOrcidEndpoint()
     {
         $user = User::find(1);
@@ -399,9 +411,10 @@ class ApiUserTest extends TestCase
     }
 
     /**
-	 * @return void
-	 */
-	#[TestDox('PATCH  /api/v1/user/{id} : Patch User Fail ORCID Check')]
+     * @testdox PATCH  /api/v1/user/{id} : Patch User Fail ORCID Check
+     *
+     * @return void
+     */
     public function testPatchUserWrongOrcidEndpoint()
     {
         $user = User::find(1);
@@ -415,9 +428,10 @@ class ApiUserTest extends TestCase
     }
 
     /**
-	 * @return void
-	 */
-	#[TestDox('PATCH  /api/v1/user/{id} : Patch User Fail ORCID Format')]
+     * @testdox PATCH  /api/v1/user/{id} : Patch User Fail ORCID Format
+     *
+     * @return void
+     */
     public function testPatchUserAnotherWrongOrcidEndpoint()
     {
         $user = User::find(1);
@@ -431,9 +445,10 @@ class ApiUserTest extends TestCase
     }
 
     /**
-	 * @return void
-	 */
-	#[TestDox('PATCH  /api/v1/user/{id} : Patch User Fail ORCID Format')]
+     * @testdox PATCH  /api/v1/user/{id} : Patch User Fail ORCID Format
+     *
+     * @return void
+     */
     public function testPatchUserAnotherSecondWrongOrcidEndpoint()
     {
         $user = User::find(1);
@@ -447,9 +462,10 @@ class ApiUserTest extends TestCase
     }
 
     /**
-	 * @return void
-	 */
-	#[TestDox('PATCH  /api/v1/user/{id} : Patch User Emtpy Request')]
+     * @testdox PATCH  /api/v1/user/{id} : Patch User Emtpy Request
+     *
+     * @return void
+     */
     public function testPatchUserWithoutDataEndpoint()
     {
         $response = $this->userRequest()
@@ -459,9 +475,10 @@ class ApiUserTest extends TestCase
     }
 
     /**
-	 * @return void
-	 */
-	#[TestDox('PATCH  /api/v1/role/{id} : Patch Role Permissions')]
+     * @testdox PATCH  /api/v1/role/{id} : Patch Role Permissions
+     *
+     * @return void
+     */
     public function testPatchRoleEndpoint()
     {
         $response = $this->userRequest()
@@ -497,9 +514,10 @@ class ApiUserTest extends TestCase
     }
 
     /**
-	 * @return void
-	 */
-	#[TestDox('PATCH  /api/v1/role/{id} : Patch Role Empty Request')]
+     * @testdox PATCH  /api/v1/role/{id} : Patch Role Empty Request
+     *
+     * @return void
+     */
     public function testPatchRoleWithoutDataEndpoint()
     {
         $response = $this->userRequest()
@@ -509,9 +527,10 @@ class ApiUserTest extends TestCase
     }
 
     /**
-	 * @return void
-	 */
-	#[TestDox('PATCH  /api/v1/user/restore/{id} : Restore User')]
+     * @testdox PATCH  /api/v1/user/restore/{id} : Restore User
+     *
+     * @return void
+     */
     public function testRestoreUserEndpoint()
     {
         $user = User::find(1);
@@ -537,9 +556,10 @@ class ApiUserTest extends TestCase
     }
 
     /**
+     * @testdox DELETE /api/v1/user/{id} : Delete User
+     *
      * @return void
      */
-     #[TestDox('DELETE /api/v1/user/{id} : Delete User')]
     public function testDeleteUserEndpoint()
     {
         $cnt = User::withTrashed()->count();
@@ -572,9 +592,10 @@ class ApiUserTest extends TestCase
     }
 
     /**
+     * @testdox DELETE /api/v1/user/99 : Delete User Fail
+     *
      * @return void
      */
-     #[TestDox('DELETE /api/v1/user/99 : Delete User Fail')]
     public function testDeleteNonExstingUserEndpoint()
     {
         $cnt = User::withTrashed()->count();
@@ -596,9 +617,10 @@ class ApiUserTest extends TestCase
     }
 
     /**
+     * @testdox DELETE /api/v1/role/{id} : Delete Role
+     *
      * @return void
      */
-     #[TestDox('DELETE /api/v1/role/{id} : Delete Role')]
     public function testDeleteRoleEndpoint()
     {
         $cnt = Role::count();
@@ -613,9 +635,10 @@ class ApiUserTest extends TestCase
     }
 
     /**
+     * @testdox DELETE /api/v1/role/99 : Delete Role Fail
+     *
      * @return void
      */
-     #[TestDox('DELETE /api/v1/role/99 : Delete Role Fail')]
     public function testDeleteNonExstingRoleEndpoint()
     {
         $cnt = Role::count();
@@ -633,9 +656,10 @@ class ApiUserTest extends TestCase
     }
 
     /**
+     * @testdox DELETE /api/v1/user/avatar : Delete User Avatar
+     *
      * @return void
      */
-    #[TestDox('DELETE /api/v1/user/avatar : Delete User Avatar')]
     public function testDeleteAvatarEndpoint()
     {
         $response = $this->userRequest()

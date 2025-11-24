@@ -7,17 +7,20 @@ use App\AttributeValue;
 use App\DataTypes\TimePeriod;
 use App\Exceptions\InvalidDataException;
 use Tests\TestCase;
-use PHPUnit\Framework\Attributes\DataProvider;
 
 // !!!! Currently this test is only testing the fromImport function!!!
 class TimeperiodAttributeTest extends TestCase {
-    #[DataProvider('truthyProvider')]
+    /**
+     * @dataProvider truthyProvider
+    */
     public function testFromImportTruthy($input) {
         $this->expectNotToPerformAssertions(TimeperiodAttribute::class);
         TimeperiodAttribute::fromImport($input);
     }
 
-    #[DataProvider('truthyProvider')]
+    /**
+    * @dataProvider truthyProvider
+    */
     public function testFromImportReturnValues($input, $expected) {
         // Convert the TimePeriod object to a json string
         if($expected != null){
@@ -26,7 +29,9 @@ class TimeperiodAttributeTest extends TestCase {
         $this->assertEquals($expected, TimeperiodAttribute::fromImport($input));
     }
 
-    #[DataProvider('falsyProvider')]
+    /**
+     * @dataProvider falsyProvider
+    */
     public function testFromImportFalsy($input) {
         $this->expectException(InvalidDataException::class);
         TimeperiodAttribute::fromImport($input);

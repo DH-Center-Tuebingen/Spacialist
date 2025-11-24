@@ -12,7 +12,7 @@
                     <button
                         type="button"
                         class="btn btn-fab rounded-circle"
-                        :class="{ 'btn-primary': actionState.drawType == 'Point', 'btn-outline-primary': actionState.drawType != 'Point' }"
+                        :class="{'btn-primary': actionState.drawType == 'Point', 'btn-outline-primary': actionState.drawType != 'Point'}"
                         data-bs-toggle="popover"
                         :data-bs-content="t('main.map.draw.point.desc')"
                         data-bs-trigger="hover"
@@ -24,7 +24,7 @@
                     <button
                         type="button"
                         class="btn btn-fab rounded-circle"
-                        :class="{ 'btn-primary': actionState.drawType == 'LineString', 'btn-outline-primary': actionState.drawType != 'LineString' }"
+                        :class="{'btn-primary': actionState.drawType == 'LineString', 'btn-outline-primary': actionState.drawType != 'LineString'}"
                         data-bs-toggle="popover"
                         :data-bs-content="t('main.map.draw.linestring.desc')"
                         data-bs-trigger="hover"
@@ -36,7 +36,7 @@
                     <button
                         type="button"
                         class="btn btn-fab rounded-circle"
-                        :class="{ 'btn-primary': actionState.drawType == 'Polygon', 'btn-outline-primary': actionState.drawType != 'Polygon' }"
+                        :class="{'btn-primary': actionState.drawType == 'Polygon', 'btn-outline-primary': actionState.drawType != 'Polygon'}"
                         data-bs-toggle="popover"
                         :data-bs-content="t('main.map.draw.polygon.desc')"
                         data-bs-trigger="hover"
@@ -120,7 +120,7 @@
                     <button
                         type="button"
                         class="btn btn-fab rounded-circle"
-                        :class="{ 'btn-primary': actionState.measure.active, 'btn-outline-primary': !actionState.measure.active }"
+                        :class="{'btn-primary': actionState.measure.active, 'btn-outline-primary': !actionState.measure.active}"
                         data-bs-toggle="popover"
                         :data-bs-content="t('main.map.draw.measure.desc')"
                         data-bs-trigger="hover"
@@ -319,20 +319,20 @@
     import { defaults as defaultInteractions } from 'ol/interaction';
     import Feature from 'ol/Feature';
     import Map from 'ol/Map';
-    import { unByKey } from 'ol/Observable.js';
+    import {unByKey} from 'ol/Observable.js';
     import View from 'ol/View';
     import Overlay from 'ol/Overlay';
     import { transform as transformProj } from 'ol/proj';
-    import { getArea, getLength } from 'ol/sphere';
+    import {getArea, getLength} from 'ol/sphere';
 
     import FullScreen from 'ol/control/FullScreen';
     import OverviewMap from 'ol/control/OverviewMap';
     import Rotate from 'ol/control/Rotate';
     import ScaleLine from 'ol/control/ScaleLine';
 
-    import { never as neverCond, shiftKeyOnly, platformModifierKeyOnly } from 'ol/events/condition';
+    import {never as neverCond, shiftKeyOnly, platformModifierKeyOnly} from 'ol/events/condition';
 
-    import { getCenter as getExtentCenter, extend as extendExtent } from 'ol/extent';
+    import { getCenter as getExtentCenter, extend as extendExtent} from 'ol/extent';
 
     import Draw from 'ol/interaction/Draw';
     import DragRotate from 'ol/interaction/DragRotate';
@@ -461,7 +461,7 @@
                 const geometry = feature.getGeometry();
                 const props = feature.getProperties();
                 const coords = getExtentCenter(geometry.getExtent());
-                let title = t('main.map.geometry_name', { id: props.id });
+                let title = t('main.map.geometry_name', {id: props.id});
                 let subtitle = '';
                 const sizes = {
                     in_m: 0,
@@ -525,7 +525,7 @@
                 return features ? (first ? features[0] : features) : null;
             };
             const getEntityExtent = _ => {
-                const layers = entityLayerGroup.getLayers();
+                const layers = state.mapLayerGroups.entity.getLayers();
                 let entityExtent = null;
                 layers.forEach(l => {
                     const source = l.getSource();
@@ -543,7 +543,7 @@
             const setExtent = (to = null) => {
                 const newExtent = to || getEntityExtent() || defaultExtent;
 
-                for(let i = 0; i < newExtent.length; i++) {
+                for(let i=0; i<newExtent.length; i++) {
                     if(newExtent[i] == Infinity || newExtent[i] == -Infinity) {
                         newExtent[i] = defaultExtent[i];
                     }
@@ -557,9 +557,9 @@
                 });
             };
             const getAssociatedLayer = feature => {
-                const layerGroup = entityLayerGroup.getLayers().getArray();
+                const layerGroup = state.mapLayerGroups.entity.getLayers().getArray();
                 if(data.value.format == 'wkt') {
-                    for(let i = 0; i < layerGroup.length; i++) {
+                    for(let i=0; i<layerGroup.length; i++) {
                         if(layerGroup[i].get('layer_id')) {
                             return layerGroup[i];
                         }
@@ -611,7 +611,7 @@
                         // check if layer is not an entity layer
                         // and not the default unlinked layer
                         if(!l.entity_type_id && l.type != 'unlinked') {
-                            overlayLayerArray.push(createNewLayer(l));
+                            state.mapOverlays.push(createNewLayer(l));
                         } else {
                             let layerName = '';
                             if(l.entity_type_id) {
@@ -622,7 +622,7 @@
                             } else {
                                 layerName = t('global.unlinked');
                             }
-                            entityLayerArray.push(
+                            state.mapEntityLayers.push(
                                 createVectorLayer({
                                     show: true,
                                     title: layerName,
@@ -636,13 +636,25 @@
                             );
                         }
                     } else {
-                        baseLayerArray.push(createNewLayer(l));
+                        state.mapBaselayers.push(createNewLayer(l));
                     }
                 }
 
-                baseLayerGroup.setLayers(new Collection(baseLayerArray));
-                overlayLayerGroup.setLayers(new Collection(overlayLayerArray));
-                entityLayerGroup.setLayers(new Collection(entityLayerArray));
+                state.mapLayerGroups.base = new Group({
+                    title: t('main.map.baselayer', 2),
+                    openInLayerSwitcher: true,
+                    layers: state.mapBaselayers,
+                });
+                state.mapLayerGroups.overlay = new Group({
+                    title: t('main.map.overlay', 2),
+                    openInLayerSwitcher: true,
+                    layers: state.mapOverlays,
+                });
+                state.mapLayerGroups.entity = new Group({
+                    title: t('main.map.entity_layers'),
+                    openInLayerSwitcher: true,
+                    layers: state.mapEntityLayers,
+                });
             };
             const initializeProjections = async _ => {
                 // If desired epsg code is default, skip initialization
@@ -656,19 +668,14 @@
                 const p = f.getProperties();
                 if(p.entity) {
                     const et = Object.values(layers.value).find(l => l.entity_type_id == p.entity_type_id);
-
-                    //// REBASE FRAGMENT::: compatibility with ol 10
-                    //     if(et?.id){
-                    //         return Object.values(state.mapEntityLayers).find(l => l.getProperties().layer_id == et.id);
-                    //     }else {
-                    //         console.error('Entity type not found for feature', p);
-                    //     }
-                    // } 
-                    // return Object.values(state.mapEntityLayers).find(l => l.getProperties().type.toLowerCase() == 'unlinked');
-                    return entityLayerGroup.getLayers().getArray().find(l => l.getProperties().layer_id == et.id);
-                } else {
-                    return entityLayerGroup.getLayers().getArray().find(l => l.getProperties().type.toLowerCase() == 'unlinked');
-                }
+                    
+                    if(et?.id){
+                        return Object.values(state.mapEntityLayers).find(l => l.getProperties().layer_id == et.id);
+                    }else {
+                        console.error('Entity type not found for feature', p);
+                    }
+                } 
+                return Object.values(state.mapEntityLayers).find(l => l.getProperties().type.toLowerCase() == 'unlinked');
             };
             const removeFeatureFromLayer = f => {
                 const layer = getLayerForFeature(f);
@@ -678,9 +685,9 @@
             };
             const getLayerBy = (prop, value) => {
                 const layers = [
-                    ...baseLayerGroup.getLayers().getArray(),
-                    ...overlayLayerGroup.getLayers().getArray(),
-                    ...entityLayerGroup.getLayers().getArray(),
+                    ...state.mapLayerGroups.base.getLayers().getArray(),
+                    ...state.mapLayerGroups.overlay.getLayers().getArray(),
+                    ...state.mapLayerGroups.entity.getLayers().getArray(),
                 ];
 
                 return layers.find(l => l.getProperties()[prop] == value);
@@ -735,15 +742,15 @@
                     layer_id: 'wkt_layer',
                 });
 
-                entityLayerGroup.push(wktLayer);
+                state.mapEntityLayers.push(wktLayer);
                 const source = wktLayer.getSource();
 
-                for(let i = 0; i < features.length; i++) {
+                for(let i=0; i<features.length; i++) {
                     const geom = wktFormat.readGeometry(features[i], {
                         featureProjection: 'EPSG:3857',
                         dataProjection: state.inputEpsgCode,
                     });
-                    source.addFeature(new Feature({ geometry: geom }));
+                    source.addFeature(new Feature({geometry: geom}));
                 }
             };
             const loadGeojsonData = features => {
@@ -785,9 +792,9 @@
             };
             const reinitializeData = _ => {
                 const layers = [
-                    ...baseLayerGroup.getLayers().getArray(),
-                    ...overlayLayerGroup.getLayers().getArray(),
-                    ...entityLayerGroup.getLayers().getArray(),
+                    ...state.mapLayerGroups.base.getLayers().getArray(),
+                    ...state.mapLayerGroups.overlay.getLayers().getArray(),
+                    ...state.mapLayerGroups.entity.getLayers().getArray(),
                 ];
 
                 layers.forEach(l => {
@@ -800,9 +807,9 @@
                 setExtent();
             };
             const updateLayerGroups = _ => {
-                baseLayerGroup.setLayers(new Collection(baseLayerArray));
-                overlayLayerGroup.setLayers(new Collection(overlayLayerArray));
-                entityLayerGroup.setLayers(new Collection(entityLayerArray));
+                state.mapLayerGroups.base.setLayers(new Collection(state.mapBaselayers));
+                state.mapLayerGroups.overlay.setLayers(new Collection(state.mapOverlays));
+                state.mapLayerGroups.entity.setLayers(new Collection(state.mapEntityLayers));
                 setExtent();
             };
             const initializeMapEvents = _ => {
@@ -832,7 +839,7 @@
                         const coords = getExtentCenter(geometry.getExtent());
                         actionState.popup.setPosition(coords);
 
-                        let title = t('main.map.geometry_name', { id: props.id });
+                        let title = t('main.map.geometry_name', {id: props.id});
                         if(titleFn.value) {
                             const fromFn = titleFn.value(feature);
                             if(fromFn) {
@@ -1159,7 +1166,7 @@
                 const allLayers = !layer;
                 const currentExtent = state.map.getView().calculateExtent(state.map.getSize());
                 const extentFeatures = [];
-                const layers = allLayers ? entityLayerGroup.getLayers() : [layer];
+                const layers = allLayers ? state.mapLayerGroups.entity.getLayers() : [layer];
                 layers.forEach(lg => {
                     const src = lg.getSource();
                     if(src && !!src.forEachFeatureInExtent) {
@@ -1266,24 +1273,6 @@
 
             // DATA
             // EPSG:3857 bounds (taken from epsg.io/3857)
-            const baseLayerArray = [];
-            const overlayLayerArray = [];
-            const entityLayerArray = [];
-            const baseLayerGroup = new Group({
-                title: t('main.map.baselayer', 2),
-                openInLayerSwitcher: true,
-                layers: baseLayerArray,
-            });
-            const overlayLayerGroup = new Group({
-                title: t('main.map.overlay', 2),
-                openInLayerSwitcher: true,
-                layers: overlayLayerArray,
-            });
-            const entityLayerGroup = new Group({
-                title: t('main.map.entity_layers'),
-                openInLayerSwitcher: true,
-                layers: entityLayerArray,
-            });
             const defaultExtent = [-20026376.39, -20048966.10, 20026376.39, 20048966.10];
             const wktFormat = getWktFormat();
             const geojsonFormat = getGeoJsonFormat();
@@ -1291,6 +1280,14 @@
                 map: null,
                 extent: defaultExtent,
                 mapId: `interactive-map-container-${getTs()}`,
+                mapLayerGroups: {
+                    base: null,
+                    overlay: null,
+                    entity: null,
+                },
+                mapOverlays: [],
+                mapBaselayers: [],
+                mapEntityLayers: [],
                 layerStyleCache: {},
                 featureList: {},
                 epsgCode: computed(_ => `EPSG:${projection.value}`),
@@ -1431,9 +1428,9 @@
                             new PinchZoom(),
                         ]),
                         layers: [
-                            baseLayerGroup,
-                            overlayLayerGroup,
-                            entityLayerGroup,
+                            state.mapLayerGroups.base,
+                            state.mapLayerGroups.overlay,
+                            state.mapLayerGroups.entity,
                         ],
                         target: state.mapId,
                         view: new View({
@@ -1482,22 +1479,22 @@
 
             // WATCHER
             watch(_ => selection.value, (newValue, oldValue) => {
-                const feature = state.featureList[newValue];
-                if(!!feature) {
-                    setOverlay(feature);
-                } else {
-                    actionState.overlay.setPosition();
-                    actionState.bsOverlay.hide();
-                    actionState.overlayData = {};
-                    // vm.selectedFeature = {};
-                }
+                    const feature = state.featureList[newValue];
+                    if(!!feature) {
+                        setOverlay(feature);
+                    } else {
+                        actionState.overlay.setPosition();
+                        actionState.bsOverlay.hide();
+                        actionState.overlayData = {};
+                        // vm.selectedFeature = {};
+                    }
             });
 
             watch(_ => extent.value, (newValue, oldValue) => {
                 const layers = [
-                    ...baseLayerGroup.getLayers().getArray(),
-                    ...overlayLayerGroup.getLayers().getArray(),
-                    ...entityLayerGroup.getLayers().getArray(),
+                    ...state.mapLayerGroups.base.getLayers().getArray(),
+                    ...state.mapLayerGroups.overlay.getLayers().getArray(),
+                    ...state.mapLayerGroups.entity.getLayers().getArray(),
                 ];
                 const id = newValue.id;
 
@@ -1507,7 +1504,7 @@
                         bbox = newValue.bbox;
                         break;
                     case 'layer':
-                        for(let i = 0; i < layers.length; i++) {
+                        for(let i=0; i<layers.length; i++) {
                             const l = layers[i];
                             const p = l.getProperties();
                             if(p.layer_id == id) {
@@ -1519,11 +1516,11 @@
                     case 'layer_by_feature':
                         let found = false;
 
-                        for(let i = 0; i < layers.length; i++) {
+                        for(let i=0; i<layers.length; i++) {
                             const l = layers[i];
                             const s = l.getSource();
                             const features = s.getFeatures();
-                            for(let j = 0; j < features.length; j++) {
+                            for(let j=0; j<features.length; j++) {
                                 const f = features[j];
                                 if(f.getProperties().id == id) {
                                     bbox = s.getExtent();

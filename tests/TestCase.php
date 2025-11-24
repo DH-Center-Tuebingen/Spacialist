@@ -9,12 +9,14 @@ use Laravel\Sanctum\Sanctum;
 
 use App\User;
 use Database\Seeders\TestingSeeder;
+use DMS\PHPUnitExtensions\ArraySubset\ArraySubsetAsserts;
 use Illuminate\Support\Facades\Auth;
 
 abstract class TestCase extends BaseTestCase {
     use CreatesApplication;
     use WithFaker;
     use RefreshDatabase;
+    use ArraySubsetAsserts;
 
     /**
     * Indicates whether the default seeder should run before each test.
@@ -64,7 +66,7 @@ abstract class TestCase extends BaseTestCase {
                 }
 
             }
-        } catch(\Exception $e) {
+        }catch(\Exception $e) {
             // No error message found in response
         }
 

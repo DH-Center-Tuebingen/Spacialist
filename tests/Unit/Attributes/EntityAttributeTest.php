@@ -6,22 +6,27 @@ use App\AttributeTypes\EntityAttribute;
 use App\AttributeValue;
 use App\Exceptions\InvalidDataException;
 use Tests\TestCase;
-use PHPUnit\Framework\Attributes\DataProvider;
 
 // !!!! Currently this test is only testing the fromImport function!!!
 class EntityAttributeTest extends TestCase {
-    #[DataProvider('truthyProvider')]
+    /**
+     * @dataProvider truthyProvider
+    */
     public function testFromImportTruthy($input) {
         $this->expectNotToPerformAssertions(EntityAttribute::class);
         EntityAttribute::fromImport($input);
     }
 
-    #[DataProvider('truthyProvider')]
+    /**
+    * @dataProvider truthyProvider
+    */
     public function testFromImportReturnValues($input, $expected) {
         $this->assertEquals($expected, EntityAttribute::fromImport($input));
     }
 
-    #[DataProvider('falsyProvider')]
+    /**
+     * @dataProvider falsyProvider
+    */
     public function testFromImportFalsy($input) {
         $this->expectException(InvalidDataException::class);
         EntityAttribute::fromImport($input);
@@ -50,8 +55,8 @@ class EntityAttributeTest extends TestCase {
 
     public static function falsyProvider() {
         return [
-            "fail when input is not a string (int)" => [1],
-            "fail when input is not a string (bool)" => [true],
+            "fail when input is not a string" => [1],
+            "fail when input is not a string" => [true],
             "fail when input is not a valid concept/label in the vocabulary" => ["Fund"],
             "fail when case is not correct" => ["inv. 1234"],
         ];

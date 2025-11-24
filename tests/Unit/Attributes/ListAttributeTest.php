@@ -6,17 +6,20 @@ use App\AttributeTypes\ListAttribute;
 use App\AttributeValue;
 use App\Exceptions\InvalidDataException;
 use Tests\TestCase;
-use PHPUnit\Framework\Attributes\DataProvider;
 
 // !!!! Currently this test is only testing the fromImport function!!!
 class ListAttributeTest extends TestCase {
-    #[DataProvider('truthyProvider')]
+    /**
+    * @dataProvider truthyProvider
+    */
     public function testFromImportTruthy($input) {
         $this->expectNotToPerformAssertions(ListAttribute::class);
         ListAttribute::fromImport($input);
     }
 
-    #[DataProvider('truthyProvider')]
+    /**
+    * @dataProvider truthyProvider
+    */
     public function testFromImportReturnValues($input, $expected) {
         if($expected != null)
         $expected = json_encode($expected);
@@ -24,7 +27,9 @@ class ListAttributeTest extends TestCase {
         $this->assertEquals($expected, ListAttribute::fromImport($input));
     }
 
-    #[DataProvider('falsyProvider')]
+    /**
+    * @dataProvider falsyProvider
+    */
     public function testFromImportFalsy($input) {
         $this->expectException(InvalidDataException::class);
         ListAttribute::fromImport($input);

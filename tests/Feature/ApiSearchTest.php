@@ -7,16 +7,16 @@ use App\Entity;
 use App\ThLanguage;
 use App\User;
 use Tests\TestCase;
-use PHPUnit\Framework\Attributes\TestDox;
 
 class ApiSearchTest extends TestCase
 {
     // Testing GET requests
 
     /**
-	 * @return void
-	 */
-	#[TestDox('GET    /api/v1/search : Search Global for Entity')]
+     * @testdox GET    /api/v1/search : Search Global for Entity
+     *
+     * @return void
+     */
     public function testGlobalSearchEntityEndpoint()
     {
         $response = $this->userRequest()
@@ -63,9 +63,10 @@ class ApiSearchTest extends TestCase
     }
 
     /**
-	 * @return void
-	 */
-	#[TestDox('GET    /api/v1/search : Search Global for Bibliography')]
+     * @testdox GET    /api/v1/search : Search Global for Bibliography
+     *
+     * @return void
+     */
     public function testGlobalSearchBibliographyEndpoint()
     {
         $fields = [
@@ -138,9 +139,10 @@ class ApiSearchTest extends TestCase
     }
 
     /**
-	 * @return void
-	 */
-	#[TestDox('GET    /api/v1/search : Search Global')]
+     * @testdox GET    /api/v1/search : Search Global
+     *
+     * @return void
+     */
     public function testGlobalSearchAllEndpoint()
     {
         $nowTs = time();
@@ -187,9 +189,10 @@ class ApiSearchTest extends TestCase
     }
 
     /**
-	 * @return void
-	 */
-	#[TestDox('GET    /api/v1/search/entity : Search Entity')]
+     * @testdox GET    /api/v1/search/entity : Search Entity
+     *
+     * @return void
+     */
     public function testEntitySearchEndpoint()
     {
         $response = $this->userRequest()
@@ -197,14 +200,13 @@ class ApiSearchTest extends TestCase
 
         $content = json_decode($response->getContent());
         $response->assertStatus(200);
-        $response->assertJsonCount(10);
+        $response->assertJsonCount(9);
         // response content is Laravel Paginate Array
         $this->assertObjectHasProperty('data', $content);
         $this->assertObjectHasProperty('from', $content);
         $this->assertObjectHasProperty('to', $content);
         $this->assertObjectHasProperty('per_page', $content);
         $this->assertObjectHasProperty('current_page', $content);
-        $this->assertObjectHasProperty('current_page_url', $content);
         $this->assertObjectHasProperty('first_page_url', $content);
         $this->assertObjectHasProperty('next_page_url', $content);
         $this->assertObjectHasProperty('prev_page_url', $content);
@@ -226,9 +228,10 @@ class ApiSearchTest extends TestCase
     }
 
     /**
-	 * @return void
-	 */
-	#[TestDox('GET    /api/v1/search/label : Search for Thesaurex Label')]
+     * @testdox GET    /api/v1/search/label : Search for Thesaurex Label
+     *
+     * @return void
+     */
     public function testLabelSearchEndpoint()
     {
         $response = $this->userRequest()
@@ -281,9 +284,10 @@ class ApiSearchTest extends TestCase
     }
 
     /**
-	 * @return void
-	 */
-	#[TestDox('GET    /api/v1/search/attribute : Search Attributes')]
+     * @testdox GET    /api/v1/search/attribute : Search Attributes
+     *
+     * @return void
+     */
     public function testAttributeSearchEndpoint()
     {
         $response = $this->userRequest()
@@ -324,9 +328,10 @@ class ApiSearchTest extends TestCase
     }
 
     /**
-	 * @return void
-	 */
-	#[TestDox('GET    /api/v1/search/selection/{id} : Search in Attribute Selection')]
+     * @testdox GET    /api/v1/search/selection/{id} : Search in Attribute Selection
+     *
+     * @return void
+     */
     public function testSelectionSearchEndpoint()
     {
         $response = $this->userRequest()
@@ -359,9 +364,10 @@ class ApiSearchTest extends TestCase
     // Testing exceptions and permissions
 
     /**
-	 * @return void
-	 */
-	#[TestDox('Test Permissions')]
+     * @testdox Test Permissions
+     *
+     * @return void
+     */
     public function testPermissions()
     {
         User::first()->roles()->detach();
@@ -385,9 +391,10 @@ class ApiSearchTest extends TestCase
         }
     }
     /**
-	 * @return void
-	 */
-	#[TestDox('Test Exceptions')]
+     * @testdox Test Exceptions
+     *
+     * @return void
+     */
     public function testExceptions()
     {
         $lang = User::first()->getLanguage();

@@ -6,22 +6,27 @@ use App\AttributeTypes\DropdownMultipleAttribute;
 use App\AttributeValue;
 use App\Exceptions\InvalidDataException;
 use Tests\TestCase;
-use PHPUnit\Framework\Attributes\DataProvider;
 
 // !!!! Currently this test is only testing the fromImport function!!!
 class DropdownMultipleAttributeTest extends TestCase {
-    #[DataProvider('truthyProvider')]
+    /**
+     * @dataProvider truthyProvider
+    */
     public function testFromImportTruthy($input) {
         $this->expectNotToPerformAssertions(DropdownMultipleAttribute::class);
         DropdownMultipleAttribute::fromImport($input);
     }
 
-    #[DataProvider('truthyProvider')]
+    /**
+    * @dataProvider truthyProvider
+    */
     public function testFromImportCheckReturnValues($input, $expected) {
         $this->assertEquals($expected, DropdownMultipleAttribute::fromImport($input));
     }
 
-    #[DataProvider('falsyProvider')]
+    /**
+     * @dataProvider falsyProvider
+    */
     public function testFromImportFalsy($input) {
         $this->expectException(InvalidDataException::class);
         DropdownMultipleAttribute::fromImport($input);
@@ -58,8 +63,8 @@ class DropdownMultipleAttributeTest extends TestCase {
 
     public static function falsyProvider() {
         return [
-            "fail when input is not a string (int)" => [1],
-            "fail when input is not a string (bool)" => [true],
+            "fail when input is not a string" => [1],
+            "fail when input is not a string" => [true],
             "fail when one input is not a valid concept/label in the vocabulary" => ["Fund;Pottery"],
             "fail when case sensitivity is not considered" => ["find;pottery"],
         ];

@@ -10,8 +10,6 @@ use App\User;
 use Tests\TestCase;
 use Tests\Permission;
 use Tests\ResponseTester;
-use PHPUnit\Framework\Attributes\DataProvider;
-use PHPUnit\Framework\Attributes\TestDox;
 
 class ApiEntityTest extends TestCase
 {
@@ -19,7 +17,9 @@ class ApiEntityTest extends TestCase
     //              [[ GET ]]
     // ==========================================
 
-    #[TestDox('GET    /api/v1/entity  -  Get all top entities.')]
+    /**
+     * @testdox GET    /api/v1/entity  -  Get all top entities.
+     */
     public function testTopEntityEndpoint()
     {
         $response = $this->userRequest()
@@ -40,7 +40,9 @@ class ApiEntityTest extends TestCase
         ]);
     }
 
-    #[TestDox('GET    /api/v1/entity/{id}  -  Get entity (id=1).')]
+    /**
+     * @testdox GET    /api/v1/entity/{id}  -  Get entity (id=1).
+     */
     public function testEntityEndpointtestEntityEndpoint()
     {
         $response = $this->userRequest()
@@ -75,7 +77,9 @@ class ApiEntityTest extends TestCase
         ]);
     }
 
-    #[TestDox('GET    /api/v1/entity/{id}  -  Get entity (id=2).')]
+    /**
+     * @testdox GET    /api/v1/entity/{id}  -  Get entity (id=2).
+     */
     public function testEntityEndpointId()
     {
         $response = $this->userRequest()
@@ -86,7 +90,9 @@ class ApiEntityTest extends TestCase
         ]);
     }
 
-    #[TestDox('GET    /api/v1/entity/{id}  -  Get non-existing entity.')]
+    /**
+     * @testdox GET    /api/v1/entity/{id}  -  Get non-existing entity.
+     */
     public function testEntityWrongIdEndpoint()
     {
         $response = $this->userRequest()
@@ -95,7 +101,9 @@ class ApiEntityTest extends TestCase
         $response->assertStatus(404);
     }
 
-    #[TestDox('GET    /api/v1/entity/entity_type/{entity_id}/data/{attribute_id}  -  Get attribute values (id=15) of an entity-type (id=3).')]
+    /**
+     * @testdox GET    /api/v1/entity/entity_type/{entity_id}/data/{attribute_id}  -  Get attribute values (id=15) of an entity-type (id=3).
+     */
     public function testEntityTypeDataEndpoint()
     {
         $response = $this->userRequest()
@@ -124,7 +132,9 @@ class ApiEntityTest extends TestCase
         ]);
     }
 
-     #[TestDox('GET    /api/v1/entity/{id}/data  -  Get data of an entity (id=1).')]
+     /**
+      * @testdox GET    /api/v1/entity/{id}/data  -  Get data of an entity (id=1).
+      */
     public function testEntityDataEndpoint()
     {
         $response = $this->userRequest()
@@ -150,7 +160,9 @@ class ApiEntityTest extends TestCase
         ]);
     }
 
-     #[TestDox('GET    /api/v1/entity/{id}/data  -  Get data of a non-existing entity.')]
+     /**
+      * @testdox GET    /api/v1/entity/{id}/data  -  Get data of a non-existing entity.
+      */
     public function testEntityDataWithWrongIdEndpoint()
     {
         $response = $this->userRequest()
@@ -162,7 +174,9 @@ class ApiEntityTest extends TestCase
         ]);
     }
 
-    #[TestDox('GET    /api/v1/entity/{id}/data/{aid}  -  Get data of an attribute (id=15) of an entity (id=1).')]
+    /**
+     * @testdox GET    /api/v1/entity/{id}/data/{aid}  -  Get data of an attribute (id=15) of an entity (id=1).
+     */
     public function testEntityDataWithAttributeEndpoint()
     {
         $response = $this->userRequest()
@@ -188,7 +202,9 @@ class ApiEntityTest extends TestCase
         ]);
     }
 
-     #[TestDox('GET    /api/v1/entity/{id}/data/{aid}  -  Get data of a non-existing attribute (id=99) of an entity (id=1).')]
+     /**
+      * @testdox GET    /api/v1/entity/{id}/data/{aid}  -  Get data of a non-existing attribute (id=99) of an entity (id=1).
+      */
     public function testEntityDataWithWrongAttributeEndpoint()
     {
         $response = $this->userRequest()
@@ -200,7 +216,9 @@ class ApiEntityTest extends TestCase
         ]);
     }
 
-    #[TestDox('GET    /api/v1/entity/{id}/export  -  Get entity and all children of an entity as csv/zip (id=3).')]
+    /**
+    * @testdox GET    /api/v1/entity/{id}/export  -  Get entity and all children of an entity as csv/zip (id=3).
+     */
     public function testEntityExportEndpoint()
     {
         Carbon::setTestNow(Carbon::create(2025, 1, 1, 12, 30, 0));
@@ -211,7 +229,9 @@ class ApiEntityTest extends TestCase
         $response->assertStatus(200);
     }
 
-    #[TestDox('GET    /api/v1/entity/{id}/parent/metadata  -  Get all parentIds of an entity (id=5).')]
+    /**
+    * @testdox GET    /api/v1/entity/{id}/parent/metadata  -  Get all parentIds of an entity (id=5).
+     */
     public function testEntityParentMetadataGetIdEndpoint()
     {
         $response = $this->userRequest()
@@ -223,7 +243,9 @@ class ApiEntityTest extends TestCase
         ]);
     }
 
-    #[TestDox('GET    /api/v1/entity/{id}/parent/metadata  -  Get all parent metadata of an entity (id=5).')]
+    /**
+    * @testdox GET    /api/v1/entity/{id}/parent/metadata  -  Get all parent metadata of an entity (id=5).
+     */
     public function testEntityParentMetadataEndpoint()
     {
         $response = $this->userRequest()
@@ -245,7 +267,9 @@ class ApiEntityTest extends TestCase
         ]);
     }
 
-    #[TestDox('GET    /api/v1/entity/byParent/{id}  -  Get all sub-entities/children of an entity (id=2).')]
+    /**
+     * @testdox GET    /api/v1/entity/byParent/{id}  -  Get all sub-entities/children of an entity (id=2).
+     */
     public function testEntityParentEndpoint()
     {
         $response = $this->userRequest()
@@ -275,7 +299,9 @@ class ApiEntityTest extends TestCase
     //              [[ POST ]]
     // ==========================================
 
-    #[TestDox('POST   /api/v1/entity  -  Add a new entity.')]
+    /**
+     * @testdox POST   /api/v1/entity  -  Add a new entity.
+     */
     public function testNewEntityEndpoint()
     {
         $cnt = Entity::count();
@@ -311,7 +337,9 @@ class ApiEntityTest extends TestCase
         $this->assertEquals($cnt, 9);
     }
 
-    #[TestDox('POST   /api/v1/entity  -  Add a new root entity.')]
+    /**
+     *  @testdox POST   /api/v1/entity  -  Add a new root entity.
+     */
     public function testNewRootEntityEndpoint()
     {
         $cnt = Entity::count();
@@ -350,7 +378,9 @@ class ApiEntityTest extends TestCase
     //              [[ PATCH ]]
     // ==========================================
 
-    #[TestDox('PATCH  /api/v1/entity/{entity_id}/attributes  -  Test modifying [remove, replace, add] attributes of an entity (id=4).')]
+    /**
+     * @testdox PATCH  /api/v1/entity/{entity_id}/attributes  -  Test modifying [remove, replace, add] attributes of an entity (id=4).
+     */
     public function testPatchAttributesEndpoint()
     {
         $entity = Entity::with('attributes')->find(4);
@@ -526,7 +556,9 @@ class ApiEntityTest extends TestCase
         
     }
 
-    #[TestDox('PATCH  /api/v1/entity/{entity_id}/name  -  Test renaming an entity (id=1)  -  Site A => Site A_renamed.')]
+    /**
+     * @testdox PATCH  /api/v1/entity/{entity_id}/name  -  Test renaming an entity (id=1)  -  Site A => Site A_renamed.
+     */
     public function testPatchRenameEntityEndpoint()
     {
         $entity = Entity::find(1);
@@ -554,7 +586,9 @@ class ApiEntityTest extends TestCase
         $this->assertEquals('Site A_renamed', $entity->name);
     }
 
-    #[TestDox('PATCH  /api/v1/entity/{entity_id}/rank  -  Move an entity (id=1) from one parent (id=7) to another entity (id=8).')]
+    /**
+     * @testdox PATCH  /api/v1/entity/{entity_id}/rank  -  Move an entity (id=1) from one parent (id=7) to another entity (id=8).
+     */
     public function testPatchMoveEntityEndpoint()
     {
         $siteA = Entity::find(1);
@@ -593,8 +627,10 @@ class ApiEntityTest extends TestCase
         $this->assertEquals(2, $find12->rank);
     }
 
-    #[DataProvider('moveExceptionsProvider')]
-    #[TestDox('PATCH  /api/v1/entity/{entity_id}/rank  -  Move entities exception')]
+    /**
+     *  @dataProvider  moveExceptionsProvider
+     *  @testdox PATCH  /api/v1/entity/{entity_id}/rank  -  Move entities exception
+     */
     function testMoveExceptions(int $entity,int | null $newParentEntity, int $statusCode = 400) {
             $response = $this->userRequest()
             ->patch("/api/v1/entity/$entity/rank", [
@@ -619,7 +655,9 @@ class ApiEntityTest extends TestCase
     //              [[ DELETE ]]
     // ==========================================
 
-    #[TestDox('DELETE /api/v1/entity/{entity_id}  -  Delete an entity (id=8) with no sub-entities.')]
+    /**
+     * @testdox DELETE /api/v1/entity/{entity_id}  -  Delete an entity (id=8) with no sub-entities.
+     */
     public function testDeleteEntityWithoutSubEntities()
     {
         $cnt = Entity::count();
@@ -634,7 +672,9 @@ class ApiEntityTest extends TestCase
         $this->assertEquals($cnt, 7);
     }
 
-    #[TestDox('DELETE /api/v1/entity/{entity_id}  -  Delete an entity (id=1) and all it\'s sub-entities.')]
+    /**
+     * @testdox DELETE /api/v1/entity/{entity_id}  -  Delete an entity (id=1) and all it's sub-entities.
+     */
     public function testDeleteEntityEndpoint()
     {
         $cnt = Entity::count();
@@ -649,7 +689,9 @@ class ApiEntityTest extends TestCase
         $this->assertEquals($cnt, 3);
     }
 
-    #[TestDox('DELETE /api/v1/entity/{entity_id}  -  Delete a non-existing entity.')]
+    /**
+     * @testdox DELETE /api/v1/entity/{entity_id}  -  Delete a non-existing entity.
+     */
     public function testDeleteEntityWrongIdEndpoint()
     {
         $response = $this->userRequest()
@@ -665,14 +707,18 @@ class ApiEntityTest extends TestCase
     //      [[ ADDITIONAL DATA PROVIDERS ]]
     // ==========================================
 
-    #[DataProvider('permissions')]
-    #[TestDox('[[PROVIDER]] Routes Without Permissions')]
+    /**
+     * @dataProvider permissions
+     * @testdox [[PROVIDER]] Routes Without Permissions
+     */
     public function testWithoutPermission($permission) {
         (new ResponseTester($this))->testMissingPermission($permission);
     }
 
-    #[DataProvider('exceptions')]
-    #[TestDox('[[PROVIDER]] Exceptions With Permissions')]
+    /**
+     * @dataProvider exceptions
+     * @testdox [[PROVIDER]] Exceptions With Permissions
+     */
     public function testSucceedWithPermission($permission) {
         (new ResponseTester($this))->testExceptions($permission);
     }

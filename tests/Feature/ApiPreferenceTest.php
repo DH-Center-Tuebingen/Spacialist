@@ -4,7 +4,7 @@ namespace Tests\Feature;
 
 use Illuminate\Testing\Fluent\AssertableJson;
 use Tests\TestCase;
-use PHPUnit\Framework\Attributes\TestDox;
+use Illuminate\Foundation\Testing\WithoutMiddleware;
 
 use App\User;
 use App\Preference;
@@ -15,9 +15,10 @@ class ApiPreferenceTest extends TestCase
     // Testing GET requests
 
     /**
-	 * @return void
-	 */
-	#[TestDox('GET    /api/v1/preferences : Get System Preferences')]
+     * @testdox GET    /api/v1/preferences : Get System Preferences
+     *
+     * @return void
+     */
     public function testPreferenceEndpoint()
     {
         $cnt = UserPreference::count();
@@ -119,9 +120,10 @@ class ApiPreferenceTest extends TestCase
     }
 
     /**
-	 * @return void
-	 */
-	#[TestDox('PATCH  /api/v1/preference : Change System Preference')]
+     * @testdox PATCH  /api/v1/preference : Change System Preference
+     *
+     * @return void
+     */
     public function testPatchSystemPreferenceEndpoint()
     {
         $data = [
@@ -143,9 +145,10 @@ class ApiPreferenceTest extends TestCase
     }
 
     /**
-	 * @return void
-	 */
-	#[TestDox('PATCH  /api/v1/preference : Change User Preference')]
+     * @testdox PATCH  /api/v1/preference : Change User Preference
+     *
+     * @return void
+     */
     public function testPatchUserPreferenceEndpoint()
     {
         $data = [
@@ -170,9 +173,10 @@ class ApiPreferenceTest extends TestCase
     // Testing exceptions and permissions
 
     /**
-	 * @return void
-	 */
-	#[TestDox('Test Permissions')]
+     * @testdox Test Permissions
+     *
+     * @return void
+     */
     public function testPermissions()
     {
         User::first()->roles()->detach();
@@ -197,9 +201,10 @@ class ApiPreferenceTest extends TestCase
         }
     }
     /**
-	 * @return void
-	 */
-	#[TestDox('Test Exceptions')]
+     * @testdox Test Exceptions
+     *
+     * @return void
+     */
     public function testExceptions()
     {
         $calls = [

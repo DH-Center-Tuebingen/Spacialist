@@ -6,17 +6,17 @@ use App\Reference;
 use Tests\Permission;
 use Tests\ResponseTester;
 use Tests\TestCase;
-use PHPUnit\Framework\Attributes\DataProvider;
-use PHPUnit\Framework\Attributes\TestDox;
 
 class ApiReferenceTest extends TestCase
 {
-
+    
     // ==========================================
     //                [[ GET ]]
     // ==========================================
-
-    #[TestDox('GET    /api/v1/entity/{id}/reference  -  Get all references of an entity (id=1).')]
+    
+    /**
+    * @testdox GET    /api/v1/entity/{id}/reference  -  Get all references of an entity (id=1).
+    */
     public function testEntityReferencesEndpoint()
     {
         $response = $this->userRequest()
@@ -85,12 +85,14 @@ class ApiReferenceTest extends TestCase
             ]
         ]);
     }
-
+    
     // ==========================================
     //              [[ POST ]]
     // ==========================================
-
-    #[TestDox('POST   /api/v1/entity/{entity_id}/reference/{attribute_id}  -  Add a new reference to an entity (id=2).')]
+    
+    /**
+    * @testdox POST   /api/v1/entity/{entity_id}/reference/{attribute_id}  -  Add a new reference to an entity (id=2).
+    */
     public function testNewReferenceEndpoint()
     {
         $cnt = Reference::count();
@@ -130,13 +132,15 @@ class ApiReferenceTest extends TestCase
         $cnt = Reference::count();
         $this->assertEquals($cnt, 4);
     }
-
-
+    
+    
     // ==========================================
     //              [[ PATCH ]]
     // ==========================================
-
-    #[TestDox('PATCH  /api/v1/entity/reference/{id}  -  Patch description of an entity reference (id=1)')]
+    
+/**
+     * @testdox PATCH  /api/v1/entity/reference/{id}  -  Patch description of an entity reference (id=1)
+     */
     public function testPatchReferenceEndpoint()
     {
         $reference = Reference::find(2);
@@ -169,8 +173,10 @@ class ApiReferenceTest extends TestCase
             'user_id' => 1,
         ]);
     }
-
-    #[TestDox('PATCH  /api/v1/entity/reference/{id}  -  Patch without description of an entity reference (id=1)')]
+    
+    /**
+     * @testdox PATCH  /api/v1/entity/reference/{id}  -  Patch without description of an entity reference (id=1)
+     */
     public function testPatchReferenceMissingDescriptionEndpoint()
     {
         $reference = Reference::find(2);
@@ -188,8 +194,10 @@ class ApiReferenceTest extends TestCase
     // ==========================================
     //              [[ DELETE ]]
     // ==========================================
-
-    #[TestDox('DELETE /api/v1/entity/reference/{id}  -  Delete a reference (id=1).')]
+    
+    /**
+     * @testdox DELETE /api/v1/entity/reference/{id}  -  Delete a reference (id=1).
+     */
      public function testDeleteReferenceEndpoint()
     {
         $cnt = Reference::count();
@@ -203,23 +211,26 @@ class ApiReferenceTest extends TestCase
         $cnt = Reference::count();
         $this->assertEquals($cnt, 2);
     }
-
+    
     // ==========================================
     //      [[ ADDITIONAL DATA PROVIDERS ]]
     // ==========================================
-
-    #[DataProvider('permissions')]
-    #[TestDox('[[PROVIDER]] Routes Without Permissions')]
+    
+    /**
+     * @dataProvider permissions
+     * @testdox [[PROVIDER]] Routes Without Permissions
+     */
     public function testWithoutPermission($permission) {
         (new ResponseTester($this))->testMissingPermission($permission);
     }
-    
-    #[DataProvider('exceptions')]
-    #[TestDox('[[PROVIDER]] Exceptions With Permissions')]
+    /**
+     * @dataProvider exceptions
+     * @testdox [[PROVIDER]] Exceptions With Permissions
+     */
     public function testSucceedWithPermission($permission) {
         (new ResponseTester($this))->testExceptions($permission);
     }
-
+    
     public static function permissions() {
         return [
             "GET    /api/v1/entity/99/reference"    => Permission::for("get",      "/api/v1/entity/99/reference",      "You do not have the permission to view references"),
@@ -228,7 +239,7 @@ class ApiReferenceTest extends TestCase
             "DELETE /api/v1/entity/reference/99"    => Permission::for("delete",   "/api/v1/entity/reference/99",      "You do not have the permission to delete references"),
         ];
     }
-
+    
     public static function exceptions() {
         return [
             "GET    /api/v1/entity/99/reference" =>Permission::for("get",      "/api/v1/entity/99/reference",      "This entity does not exist"),

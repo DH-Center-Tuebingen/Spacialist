@@ -14,13 +14,13 @@ All notable changes to this project will be documented in this file.
 - Patch attribute endpoint: moved aid param from params obj to top level, as other values were not used 
 ## 0.12 - (Luxor)
 ### Added
-- API endpoint for getting all entity details data in one request: GET::v1/entity/{id}/entity_detail
-### Changed
-- Alerts can now be dismissed
-- Now entity metadata is only loaded when accessing the metadata tab
+- **BACKPORT::0.12** API endpoint for getting all entity details data in one request: GET::v1/entity/{id}/entity_detail
+## Changed
+- - Now entity metadata is only loaded when accessing the metadata tab
+
 ## Fixed
-- Removed redundant calls to the entity endpoint
-- Metadata tab error on submit (unknown variable)
+- **BACKPORT::0.12** Removed redundant calls to the entity endpoint
+- **BACKPORT::0.12** Metadata tab error on submit (unknown variable)
 
 ## 0.11.1
 ### Added
