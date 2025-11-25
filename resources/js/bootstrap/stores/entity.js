@@ -44,9 +44,12 @@ import {
     removeEntityTypeAttribute,
     reorderEntityAttributes,
     searchEntity,
-    updateAttributeDependency,
     updateAttributeMetadata,
 } from '@/api.js';
+
+import {
+    updateAttributeDependency,
+} from '@/api/attribute.js';
 
 function updateSelectionTypeIdList(selection) {
     const tmpDict = {};
@@ -131,6 +134,19 @@ export const useEntityStore = defineStore('entity', {
             if(!id) return {};
             return state.entityTypes[id];
         },
+        getEntityTypeAttributeById: state => (entityType, entityTypeAttributeId) => {
+            const entityTypeAttributeList = state.entityTypeAttributes[entityType] || [];
+            for(let i = 0; i < entityTypeAttributeList.length; i++) {
+                const curr = entityTypeAttributeList[i];
+                if(curr.pivot.id == entityTypeAttributeId) {
+                    return curr;
+                }
+            }
+            return null;
+        },
+        getEntityTypeAttributeDependencies: state => (entityTypeId, entityTypeAttributeId) => {
+            return state.getEntityTypeAttributeById(entityTypeId, entityTypeAttributeId)?.pivot?.depends_on ?? null;
+        },
         getEntityTypeAttributes: state => (id, exclude = false) => {
             if(!id || !state.entityTypeAttributes[id]) return [];
 
@@ -141,6 +157,33 @@ export const useEntityStore = defineStore('entity', {
             }
 
             return state.entityTypeAttributes[id];
+        },
+        getEntityTypeDependencyTriggers: state => (id) => {
+            if(!id) return {};
+            const attributes = state.getEntityTypeAttributes(id);
+
+            const dependencyTriggers = {};
+            attributes.forEach(a => {
+                if(a?.pivot?.depends_on) {
+                    const dependencies = a.pivot.depends_on;
+                    dependencies.groups.forEach(group => {
+                        group.rules.forEach(rule => {
+                            if(!dependencyTriggers[rule.on]) {
+                                dependencyTriggers[rule.on] = [];
+                            }
+                            const entityTypeAttributeId = a.pivot.id;
+                            if(entityTypeAttributeId) {
+                                dependencyTriggers[rule.on].push(entityTypeAttributeId);
+                            } else {
+                                console.error('Could not find entity type attribute id for dependency trigger', a);
+                            }
+                        });
+                    });
+                }
+            });
+
+            console.log('DEPENDENCY TRIGGERS', dependencyTriggers);
+            return dependencyTriggers;
         },
         getEntityTypeAttributeSelections(state) {
             return id => {
@@ -464,9 +507,9 @@ export const useEntityStore = defineStore('entity', {
             };
             return metadata;
         },
-        updateAttributeMetadata(entityTypeId, attributeId, etAttrId, metadata) {
+        updateAttributeMetadata(entityTypeId, attributeId, entityTypeAttributeId, metadata) {
             const attributes = this.getEntityTypeAttributes(entityTypeId);
-            const attribute = attributes.find(a => a.id == attributeId && a.pivot.id == etAttrId);
+            const attribute = attributes.find(a => a.id == attributeId && a.pivot.id == entityTypeAttributeId);
             attribute.pivot.metadata = metadata;
         },
         set(data) {
@@ -506,9 +549,9 @@ export const useEntityStore = defineStore('entity', {
                 return this.updateEntityMetadata(id, except(data, 'user'));
             });
         },
-        async patchEntityMetadata(entityTypeId, attributeId, etAttrId, metadata) {
-            return updateAttributeMetadata(etAttrId, metadata).then(data => {
-                this.updateAttributeMetadata(entityTypeId, attributeId, etAttrId, data.data);
+        async patchEntityMetadata(entityTypeId, attributeId, entityTypeAttributeId, metadata) {
+            return updateAttributeMetadata(entityTypeAttributeId, metadata).then(data => {
+                this.updateAttributeMetadata(entityTypeId, attributeId, entityTypeAttributeId, data.data);
             });
         },
         externalAttributeValueDeleted(entityId, attributeId) {
@@ -687,6 +730,7 @@ export const useEntityStore = defineStore('entity', {
             });
         },
         async addEntityTypeAttribute(entityTypeId, attributeId, rank) {
+            console.log('ADD ENTITY TYPE ATTRIBUTE', entityTypeId, attributeId, rank);
             return addEntityTypeAttribute(entityTypeId, attributeId, rank).then(data => {
                 const relation = data.attribute;
                 delete data.attribute;
@@ -794,12 +838,11 @@ export const useEntityStore = defineStore('entity', {
                 }
             });
         },
-        async updateDependency(entityTypeId, attributeId, dependency) {
-            return updateAttributeDependency(entityTypeId, attributeId, dependency).then(response => {
-                const attributes = this.getEntityTypeAttributes(entityTypeId);
-                const attribute = attributes.find(a => a.id == attributeId);
-                if(attribute) {
-                    attribute.pivot.depends_on = response.data;
+        async updateDependency(entityTypeId, entityTypeAttributeId, dependency) {
+            return updateAttributeDependency(entityTypeAttributeId, dependency).then(response => {
+                const entityTypeAttribute = this.getEntityTypeAttributeById(entityTypeId, entityTypeAttributeId);
+                if(entityTypeAttribute) {
+                    entityTypeAttribute.pivot.depends_on = response.data;
                 }
             });
         },

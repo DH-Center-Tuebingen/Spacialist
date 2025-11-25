@@ -208,6 +208,7 @@
                 :key="`attribute-group-${group.id}-tab`"
                 class="nav-item"
                 role="presentation"
+                :class="tabClasses(group)"
             >
                 <a
                     :id="`active-entity-attributes-group-${group.id}-tab`"
@@ -314,7 +315,7 @@
                     @keydown.ctrl.s="e => handleSaveOnKey(e, `${group.id}`)"
                 >
                     <attribute-list
-                        v-if="state.attributesFetched && !group.hidden"
+                        v-if="state.attributesFetched && isGroupVisibleOrDirty(group)"
                         :ref="el => setAttrRefs(el, group.id)"
                         v-dcan="'entity_data_read'"
                         class="h-100 overflow-y-auto row"
@@ -439,8 +440,6 @@
     import {
         can,
         userId,
-        getEntityTypeDependencies,
-        getEntityTypeDependencyTriggers,
         translateConcept,
         _cloneDeep,
     } from '@/helpers/helpers.js';
@@ -549,7 +548,11 @@
                     return false;
                 }),
                 filteredEntityGroups: computed(_ => {
-                    return state.entityGroups.filter(g => !g.hidden);
+                    // Groups that are hidden should not be visible, unless they have dirty states
+                    // then the user still sees the group to be able to save or reset the changes.
+                    // (Additionally this would lead to a unintended situation if the user tries to navigate away,
+                    //  they wouldn't receive a warning without any visible dirty states)
+                    return state.entityGroups.filter(isGroupVisibleOrDirty);
                 }),
                 entityGroups: computed(_ => {
                     // TODO:: Does this makes sense?
@@ -565,10 +568,13 @@
                         let currentUnnamedGroupCntr = 1;
                         let hideGroup = false;
                         state.entityAttributes.forEach(a => {
-                            if(a.is_system && a.datatype == 'system-separator') {
+                            
+                            const entityTypeAttributeId = a?.pivot?.id ?? undefined;
+                            
+                            if(a.is_system && a.datatype == 'system-separator' && entityTypeAttributeId) {
                                 // If system separator is hidden, skip adding it
                                 // and set flag to hide it's attributes
-                                if(state.hiddenAttributes[a.id]?.hide) {
+                                if(state.hiddenAttributes[entityTypeAttributeId]?.hide) {
                                     hideGroup = true;
                                 } else {
                                     hideGroup = false;
@@ -609,8 +615,7 @@
                     }
                 }),
                 entityTypeSelections: computed(_ => entityStore.getEntityTypeAttributeSelections(state.entity.entity_type_id)),
-                entityTypeDependencies: computed(_ => getEntityTypeDependencies(state.entity.entity_type_id)),
-                entityTypeTriggers: computed(_ => getEntityTypeDependencyTriggers(state.entity.entity_type_id)),
+                entityTypeTriggers: computed(_ => entityStore.getEntityTypeDependencyTriggers(state.entity.entity_type_id)),
                 hasAttributeLinks: computed(_ => state.entity.attributeLinks && state.entity.attributeLinks.length > 0),
                 groupedAttributeLinks: computed(_ => {
                     if(!state.hasAttributeLinks) return {};
@@ -754,7 +759,7 @@
             const updateDependencyState = (aid, value) => {
                 const attributeTriggers = state.entityTypeTriggers[aid];
                 if(!attributeTriggers) return;
-
+                
                 // This is a bit of a temporary hack, as the dirty value
                 // used to overwrite the attribute value with just the value.
                 // Which leads to inconsitencies in the data.
@@ -768,9 +773,19 @@
                         liveData[k].value = dirtyValues[k];
                     }
                 }
-
+                
                 for(const dependantId of attributeTriggers) {
-                    const attributeDependencies = state.entityTypeDependencies[dependantId];
+                    const attributeDependencies = useEntityStore().getEntityTypeAttributeDependencies(state.entity.entity_type_id, dependantId);
+                   
+                    if(!attributeDependencies?.groups || attributeDependencies.groups.length === 0) {
+                        // No dependencies means we show the attribute
+                        state.hiddenAttributes[dependantId] = {
+                            hide: false,
+                            by: null,
+                        };
+                        continue;
+                    }
+                    
                     const matchAllGroups = !attributeDependencies.or;
                     let dependencyMatch = matchAllGroups;
 
@@ -1063,6 +1078,17 @@
                 if(el === null) return;
                 attrRefs.value[grp] = el;
             };
+            
+            const isGroupVisibleOrDirty = (group) => {
+                return !group.hidden || state.dirtyStates[group.id];
+            };
+            
+            const tabClasses = (group) => {
+                // When the group should be hidden, but it still has dirty states, we show it with reduced opacity.
+                return {
+                    'opacity-50': group.hidden,
+                };
+            };
 
             // ON MOUNTED
             onMounted(_ => {
@@ -1216,6 +1242,7 @@
                 translateConcept,
                 // LOCAL
                 hasReferenceGroup,
+                isGroupVisibleOrDirty,
                 showMetadata,
                 dataChanged,
                 editEntityName,
@@ -1234,6 +1261,7 @@
                 saveEntity,
                 resetForm,
                 setAttrRefs,
+                tabClasses,
                 // STATE
                 attrRefs,
                 state,

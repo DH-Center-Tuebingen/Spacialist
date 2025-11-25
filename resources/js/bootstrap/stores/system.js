@@ -109,7 +109,15 @@ export const useSystemStore = defineStore('system', {
     },
     actions: {
         getConceptById(id) {
-            return this.concepts[id];
+            const concept = Object.entries(this.concepts)
+                .find(([, concept]) => concept.id == id);
+            
+            if(!concept) return null;
+            
+            return {
+                concept_url: concept[0],
+                ...concept[1],
+            };
         },
         setAppState(state) {
             this.appInitialized = state;

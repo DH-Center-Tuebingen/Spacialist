@@ -9,26 +9,18 @@
                 }"
                 :append-to-body="true"
                 :value-prop="'id'"
-                :label="'thesaurus_url'"
-                :track-by="'id'"
+                :label="'displayLabel'"
+                track-by="displayLabel"
                 :object="true"
                 :mode="'single'"
                 :hide-selected="true"
                 :options="options"
+                :searchable="true"
                 :placeholder="t('global.select.placeholder')"
                 @change="dependantSelected"
-            >
-                <template #option="{ option }">
-                    {{ translateConcept(option.thesaurus_url) }}
-                </template>
-                <template #singlelabel="{ value }">
-                    <div class="multiselect-single-label">
-                        {{ translateConcept(value.thesaurus_url) }}
-                    </div>
-                </template>
-            </multiselect>
+            />
         </div>
-        <div class="col-3">
+        <div class="col-2">
             <multiselect
                 v-if="modelValue.attribute?.id"
                 :value="modelValue.operator"
@@ -224,7 +216,8 @@
                 }
 
                 attributeData.value = attribute.value;
-                attributeValueWrapper.value = value;
+                console.log('VALUE', props.modelValue.value, value);
+                attributeValueWrapper.value = {value};
             };
 
             const searchEntity = async query => {

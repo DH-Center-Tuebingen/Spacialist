@@ -141,6 +141,7 @@
                                 :hide-links="state.hideEntityLink"
                                 :preview="preview"
                                 :preview-data="previewData"
+                                :data-entity-attribute-id="element?.pivot?.id ?? 0"
                                 @change="attributeChanged"
                                 @update-selection="handleSelectionUpdate"
                                 @expanded="e => onAttributeExpand(e, index)"

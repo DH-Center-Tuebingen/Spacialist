@@ -467,7 +467,7 @@ class EditorController extends Controller {
         return response()->json(null, 204);
     }
 
-    public function patchDependency(Request $request, $etid, $aid) {
+    public function patchDependency(Request $request, $entityTypeAttributeId) {
         $user = auth()->user();
         if(!$user->can('entity_type_write')) {
             return response()->json([
@@ -478,11 +478,8 @@ class EditorController extends Controller {
             'data' => 'required|array',
         ]);
 
-        $entityAttribute = EntityAttribute::where([
-            ['attribute_id', '=', $aid],
-            ['entity_type_id', '=', $etid]
-        ])->first();
-
+        $entityAttribute = EntityAttribute::findOrFail($entityTypeAttributeId);
+        
         if($entityAttribute === null) {
             return response()->json([
                 'error' => __('Entity Attribute not found')

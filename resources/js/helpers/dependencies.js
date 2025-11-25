@@ -1,4 +1,5 @@
 import useAttributeStore from '@/bootstrap/stores/attribute.js';
+import { translateConcept } from './helpers';
 
 const EQUAL = { name: 'equal', operator: '=' };
 const NOT_EQUAL = { name: 'not_equal', operator: '!=' };
@@ -207,6 +208,7 @@ export const formatDependency = dependencyRules => {
                     value: null,
                 };
                 converted.attribute = useAttributeStore().getAttribute(rule.on);
+                converted.attribute.displayLabel = translateConcept(converted.attribute.thesaurus_url);
                 converted.operator = getOperatorBySymbol(rule.operator);
                 converted.value = rule.value;
                 return converted;

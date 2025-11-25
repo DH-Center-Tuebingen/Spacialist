@@ -679,6 +679,7 @@ export function showEditAttribute(aid, etid, metadata) {
         component: EditAttribute,
         attrs: {
             name: uid,
+            entityTypeAttributeId: metadata?.pivot?.id ?? 0,
             attributeId: aid,
             entityTypeId: etid,
             metadata: metadata,
@@ -687,11 +688,13 @@ export function showEditAttribute(aid, etid, metadata) {
             },
             async onConfirm(e) {
                 const entityStore = useEntityStore();
+                const entityTypeAttributeId = metadata?.pivot?.id;
+                
                 if(e.metadata) {
-                    await entityStore.patchEntityMetadata(etid, aid, metadata.pivot.id, e.metadata);
+                    await entityStore.patchEntityMetadata(etid, aid, entityTypeAttributeId, e.metadata);
                 }
                 if(e.dependency) {
-                    await entityStore.updateDependency(etid, aid, e.dependency);
+                    await entityStore.updateDependency(etid, entityTypeAttributeId, e.dependency);
                 }
                 modal.destroy();
             },

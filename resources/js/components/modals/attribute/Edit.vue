@@ -7,7 +7,7 @@
         <div class="sp-modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">
-                    <template v-if="state.attribute.is_system">
+                    <template v-if="isSystem">
                         {{
                             t('main.entity.modals.edit.title_attribute', {
                                 name: t('global.attributes.system-separator')
@@ -31,15 +31,16 @@
                 />
             </div>
             <div class="modal-body overflow-hidden d-flex flex-column">
-                <template v-if="state.attribute.is_system">
+                <template v-if="isSystem">
                     <div class="mb-3 row">
                         <label class="col-form-label text-end col-md-2">
-                            {{ t('global.text') }}:
+                            {{ t('global.text') }}
                         </label>
                         <div class="col-md-10">
                             <simple-search
                                 :endpoint="searchLabel"
                                 :key-fn="getConceptLabel"
+                                :value="systemSeparatorToLabel(state.separatorTitle)"
                                 @selected="handleSeparatorRename"
                             />
                         </div>
@@ -48,7 +49,7 @@
                 <template v-else>
                     <div class="mb-3 row">
                         <label class="col-form-label text-end col-md-2">
-                            {{ t('global.label') }}:
+                            {{ t('global.label') }}
                         </label>
                         <div class="col-md-10">
                             <input
@@ -61,7 +62,7 @@
                     </div>
                     <div class="mb-3 row">
                         <label class="col-form-label text-end col-md-2">
-                            {{ t('global.type') }}:
+                            {{ t('global.type') }}
                         </label>
                         <div class="col-md-10">
                             <input
@@ -73,32 +74,36 @@
                         </div>
                     </div>
                 </template>
-                <hr>
-                <h5 class="text-center">
-                    {{ t('global.dependency.title') }}
-                </h5>
-                <DependencyForm
-                    v-model="state.dependency"
-                    :options="state.supportedEntityTypeAttributes"
-                />
-                <hr>
                 <div class="row">
-                    <h5 class="text-center">
+                    <label class="col-form-label text-end col-md-2">
                         {{ t('global.width') }}
-                    </h5>
-                    <div class="d-flex justify-content-between">
-                        <span>50%</span>
-                        <span>100%</span>
+                    </label>
+                    <div class="col-md-10">
+                        <div class="d-flex justify-content-between">
+                            <span>50%</span>
+                            <span>100%</span>
+                        </div>
+                        <input
+                            id="attribute-width-slider"
+                            v-model.number="state.width"
+                            type="range"
+                            class="form-range px-3"
+                            min="50"
+                            max="100"
+                            step="50"
+                        >
                     </div>
-                    <input
-                        id="attribute-width-slider"
-                        v-model.number="state.width"
-                        type="range"
-                        class="form-range px-3"
-                        min="50"
-                        max="100"
-                        step="50"
-                    >
+                </div>
+                <div class="row">
+                    <label class="col-form-label text-end col-md-2">
+                        {{ t('global.dependency.title') }}
+                    </label>
+                    <div class="col-md-10">
+                        <DependencyForm
+                            v-model="state.dependency"
+                            :options="state.supportedEntityTypeAttributes"
+                        />
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">
@@ -140,8 +145,6 @@
 
     import {
         getConceptLabel,
-        getEntityTypeAttribute,
-        getEntityTypeDependencies,
         translateConcept,
         multiselectResetClasslist,
     } from '@/helpers/helpers.js';
@@ -153,12 +156,15 @@
     } from '@/helpers/dependencies.js';
 
     import DependencyForm from '@/components/entity/dependency/DependencyForm.vue';
-
     export default {
         components: {
             DependencyForm,
         },
         props: {
+            entityTypeAttributeId: {
+                required: true,
+                type: Number,
+            },
             attributeId: {
                 required: true,
                 type: Number,
@@ -233,24 +239,49 @@
                     const supportedEntityTypeAttributes = attributeSelection.filter(a => {
                         return a.id != props.attributeId && getInputTypeClass(a.datatype) != 'unsupported';
                     });
-                    return supportedEntityTypeAttributes;
+                    return supportedEntityTypeAttributes.map(obj => {
+                        obj.displayLabel = translateConcept(obj.thesaurus_url);
+                        return obj;
+                    }).toSorted((a, b) => {
+                        return a.displayLabel.localeCompare(b.displayLabel);
+                    });
                 }),
             });
 
             // ON MOUNTED
             onMounted(_ => {
-                state.attribute = getEntityTypeAttribute(props.entityTypeId, props.attributeId);
-                const currentDependency = getEntityTypeDependencies(props.entityTypeId, props.attributeId);
+                state.attribute = useEntityStore().getEntityTypeAttributeById(props.entityTypeId, props.entityTypeAttributeId);
+                const currentDependency = useEntityStore().getEntityTypeAttributeDependencies(props.entityTypeId, props.entityTypeAttributeId);
+                
                 if(currentDependency) {
                     state.dependency = formatDependency(currentDependency);
                 }
                 if(state.attribute?.pivot?.metadata) {
-                    state.width = state.attribute.pivot.metadata.width || 100;
-                    if(state.attribute.is_system) {
-                        state.separatorTitle = state.attribute.pivot.metadata.title;
+                    const metadata = state.attribute.pivot.metadata;
+                    state.width = metadata.width || 100;
+                    if(metadata.title) {
+                        state.separatorTitle = metadata.title;
                     }
                 }
             });
+
+            const isSystem = computed(_ => state.attribute.is_system);
+
+            const systemSeparatorToLabel = conceptUrl => {
+                return {
+                    id: 0,
+                    concept_url: conceptUrl,
+                    labels: [
+                        {
+                            label: translateConcept(conceptUrl),
+                            language: {
+                                id: 0,
+                                short_name: 'any',
+                            }
+                        }
+                    ],
+                };
+            };
 
             // RETURN
             return {
@@ -260,6 +291,7 @@
                 getConceptLabel,
                 translateConcept,
                 multiselectResetClasslist,
+                systemSeparatorToLabel,
                 // PROPS
                 // LOCAL
                 getInputTypeClass,
@@ -268,6 +300,7 @@
                 handleSeparatorRename,
                 // STATE
                 state,
+                isSystem,
             };
         },
     };
