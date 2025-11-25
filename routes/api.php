@@ -111,7 +111,7 @@ Route::middleware('auth:sanctum')->prefix('v1/editor')->group(function() {
     Route::post('/dm/entity_type/{ctid}/duplicate', 'EditorController@duplicateEntityType')->where('ctid', '[0-9]+');
 
     Route::patch('/dm/entity_type/{etid}', 'EditorController@patchEntityType')->where('etid', '[0-9]+');
-    Route::patch('/dm/entity_type/{ctid}/attribute/{aid}/position', 'EditorController@reorderAttribute')->where('ctid', '[0-9]+')->where('aid', '[0-9]+');
+    Route::patch('/dm/entity_type/attribute/{entity_type_attribute_id}/position', 'EditorController@reorderAttribute')->where('entity_type_attribute_id', '[0-9]+');
     Route::patch('/dm/entity_type/attribute/{entity_type_attribute_id}/dependency', 'EditorController@patchDependency')->where('entity_type_attribute_id', '[0-9]+');
     Route::patch('/dm/entity_type/attribute/{id}/metadata', 'EditorController@patchAttributeMetadata')->where('id', '[0-9]+');
 

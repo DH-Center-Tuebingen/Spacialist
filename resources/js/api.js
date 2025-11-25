@@ -602,16 +602,6 @@ export async function patchEntityType(etid, updatedProps) {
     );
 }
 
-export async function reorderEntityAttributes(etid, aid, position) {
-    const data = {
-        position: position,
-    };
-
-    return $httpQueue.add(
-        () => http.patch(`/editor/dm/entity_type/${etid}/attribute/${aid}/position`, data).then(response => response.data)
-    );
-}
-
 export async function updateAttributeMetadata(pivid, data) {
     return $httpQueue.add(
         () => http.patch(`/editor/dm/entity_type/attribute/${pivid}/metadata`, data)

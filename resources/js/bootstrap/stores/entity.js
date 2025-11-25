@@ -42,12 +42,12 @@ import {
     patchAttribute as apiPatchAttribute,
     patchAttributes as apiPatchAttributes,
     removeEntityTypeAttribute,
-    reorderEntityAttributes,
     searchEntity,
     updateAttributeMetadata,
 } from '@/api.js';
 
 import {
+    reorderEntityAttributes,
     updateAttributeDependency,
 } from '@/api/attribute.js';
 
@@ -801,21 +801,14 @@ export const useEntityStore = defineStore('entity', {
                 }
             });
         },
-        async reorderAttributes(entityTypeId, attributeId, from, to) {
+        async reorderAttributes(entityTypeId, entityTypeAttributeId, from, to) {
             if(from == to) {
                 return;
             }
             const attributes = this.getEntityTypeAttributes(entityTypeId);
-            // Already added
-            if(attributes.length < to && attributes[to].id == attributeId) {
-                return;
-            }
-            // Return if moved attribute does not match
-            if(attributes[from].id != attributeId) {
-                return;
-            }
+
             const rank = to + 1;
-            return reorderEntityAttributes(entityTypeId, attributeId, rank).then(_ => {
+            return reorderEntityAttributes(entityTypeAttributeId, rank).then(_ => {
                 attributes[from].position = rank;
                 const movedAttrs = attributes.splice(from, 1);
                 attributes.splice(to, 0, ...movedAttrs);

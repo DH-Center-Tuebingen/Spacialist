@@ -293,7 +293,13 @@
                 }
             };
             const reorderEntityAttribute = e => {
-                entityStore.reorderAttributes(currentRoute.params.id, e.element.id, e.from, e.to);
+                const entityTypeAttributeId = e.element?.pivot?.id;
+                if(!entityTypeAttributeId) {
+                    console.error('Cannot reorder attribute: Missing pivot ID!');
+                    return;
+                }
+
+                entityStore.reorderAttributes(currentRoute.params.id, entityTypeAttributeId, e.from, e.to);
             };
 
             const getDefaultPropertyValues = function () {

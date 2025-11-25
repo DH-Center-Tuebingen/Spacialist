@@ -1,3 +1,5 @@
+import http from '@/bootstrap/http.js';
+
 export async function updateAttributeDependency(entityTypeAttributeId, dependency) {
     const apiData = {};
     const dependencyData = {};
@@ -20,5 +22,16 @@ export async function updateAttributeDependency(entityTypeAttributeId, dependenc
     apiData.data = dependencyData;
     return $httpQueue.add(
         () => http.patch(`/editor/dm/entity_type/attribute/${entityTypeAttributeId}/dependency`, apiData)
+    );
+}
+
+
+export async function reorderEntityAttributes(entityTypeAttributeId, position) {
+    const data = {
+        position: position,
+    };
+
+    return $httpQueue.add(
+        () => http.patch(`/editor/dm/entity_type/attribute/${entityTypeAttributeId}/position`, data).then(response => response.data)
     );
 }

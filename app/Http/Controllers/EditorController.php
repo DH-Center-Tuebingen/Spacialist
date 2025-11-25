@@ -414,7 +414,7 @@ class EditorController extends Controller {
         return response()->json($entityType, 200);
     }
 
-    public function reorderAttribute(Request $request, $ctid, $aid) {
+    public function reorderAttribute(Request $request, $entityAttributeId) {
         $user = auth()->user();
         if(!$user->can('entity_type_write')) {
             return response()->json([
@@ -425,45 +425,43 @@ class EditorController extends Controller {
             'position' => 'required|integer|exists:entity_attributes,position'
         ]);
 
-        $pos = $request->get('position');
-        $ca = EntityAttribute::where([
-            ['attribute_id', '=', $aid],
-            ['entity_type_id', '=', $ctid]
-        ])->first();
+        $targetPosition = $request->get('position');
+        $entityAttribute = EntityAttribute::findOrFail($entityAttributeId);
 
-        if($ca === null) {
+        if($entityAttribute === null) {
             return response()->json([
                 'error' => __('Entity Attribute not found')
             ], 400);
         }
 
+        $currentPosition = $entityAttribute->position;
         // Same position, nothing to do
-        if($ca->position == $pos) {
+        if($currentPosition == $targetPosition) {
             return response()->json(null, 204);
         }
-        if($ca->position < $pos) {
+        if($currentPosition < $targetPosition) {
             $successors = EntityAttribute::where([
-                ['position', '>', $ca->position],
-                ['position', '<=', $pos],
-                ['entity_type_id', '=', $ctid]
+                ['position', '>', $currentPosition],
+                ['position', '<=', $targetPosition],
+                ['entity_type_id', '=', $entityAttribute->entity_type_id ]
             ])->get();
             foreach($successors as $s) {
                 $s->position--;
                 $s->save();
             }
-        } else { // $ca->position > $pos
+        } else { // if $currentPosition > $targetPosition
             $predecessors = EntityAttribute::where([
-                ['position', '<', $ca->position],
-                ['position', '>=', $pos],
-                ['entity_type_id', '=', $ctid]
+                ['position', '<', $currentPosition],
+                ['position', '>=', $targetPosition],
+                ['entity_type_id', '=', $entityAttribute->entity_type_id ]
             ])->get();
             foreach($predecessors as $p) {
                 $p->position++;
                 $p->save();
             }
         }
-        $ca->position = $pos;
-        $ca->save();
+        $entityAttribute->position = $pos;
+        $entityAttribute->save();
         return response()->json(null, 204);
     }
 
