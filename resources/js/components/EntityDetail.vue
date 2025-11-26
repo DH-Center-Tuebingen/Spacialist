@@ -756,10 +756,20 @@
                 state.entity.editing = false;
                 state.editedEntityName = '';
             };
-            const updateDependencyState = (aid, value) => {
-                const attributeTriggers = state.entityTypeTriggers[aid];
-                if(!attributeTriggers) return;
+            const updateDependencyState = (entityAttribute) => {
                 
+                // If the pivot id is not present, we cannot process dependencies.
+                // Nothing is hidden and er return an error.
+                const entityTypeAttributeId = entityAttribute?.pivot?.id ?? 0;
+                
+                if(!entityTypeAttributeId) {
+                    console.error('No entity attribute or pivot id provided for dependency update', entityAttribute);
+                    return;
+                }
+
+                const attributeTriggers = state.entityTypeTriggers[entityAttribute.id];
+                if(!attributeTriggers) return;
+
                 // This is a bit of a temporary hack, as the dirty value
                 // used to overwrite the attribute value with just the value.
                 // Which leads to inconsitencies in the data.
@@ -773,13 +783,11 @@
                         liveData[k].value = dirtyValues[k];
                     }
                 }
-                
-                for(const dependantId of attributeTriggers) {
-                    const attributeDependencies = useEntityStore().getEntityTypeAttributeDependencies(state.entity.entity_type_id, dependantId);
-                   
+                for(const {attributeId, entityTypeAttributeId} of attributeTriggers) {
+                    const attributeDependencies = useEntityStore().getEntityTypeAttributeDependencies(state.entity.entity_type_id, entityTypeAttributeId);
                     if(!attributeDependencies?.groups || attributeDependencies.groups.length === 0) {
                         // No dependencies means we show the attribute
-                        state.hiddenAttributes[dependantId] = {
+                        state.hiddenAttributes[entityTypeAttributeId] = {
                             hide: false,
                             by: null,
                         };
@@ -833,9 +841,9 @@
                         }
                     }
 
-                    state.hiddenAttributes[dependantId] = {
+                    state.hiddenAttributes[entityTypeAttributeId] = {
                         hide: !dependencyMatch,
-                        by: aid, // TODO might be more than one
+                        by: attributeId, // TODO might be more than one
                     };
                 }
             };
@@ -843,8 +851,7 @@
                 if(!state.entityAttributes) return;
 
                 for(let i = 0; i < state.entityAttributes.length; i++) {
-                    const curr = state.entityAttributes[i];
-                    updateDependencyState(curr.id, state.entity.data[curr.id].value);
+                    updateDependencyState(state.entityAttributes[i]);
                 }
             };
             const showHiddenAttributes = _ => {
@@ -901,8 +908,8 @@
                 state.attributeGrpHovered = status ? grp : null;
             };
 
-            const dataChanged = function (e) {
-                updateDependencyState(e.attribute_id, e.value);
+            const dataChanged = (event) => {
+                updateDependencyState(event.entityAttribute);
             };
 
             const setFormState = (e, isDirty, grp) => {
@@ -1078,11 +1085,11 @@
                 if(el === null) return;
                 attrRefs.value[grp] = el;
             };
-            
+
             const isGroupVisibleOrDirty = (group) => {
                 return !group.hidden || state.dirtyStates[group.id];
             };
-            
+
             const tabClasses = (group) => {
                 // When the group should be hidden, but it still has dirty states, we show it with reduced opacity.
                 return {
@@ -1092,7 +1099,6 @@
 
             // ON MOUNTED
             onMounted(_ => {
-                console.log('entity detail component mounted');
                 channels.entity = joinEntityRoom(route.params.id);
                 listenToList(channels.entity, [
                     handleEntityDataUpdated,

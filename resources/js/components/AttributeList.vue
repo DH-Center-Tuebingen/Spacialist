@@ -12,7 +12,7 @@
     >
         <template #item="{ element, index }">
             <div
-                v-if="!state.hiddenAttributeList[element.id] || showHidden"
+                v-if="!isHidden(element) || showHidden"
                 class="mt-3 px-2"
                 :class="additionalRowClasses(element)"
                 @mouseenter="onEnter(index)"
@@ -136,7 +136,7 @@
                                 :ref="el => setRef(el, element.id)"
                                 :data="element"
                                 :value-wrapper="state.attributeValues[element.id]"
-                                :disabled="state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
+                                :disabled="isHidden(element) || isDisabledInModeration(element.id)"
                                 :react-to="state.rootAttributeValues[element.root_attribute_id]"
                                 :hide-links="state.hideEntityLink"
                                 :preview="preview"
@@ -695,6 +695,12 @@
 
                 return '';
             };
+            
+            const isHidden = element => {
+                const entityAttributeId = element?.pivot?.id;
+                if(!entityAttributeId) return false;
+                return state.hiddenAttributeList[entityAttributeId] ?? false;
+            };
 
             // ON MOUNTED
             onMounted(_ => {
@@ -724,6 +730,7 @@
                 attributeChanged,
                 certainty,
                 handleSelectionUpdate,
+                isHidden,
                 additionalRowClasses,
                 attributeClasses,
                 expandedClasses,

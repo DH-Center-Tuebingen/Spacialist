@@ -14,6 +14,9 @@ use \App\Plugins\Map\App\Geodata;
 use App\Plugin;
 use App\ThConcept;
 use App\AttributeTypes\AttributeBase;
+
+use App\Services\AttributeDependencyService;
+
 use Illuminate\Support\Arr;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\Builder;
@@ -465,7 +468,7 @@ class EditorController extends Controller {
         return response()->json(null, 204);
     }
 
-    public function patchDependency(Request $request, $entityTypeAttributeId) {
+    public function patchDependency(Request $request, $entityTypeAttributeId, AttributeDependencyService $dependencyService) {
         $user = auth()->user();
         if(!$user->can('entity_type_write')) {
             return response()->json([
@@ -485,58 +488,17 @@ class EditorController extends Controller {
         }
 
         $dependencyData = $request->get('data');
-        $hasData = false;
-        $dependsOn = [
-            'or' => $dependencyData['or'],
-        ];
-        $operators = [
-            '<' => true,
-            '>' => true,
-            '<=' => true,
-            '>=' => true,
-            '=' => true,
-            '!=' => true,
-            '?' => false,
-            '!?' => false,
-        ];
-        foreach($dependencyData['groups'] as $group) {
-            if(count($group['rules']) > 0) {
-                $hasData = true;
-                $groupRules = [];
-                foreach($group['rules'] as $rule) {
-                    if(!in_array($rule['operator'], array_keys($operators))) {
-                        return response()->json([
-                            'error' => __('Operator mismatch')
-                        ], 400);
-                    }
-                    if(!EntityAttribute::where('attribute_id', $rule['attribute'])->exists()) {
-                        return response()->json([
-                            'error' => __('Entity attribute does not exist')
-                        ], 400);
-                    }
-
-                    $formattedRule = [
-                        'operator' => $rule['operator'],
-                        'on' => $rule['attribute'],
-                    ];
-                    if($operators[$rule['operator']]) {
-                        $formattedRule['value'] = $rule['value'];
-                    }
-                    $groupRules[] = $formattedRule;
-                }
-                $dependsOn['groups'][] = [
-                    'or' => $group['or'],
-                    'rules' => $groupRules,
-                ];
-            }
+        try{        
+            $dependsOn = $dependencyService->updateDependencies($entityAttribute, $dependencyData);
+        } catch(\InvalidArgumentException $e) {
+            return response()->json([
+                'error' => $e->getMessage()
+            ], 400);
         }
-
-        if(!$hasData) {
-            $dependsOn = null;
-        }
-
+        
         $entityAttribute->depends_on = $dependsOn;
         $entityAttribute->save();
+        
         return response()->json($entityAttribute->depends_on, 200);
     }
 

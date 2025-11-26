@@ -161,21 +161,21 @@ export const useEntityStore = defineStore('entity', {
         getEntityTypeDependencyTriggers: state => (id) => {
             if(!id) return {};
             const attributes = state.getEntityTypeAttributes(id);
-
             const dependencyTriggers = {};
-            attributes.forEach(a => {
-                if(a?.pivot?.depends_on) {
-                    const dependencies = a.pivot.depends_on;
+            attributes.forEach(attribute => {
+                if(attribute?.pivot?.depends_on?.groups) {
+                    const dependencies = attribute.pivot.depends_on;
                     dependencies.groups.forEach(group => {
                         group.rules.forEach(rule => {
                             if(!dependencyTriggers[rule.on]) {
                                 dependencyTriggers[rule.on] = [];
                             }
-                            const entityTypeAttributeId = a.pivot.id;
+                            
+                            const entityTypeAttributeId = attribute.pivot.id;
                             if(entityTypeAttributeId) {
-                                dependencyTriggers[rule.on].push(entityTypeAttributeId);
+                                dependencyTriggers[rule.on].push({entityTypeAttributeId, attributeId: attribute.id});
                             } else {
-                                console.error('Could not find entity type attribute id for dependency trigger', a);
+                                console.error('Could not find entity type attribute id for dependency trigger', attribute);
                             }
                         });
                     });

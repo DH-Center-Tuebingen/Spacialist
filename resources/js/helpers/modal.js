@@ -18,9 +18,9 @@ import {
 } from '@/api.js';
 
 import {
+    _cloneDeep,
     can,
     userId,
-    getEntityTypeAttributes,
     getTs,
 } from '@/helpers/helpers.js';
 
@@ -689,12 +689,15 @@ export function showEditAttribute(aid, etid, metadata) {
             async onConfirm(e) {
                 const entityStore = useEntityStore();
                 const entityTypeAttributeId = metadata?.pivot?.id;
-                
+
                 if(e.metadata) {
-                    await entityStore.patchEntityMetadata(etid, aid, entityTypeAttributeId, e.metadata);
+                    const metadata = _cloneDeep(e.metadata);
+                    await entityStore.patchEntityMetadata(etid, aid, entityTypeAttributeId, metadata);
                 }
                 if(e.dependency) {
-                    await entityStore.updateDependency(etid, entityTypeAttributeId, e.dependency);
+                    // This would reset the content of the dependency object, when the store updates it (e.g. this occured on error and cleared the inputs).
+                    const dependency = _cloneDeep(e.dependency);
+                    await entityStore.updateDependency(etid, entityTypeAttributeId, dependency);
                 }
                 modal.destroy();
             },

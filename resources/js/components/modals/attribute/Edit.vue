@@ -133,6 +133,7 @@
         computed,
         onMounted,
         reactive,
+        watch,
     } from 'vue';
 
     import { useI18n } from 'vue-i18n';
@@ -228,6 +229,9 @@
                 },
                 width: 100,
                 isValid: computed(_ => {
+                    if(!state.dependency || !state.dependency.groups) {
+                        return true;
+                    }
                     return state.dependency.groups.every(group => {
                         return group.rules.length == 0 || group.rules.every(rule => validateDependencyRule(rule));
                     });
@@ -252,7 +256,7 @@
             onMounted(_ => {
                 state.attribute = useEntityStore().getEntityTypeAttributeById(props.entityTypeId, props.entityTypeAttributeId);
                 const currentDependency = useEntityStore().getEntityTypeAttributeDependencies(props.entityTypeId, props.entityTypeAttributeId);
-                
+
                 if(currentDependency) {
                     state.dependency = formatDependency(currentDependency);
                 }

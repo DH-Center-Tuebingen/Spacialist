@@ -358,6 +358,8 @@
         emits: ['expanded', 'change', 'update-selection'],
         setup(props, context) {
             const attributeStore = useAttributeStore();
+            
+            // TODO: Remove useless toRefs usage
             const {
                 data,
                 valueWrapper,
@@ -393,6 +395,7 @@
                 context.emit('change', {
                     ...e,
                     attribute_id: data.value.id,
+                    entityAttribute: data.value,
                 });
             };
 
