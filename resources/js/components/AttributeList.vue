@@ -12,7 +12,7 @@
     >
         <template #item="{ element, index }">
             <div
-                v-if="!isHidden(element) || showHidden"
+                v-if="!(isAttributeHidden(element) && !isAttributeDirty(element)) || showHidden"
                 class="mt-3 px-2"
                 :class="additionalRowClasses(element)"
                 @mouseenter="onEnter(index)"
@@ -136,7 +136,7 @@
                                 :ref="el => setRef(el, element.id)"
                                 :data="element"
                                 :value-wrapper="state.attributeValues[element.id]"
-                                :disabled="isHidden(element) || isDisabledInModeration(element.id)"
+                                :disabled="isAttributeHidden(element) || isDisabledInModeration(element.id)"
                                 :react-to="state.rootAttributeValues[element.root_attribute_id]"
                                 :hide-links="state.hideEntityLink"
                                 :preview="preview"
@@ -360,6 +360,10 @@
                     itmCls.forEach(itm => {
                         expClasses[itm] = true;
                     });
+                }
+                
+                if(isAttributeHidden(element)) {
+                    expClasses['opacity-50'] = true;
                 }
 
                 return expClasses;
@@ -696,10 +700,14 @@
                 return '';
             };
             
-            const isHidden = element => {
+            const isAttributeHidden = element => {
                 const entityAttributeId = element?.pivot?.id;
                 if(!entityAttributeId) return false;
                 return state.hiddenAttributeList[entityAttributeId] ?? false;
+            };
+            
+            const isAttributeDirty = element => {
+                return state.changeTracker.local[element.id] ?? false;
             };
 
             // ON MOUNTED
@@ -730,7 +738,8 @@
                 attributeChanged,
                 certainty,
                 handleSelectionUpdate,
-                isHidden,
+                isAttributeDirty,
+                isAttributeHidden,
                 additionalRowClasses,
                 attributeClasses,
                 expandedClasses,
