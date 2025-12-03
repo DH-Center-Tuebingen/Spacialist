@@ -125,14 +125,14 @@
                                     :title="translateConcept(element.thesaurus_url)"
                                 >
                                     {{ translateConcept(element.thesaurus_url) }}
-                                    <span
-                                        v-if="element.pivot?.metadata?.required"
-                                        class="text-danger"
-                                    >
-                                        <i class="fas fa-fw fa-xs fa-asterisk align-top" />
-                                    </span>
                                 </span>
                             </div>
+                            <span
+                                v-if="element.pivot?.metadata?.required"
+                                class="text-danger"
+                            >
+                                <i class="fas fa-fw fa-xs fa-asterisk align-top" />
+                            </span>
                             <a
                                 v-if="getConceptNote(element.thesaurus_url)"
                                 tabindex="0"
