@@ -793,7 +793,7 @@ class ApiEditorTest extends TestCase
 
         $entityAttribute = EntityAttribute::find(1);
         $this->assertArrayHasKey('metadata', $entityAttribute);
-        $this->assertEquals(json_encode($patchData), $entityAttribute->metadata);
+        $this->assertEquals((object) $patchData, $entityAttribute->metadata);
     }
 
     #[TestDox('PATCH /api/v1/editor/dm/entity_type/attribute/1/metadata  -   Test validation error on patching entity type attribute metadata (id=1).')]
