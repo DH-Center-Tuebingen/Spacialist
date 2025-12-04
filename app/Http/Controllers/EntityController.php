@@ -855,13 +855,14 @@ class EntityController extends Controller {
         foreach($request->request as $patch) {
             $op = $patch['op'];
             $aid = $patch['params']['aid'];
-            $value = $patch['value'];
+            // FIXME [VR]: `?? null` is only necessary, because of temporary AttributeValue::handlePatch() implementation
+            $value = $patch['value'] ?? null;
             $error = AttributeValue::handlePatch($id, $aid, $value, $op, $user, $addedAttributes, $removedAttributes);
             if($error !== false) {
                 DB::rollback();
                 return response()->json([
-                    'error' => $error,
-                ], 400);
+                    'error' => $error['message'],
+            ], $error['code']);
             }
         }
 

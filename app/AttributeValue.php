@@ -4,6 +4,7 @@ namespace App;
 
 use App\Geodata;
 use App\AttributeTypes\AttributeBase;
+use App\Exceptions\InvalidDataException;
 use Illuminate\Database\Eloquent\Model;
 use Clickbar\Magellan\Data\Geometries\Geometry;
 use App\Traits\CommentTrait;
@@ -91,6 +92,7 @@ class AttributeValue extends Model implements Searchable
     // But this is also already fixed (in a different way) on pull/585 (0.11.2-fix-attribute-value-list-error)
     public static function handlePatch(int $entity_id, int $attribute_id, mixed $value, string $operation, User $user, array &$added = [], array &$deleted = []) {
         $error = null;
+        $code = 400;
         switch($operation) {
             case 'remove':
                 $attrval = AttributeValue::where([
@@ -146,7 +148,10 @@ class AttributeValue extends Model implements Searchable
         }
 
         if($error !== null) {
-            return $error;
+            return [
+                'message' => $error,
+                'code' => $code,
+            ];
         }
 
         // no further action required for deleted attribute values, continue with next patch
@@ -158,7 +163,10 @@ class AttributeValue extends Model implements Searchable
             $attr = Attribute::findOrFail($attribute_id);
             $formKeyValue = AttributeValue::getFormattedKeyValue($attr->datatype, $value);
         } catch(InvalidDataException $ide) {
-            return $ide->getMessage(); // TODO code 422
+            return [
+                'message' => $ide->getMessage(),
+                'code' => 422,
+            ];
         }
 
         $attrval->{$formKeyValue->key} = $formKeyValue->val;
