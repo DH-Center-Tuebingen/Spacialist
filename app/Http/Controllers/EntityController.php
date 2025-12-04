@@ -855,6 +855,7 @@ class EntityController extends Controller {
             $op = $patch['op'];
             $aid = $patch['params']['aid'];
             $error = null;
+            $code = 400;
             $entityAttribute = EntityAttribute::where('entity_type_id', $entity->entity_type_id)
                 ->where('attribute_id', $aid)
                 ->first();
@@ -862,6 +863,7 @@ class EntityController extends Controller {
                 case 'remove':
                     if($entityAttribute->isRequired()) {
                         $error = __('This attribute is required.');
+                        $code = 422;
                         break;
                     }
                     $attrval = AttributeValue::where([
@@ -919,13 +921,14 @@ class EntityController extends Controller {
 
             if($op != 'remove' && !isset($value)) {
                 $error = __('Required attribute is missing.');
+                $code = 422;
             }
 
             if($error !== null) {
                 DB::rollBack();
                 return response()->json([
                     'error' => $error,
-                ], 400);
+                ], $code);
             }
 
             // no further action required for deleted attribute values, continue with next patch
@@ -963,7 +966,7 @@ class EntityController extends Controller {
             DB::rollBack();
             return response()->json([
                 'error' => __('Required attribute is missing.'),
-            ], 400);
+            ], 422);
         }
 
         // Save model if last editor changed

@@ -566,7 +566,7 @@ class EditorController extends Controller {
             ], 400);
         }
 
-        $metadata = json_decode($entityAttribute->metadata) ?? new \stdClass();
+        $metadata = $entityAttribute->metadata ?? new \stdClass();
 
         if($request->has('title')) {
             $metadata->title = $request->get('title');
@@ -578,7 +578,7 @@ class EditorController extends Controller {
             $metadata->required = $request->get('required');
         }
 
-        $entityAttribute->metadata = json_encode($metadata);
+        $entityAttribute->metadata = $metadata;
         $entityAttribute->save();
 
         return response()->json($metadata, 200);
