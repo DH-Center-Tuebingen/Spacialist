@@ -838,8 +838,6 @@ class EntityController extends Controller {
                 'error' => __('This entity does not exist'),
             ], 400);
         }
-
-        DB::beginTransaction();
         $addedAttributes = [];
         $removedAttributes = [];
 
@@ -851,12 +849,21 @@ class EntityController extends Controller {
             ], 204);
         }
 
+        DB::beginTransaction();
+
         foreach($request->request as $patch) {
             $op = $patch['op'];
             $aid = $patch['params']['aid'];
             $error = null;
+            $entityAttribute = EntityAttribute::where('entity_type_id', $entity->entity_type_id)
+                ->where('attribute_id', $aid)
+                ->first();
             switch($op) {
                 case 'remove':
+                    if($entityAttribute->isRequired()) {
+                        $error = __('This attribute is required.');
+                        break;
+                    }
                     $attrval = AttributeValue::where([
                         ['entity_id', '=', $id],
                         ['attribute_id', '=', $aid],
@@ -910,6 +917,10 @@ class EntityController extends Controller {
                     $error = __('Unknown operation');
             }
 
+            if(!isset($value)) {
+                $error = __('Required attribute is missing.');
+            }
+
             if($error !== null) {
                 DB::rollBack();
                 return response()->json([
@@ -924,6 +935,7 @@ class EntityController extends Controller {
 
             try {
                 $attr = Attribute::findOrFail($aid);
+                if($attr->datatype == 'attribute-group') continue;
                 $formKeyValue = AttributeValue::getFormattedKeyValue($attr->datatype, $value);
             } catch(InvalidDataException $ide) {
                 return response()->json([
@@ -941,6 +953,17 @@ class EntityController extends Controller {
             if($attrval->wasRecentlyCreated) {
                 $addedAttributes[$aid] = $attrval;
             }
+        }
+
+        $requiredAttributes = $entity->entity_type->required_attributes->pluck('attribute_id');
+        $existingValues = AttributeValue::where('entity_id', $entity->id)
+            ->whereIn('attribute_id', $requiredAttributes)
+            ->count();
+        if(count($requiredAttributes) != $existingValues) {
+            DB::rollBack();
+            return response()->json([
+                'error' => __('Required attribute is missing.'),
+            ], 400);
         }
 
         // Save model if last editor changed
