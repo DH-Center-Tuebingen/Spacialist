@@ -3,6 +3,7 @@
 namespace App;
 
 use App\File\Directory;
+use App\Services\AccessPointsService;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
@@ -353,6 +354,10 @@ class Plugin extends Model
 
     public function clearCache(): void {
         Cache::forget($this->getScopeCacheKey());
+        
+        // TODO: Models are meant for the data layer only, 
+        // we should restructure the code into service classes (e.g. PluginMigrationService) 
+        app(AccessPointsService::class)->clearCache();
     }
 
     public function handleInstallation(bool $isUpdate = false): void {
@@ -484,7 +489,7 @@ class Plugin extends Model
 
             self::getDirectory()->store(
                 $this->publicName(false),
-                $scriptPath
+                $filehandle
             );
             fclose($filehandle);
         } else {
