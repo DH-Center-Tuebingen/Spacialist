@@ -917,7 +917,7 @@ class EntityController extends Controller {
                     $error = __('Unknown operation');
             }
 
-            if(!isset($value)) {
+            if($op != 'remove' && !isset($value)) {
                 $error = __('Required attribute is missing.');
             }
 
