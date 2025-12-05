@@ -21,5 +21,5 @@ const models = [
 
 test('loggable models', function () {
     $compModels = sp_loggable_models();
-    expect($compModels)->toEqual(self::models);
+    expect($compModels)->toEqual(models);
 });

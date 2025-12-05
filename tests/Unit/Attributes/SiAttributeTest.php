@@ -241,26 +241,26 @@ test('volume units', function () {
     expect($fluidOunce)->not->toBeNull();
     expect($fluidOunce->getSymbol())->toEqual('fl oz');
     expect($fluidOunce->is(1))->toEqual(2.95735295625e-5);
-    expect($fluidOunce->is(1))->toEqualWithDelta($millilitre->is(29.5735295625), self::INACCURACY);
+    expect($fluidOunce->is(1))->toEqualWithDelta($millilitre->is(29.5735295625), INACCURACY);
 
     $pint = $volumeUnits->get('pint_us');
     expect($pint)->not->toBeNull();
     expect($pint->getSymbol())->toEqual('pt');
-    expect($pint->is(1))->toEqualWithDelta($millilitre->is(473.176473), self::INACCURACY);
+    expect($pint->is(1))->toEqualWithDelta($millilitre->is(473.176473), INACCURACY);
 
     $gallon = $volumeUnits->get('gallon_us');
     expect($gallon)->not->toBeNull();
     expect($gallon->getSymbol())->toEqual('gal');
-    expect($gallon->is(1))->toEqualWithDelta($litre->is(3.785411784), self::INACCURACY);
+    expect($gallon->is(1))->toEqualWithDelta($litre->is(3.785411784), INACCURACY);
 
     // Imperal Conversions
-    expect($gallon->is(1 / 8))->toEqualWithDelta($pint->is(1), self::INACCURACY);
-    expect($fluidOunce->is(16))->toEqualWithDelta($pint->is(1), self::INACCURACY);
+    expect($gallon->is(1 / 8))->toEqualWithDelta($pint->is(1), INACCURACY);
+    expect($fluidOunce->is(16))->toEqualWithDelta($pint->is(1), INACCURACY);
 
     $cubicMile = $volumeUnits->get('cubic_mile');
     expect($cubicMile)->not->toBeNull();
     expect($cubicMile->getSymbol())->toEqual('mi³');
-    expect($cubicMile->is(1))->toEqualWithDelta($baseUnit->is(4168181825.44058), self::INACCURACY);
+    expect($cubicMile->is(1))->toEqualWithDelta($baseUnit->is(4168181825.44058), INACCURACY);
 });
 
 test('speed units', function () {
@@ -274,22 +274,22 @@ test('speed units', function () {
 
     $kmh = $speedUnits->get('kilometre_per_hour');
     expect($kmh->getSymbol())->toEqual('km/h');
-    expect($kmh->is(3.6))->toEqualWithDelta(1, self::INACCURACY);
+    expect($kmh->is(3.6))->toEqualWithDelta(1, INACCURACY);
 
     $timeUnits = new TimeUnits();
     $lengthUnits = new LengthUnits();
 
     $msToKmhFactor = $lengthUnits->get('kilometre')->is(1) / $timeUnits->get('hour')->is(1);
-    expect($msToKmhFactor)->toEqualWithDelta($kmh->is(1), self::INACCURACY);
+    expect($msToKmhFactor)->toEqualWithDelta($kmh->is(1), INACCURACY);
 
     $mph = $speedUnits->get('mile_per_hour');
     expect($mph->getSymbol())->toEqual('mph');
-    expect($mph->is(1))->toEqualWithDelta(0.44704, self::INACCURACY);
+    expect($mph->is(1))->toEqualWithDelta(0.44704, INACCURACY);
 
     $msToMphFactor = $lengthUnits->get('mile')->is(1) / $timeUnits->get('hour')->is(1);
-    expect($msToMphFactor)->toEqualWithDelta($mph->is(1), self::INACCURACY);
+    expect($msToMphFactor)->toEqualWithDelta($mph->is(1), INACCURACY);
 
-    expect($mph->is(1))->toEqualWithDelta($kmh->is(1.609344), self::INACCURACY);
+    expect($mph->is(1))->toEqualWithDelta($kmh->is(1.609344), INACCURACY);
 });
 
 test('force units', function () {
@@ -336,19 +336,19 @@ test('pressure units', function () {
     // Various
     $psi = $pressureUnits->get('pound_per_square_inch');
     expect($psi->getSymbol())->toEqual('psi');
-    expect($psi->is(0.0001450377438972831))->toEqualWithDelta(1, self::INACCURACY);
+    expect($psi->is(0.0001450377438972831))->toEqualWithDelta(1, INACCURACY);
 
     $torr = $pressureUnits->get('torr');
     expect($torr->getSymbol())->toEqual('Torr');
-    expect($torr->is(0.0075006150504341364))->toEqualWithDelta(1, self::INACCURACY);
+    expect($torr->is(0.0075006150504341364))->toEqualWithDelta(1, INACCURACY);
 
     $at = $pressureUnits->get('technical_atmosphere');
     expect($at->getSymbol())->toEqual('at');
-    expect($at->is(1.019716212977928e-5))->toEqualWithDelta(1, self::INACCURACY);
+    expect($at->is(1.019716212977928e-5))->toEqualWithDelta(1, INACCURACY);
 
     $atm = $pressureUnits->get('standard_atmosphere');
     expect($atm->getSymbol())->toEqual('atm');
-    expect($atm->is(9.869232667160128e-6))->toEqualWithDelta(1, self::INACCURACY);
+    expect($atm->is(9.869232667160128e-6))->toEqualWithDelta(1, INACCURACY);
 });
 
 test('volumetric flow', function () {

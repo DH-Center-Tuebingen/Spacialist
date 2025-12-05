@@ -1,9 +1,7 @@
 <?php
 
-uses(\Tests\TransactionedTestCase::class);
 use App\Role;
 use App\User;
-
 
 test('spacialist create user and role command', function () {
     $this->artisan('app:create --role --user')

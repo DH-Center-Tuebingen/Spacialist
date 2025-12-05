@@ -1,9 +1,10 @@
 <?php
 
-uses(\Illuminate\Foundation\Testing\TestCase::class);
 use Illuminate\Support\Facades\Storage;
-use PHPUnit\Framework\Attributes\Test;
 
+require_once __DIR__ . '/MigrationTestHelpers.php';
+
+use function Tests\Unit\Migration\cleanuPrivateMigrationFiles;
 
 beforeEach(function () {
     // Set up test environment
@@ -26,44 +27,13 @@ beforeEach(function () {
     ]);
 
     // Clean up any existing test files
-    cleanupTestFiles();
+    cleanuPrivateMigrationFiles();
 });
 
 afterEach(function () {
-    cleanupTestFiles();
+    cleanuPrivateMigrationFiles();
     putenv('ALLOW_FILESYSTEM_MIGRATIONS=false');
 });
-
-function cleanupTestFiles(): void
-{
-    $testPublicPath = storage_path('testing/make_private_migration/public');
-    $testLocalPath = storage_path('testing/make_private_migration/local');
-
-    if(is_dir($testPublicPath)) {
-        deleteDirectory($testPublicPath);
-    }
-    if(is_dir($testLocalPath)) {
-        deleteDirectory($testLocalPath);
-    }
-}
-
-function deleteDirectory(string $path): void
-{
-    if(!is_dir($path)) {
-        return;
-    }
-
-    $files = array_diff(scandir($path), ['.', '..']);
-    foreach($files as $file) {
-        $fullPath = $path . DIRECTORY_SEPARATOR . $file;
-        if(is_dir($fullPath)) {
-            deleteDirectory($fullPath);
-        } else {
-            unlink($fullPath);
-        }
-    }
-    rmdir($path);
-}
 
 test('moves files from public to private storage', function () {
     // Get the actual migration

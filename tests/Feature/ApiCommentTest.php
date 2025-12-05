@@ -4,8 +4,7 @@ use App\Comment;
 use Carbon\Carbon;
 use Tests\Permission;
 use Tests\ResponseTester;
-use PHPUnit\Framework\Attributes\DataProvider;
-use PHPUnit\Framework\Attributes\TestDox;
+
 
 
 test('get comments', function ($url, $result) {
@@ -244,17 +243,31 @@ test('unprocessable', function ($permission, $errors) {
 })->with('unprocessable');
 
 dataset('permissions', function () {
+    $testComment = [
+        'content' => 'Test comment content',
+        'resource_type' => 'entity',
+        'resource_id' => 1,
+        'metadata' => [],
+    ];
+    
     return [
         "GET    /api/v1/comment/resource/1?r=entity"                    => Permission::for("get",   "/api/v1/comment/resource/1?r=entity",                  "You do not have the permission to get comments"),
         "GET    /api/v1/comment/resource/8?r=attribute_value&aid=5"     => Permission::for("get",   "/api/v1/comment/resource/8?r=attribute_value&aid=5",   "You do not have the permission to get comments"),
-        "POST   /api/v1/comment"                                        => Permission::for("post",  "/api/v1/comment",                                      "You do not have the permission to add comments", self::$testComment),
-        "PATCH  /api/v1/comment/1"                                      => Permission::for("patch", "/api/v1/comment/1",                                    "You do not have the permission to edit a comment", self::$testComment),
+        "POST   /api/v1/comment"                                        => Permission::for("post",  "/api/v1/comment",                                      "You do not have the permission to add comments", $testComment),
+        "PATCH  /api/v1/comment/1"                                      => Permission::for("patch", "/api/v1/comment/1",                                    "You do not have the permission to edit a comment", $testComment),
         "DELETE /api/v1/comment/1"                                      => Permission::for("delete","/api/v1/comment/1",                                      "You do not have the permission to delete a comment"),
     ];
 });
 
 //TODO:: Test certainties
 dataset('exceptions', function () {
+    $testComment = [
+        'content' => 'Test comment content',
+        'resource_type' => 'entity',
+        'resource_id' => 1,
+        'metadata' => [],
+    ];
+    
     return [
         "GET    /api/v1/comment/resource/99?r=entity -> invalid entity"                         => Permission::for("get",   "/api/v1/comment/resource/99?r=entity",                     "This entity does not exist"),
         "GET    /api/v1/comment/resource/99?r=attribute_value&aid=5 -> invalid entity"          => Permission::for("get",   "/api/v1/comment/resource/99?r=attribute_value&aid=5",      "This attribute value does not exist"),
@@ -263,9 +276,9 @@ dataset('exceptions', function () {
          // DISCUSS: I would expect a comment to fail if it is empty. But due to the nature of
         //          the comments being intertwined with the certainty system, this is currently not possible.
         // "POST   /api/v1/comment -> empty content"                                               => Permission::for("post",  "/api/v1/comment",                                          "The resource_id field is required.", ['content' => '', 'resource_id' => 1, 'resource_type' => 'entity']),
-        "PATCH  /api/v1/comment/99 -> comment does not exist"                                   => Permission::for("patch", "/api/v1/comment/99",                                       "This comment does not exist", self::$testComment),
-        "PATCH  /api/v1/comment/99 -> comment does not exist"                                   => Permission::for("patch", "/api/v1/comment/99",                                       "This comment does not exist", self::$testComment),
-        "PATCH  /api/v1/comment/99 -> comment does not exist"                                   => Permission::for("patch", "/api/v1/comment/99",                                       "This comment does not exist", self::$testComment),
+        "PATCH  /api/v1/comment/99 -> comment does not exist"                                   => Permission::for("patch", "/api/v1/comment/99",                                       "This comment does not exist", $testComment),
+        "PATCH  /api/v1/comment/99 -> comment does not exist"                                   => Permission::for("patch", "/api/v1/comment/99",                                       "This comment does not exist", $testComment),
+        "PATCH  /api/v1/comment/99 -> comment does not exist"                                   => Permission::for("patch", "/api/v1/comment/99",                                       "This comment does not exist", $testComment),
         "DELETE /api/v1/comment/99 -> comment does not exist"                                   => Permission::for("delete","/api/v1/comment/99",                                       "This comment does not exist"),
     ];
 });
