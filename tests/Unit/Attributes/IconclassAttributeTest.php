@@ -1,40 +1,33 @@
 <?php
-namespace Tests\Unit\Attributes;
 
 use App\AttributeTypes\IconclassAttribute;
 use App\Exceptions\InvalidDataException;
-use Tests\TestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
 
-// !!!! Currently this test is only testing the fromImport function!!!
-class IconclassAttributeTest extends TestCase {
-    #[DataProvider('truthyProvider')]
-    public function testFromImportTruthy($input) {
-        $this->expectNotToPerformAssertions(IconclassAttribute::class);
-        IconclassAttribute::fromImport($input);
-    }
 
-    #[DataProvider('truthyProvider')]
-    public function testFromImportReturnValues($input, $expected) {
-        $this->assertEquals($expected, IconclassAttribute::fromImport($input));
-    }
+test('from import truthy', function ($input) {
+    $this->expectNotToPerformAssertions(IconclassAttribute::class);
+    IconclassAttribute::fromImport($input);
+})->with('truthyProvider');
 
-    #[DataProvider('falsyProvider')]
-    public function testFromImportFalsy($input) {
-        $this->expectException(InvalidDataException::class);
-        IconclassAttribute::fromImport($input);
-    }
+test('from import return values', function ($input, $expected) {
+    expect(IconclassAttribute::fromImport($input))->toEqual($expected);
+})->with('truthyProvider');
 
-    public static function truthyProvider() {
-        return [
-            "empty string" => ["", null],
-            "string" => ["string", "string"],
-        ];
-    }
+test('from import falsy', function ($input) {
+    $this->expectException(InvalidDataException::class);
+    IconclassAttribute::fromImport($input);
+})->with('falsyProvider');
 
-    public static function falsyProvider() {
-        return [
-            "number" => [4],
-        ];
-    }
-}
+dataset('truthyProvider', function () {
+    return [
+        "empty string" => ["", null],
+        "string" => ["string", "string"],
+    ];
+});
+
+dataset('falsyProvider', function () {
+    return [
+        "number" => [4],
+    ];
+});

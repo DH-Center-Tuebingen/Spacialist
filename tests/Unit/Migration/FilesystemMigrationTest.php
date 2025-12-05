@@ -1,57 +1,52 @@
 <?php
 
-namespace Tests\Unit\Migration;
-
-use App\Traits\FilesystemMigration;
-
-use Illuminate\Database\Migrations\Migration;
-// We need to use the default TestCase to avoid the Database to be refreshed.
-use Illuminate\Foundation\Testing\TestCase;
+uses(\Illuminate\Foundation\Testing\TestCase::class);
 use Illuminate\Support\Facades\Storage;
+use \Tests\Unit\Migration\TestMigration;
+use \Illuminate\Foundation\Testing\TestCase;
+use \Illuminate\Database\Migrations\Migration;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
 
-/**
- *  The migrator is a very complex and file based system
- *  so we just emulate it's core functionality for these few tests.
- * (Only to test the proper calling of shouldRun() in up() and down())
- */
-class Migrator {
-    static function run($migration){
-        $shouldRunMigration = $migration instanceof Migration
-            ? $migration->shouldRun()
-            : true;
 
-        $skipped = true;
-        if($shouldRunMigration) {
-            $skipped = false;
-            $migration->up();
-        }
+function run($migration)
+{
+    $shouldRunMigration = $migration instanceof Migration
+        ? $migration->shouldRun()
+        : true;
 
-        return $skipped;
+    $skipped = true;
+    if($shouldRunMigration) {
+        $skipped = false;
+        up();
     }
 
-    // Currently Laravel does not call shouldRun() on rollback (12.x)
-    static function rollback($migration) {
-        $migration->down();
-        return false;
-    }
+    return $skipped;
+}
+
+// Currently Laravel does not call shouldRun() on rollback (12.x)
+function rollback($migration)
+{
+    down();
+    return false;
 }
 
 // We just need empty migrations as the Migrator is handling the check
 // whether the migration was run or not.
 class TestMigration extends Migration {
-    use FilesystemMigration;
+    uses(\App\Traits\FilesystemMigration::class);
+    
+    function up(): void
+    {
+    }
 
-    public function up(): void {}
-
-    public function down(): void {}
+    function down(): void
+    {
+    }
 }
 
 class FilesystemMigrationTest extends TestCase {
-    protected function setUp(): void {
-        parent::setUp();
-
+    beforeEach(function () {
         // Create test storage disks for testing
         config([
             'filesystems.disks.test_source' => [
@@ -65,91 +60,81 @@ class FilesystemMigrationTest extends TestCase {
         ]);
 
         // Clean up any previous test files
-        $this->cleanupTestDirectories();
-    }
+        cleanupTestDirectories();
+    });
 
-    protected function tearDown(): void {
-        $this->cleanupTestDirectories();
-        parent::tearDown();
-    }
+    afterEach(function () {
+        cleanupTestDirectories();
+    });
 
-    private function cleanupTestDirectories(): void {
+    function cleanupTestDirectories(): void
+    {
         $sourcePath = storage_path('testing/source');
         $targetPath = storage_path('testing/target');
 
         if(is_dir($sourcePath)) {
-            $this->deleteDirectory($sourcePath);
+            deleteDirectory($sourcePath);
         }
         if(is_dir($targetPath)) {
-            $this->deleteDirectory($targetPath);
+            deleteDirectory($targetPath);
         }
     }
 
-    private function deleteDirectory(string $path): void {
+    function deleteDirectory(string $path): void
+    {
         if(!is_dir($path)) return;
 
         $files = glob($path . '/*');
         foreach($files as $file) {
-            is_dir($file) ? $this->deleteDirectory($file) : unlink($file);
+            is_dir($file) ? deleteDirectory($file) : unlink($file);
         }
         rmdir($path);
     }
 
-    #[Test]
-    public function should_not_migrate_when_environment_variable_is_false() {
+    test('should not migrate when environment variable is false', function () {
         putenv('ALLOW_FILESYSTEM_MIGRATIONS=false');
         $migration = new TestMigration();
-        $this->assertFalse($migration->shouldRun());
-        $skipped = Migrator::run($migration);
-        $this->assertTrue($skipped, 'migrate() should be skipped when shouldRun() returns false');
-    }
+        expect($migration->shouldRun())->toBeFalse();
+        $skipped = run($migration);
+        expect($skipped)->toBeTrue('migrate() should be skipped when shouldRun() returns false');
+    });
 
-    #[Test]
-    public function should_migrate_when_environment_variable_is_true() {
+    test('should migrate when environment variable is true', function () {
         putenv('ALLOW_FILESYSTEM_MIGRATIONS=true');
         $migration = new TestMigration();
-        $this->assertTrue($migration->shouldRun());
-        $skipped = Migrator::run($migration);
-        $this->assertFalse($skipped, 'migrate() should be run when shouldRun() returns true');
-    }
+        expect($migration->shouldRun())->toBeTrue();
+        $skipped = run($migration);
+        expect($skipped)->toBeFalse('migrate() should be run when shouldRun() returns true');
+    });
 
-    #[Test]
-    /**
-     * This is somewhat controversial, as it's only called when the migration is registered
-     * but when the variable is set for rollback, it would still happen. This is due to the current
-     * implementation in Laravel 12.x where shouldRun() is not called on rollback at all.
-     *
-    */
-    public function should_rollback_when_environment_variable_is_false() {
+    test('should rollback when environment variable is false', function () {
         putenv('ALLOW_FILESYSTEM_MIGRATIONS=false');
         $migration = new TestMigration();
-        $this->assertFalse($migration->shouldRun());
-        $skipped = Migrator::rollback($migration);
-        $this->assertFalse($skipped, 'rollback() should be run when shouldRun() returns false');
-    }
+        expect($migration->shouldRun())->toBeFalse();
+        $skipped = rollback($migration);
+        expect($skipped)->toBeFalse('rollback() should be run when shouldRun() returns false');
+    });
 
-    #[Test]
-    public function should_rollback_when_environment_variable_is_true() {
+    test('should rollback when environment variable is true', function () {
         putenv('ALLOW_FILESYSTEM_MIGRATIONS=true');
         $migration = new TestMigration();
-        $this->assertTrue($migration->shouldRun());
-        $skipped = Migrator::rollback($migration);
-        $this->assertFalse($skipped, 'rollback() should not be skipped when shouldRun() returns true');
-    }
+        expect($migration->shouldRun())->toBeTrue();
+        $skipped = rollback($migration);
+        expect($skipped)->toBeFalse('rollback() should not be skipped when shouldRun() returns true');
+    });
 
-    #[Test]
-    public function moves_files_between_disks_successfully() {
+    test('moves files between disks successfully', function () {
         putenv('ALLOW_FILESYSTEM_MIGRATIONS=true');
 
         // Create test migration instance
         $migration = new class extends Migration {
-            use FilesystemMigration;
-
-            public function up(): void {
+            uses(\App\Traits\FilesystemMigration::class);
+            
+            function up(): void
+            {
                 $this->safelyMoveDirectoryBetweenDisks('test_source', 'test_target', 'test_dir');
             }
         };
-
         // Setup test files
         $source = Storage::disk('test_source');
         $target = Storage::disk('test_target');
@@ -159,57 +144,50 @@ class FilesystemMigrationTest extends TestCase {
         $source->put('test_dir/file2.txt', 'content2');
 
         // Execute migration
-        $migration->up();
+        up();
 
         // Assert files moved correctly
-        $this->assertFalse($source->exists('test_dir/file1.txt'));
-        $this->assertFalse($source->exists('test_dir/file2.txt'));
-        $this->assertFalse($source->exists('test_dir'));
+        expect($source->exists('test_dir/file1.txt'))->toBeFalse();
+        expect($source->exists('test_dir/file2.txt'))->toBeFalse();
+        expect($source->exists('test_dir'))->toBeFalse();
 
-        $this->assertTrue($target->exists('test_dir/file1.txt'));
-        $this->assertTrue($target->exists('test_dir/file2.txt'));
-        $this->assertEquals('content1', $target->get('test_dir/file1.txt'));
-        $this->assertEquals('content2', $target->get('test_dir/file2.txt'));
-    }
+        expect($target->exists('test_dir/file1.txt'))->toBeTrue();
+        expect($target->exists('test_dir/file2.txt'))->toBeTrue();
+        expect($target->get('test_dir/file1.txt'))->toEqual('content1');
+        expect($target->get('test_dir/file2.txt'))->toEqual('content2');
+    });
 
-    #[Test]
-    public function handles_non_existent_source_directory_gracefully() {
+    test('handles non existent source directory gracefully', function () {
         putenv('ALLOW_FILESYSTEM_MIGRATIONS=true');
 
         $migration = new class extends Migration {
-            use FilesystemMigration;
-
-            public function up(): void {
+            uses(\App\Traits\FilesystemMigration::class);
+            
+            function up(): void
+            {
                 $this->safelyMoveDirectoryBetweenDisks('test_source', 'test_target', 'non_existent_dir');
             }
         };
-
         // Should not throw exception
-        $migration->up();
+        up();
 
         $source = Storage::disk('test_source');
-        $this->assertFalse($source->exists('non_existent_dir'));
+        expect($source->exists('non_existent_dir'))->toBeFalse();
         $target = Storage::disk('test_target');
-        $this->assertFalse($target->exists('non_existent_dir'));
-    }
+        expect($target->exists('non_existent_dir'))->toBeFalse();
+    });
 
-    /**
-     * This test is not strictly necessary, but it ensures that
-     * if a file with the same content already exists in the target,
-     * the migration does not fail.
-    */
-    #[Test]
-    public function does_not_fail_when_files_have_same_content() {
+    test('does not fail when files have same content', function () {
         putenv('ALLOW_FILESYSTEM_MIGRATIONS=true');
 
         $migration = new class extends Migration {
-            use FilesystemMigration;
-
-            public function up(): void {
+            uses(\App\Traits\FilesystemMigration::class);
+            
+            function up(): void
+            {
                 $this->safelyMoveDirectoryBetweenDisks('test_source', 'test_target', 'test_dir');
             }
         };
-
         // Setup files in both locations with same content
         $source = Storage::disk('test_source');
         $target = Storage::disk('test_target');
@@ -221,23 +199,22 @@ class FilesystemMigrationTest extends TestCase {
         $target->put('test_dir/same_file.txt', 'same content');
 
         // Should not throw exception
-        $migration->up();
+        up();
 
-        $this->assertEquals('same content', $target->get('test_dir/same_file.txt'));
-    }
+        expect($target->get('test_dir/same_file.txt'))->toEqual('same content');
+    });
 
-    #[Test]
-    public function fails_when_existing_file_has_different_content() {
+    test('fails when existing file has different content', function () {
         putenv('ALLOW_FILESYSTEM_MIGRATIONS=true');
 
         $migration = new class extends Migration {
-            use FilesystemMigration;
-
-            public function up(): void {
+            uses(\App\Traits\FilesystemMigration::class);
+            
+            function up(): void
+            {
                 $this->safelyMoveDirectoryBetweenDisks('test_source', 'test_target', 'test_dir');
             }
         };
-
         // Setup files with different content
         $source = Storage::disk('test_source');
         $target = Storage::disk('test_target');
@@ -252,21 +229,20 @@ class FilesystemMigrationTest extends TestCase {
         $this->expectException(\Exception::class);
         $this->expectExceptionMessage('File verification failed for: test_dir/conflict_file.txt');
 
-        $migration->up();
-    }
+        up();
+    });
 
-    #[Test]
-    public function creates_target_directory_if_not_exists() {
+    test('creates target directory if not exists', function () {
         putenv('ALLOW_FILESYSTEM_MIGRATIONS=true');
 
         $migration = new class extends Migration {
-            use FilesystemMigration;
-
-            public function up(): void {
+            uses(\App\Traits\FilesystemMigration::class);
+            
+            function up(): void
+            {
                 $this->safelyMoveDirectoryBetweenDisks('test_source', 'test_target', 'test_dir');
             }
         };
-
         // Setup source only
         $source = Storage::disk('test_source');
         $target = Storage::disk('test_target');
@@ -274,24 +250,23 @@ class FilesystemMigrationTest extends TestCase {
         $source->makeDirectory('test_dir');
         $source->put('test_dir/file.txt', 'content');
 
-        $migration->up();
+        up();
 
-        $this->assertTrue($target->exists('test_dir'));
-        $this->assertTrue($target->exists('test_dir/file.txt'));
-    }
+        expect($target->exists('test_dir'))->toBeTrue();
+        expect($target->exists('test_dir/file.txt'))->toBeTrue();
+    });
 
-    #[Test]
-    public function fails_when_encountering_symlinks() {
+    test('fails when encountering symlinks', function () {
         putenv('ALLOW_FILESYSTEM_MIGRATIONS=true');
 
         $migration = new class extends Migration {
-            use FilesystemMigration;
-
-            public function up(): void {
+            uses(\App\Traits\FilesystemMigration::class);
+            
+            function up(): void
+            {
                 $this->safelyMoveDirectoryBetweenDisks('test_source', 'test_target', 'test_dir');
             }
         };
-
         // Setup source with a symlink
         $source = Storage::disk('test_source');
         $source->makeDirectory('test_dir');
@@ -300,30 +275,30 @@ class FilesystemMigrationTest extends TestCase {
 
         $this->expectException(\Exception::class);
         $this->expectExceptionMessage('Migration incomplete: completion could not be evaluated due to symlinked files in test_source/test_dir. Please verify manually if the migration was successful.');
+
         // Should not throw exception, as symlinks are caught and ignored
-        $migration->up();
+        up();
 
         // Verify the regular file was moved, but the symlink was ignored
-        $this->assertFalse($source->exists('test_dir/file.txt'));
-        $this->assertFalse($source->exists('test_dir/symlink.txt'));
+        expect($source->exists('test_dir/file.txt'))->toBeFalse();
+        expect($source->exists('test_dir/symlink.txt'))->toBeFalse();
 
         $target = Storage::disk('test_target');
-        $this->assertTrue($target->exists('test_dir/file.txt'));
-        $this->assertFalse($target->exists('test_dir/symlink.txt'));
-    }
+        expect($target->exists('test_dir/file.txt'))->toBeTrue();
+        expect($target->exists('test_dir/symlink.txt'))->toBeFalse();
+    });
 
-    #[Test]
-    public function does_not_delete_source_directory_if_not_empty() {
+    test('does not delete source directory if not empty', function () {
         putenv('ALLOW_FILESYSTEM_MIGRATIONS=true');
 
         $migration = new class extends Migration {
-            use FilesystemMigration;
-
-            public function up(): void {
+            uses(\App\Traits\FilesystemMigration::class);
+            
+            function up(): void
+            {
                 $this->safelyMoveDirectoryBetweenDisks('test_source', 'test_target', 'test_dir');
             }
         };
-
         // Setup source with one file and one subdirectory
         $source = Storage::disk('test_source');
         $source->makeDirectory('test_dir');
@@ -335,11 +310,11 @@ class FilesystemMigrationTest extends TestCase {
         $this->expectException(\Exception::class);
         $this->expectExceptionMessage('Migration incomplete: some files could not be moved from test_source/test_dir to test_target/test_dir. Source directory was not empty and therefore not deleted!');
 
-        $migration->up();
+        up();
 
         // Verify source directory still exists with the subdirectory
-        $this->assertTrue($source->exists('test_dir'));
-        $this->assertTrue($source->exists('test_dir/subdir'));
-        $this->assertTrue($source->exists('test_dir/subdir/nested_file.txt'));
-    }
+        expect($source->exists('test_dir'))->toBeTrue();
+        expect($source->exists('test_dir/subdir'))->toBeTrue();
+        expect($source->exists('test_dir/subdir/nested_file.txt'))->toBeTrue();
+    });
 }

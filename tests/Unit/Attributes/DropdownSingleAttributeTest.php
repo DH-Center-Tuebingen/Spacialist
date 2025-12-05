@@ -1,59 +1,47 @@
 <?php
-namespace Tests\Unit\Attributes;
 
 use App\AttributeTypes\AttributeBase;
 use App\AttributeTypes\DropdownSingleAttribute;
 use App\AttributeValue;
 use App\Exceptions\InvalidDataException;
-use Tests\TestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
 
-// !!!! Currently this test is only testing the fromImport function!!!
-class DropdownSingleAttributeTest extends TestCase {
-    #[DataProvider('truthyProvider')]
-    public function testFromImportTruthy($input) {
-        $this->expectNotToPerformAssertions(DropdownSingleAttribute::class);
-        DropdownSingleAttribute::fromImport($input);
-    }
 
-    #[DataProvider('truthyProvider')]
-    public function testFromImportReturnValues($input, $expected) {
-        $this->assertEquals($expected, DropdownSingleAttribute::fromImport($input));
-    }
+test('from import truthy', function ($input) {
+    $this->expectNotToPerformAssertions(DropdownSingleAttribute::class);
+    DropdownSingleAttribute::fromImport($input);
+})->with('truthyProvider');
 
-    #[DataProvider('falsyProvider')]
-    public function testFromImportFalsy($input) {
-        $this->expectException(InvalidDataException::class);
-        DropdownSingleAttribute::fromImport($input);
-    }
+test('from import return values', function ($input, $expected) {
+    expect(DropdownSingleAttribute::fromImport($input))->toEqual($expected);
+})->with('truthyProvider');
 
-    /**
-     * Test export of attribute (attribute value id = 60)
-     *
-     * @return void
-     */
-    public function testParseExport() {
-        $testValue = AttributeValue::find(60);
-        $parseResult = AttributeBase::serializeExportData($testValue);
+test('from import falsy', function ($input) {
+    $this->expectException(InvalidDataException::class);
+    DropdownSingleAttribute::fromImport($input);
+})->with('falsyProvider');
 
-        $this->assertEquals('Graben', $parseResult);
-    }
+test('parse export', function () {
+    $testValue = AttributeValue::find(60);
+    $parseResult = AttributeBase::serializeExportData($testValue);
 
-    public static function truthyProvider() {
-        return [
-            "no value" => ["", null],
-            "value in english" => ["Find","https://spacialist.escience.uni-tuebingen.de/<user-project>/fundobjekt#20171220094921"],
-            "value in german" => ["Fundobjekt", "https://spacialist.escience.uni-tuebingen.de/<user-project>/fundobjekt#20171220094921"],
-            "value with whitespace" => [" Find ","https://spacialist.escience.uni-tuebingen.de/<user-project>/fundobjekt#20171220094921"],
-        ];
-    }
+    expect($parseResult)->toEqual('Graben');
+});
 
-    public static function falsyProvider() {
-        return [
-            "fail when input is not a string (int)" => [1],
-            "fail when input is not a string (bool)" => [true],
-            "fail when input is not a valid concept/label in the vocabulary" => ["Fund"],
-            "fail when case is not correct" => ["fundobjekt"],
-        ];
-    }
-}
+dataset('truthyProvider', function () {
+    return [
+        "no value" => ["", null],
+        "value in english" => ["Find","https://spacialist.escience.uni-tuebingen.de/<user-project>/fundobjekt#20171220094921"],
+        "value in german" => ["Fundobjekt", "https://spacialist.escience.uni-tuebingen.de/<user-project>/fundobjekt#20171220094921"],
+        "value with whitespace" => [" Find ","https://spacialist.escience.uni-tuebingen.de/<user-project>/fundobjekt#20171220094921"],
+    ];
+});
+
+dataset('falsyProvider', function () {
+    return [
+        "fail when input is not a string (int)" => [1],
+        "fail when input is not a string (bool)" => [true],
+        "fail when input is not a valid concept/label in the vocabulary" => ["Fund"],
+        "fail when case is not correct" => ["fundobjekt"],
+    ];
+});

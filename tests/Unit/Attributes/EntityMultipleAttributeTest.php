@@ -1,60 +1,48 @@
 <?php
-namespace Tests\Unit\Attributes;
 
 use App\AttributeTypes\AttributeBase;
 use App\AttributeTypes\EntityMultipleAttribute;
 use App\AttributeValue;
 use App\Exceptions\InvalidDataException;
-use Tests\TestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
 
-// !!!! Currently this test is only testing the fromImport function!!!
-class EntityMultipleAttributeTest extends TestCase {
-    #[DataProvider('truthyProvider')]
-    public function testFromImportTruthy($input) {
-        $this->expectNotToPerformAssertions(EntityMultipleAttribute::class);
-        EntityMultipleAttribute::fromImport($input);
-    }
 
-    #[DataProvider('truthyProvider')]
-    public function testFromImportReturnValues($input, $expected) {
-        $this->assertEquals($expected, EntityMultipleAttribute::fromImport($input));
-    }
+test('from import truthy', function ($input) {
+    $this->expectNotToPerformAssertions(EntityMultipleAttribute::class);
+    EntityMultipleAttribute::fromImport($input);
+})->with('truthyProvider');
 
-    #[DataProvider('falsyProvider')]
-    public function testFromImportFalsy($input) {
-        $this->expectException(InvalidDataException::class);
-        EntityMultipleAttribute::fromImport($input);
-    }
+test('from import return values', function ($input, $expected) {
+    expect(EntityMultipleAttribute::fromImport($input))->toEqual($expected);
+})->with('truthyProvider');
 
-    /**
-     * Test export of attribute (attribute value id = 75)
-     *
-     * @return void
-     */
-    public function testParseExport() {
-        $testValue = AttributeValue::find(75);
-        $parseResult = AttributeBase::serializeExportData($testValue);
+test('from import falsy', function ($input) {
+    $this->expectException(InvalidDataException::class);
+    EntityMultipleAttribute::fromImport($input);
+})->with('falsyProvider');
 
-        $this->assertEquals('Inv. 31;Befund 1', $parseResult);
-    }
+test('parse export', function () {
+    $testValue = AttributeValue::find(75);
+    $parseResult = AttributeBase::serializeExportData($testValue);
 
-    public static function truthyProvider() {
-        $dataJson = json_encode([3, 4]);
+    expect($parseResult)->toEqual('Inv. 31;Befund 1');
+});
 
-        return [
-            "no value" => ["", null],
-            "value in english" => ["Inv. 1234;Inv. 124", $dataJson],
-            "value with whitespace" => [" Inv. 1234 ; Inv. 124 ", $dataJson],
-        ];
-    }
+dataset('truthyProvider', function () {
+    $dataJson = json_encode([3, 4]);
 
-    public static function falsyProvider() {
-        return [
-            "fail when input is not a string (int)" => [1],
-            "fail when input is not a string (bool)" => [true],
-            "fail when one input is not a valid entity name" => ["Inv. 1234;invalid entity"],
-            "fail when case sensitivity is not considered" => ["Inv. 1234;inv. 124"],
-        ];
-    }
-}
+    return [
+        "no value" => ["", null],
+        "value in english" => ["Inv. 1234;Inv. 124", $dataJson],
+        "value with whitespace" => [" Inv. 1234 ; Inv. 124 ", $dataJson],
+    ];
+});
+
+dataset('falsyProvider', function () {
+    return [
+        "fail when input is not a string (int)" => [1],
+        "fail when input is not a string (bool)" => [true],
+        "fail when one input is not a valid entity name" => ["Inv. 1234;invalid entity"],
+        "fail when case sensitivity is not considered" => ["Inv. 1234;inv. 124"],
+    ];
+});

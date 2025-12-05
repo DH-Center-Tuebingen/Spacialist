@@ -1,306 +1,257 @@
 <?php
 
-namespace Tests\Feature;
-
 use App\Entity;
 use App\Notifications\CommentPosted;
 use App\User;
-use Tests\TestCase;
 use Illuminate\Support\Facades\Hash;
 use PHPUnit\Framework\Attributes\TestDox;
 
-class ApiNotificationTest extends TestCase
+
+function setupData()
 {
-    public static function setupData() {
-        $testUser = new User();
-        $testUser->name = 'Test User';
-        $testUser->nickname = 'testuser';
-        $testUser->email = 'test@localhost';
-        $testUser->password = Hash::make('test');
-        $testUser->save();
-        $testUser->assignRole('admin');
-        $testUser = User::find($testUser->id);
+    $testUser = new User();
+    $testUser->name = 'Test User';
+    $testUser->nickname = 'testuser';
+    $testUser->email = 'test@localhost';
+    $testUser->password = Hash::make('test');
+    $testUser->save();
+    $testUser->assignRole('admin');
+    $testUser = User::find($testUser->id);
 
-        $user = User::find(1);
-        $entity = Entity::first();
+    $user = User::find(1);
+    $entity = Entity::first();
 
-        $entity->addComment([
-            'content' => 'A simple test'
-        ], $user, false, []);
-        $entity->addComment([
-            'content' => 'A simple test from a simple user'
-        ], $testUser, true, []);
-        $entity->load('comments');
+    $entity->addComment([
+        'content' => 'A simple test'
+    ], $user, false, []);
+    $entity->addComment([
+        'content' => 'A simple test from a simple user'
+    ], $testUser, true, []);
+    $entity->load('comments');
 
-        return [
-            'users' => [$user, $testUser],
-            'entity' => $entity,
-        ];
-    }
+    return [
+        'users' => [$user, $testUser],
+        'entity' => $entity,
+    ];
+}
 
-    /**
-	 * @return void
-	 */
-	#[TestDox('GET    /api/v1/comment/resource/{id}?r=entity : Test get Comments for Resource')]
-    public function testResourceComments()
-    {
-        $data = self::setupData();
-        $user = $data['users'][0];
-        $entity = $data['entity'];
+test('resource comments', function () {
+    $data = setupData();
+    $user = $data['users'][0];
+    $entity = $data['entity'];
 
-        $eid = $entity->id;
-        $response = $this->userRequest()
-            ->get("/api/v1/comment/resource/$eid?r=entity");
-        $response->assertStatus(200);
-        $response->assertJsonCount(2);
-        $response->assertJsonStructure([
-            '*' => [
-                'id',
-                'user_id',
-                'commentable_id',
-                'commentable_type',
-                'reply_to',
-                'content',
-                'metadata',
-                'created_at',
-                'updated_at',
-                'deleted_at',
+    $eid = $entity->id;
+    $response = $this->userRequest()
+        ->get("/api/v1/comment/resource/$eid?r=entity");
+    $response->assertStatus(200);
+    $response->assertJsonCount(2);
+    $response->assertJsonStructure([
+        '*' => [
+            'id',
+            'user_id',
+            'commentable_id',
+            'commentable_type',
+            'reply_to',
+            'content',
+            'metadata',
+            'created_at',
+            'updated_at',
+            'deleted_at',
+        ]
+    ]);
+});
+
+test('comment replies', function () {
+    $data = setupData();
+    $user = $data['users'][0];
+    $entity = $data['entity'];
+
+    $eid = $entity->id;
+    $cid = $entity->comments[1]->id;
+    $response = $this->userRequest()
+        ->get("/api/v1/comment/$cid/reply");
+    $response->assertStatus(200);
+    $response->assertJsonCount(0);
+
+    $entity->addComment([
+        'content' => 'A simple reply',
+        'reply_to' => $cid,
+    ], $user, false, []);
+
+    $entity->load('comments');
+    $entity->comments[1]->load('replies');
+    expect(count($entity->comments))->toEqual(2);
+    expect(count($entity->comments[1]->replies))->toEqual(1);
+});
+
+test('add comment', function () {
+    $data = setupData();
+    $user = $data['users'][0];
+    $entity = $data['entity'];
+
+    $response = $this->userRequest()
+        ->post("/api/v1/comment", [
+            'resource_type' => 'entity',
+            'resource_id' => $entity->id,
+            'content' => 'This is a test',
+            'metadata' => [
+                'key' => 'value'
             ]
         ]);
-    }
+    $response->assertStatus(201);
+    $response->assertJsonStructure([
+        'id',
+        'user_id',
+        'commentable_id',
+        'commentable_type',
+        'reply_to',
+        'content',
+        'metadata',
+        'created_at',
+        'updated_at',
+        'deleted_at',
+        'author',
+    ]);
 
-    /**
-	 * @return void
-	 */
-	#[TestDox('GET    /api/v1/comment/{id}/reply : Test get replies for comment')]
-    public function testCommentReplies()
-    {
-        $data = self::setupData();
-        $user = $data['users'][0];
-        $entity = $data['entity'];
+    $entity->load('comments');
+    expect(count($entity->comments))->toEqual(3);
+    expect($entity->comments[2]->content)->toEqual('This is a test');
+    expect($entity->comments[2]->metadata['key'])->toEqual('value');
+});
 
-        $eid = $entity->id;
-        $cid = $entity->comments[1]->id;
-        $response = $this->userRequest()
-            ->get("/api/v1/comment/$cid/reply");
-        $response->assertStatus(200);
-        $response->assertJsonCount(0);
+test('update comment', function () {
+    $data = setupData();
+    $user = $data['users'][0];
+    $testUser = $data['users'][1];
+    $entity = $data['entity'];
 
-        $entity->addComment([
-            'content' => 'A simple reply',
-            'reply_to' => $cid,
-        ], $user, false, []);
+    $entity->load('comments');
+    $cid = $entity->comments[0]->id;
 
-        $entity->load('comments');
-        $entity->comments[1]->load('replies');
-        $this->assertEquals(2, count($entity->comments));
-        $this->assertEquals(1, count($entity->comments[1]->replies));
-    }
+    $response = $this->userRequest()
+        ->patch("/api/v1/comment/$cid", [
+            'content' => 'This is still a test',
+        ]);
+    $this->assertStatus($response, 200);
+    $response->assertJsonStructure([
+        'id',
+        'user_id',
+        'commentable_id',
+        'commentable_type',
+        'reply_to',
+        'content',
+        'metadata',
+        'created_at',
+        'updated_at',
+        'deleted_at',
+    ]);
 
-    /**
-	 * @return void
-	 */
-	#[TestDox('POST   /api/v1/comment : Test Add Comment')]
-    public function testAddComment()
-    {
-        $data = self::setupData();
-        $user = $data['users'][0];
-        $entity = $data['entity'];
+    $entity->load('comments');
+    expect(count($entity->comments))->toEqual(2);
+    expect($entity->comments[0]->content)->toEqual('This is still a test');
+});
 
-        $response = $this->userRequest()
-            ->post("/api/v1/comment", [
-                'resource_type' => 'entity',
-                'resource_id' => $entity->id,
-                'content' => 'This is a test',
-                'metadata' => [
-                    'key' => 'value'
-                ]
-            ]);
-        $response->assertStatus(201);
-        $response->assertJsonStructure([
-            'id',
-            'user_id',
-            'commentable_id',
-            'commentable_type',
-            'reply_to',
-            'content',
-            'metadata',
-            'created_at',
-            'updated_at',
-            'deleted_at',
-            'author',
+test('mark notification as read', function () {
+    $data = setupData();
+    $user = $data['users'][0];
+
+    $user->load('notifications');
+    $user->load('unreadNotifications');
+    expect(count($user->notifications))->toEqual(1);
+    expect(count($user->unreadNotifications))->toEqual(1);
+
+    $id = $user->unreadNotifications[0]->id;
+
+    $response = $this->userRequest()
+        ->patch("/api/v1/notification/read/$id");
+
+    $response->assertStatus(204);
+    $user->load('notifications');
+    $user->load('unreadNotifications');
+    expect(count($user->notifications))->toEqual(1);
+    expect(count($user->unreadNotifications))->toEqual(0);
+});
+
+test('mark notifications as read', function () {
+    $data = setupData();
+    $user = $data['users'][0];
+    $entity = $data['entity'];
+
+    $user->notify(new CommentPosted($entity->comments->last(), [], []));
+    $user->load('notifications');
+    $user->load('unreadNotifications');
+    expect(count($user->notifications))->toEqual(2);
+    expect(count($user->unreadNotifications))->toEqual(2);
+
+    $ids = $user->unreadNotifications->pluck('id')->toArray();
+
+    $response = $this->userRequest()
+        ->patch("/api/v1/notification/read", [
+            'ids' => $ids,
         ]);
 
-        $entity->load('comments');
-        $this->assertEquals(3, count($entity->comments));
-        $this->assertEquals('This is a test', $entity->comments[2]->content);
-        $this->assertEquals('value', $entity->comments[2]->metadata['key']);
-    }
+    $response->assertStatus(204);
+    $user->load('notifications');
+    $user->load('unreadNotifications');
+    expect(count($user->notifications))->toEqual(2);
+    expect(count($user->unreadNotifications))->toEqual(0);
+});
 
-    /**
-	 * @return void
-	 */
-	#[TestDox('PATCH  /api/v1/comment/{id} : Test Edit Comment')]
-    public function testUpdateComment()
-    {
-        $data = self::setupData();
-        $user = $data['users'][0];
-        $testUser = $data['users'][1];
-        $entity = $data['entity'];
+test('delete notifications', function () {
+    $data = setupData();
+    $user = $data['users'][0];
+    $entity = $data['entity'];
 
-        $entity->load('comments');
-        $cid = $entity->comments[0]->id;
+    $user->notify(new CommentPosted($entity->comments->last(), [], []));
+    $user->load('notifications');
+    $user->load('unreadNotifications');
+    expect(count($user->notifications))->toEqual(2);
+    expect(count($user->unreadNotifications))->toEqual(2);
 
-        $response = $this->userRequest()
-            ->patch("/api/v1/comment/$cid", [
-                'content' => 'This is still a test',
-            ]);
-        $this->assertStatus($response, 200);
-        $response->assertJsonStructure([
-            'id',
-            'user_id',
-            'commentable_id',
-            'commentable_type',
-            'reply_to',
-            'content',
-            'metadata',
-            'created_at',
-            'updated_at',
-            'deleted_at',
+    $id = $user->unreadNotifications->first()->id;
+
+    $response = $this->userRequest()
+        ->patch("/api/v1/notification", [
+            'ids' => [$id]
         ]);
 
-        $entity->load('comments');
-        $this->assertEquals(2, count($entity->comments));
-        $this->assertEquals('This is still a test', $entity->comments[0]->content);
-    }
+    $response->assertStatus(204);
+    $user->load('notifications');
+    $user->load('unreadNotifications');
+    expect(count($user->notifications))->toEqual(1);
+    expect(count($user->unreadNotifications))->toEqual(1);
+});
 
-    /**
-	 * @return void
-	 */
-	#[TestDox('PATCH  /api/v1/notification/read/{id} : Test mark single notification as read')]
-    public function testMarkNotificationAsRead()
-    {
-        $data = self::setupData();
-        $user = $data['users'][0];
+test('delete notification', function () {
+    $data = setupData();
+    $user = $data['users'][0];
 
-        $user->load('notifications');
-        $user->load('unreadNotifications');
-        $this->assertEquals(1, count($user->notifications));
-        $this->assertEquals(1, count($user->unreadNotifications));
+    $user->load('notifications');
+    $user->load('unreadNotifications');
 
-        $id = $user->unreadNotifications[0]->id;
+    $id = $user->unreadNotifications->first()->id;
 
-        $response = $this->userRequest()
-            ->patch("/api/v1/notification/read/$id");
+    $response = $this->userRequest()
+        ->delete("/api/v1/notification/$id");
 
-        $response->assertStatus(204);
-        $user->load('notifications');
-        $user->load('unreadNotifications');
-        $this->assertEquals(1, count($user->notifications));
-        $this->assertEquals(0, count($user->unreadNotifications));
-    }
+    $this->assertStatus($response, 204);
+    $user->load('notifications');
+    $user->load('unreadNotifications');
+    expect(count($user->notifications))->toEqual(0);
+    expect(count($user->unreadNotifications))->toEqual(0);
+});
 
-    /**
-	 * @return void
-	 */
-	#[TestDox('PATCH  /api/v1/notification/read : Test mark array of notifications as read')]
-    public function testMarkNotificationsAsRead()
-    {
-        $data = self::setupData();
-        $user = $data['users'][0];
-        $entity = $data['entity'];
+test('delete comment', function () {
+    $data = setupData();
+    $user = $data['users'][0];
+    $entity = $data['entity'];
 
-        $user->notify(new CommentPosted($entity->comments->last(), [], []));
-        $user->load('notifications');
-        $user->load('unreadNotifications');
-        $this->assertEquals(2, count($user->notifications));
-        $this->assertEquals(2, count($user->unreadNotifications));
+    $id = $entity->comments->first()->id;
+    $response = $this->userRequest()
+        ->delete("/api/v1/comment/$id");
 
-        $ids = $user->unreadNotifications->pluck('id')->toArray();
-
-        $response = $this->userRequest()
-            ->patch("/api/v1/notification/read", [
-                'ids' => $ids,
-            ]);
-
-        $response->assertStatus(204);
-        $user->load('notifications');
-        $user->load('unreadNotifications');
-        $this->assertEquals(2, count($user->notifications));
-        $this->assertEquals(0, count($user->unreadNotifications));
-    }
-
-    /**
-	 * @return void
-	 */
-	#[TestDox('PATCH  /api/v1/notification : Test delete notifications')]
-    public function testDeleteNotifications()
-    {
-        $data = self::setupData();
-        $user = $data['users'][0];
-        $entity = $data['entity'];
-
-        $user->notify(new CommentPosted($entity->comments->last(), [], []));
-        $user->load('notifications');
-        $user->load('unreadNotifications');
-        $this->assertEquals(2, count($user->notifications));
-        $this->assertEquals(2, count($user->unreadNotifications));
-
-        $id = $user->unreadNotifications->first()->id;
-
-        $response = $this->userRequest()
-            ->patch("/api/v1/notification", [
-                'ids' => [$id]
-            ]);
-
-        $response->assertStatus(204);
-        $user->load('notifications');
-        $user->load('unreadNotifications');
-        $this->assertEquals(1, count($user->notifications));
-        $this->assertEquals(1, count($user->unreadNotifications));
-    }
-
-    /**
-	 * @return void
-	 */
-	#[TestDox('DELETE /api/v1/notification/{id} : Test delete notification')]
-    public function testDeleteNotification()
-    {
-        $data = self::setupData();
-        $user = $data['users'][0];
-
-        $user->load('notifications');
-        $user->load('unreadNotifications');
-
-        $id = $user->unreadNotifications->first()->id;
-
-        $response = $this->userRequest()
-            ->delete("/api/v1/notification/$id");
-
-        $this->assertStatus($response, 204);
-        $user->load('notifications');
-        $user->load('unreadNotifications');
-        $this->assertEquals(0, count($user->notifications));
-        $this->assertEquals(0, count($user->unreadNotifications));
-    }
-
-    /**
-	 * @return void
-	 */
-	#[TestDox('DELETE /api/v1/comment/{id} : Test delete comment')]
-    public function testDeleteComment()
-    {
-        $data = self::setupData();
-        $user = $data['users'][0];
-        $entity = $data['entity'];
-
-        $id = $entity->comments->first()->id;
-        $response = $this->userRequest()
-            ->delete("/api/v1/comment/$id");
-
-        $entity->load('comments');
-        $response->assertStatus(204);
-        $this->assertEquals(2, count($entity->comments));
-        $this->assertEquals(1, count($entity->comments()->withoutTrashed()->get()));
-    }
-}
+    $entity->load('comments');
+    $response->assertStatus(204);
+    expect(count($entity->comments))->toEqual(2);
+    expect(count($entity->comments()->withoutTrashed()->get()))->toEqual(1);
+});

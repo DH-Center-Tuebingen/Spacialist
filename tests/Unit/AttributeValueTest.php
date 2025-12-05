@@ -1,59 +1,34 @@
 <?php
 
-namespace Tests\Unit;
-
-use Tests\TestCase;
-
-
 use App\AttributeValue;
 
-class AttributeValueTest extends TestCase
-{
-    /**
-     * Test relations of an attribute value (id=60)
-     *
-     * @return void
-     */
-    public function testRelations()
-    {
-        $value = AttributeValue::with(['entity', 'attribute', 'entity_value', 'concept'])->find(60);
 
-        $this->assertEquals(2, $value->entity->id);
-        $this->assertEquals(14, $value->attribute->id);
-        $this->assertEquals(53, $value->concept->id);
-        $this->assertNull($value->entity_value);
+test('relations', function () {
+    $value = AttributeValue::with(['entity', 'attribute', 'entity_value', 'concept'])->find(60);
 
-        $value = AttributeValue::with(['entity', 'attribute', 'entity_value', 'concept'])->find(35);
+    expect($value->entity->id)->toEqual(2);
+    expect($value->attribute->id)->toEqual(14);
+    expect($value->concept->id)->toEqual(53);
+    expect($value->entity_value)->toBeNull();
 
-        $this->assertEquals(5, $value->entity->id);
-        $this->assertEquals(18, $value->attribute->id);
-        $this->assertNull($value->concept);
-        $this->assertEquals(6, $value->entity_value->id);
-        $this->assertEquals('Aufschluss', $value->entity_value->name);
-    }
+    $value = AttributeValue::with(['entity', 'attribute', 'entity_value', 'concept'])->find(35);
 
-    /**
-     * Test get value of an attribute value (eid=2, aid=16)
-     *
-     * @return void
-     */
-    public function testGetAttributeValueById()
-    {
-        $value = AttributeValue::getValueById(16, 2);
-        $this->assertEquals('SRID=4326;POINT(8.92 48.45)', $value);
+    expect($value->entity->id)->toEqual(5);
+    expect($value->attribute->id)->toEqual(18);
+    expect($value->concept)->toBeNull();
+    expect($value->entity_value->id)->toEqual(6);
+    expect($value->entity_value->name)->toEqual('Aufschluss');
+});
 
-        $value = AttributeValue::getValueById(99, 2);
-        $this->assertNull($value);
-    }
+test('get attribute value by id', function () {
+    $value = AttributeValue::getValueById(16, 2);
+    expect($value)->toEqual('SRID=4326;POINT(8.92 48.45)');
 
-    /**
-     * Test get last editor of first attribute value
-     *
-     * @return void
-     */
-    public function testGetAttributeValueLasteditor()
-    {
-        $value = AttributeValue::first();
-        $this->assertEquals(1, $value->user->id);
-    }
-}
+    $value = AttributeValue::getValueById(99, 2);
+    expect($value)->toBeNull();
+});
+
+test('get attribute value lasteditor', function () {
+    $value = AttributeValue::first();
+    expect($value->user->id)->toEqual(1);
+});

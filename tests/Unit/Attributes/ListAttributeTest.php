@@ -1,57 +1,50 @@
 <?php
-namespace Tests\Unit\Attributes;
 
 use App\AttributeTypes\AttributeBase;
 use App\AttributeTypes\ListAttribute;
 use App\AttributeValue;
 use App\Exceptions\InvalidDataException;
-use Tests\TestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
 
-// !!!! Currently this test is only testing the fromImport function!!!
-class ListAttributeTest extends TestCase {
-    #[DataProvider('truthyProvider')]
-    public function testFromImportTruthy($input) {
-        $this->expectNotToPerformAssertions(ListAttribute::class);
-        ListAttribute::fromImport($input);
-    }
 
-    #[DataProvider('truthyProvider')]
-    public function testFromImportReturnValues($input, $expected) {
-        if($expected != null)
-        $expected = json_encode($expected);
+test('from import truthy', function ($input) {
+    $this->expectNotToPerformAssertions(ListAttribute::class);
+    ListAttribute::fromImport($input);
+})->with('truthyProvider');
 
-        $this->assertEquals($expected, ListAttribute::fromImport($input));
-    }
+test('from import return values', function ($input, $expected) {
+    if($expected != null)
+    $expected = json_encode($expected);
 
-    #[DataProvider('falsyProvider')]
-    public function testFromImportFalsy($input) {
-        $this->expectException(InvalidDataException::class);
-        ListAttribute::fromImport($input);
-    }
+    expect(ListAttribute::fromImport($input))->toEqual($expected);
+})->with('truthyProvider');
 
-    public function testParseExport() {
-        $testValue = AttributeValue::find(69);
-        $parseResult = AttributeBase::serializeExportData($testValue);
+test('from import falsy', function ($input) {
+    $this->expectException(InvalidDataException::class);
+    ListAttribute::fromImport($input);
+})->with('falsyProvider');
 
-        $this->assertEquals('Fundstelle A', $parseResult);
-    }
+test('parse export', function () {
+    $testValue = AttributeValue::find(69);
+    $parseResult = AttributeBase::serializeExportData($testValue);
 
-    public static function truthyProvider() {
-        return [
-            "empty value" => ["", null],
-            "single item" => ["item", ["item"]],
-            "multiple items" => ["item1;item2", ["item1", "item2"]],
-            "multiple items with spaces" => [" item1 ; item2 ", ["item1", "item2"]],
-            "list with empty values" => ["item1;;item2", ["item1", "", "item2"]],
-        ];
-    }
+    expect($parseResult)->toEqual('Fundstelle A');
+});
 
-    public static function falsyProvider() {
-        return [
-            "boolean" => [true],
-            "integer" => [1],
-            "float" => [1.1],
-        ];
-    }
-}
+dataset('truthyProvider', function () {
+    return [
+        "empty value" => ["", null],
+        "single item" => ["item", ["item"]],
+        "multiple items" => ["item1;item2", ["item1", "item2"]],
+        "multiple items with spaces" => [" item1 ; item2 ", ["item1", "item2"]],
+        "list with empty values" => ["item1;;item2", ["item1", "", "item2"]],
+    ];
+});
+
+dataset('falsyProvider', function () {
+    return [
+        "boolean" => [true],
+        "integer" => [1],
+        "float" => [1.1],
+    ];
+});
