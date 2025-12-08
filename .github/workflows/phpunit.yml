@@ -64,7 +64,7 @@ jobs:
     - name: Setup Log Directory
       run: mkdir -p build/logs
     - name: Execute tests (Unit and Feature tests) via PHPUnit
-      run: vendor/bin/phpunit --coverage-clover build/logs/clover.xml
+      run: vendor/bin/pest --coverage-clover build/logs/clover.xml
     - uses: codecov/codecov-action@v4
       name: Codecov Coverage
       with:

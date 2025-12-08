@@ -13,10 +13,12 @@
 
 pest()->extend(Tests\TestCase::class)
  // ->use(Illuminate\Foundation\Testing\RefreshDatabase::class)
-    ->in('Feature');
+    ->in('Feature')
+    ->in('Browser');
 
 pest()->extend(Tests\TransactionedTestCase::class)
     ->in('Unit');
+
 
 /*
 |--------------------------------------------------------------------------
