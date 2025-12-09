@@ -241,6 +241,8 @@ test('fails when encountering symlinks', function () {
     // Setup source with a symlink
     $source = Storage::disk('test_source');
     $source->makeDirectory('test_dir');
+    
+    $target = Storage::disk('test_target');
     $target->makeDirectory('test_dir');
     
     file_put_contents(storage_path('testing/source/test_dir/file.txt'), 'content');
@@ -253,7 +255,6 @@ test('fails when encountering symlinks', function () {
     expect($source->exists('test_dir/file.txt'))->toBeFalse();
     expect($source->exists('test_dir/symlink.txt'))->toBeFalse();
 
-    $target = Storage::disk('test_target');
     expect($target->exists('test_dir/file.txt'))->toBeTrue();
     expect($target->exists('test_dir/symlink.txt'))->toBeFalse();
 })->skip(PHP_OS_FAMILY === 'Windows', 'Symlink creation requires administrator privileges on Windows');
