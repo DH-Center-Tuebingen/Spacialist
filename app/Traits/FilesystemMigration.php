@@ -37,7 +37,7 @@ trait FilesystemMigration {
      * @param string|null $destDirectory
      * @return void
      */
-    protected function safelyMoveDirectoryBetweenDisks(string $srcDisk, string $destDisk, string $srcDirectory, string $destDirectory = null): void {
+    protected function safelyMoveDirectoryBetweenDisks(string $srcDisk, string $destDisk, string $srcDirectory, ?string $destDirectory = null): void {
         if($destDirectory === null) {
             $destDirectory = $srcDirectory;
         }

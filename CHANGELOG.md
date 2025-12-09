@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 - Plugin-System now supports custom components, e.g. attribute types
 - .env variable `ALLOW_FILESYSTEM_MIGRATIONS` to explcitly enable filesystem migrations
 - API endpoint for getting all entity details data in one request: GET::v1/entity/{id}/entity_detail
+- PEST Browser testing functionality 
 ### Fixed
 - Removed redundant calls to the entity endpoint
 - Metadata tab error on submit (unknown variable)
@@ -15,6 +16,8 @@ All notable changes to this project will be documented in this file.
 - Now entity metadata is only loaded when accessing the metadata tab
 - Migrations now have logging automatically disabled
 - Migrations that require filesystem changes can now be handled using the `App\Traits\FilesystemMigration` trait (call `$this->safelyMoveDirectoryBetweenDisks(...)` with `ALLOW_FILESYTEM_MIGRATIONS` set to `true`)
+- Moved to PEST as testing framework
+- PHP version requirements for testing changed: [8.2, 8.3] =>  [8.3, 8.4]
 
 ## 0.11.1
 ### Added

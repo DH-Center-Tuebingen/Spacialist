@@ -1,36 +1,17 @@
 <?php
 
-namespace Tests\Unit;
-
-use Tests\TestCase;
-
-
 use App\Reference;
 
-class ReferenceTest extends TestCase
-{
-    /**
-     * Test relations of an reference (id=3)
-     *
-     * @return void
-     */
-    public function testRelations()
-    {
-        $ref = Reference::with(['entity', 'attribute', 'bibliography'])->find(3);
 
-        $this->assertEquals(1, $ref->entity->id);
-        $this->assertEquals(13, $ref->attribute->id);
-        $this->assertEquals(1323, $ref->bibliography->id);
-    }
+test('relations', function () {
+    $ref = Reference::with(['entity', 'attribute', 'bibliography'])->find(3);
 
-    /**
-     * Test get last editor of first reference entry
-     *
-     * @return void
-     */
-    public function testGetReferenceEntryLasteditor()
-    {
-        $ref = Reference::first();
-        $this->assertEquals(1, $ref->user->id);
-    }
-}
+    expect($ref->entity->id)->toEqual(1);
+    expect($ref->attribute->id)->toEqual(13);
+    expect($ref->bibliography->id)->toEqual(1323);
+});
+
+test('get reference entry lasteditor', function () {
+    $ref = Reference::first();
+    expect($ref->user->id)->toEqual(1);
+});

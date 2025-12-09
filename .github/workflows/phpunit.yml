@@ -1,6 +1,14 @@
 name: PhpUnit
 
-on: ["push", "pull_request"]
+on:
+  push:
+    branches:
+      - main
+      - 'release-**'
+  pull_request:
+    branches:
+      - main
+      - 'release-**'
 
 jobs:
   laravel-tests:
@@ -10,7 +18,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php-versions: ['8.2', '8.3']
+        php-versions: ['8.3', '8.4']
         pg-gis-combo: ['16-3.5-alpine', '17-3.5-alpine']
         databases: ['pgsql']
 
@@ -64,7 +72,7 @@ jobs:
     - name: Setup Log Directory
       run: mkdir -p build/logs
     - name: Execute tests (Unit and Feature tests) via PHPUnit
-      run: vendor/bin/phpunit --coverage-clover build/logs/clover.xml
+      run: vendor/bin/pest --coverage-clover build/logs/clover.xml
     - uses: codecov/codecov-action@v4
       name: Codecov Coverage
       with:
