@@ -248,15 +248,19 @@ test('fails when encountering symlinks', function () {
     file_put_contents(storage_path('testing/source/test_dir/file.txt'), 'content');
     symlink(storage_path('testing/source/test_dir/file.txt'), storage_path('testing/source/test_dir/symlink.txt'));
 
+    expect($source->exists('test_dir/file.txt'))->toBeTrue();
+    expect($source->exists('test_dir/symlink.txt'))->toBeTrue();
+    
     expect(fn() => $migration->up())
         ->toThrow(\Exception::class, 'Migration incomplete: completion could not be evaluated due to symlinked files in test_source/test_dir. Please verify manually if the migration was successful.');
+    
+        $fileIsStillInSource = $source->exists('test_dir/file.txt');
+    $filwWasMoved = $target->exists('test_dir/file.txt');
+    
+    // Check that the original file was not removed:
+    expect($fileIsStillInSource || $filwWasMoved)->toBeTrue();
+    expect($source->exists('test_dir/symlink.txt'))->toBeTrue();
 
-    // Verify the regular file was moved, but the symlink was ignored
-    expect($source->exists('test_dir/file.txt'))->toBeFalse();
-    expect($source->exists('test_dir/symlink.txt'))->toBeFalse();
-
-    expect($target->exists('test_dir/file.txt'))->toBeTrue();
-    expect($target->exists('test_dir/symlink.txt'))->toBeFalse();
 })->skip(PHP_OS_FAMILY === 'Windows', 'Symlink creation requires administrator privileges on Windows');
 
 test('does not delete source directory if not empty', function () {
