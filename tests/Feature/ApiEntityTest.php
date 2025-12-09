@@ -8,7 +8,6 @@ use App\User;
 use Tests\Permission;
 use Tests\ResponseTester;
 use PHPUnit\Framework\Attributes\DataProvider;
-use PHPUnit\Framework\Attributes\TestDox;
 
 
 test('top entity endpoint', function () {

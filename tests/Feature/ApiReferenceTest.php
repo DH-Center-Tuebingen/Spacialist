@@ -4,7 +4,6 @@ use App\Reference;
 use Tests\Permission;
 use Tests\ResponseTester;
 use PHPUnit\Framework\Attributes\DataProvider;
-use PHPUnit\Framework\Attributes\TestDox;
 
 
 test('entity references endpoint', function () {

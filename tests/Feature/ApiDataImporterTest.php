@@ -550,7 +550,7 @@ test('data import success', function () {
     expect($entity)->not->toBeNull();
 
     expect($entity->name)->toEqual('imported');
-    $entityData = getData();
+    $entityData = $entity->getData();
     expect($entityData[9]->value)->toEqual(json_decode('{"B":1,"H":2,"T":3,"unit":"cm"}'));
 });
 
@@ -577,7 +577,7 @@ test('data import can create attribute', function () {
         ->assertStatus(201);
 
     $entityId = Entity::getFromPath('Site A');
-    $data = getData();
+    $data = Entity::find($entityId)->getData();
     expect($data[8]->value)->toEqual('updated');
 });
 
@@ -592,7 +592,7 @@ test('data import can update attribute', function () {
         ->assertStatus(201);
 
     $entityId = Entity::getFromPath('Site A');
-    $data = getData();
+    $data = Entity::find($entityId)->getData();
     expect($data[15]->value)->toEqual(["alt name", "alias"]);
 });
 

@@ -4,7 +4,6 @@ use App\Bibliography;
 use App\Entity;
 use App\ThLanguage;
 use App\User;
-use PHPUnit\Framework\Attributes\TestDox;
 
 
 test('global search entity endpoint', function () {

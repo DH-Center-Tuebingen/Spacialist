@@ -5,7 +5,6 @@ use Illuminate\Http\UploadedFile;
 use Tests\Permission;
 use Tests\ResponseTester;
 use PHPUnit\Framework\Attributes\DataProvider;
-use PHPUnit\Framework\Attributes\TestDox;
 
 
 /**
@@ -135,19 +134,19 @@ test('add', function () {
     ]);
 });
 
-function importTest($filename, $results)
+function importTest($test, $filename, $results)
 {
     $path = storage_path() . "/framework/testing/$filename";
     $file = new UploadedFile($path, $filename, 'application/x-bibtex', null, true);
 
-    $response = $this->userRequest()
+    $response = $test->userRequest()
         ->post('/api/v1/bibliography/import', [
             'file' => $file
         ]);
 
     $inserted = $response->json();
 
-    $this->assertStatus($response, 201);
+    $test->assertStatus($response, 201);
     $response->assertJsonCount(16);
     $response->assertJsonStructure([ "*" => [
         "entry" => getBibliographyStructure()]
@@ -169,17 +168,17 @@ function importTest($filename, $results)
         // Note: I don't like the reliance on the $addedItem["entry"]["id"] here.
         //       But Postgres does not rollback the sequence when a transaction is rolled back.
         //       Therefore all alternative also seem to be more complex than this.
-        $response = $this->userRequest()
+        $response = $test->userRequest()
             ->get('/api/v1/bibliography/'. $addedItem["entry"]["id"]);
 
-        $this->assertStatus($response, 200);
+        $test->assertStatus($response, 200);
         $response->assertJsonStructure(getBibliographyStructure());
         $response->assertJson($r);
     }
 }
 
 test('mandatory import', function () {
-    importTest('import_mandatory.bib', [
+    importTest($this, 'import_mandatory.bib', [
         [
             "entry_type" => "article",
             "citekey" => "Smith2021",
@@ -305,7 +304,7 @@ test('mandatory import', function () {
 });
 
 test('optional import', function () {
-    importTest("import_optional.bib", [
+    importTest($this, "import_optional.bib", [
         [
             "entry_type" => "article",
             "citekey" => "Smith2021",

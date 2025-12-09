@@ -1,7 +1,6 @@
 <?php
 
 use Illuminate\Testing\Fluent\AssertableJson;
-use PHPUnit\Framework\Attributes\TestDox;
 
 use App\User;
 use App\Preference;
