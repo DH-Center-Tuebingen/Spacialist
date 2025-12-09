@@ -65,7 +65,7 @@ test('version request', function () {
 
     $response->assertStatus(200);
     $content = $response->decodeResponseJson();
-    expect($content['time'])->toMatch('/^\d+$/');
+    expect((string)$content['time'])->toMatch('/^\d+$/');
     expect($content['name'])->toMatch('/^[A-ZÄÖÜ][a-zäöüß]+$/');
     expect($content['release'])->toMatch('/^v\d+\.\d+\.\d+$/');
     expect($content['readable'])->toMatch('/^v\d+\.\d+\.\d+ \([A-ZÄÖÜ][a-zäöüß]+\)$/');
