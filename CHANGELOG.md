@@ -13,9 +13,10 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - Alerts can now be dismissed
 - Now entity metadata is only loaded when accessing the metadata tab
-- Moved to PEST as testing framework
 - Migrations now have logging automatically disabled
 - Migrations that require filesystem changes can now be handled using the `App\Traits\FilesystemMigration` trait (call `$this->safelyMoveDirectoryBetweenDisks(...)` with `ALLOW_FILESYTEM_MIGRATIONS` set to `true`)
+- Moved to PEST as testing framework
+- PHP version requirements for testing changed: [8.2, 8.3] =>  [8.3, 8.4]
 
 ## 0.11.1
 ### Added
