@@ -241,6 +241,8 @@ test('fails when encountering symlinks', function () {
     // Setup source with a symlink
     $source = Storage::disk('test_source');
     $source->makeDirectory('test_dir');
+    $target->makeDirectory('test_dir');
+    
     file_put_contents(storage_path('testing/source/test_dir/file.txt'), 'content');
     symlink(storage_path('testing/source/test_dir/file.txt'), storage_path('testing/source/test_dir/symlink.txt'));
 

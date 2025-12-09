@@ -37,7 +37,7 @@ npm-debug.log
 yarn-error.log
 yarn.lock
 .env
-.env.testing
+.env.*
 
 # Vite
 /public/build
