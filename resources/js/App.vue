@@ -24,6 +24,8 @@
     } from 'vue-final-modal';
 
     import useSystemStore from '@/bootstrap/stores/system.js';
+    import useUserStore from './bootstrap/stores/user';
+    
     import { useI18n } from 'vue-i18n';
     import { provideToast, useToast } from '@/plugins/toast.js';
 
@@ -38,6 +40,7 @@
         setup(props) {
             const { t } = useI18n();
             const systemStore = useSystemStore();
+            const userStore = useUserStore();
 
             // FETCH
 
@@ -49,8 +52,7 @@
             // ON MOUNTED
             onMounted(async _ => {
                 try {
-                    await systemStore.checkAuthState();
-                    await systemStore.setUser();
+                    await userStore.checkAuth();
                 } catch(e) {
                     if(e.response.status == 401) {
                         systemStore.setAppState(true);

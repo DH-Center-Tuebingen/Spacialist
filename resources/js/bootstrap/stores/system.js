@@ -12,7 +12,6 @@ import useUserStore from './user.js';
 import {
     checkAccess,
     fetchPreData,
-    fetchUser,
     searchConceptSelection,
     uploadPlugin,
     installPlugin,
@@ -149,9 +148,6 @@ export const useSystemStore = defineStore('system', {
 
             this.pluginStores[id] = defineStore(`plugin_${id}`, store);
         },
-        async checkAuthState() {
-            return await fetchUser();
-        },
         async checkAccess(route) {
             const accessResponse = await checkAccess(route);
             if(accessResponse.status == 200 && accessResponse?.data?.redirect) {
@@ -160,15 +156,6 @@ export const useSystemStore = defineStore('system', {
             }
 
             return true;
-        },
-        async setUser() {
-            const userStore = useUserStore();
-
-            const userData = await fetchUser();
-
-            const loginSuccessful = userData.status == 'success';
-            userStore.setLoginState(loginSuccessful);
-            userStore.setActiveUser(loginSuccessful ? userData.data : {});
         },
         async initialize(locale) {
             resetState(this);
