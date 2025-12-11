@@ -340,6 +340,7 @@
         "description": "Beschreibung",
         "roles": "Rollen",
         "permissions": "Berechtigungen",
+        "accesspoints": "Einstiegspunkte",
         "added_at": "Hinzugefügt",
         "created_at": "Erstellt",
         "updated_at": "Aktualisert",
@@ -646,6 +647,9 @@
             "active_users": "Aktive Benutzer",
             "deactivated_users": "Deaktivierte Benutzer",
             "empty_list": "Benutzerliste ist leer",
+            "accesspoints": {
+                "default": "Spacialist (Standard)"
+            },
             "toasts": {
                 "updated": {
                     "title": "Benutzer aktualisiert",

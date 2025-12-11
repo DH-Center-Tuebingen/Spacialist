@@ -220,9 +220,7 @@ class ApiActivityTest extends TestCase
         ];
 
         foreach($calls as $c) {
-            $response = $this->withHeaders([
-                    'Authorization' => "Bearer $this->token"
-                ])
+            $response = $this->userRequest()
                 ->json($c['verb'], '/api/v1' . $c['url']);
 
             $response->assertStatus(400);

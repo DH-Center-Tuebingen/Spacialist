@@ -1,14 +1,17 @@
 import { defineStore } from 'pinia';
 
 import { kebabCase } from 'lodash';
+
+import i18n from '@/bootstrap/i18n.js';
+
 import useAttributeStore from './attribute.js';
 import useBibliographyStore from './bibliography.js';
 import useEntityStore from './entity.js';
 import useUserStore from './user.js';
 
 import {
+    checkAccess,
     fetchPreData,
-    fetchUser,
     searchConceptSelection,
     uploadPlugin,
     installPlugin,
@@ -16,6 +19,10 @@ import {
     updatePlugin,
     removePlugin,
 } from '@/api.js';
+
+import {
+    router,
+} from '@/bootstrap/router.js';
 
 import {
     fetchGlobals,
@@ -75,6 +82,7 @@ export const useSystemStore = defineStore('system', {
         file: {},
         geometryTypes: [],
         datatypeData: {},
+        accessPoints: {},
     }),
     getters: {
         translateConcept: state => url => {
@@ -107,6 +115,14 @@ export const useSystemStore = defineStore('system', {
             return slot ? plugins[slot] : plugins;
         },
         getDatatypeDataOf: state => key => state.datatypeData[key],
+        getAccessPointsAsArray(state) {
+            return Object.values(state.accessPoints).map(accesspoint => {
+                return {
+                    path: accesspoint.path,
+                    label: i18n.global.t(accesspoint.label),
+                };
+            });
+        },
     },
     actions: {
         getConceptById(id) {
@@ -117,6 +133,9 @@ export const useSystemStore = defineStore('system', {
         },
         setMainViewTab(tab) {
             this.mainView.tab = tab;
+        },
+        setConcepts(concepts) {
+            this.concepts = concepts;
         },
         addCachedConceptSelection(data) {
             this.cachedConceptSelections[data.id] = data.selection;
@@ -129,6 +148,15 @@ export const useSystemStore = defineStore('system', {
 
             this.pluginStores[id] = defineStore(`plugin_${id}`, store);
         },
+        async checkAccess(route) {
+            const accessResponse = await checkAccess(route);
+            if(accessResponse.status == 200 && accessResponse?.data?.redirect) {
+                router.push(accessResponse.data.redirect);
+                return false;
+            }
+
+            return true;
+        },
         async initialize(locale) {
             resetState(this);
 
@@ -137,17 +165,13 @@ export const useSystemStore = defineStore('system', {
             const entityStore = useEntityStore();
             const userStore = useUserStore();
 
-            const userData = await fetchUser();
-            const loginSuccessful = userData.status == 'success';
-            userStore.setLoginState(loginSuccessful);
-            userStore.setActiveUser(loginSuccessful ? userData.data : {});
-
             const preData = await fetchPreData();
             this.concepts = preData.concepts;
             this.systemPreferences = preData.system_preferences;
             this.colorSets = preData.colorSets;
             this.hasAnalysis = preData.analysis;
             this.datatypeData = preData.datatype_data;
+            this.accessPoints = preData.accesspoints;
             entityStore.initializeEntityTypes(preData.entityTypes);
             userStore.setPreferences(preData.preferences);
 
@@ -166,7 +190,6 @@ export const useSystemStore = defineStore('system', {
             this.plugins = preData.plugins;
             this.geometryTypes = preData.geometryTypes;
             attributeStore.setAttributeTypes(preData.attributeTypes);
-            this.appInitialized = true;
         },
         async initializeOpenAccess() {
             return fetchGlobals().then(data => {
@@ -294,8 +317,7 @@ export const useSystemStore = defineStore('system', {
             return uninstallPlugin(id).then(data => {
                 const plugin = data.plugin;
                 const kebabedName = kebabCase(plugin.name);
-                
-                
+
                 // We use the window element here, as it resulted in an error, when
                 // trying to import the SpPS variable diretly:
                 // `Cannot access "router" before initialization`
@@ -303,7 +325,7 @@ export const useSystemStore = defineStore('system', {
                 if(window?.SpPS?.data?.plugins && window.SpPS.data.plugins[kebabedName]) {
                     delete window?.SpPS.data.plugins[kebabedName];
                 }
-                
+
                 this.unregisterPluginSlots(kebabedName);
                 this.unregisterPluginPreferences(kebabedName);
                 this.updatePlugin({

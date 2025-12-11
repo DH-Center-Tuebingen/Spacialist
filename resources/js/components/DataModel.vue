@@ -219,7 +219,7 @@
                                     :id="`dme-attribute-list-${type}-grp-container`"
                                     class="accordion-collapse collapse"
                                 >
-                                    <div class="accordion-body px-2 pb-3 pt-0">
+                                    <div class="accordion-body px-2 py-3">
                                         <attribute-list
                                             :group="{ name: `attribute-selection-${type}`, pull: true, put: false }"
                                             :attributes="attrGrp"

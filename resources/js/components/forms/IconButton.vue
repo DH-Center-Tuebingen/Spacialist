@@ -1,7 +1,6 @@
 <template>
     <div
-        class="icon-button"
-        style="user-select: none; cursor: pointer;"
+        class="icon-button clickable user-select-none"
         :aria-pressed="modelValue"
         @click="_ => $emit('update:modelValue', !modelValue)"
     >

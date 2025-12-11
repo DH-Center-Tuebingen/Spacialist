@@ -27,6 +27,12 @@ class UserController extends Controller {
 
     // GET
 
+    // Might be used in Core or Plugins to refresh a session with a short TTL
+    // e.g. for timer-based logout
+    public function refreshSession() {
+        return response()->json();
+    }
+
     public function getUser(Request $request) {
         $user = User::with('notifications')->find(auth()->user()->id);
         $user->setPermissions();
@@ -187,6 +193,7 @@ class UserController extends Controller {
             $user->login_attempts--;
             $user->save();
         }
+        $user->setPermissions();
 
         return response()
             ->json($user, 200);
@@ -204,18 +211,22 @@ class UserController extends Controller {
             'nickname' => 'required_without:email|alpha_dash|max:255|unique:users,nickname',
             'name' => 'required|string|max:255',
             'password' => 'required|min:6',
+            'password_confirm' => 'required|same:password',
+            'accesspoints' => 'array',
         ]);
 
         $name = $request->get('name');
         $nickname = $request->get('nickname');
         $email = $request->get('email');
         $password = Hash::make($request->get('password'));
+        $accesspoints = $request->get('accesspoints');
 
         $user = new User();
         $user->name = $name;
         $user->nickname = Str::lower($nickname);
         $user->email = Str::lower($email);
         $user->password = $password;
+        $user->accesspoints = $accesspoints;
         $user->save();
         $user = User::find($user->id);
 
@@ -293,6 +304,7 @@ class UserController extends Controller {
         $this->validate($request, [
             'roles' => 'array',
             'email' => 'email',
+            'accesspoints' => 'array',
             'name' => 'string|max:255',
             'nickname' => 'alpha_dash|max:255|unique:users,nickname',
             'phonenumber' => 'nullable|string|max:255',
@@ -338,6 +350,10 @@ class UserController extends Controller {
         $saveRequired = false;
         if($request->has('email')) {
             $user->email = Str::lower($request->get('email'));
+            $saveRequired = true;
+        }
+        if($request->has('accesspoints')) {
+            $user->accesspoints = $request->get('accesspoints');
             $saveRequired = true;
         }
         if($request->has('name')) {

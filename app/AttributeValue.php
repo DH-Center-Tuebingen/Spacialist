@@ -4,10 +4,11 @@ namespace App;
 
 use App\Geodata;
 use App\AttributeTypes\AttributeBase;
+use App\Exceptions\InvalidDataException;
+use Illuminate\Database\Eloquent\Model;
+use Clickbar\Magellan\Data\Geometries\Geometry;
 use App\Traits\CommentTrait;
 use App\Traits\ModerationTrait;
-use Clickbar\Magellan\Data\Geometries\Geometry;
-use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Searchable\Searchable;
@@ -85,6 +86,101 @@ class AttributeValue extends Model implements Searchable
 
     public function getValue() {
         return AttributeBase::serializeValue($this);
+    }
+
+    // [VR] Temporary solution to allow patching entities/attribute values outside of controller
+    // But this is also already fixed (in a different way) on pull/585 (0.11.2-fix-attribute-value-list-error)
+    public static function handlePatch(int $entity_id, int $attribute_id, mixed $value, string $operation, User $user, array &$added = [], array &$deleted = []) {
+        $error = null;
+        $code = 400;
+        switch($operation) {
+            case 'remove':
+                $attrval = AttributeValue::where([
+                    ['entity_id', '=', $entity_id],
+                    ['attribute_id', '=', $attribute_id],
+                ])->first();
+                if(!isset($attrval)) {
+                    $error = __('This attribute value does either not exist or is in moderation state.');
+                    break;
+                }
+                if($user->isModerated()) {
+                    $attrval->moderate('pending-delete', true);
+                } else {
+                    $deleted[$attribute_id] = $attrval;
+                    $attrval->delete();
+                }
+                break;
+
+            /**
+             * In the case when a user created the attribute, while another was visiting the
+             * page and sends an 'add' operation, and the other user also sends their changes,
+             * the application would have thrown an error, that the attribute was already created.
+             *
+             * That's why we combined the add and replace operations into one case.
+             * [SO] 29.01.2025
+             */
+            case 'add':
+            case 'replace':
+                $alreadyModerated = AttributeValue::where('entity_id', $entity_id)
+                    ->where('attribute_id', $attribute_id)
+                    ->onlyModerated()
+                    ->exists();
+
+                // Currently the logic is that a moderated state cannot be changed
+                // by a moderated user.
+                if($alreadyModerated && $user->isModerated()) {
+                    $error = __('This attribute value is in moderation state. A user with appropriate permissions has to accept or deny it first.');
+                    break;
+                }
+                $attrval = AttributeValue::firstOrNew([
+                    'entity_id' => $entity_id,
+                    'attribute_id' => $attribute_id,
+                ], [
+                    'certainty' => null
+                ]);
+                if($user->isModerated()) {
+                    $attrval = $attrval->moderate('pending', false, true);
+                    unset($attrval->comments_count);
+                }
+                break;
+            default:
+                $error = __('Unknown operation');
+        }
+
+        if($error !== null) {
+            return [
+                'message' => $error,
+                'code' => $code,
+            ];
+        }
+
+        // no further action required for deleted attribute values, continue with next patch
+        if($operation == 'remove') {
+            return false;
+        }
+
+        try {
+            $attr = Attribute::findOrFail($attribute_id);
+            $formKeyValue = AttributeValue::getFormattedKeyValue($attr->datatype, $value);
+        } catch(InvalidDataException $ide) {
+            return [
+                'message' => $ide->getMessage(),
+                'code' => 422,
+            ];
+        }
+
+        $attrval->{$formKeyValue->key} = $formKeyValue->val;
+        $attrval->user_id = $user->id;
+        $attrval->save();
+
+        // As we cannot ensure that the 'add' is correct,
+        // we use this laravel option to ensure the attribute
+        // was created and not replaced.
+        if($attrval->wasRecentlyCreated) {
+            $added[$attribute_id] = $attrval;
+        }
+
+        return false;
     }
 
     public static function getValueFromKey($arr) {

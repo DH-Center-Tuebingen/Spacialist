@@ -33,6 +33,8 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function() {
             'time' => $versionInfo->getTime()
         ]);
     });
+
+    Route::post('/access/check', 'HomeController@checkAccesspointAccess');
 });
 
 // PLUGINS
@@ -128,6 +130,7 @@ Route::middleware('web')->prefix('v1')->group(function() {
 
 
 Route::middleware('auth:sanctum')->prefix('v1')->group(function() {
+    Route::get('/refresh', 'UserController@refreshSession');
     Route::get('/auth/user', 'UserController@getUser');
     Route::get('/user', 'UserController@getUsers');
     Route::get('/role', 'UserController@getRoles');
@@ -210,8 +213,8 @@ Route::middleware('auth:sanctum')->prefix('v1/tag')->group(function() {
 /**
  * Plugins should have their own routes, if they are required to be implemented in the core,
  * we are doing something wrong. Remove all plugin routes as soon as possible.
- * 
- * If some functionality is required for the core to access plugin data, we must adjust the plugin 
+ *
+ * If some functionality is required for the core to access plugin data, we must adjust the plugin
  * system accordingly.
  */
 

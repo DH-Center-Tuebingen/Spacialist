@@ -22,6 +22,12 @@ export async function getCsrfCookie() {
     }));
 }
 
+// Might be used in Core or Plugins to refresh a session with a short TTL
+// e.g. for timer-based logout
+export async function refreshSession() {
+    return $httpQueue.add(() => http.get('/refresh'));
+}
+
 export async function uploadPlugin(file) {
     const formData = new FormData();
     formData.append('file', file);
@@ -240,6 +246,13 @@ export async function getMapProjection(srid) {
 }
 
 // POST
+export async function checkAccess(endpoint = '/') {
+    const data = {
+        endpoint: endpoint,
+    };
+    return $httpQueue.add(() => http.post('/access/check', data));
+}
+
 export async function login(credentials) {
     return await $httpQueue.add(() => http.post('/auth/login', credentials).then(response => {
         return response.data;
@@ -247,7 +260,7 @@ export async function login(credentials) {
 }
 
 export async function addUser(user) {
-    const data = only(user, ['name', 'nickname', 'email', 'password']);
+    const data = only(user, ['name', 'nickname', 'email', 'password', 'password_confirm', 'accesspoints']);
     return $httpQueue.add(
         () => http.post('user', data).then(response => response.data)
     );

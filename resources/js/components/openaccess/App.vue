@@ -24,6 +24,7 @@
 
 <script>
     import {
+        computed,
         reactive,
     } from 'vue';
 
