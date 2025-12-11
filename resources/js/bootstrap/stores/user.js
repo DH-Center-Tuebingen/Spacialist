@@ -138,11 +138,11 @@ export const useUserStore = defineStore('user', {
         },
     },
     actions: {
-        async checkAuth(){
+        async checkAuth() {
             try{
-                const user = await fetchUser()
-                this.setActiveUser(user)
-                return user
+                const user = await fetchUser();
+                this.setActiveUser(user);
+                return user;
             } catch {
                 return null;
             }

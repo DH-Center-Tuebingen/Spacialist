@@ -24,8 +24,8 @@
     } from 'vue-final-modal';
 
     import useSystemStore from '@/bootstrap/stores/system.js';
-    import useUserStore from './bootstrap/stores/user';
-    
+    import useUserStore from './bootstrap/stores/user.js';
+
     import { useI18n } from 'vue-i18n';
     import { provideToast, useToast } from '@/plugins/toast.js';
 
