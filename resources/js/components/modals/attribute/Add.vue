@@ -87,6 +87,11 @@
                     <i class="fas fa-fw fa-times" /> {{ t('global.cancel') }}
                 </button>
             </div>
+            <pre>
+                {{
+                    attribute
+                }}
+            </pre>
         </div>
     </vue-final-modal>
 </template>
@@ -119,6 +124,7 @@
             // FUNCTIONS
             const add = e => {
                 const attribute = {...e};
+                console.log("Adding attribute:", attribute);
                 if(state.hasColumns && state.columns.length > 0) {
                     attribute.columns = state.columns.slice();
                 }

@@ -477,6 +477,10 @@ export async function addAttribute(attribute) {
         data.si_default = attribute.siGroupUnit;
     }
 
+    if(attribute.metadata) {
+        data.metadata = attribute.metadata;
+    }
+
     return $httpQueue.add(
         () => http.post(`/editor/dm/attribute`, data).then(response => response.data)
     );

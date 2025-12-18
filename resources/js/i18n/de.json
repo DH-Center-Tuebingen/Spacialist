@@ -305,6 +305,9 @@
                 "entity_type": "Auf folgende Entitätstypen beschränken"
             }
         },
+        "attribute-template": {
+            "epoch-format": "Zeitspannen Format"
+        },
         "activity": "Aktivitäten",
         "action": "Aktion",
         "users": "Benutzer",

@@ -87,6 +87,7 @@
         :value="state.value"
         :epochs="state.selection"
         :type="data.datatype"
+        :metadata="data.metadata"
         @change="updateDirtyState"
     />
 

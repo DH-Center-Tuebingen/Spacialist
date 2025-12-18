@@ -221,6 +221,11 @@
                 />
             </div>
         </div>
+        <EpochAttributeTemplate
+            v-if="state.isEpoch"
+            v-model="state.attribute"
+            class="mb-3"
+        />
         <template v-if="state.isSiUnit">
             <div class="mb-3">
                 <label class="col-form-label col-3">
@@ -339,11 +344,13 @@
 
     import ChainList from './chain/ChainList.vue';
     import PluginBadge from './plugins/Badge.vue';
+    import EpochAttributeTemplate from './attribute/template/EpochAttributeTemplate.vue';
 
     export default {
         components: {
             ChainList,
             PluginBadge,
+            EpochAttributeTemplate,
         },
         props: {
             type: {
@@ -408,6 +415,11 @@
                 if(!state.canRestrictTypes || state.attribute.restrictedTypes.length == 0) {
                     state.attribute.restrictedTypes = null;
                 }
+
+                // TODO: Here happens an API call, if it fails all changes are lost.
+                // The call should be evaluated first before the data is deleted!
+                // E.g. pass the handler as a callback. When it succeeds, reset the form.
+                // otherwise, show an error message.
                 context.emit('created', { ...state.attribute });
                 reset();
             };
@@ -547,6 +559,9 @@
                         state.attribute.type == 'string-mc' ||
                         state.attribute.type == 'epoch';
                 }),
+                isEpoch: computed(_ => {
+                    return state.attribute.type == 'epoch' || state.attribute.type == 'timeperiod';
+                }),
                 isStringSc: computed(_ => {
                     return state.attribute.type == 'string-sc';
                 }),
@@ -581,6 +596,8 @@
                         );
                 }),
             });
+
+            watch(() => state.attribute.metadata, emitUpdate, { deep: true });
 
             /**
              * We update the validated event with a watcher

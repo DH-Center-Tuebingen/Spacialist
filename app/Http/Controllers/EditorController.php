@@ -171,7 +171,8 @@ class EditorController extends Controller {
             'text' => 'string',
             'recursive' => 'nullable|boolean_string',
             'si_base' => 'nullable|si_baseunit',
-            'si_default' => 'nullable|si_unit:si_base'
+            'si_default' => 'nullable|si_unit:si_base',
+            'metadata' => 'nullable|array',
         ]);
 
         $lid = $request->get('label_id');
@@ -180,6 +181,7 @@ class EditorController extends Controller {
         $attr = new Attribute();
         $attr->thesaurus_url = $curl;
         $attr->datatype = $datatype;
+        $attr->metadata = $request->get('metadata');
         $attr->recursive = $request->has('recursive') && sp_parse_boolean($request->get('recursive'));
         if($request->has('root_id')) {
             $pid = $request->get('root_id');

@@ -1,32 +1,11 @@
 <template>
     <div>
         <div class="input-group">
-            <button
-                type="button"
-                class="btn btn-outline-secondary dropdown-toggle"
-                :disabled="disabled"
-                data-bs-toggle="dropdown"
-                aria-haspopup="true"
-                aria-expanded="false"
-            >
-                <span v-if="v.startLabel.value">
-                    {{ t(`main.entity.attributes.${v.startLabel.value}`) }}
-                </span>
-                <span v-else>
-                    <!-- TODO: Check if this else is required -->
-                </span>
-            </button>
-            <ul class="dropdown-menu">
-                <a
-                    v-for="(label, i) in timeLabels"
-                    :key="i"
-                    class="dropdown-item"
-                    href="#"
-                    @click.prevent="setLabel('startLabel', label)"
-                >
-                    {{ t(`main.entity.attributes.${label}`) }}
-                </a>
-            </ul>
+            <common-era-dropdown
+                :model-value="v.startLabel.value"
+                :format="epochFormat"
+                @update:modelValue="(value) => setLabel('startLabel', value)"
+            />
             <input
                 v-model.number="v.start.value"
                 type="number"
@@ -50,35 +29,11 @@
                 aria-label=""
                 @input="v.end.handleInput"
             >
-            <button
-                type="button"
-                class="btn btn-outline-secondary dropdown-toggle"
-                :disabled="disabled"
-                data-bs-toggle="dropdown"
-                aria-haspopup="true"
-                aria-expanded="false"
-            >
-                <span v-if="v.endLabel.value">
-                    {{ t(`main.entity.attributes.${v.endLabel.value}`) }}
-                </span>
-                <span v-else>
-                    <!-- TODO: Check if this else is required -->
-                </span>
-            </button>
-            <ul
-                uib-dropdown-menu
-                class="dropdown-menu"
-            >
-                <a
-                    v-for="(label, i) in timeLabels"
-                    :key="i"
-                    class="dropdown-item"
-                    href="#"
-                    @click.prevent="setLabel('endLabel', label)"
-                >
-                    {{ t(`main.entity.attributes.${label}`) }}
-                </a>
-            </ul>
+            <common-era-dropdown
+                :model-value="v.endLabel.value"
+                :format="epochFormat"
+                @update:modelValue="(value) => setLabel('endLabel', value)"
+            />
         </div>
         <multiselect
             v-if="state.hasEpochList"
@@ -126,8 +81,12 @@
         translateConcept,
         multiselectResetClasslist,
     } from '@/helpers/helpers.js';
+    import CommonEraDropdown from './epoch/CommonEraDropdown.vue';
 
     export default {
+        components: {
+            CommonEraDropdown,
+        },
         props: {
             name: {
                 type: String,
@@ -150,6 +109,11 @@
             },
             disabled: {
                 type: Boolean,
+            },
+            metadata: {
+                type: Object,
+                required: false,
+                default: _ => new Object(),
             },
         },
         emits: ['change'],
@@ -200,6 +164,7 @@
                 });
             };
             const setLabel = (field, value) => {
+                console.log("setLabel:", field, value);
                 v[field].handleChange(value);
             };
             const handleEpochChange = option => {
@@ -207,7 +172,8 @@
             };
 
             // DATA
-            const timeLabels = ['BC', 'AD'];
+
+
             const {
                 handleInput: his,
                 value: vs,
@@ -328,17 +294,22 @@
                 }
             });
 
+            const epochFormat = computed(_ => {
+                // Default to 'bcad' as it was used before.
+                return props.metadata?.epoch_format ?? 'bcad';
+            });
+
             // RETURN
             return {
                 t,
                 // HELPERS
+                epochFormat,
                 translateConcept,
                 multiselectResetClasslist,
                 // LOCAL
                 resetFieldState,
                 undirtyField,
                 setLabel,
-                timeLabels,
                 handleEpochChange,
                 // STATE
                 state,

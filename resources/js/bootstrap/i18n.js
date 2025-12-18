@@ -25,4 +25,6 @@ export function getSupportedLanguages() {
     return Object.keys(messages);
 }
 
+export const globalT = i18n.global.t;
+
 export default i18n;

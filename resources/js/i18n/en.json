@@ -305,6 +305,9 @@
                 "entity_type": "Restrict to following Entity Types"
             }
         },
+        "attribute-template": {
+            "epoch-format": "Epoch Format"
+        },
         "activity": "Activity",
         "action": "Action",
         "users": "User | Users",

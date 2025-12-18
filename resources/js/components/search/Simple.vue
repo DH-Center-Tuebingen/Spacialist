@@ -263,10 +263,16 @@
 
                 // Only apply if the query did not change in the meantime.
                 if(state.query === query) {
-                    state.searchResults = [
-                        ...state.searchResults,
-                        ...filteredResults,
-                    ];
+                    if(!Array.isArray(filteredResults)) {
+                        console.error('Search results are not iterable:', filteredResults);
+                        console.error('Expected an array but got:', typeof filteredResults);
+                        state.searchResults = [];
+                    } else {
+                        state.searchResults = [
+                            ...state.searchResults,
+                            ...filteredResults,
+                        ];
+                    }
                 }
                 state.loading = false;
             };
