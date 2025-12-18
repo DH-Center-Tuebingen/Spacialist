@@ -139,6 +139,12 @@
             "contact": "Kontakt",
             "security": {
                 "title": "Sicherheit",
+                "password": {
+                    "password_mismatch": "Die Passwörter stimmen nicht überein",
+                    "current_password": "Aktuelles Passwort",
+                    "new_password": "Neues Passwort",
+                    "new_password_confirmation": "Neues Passwort bestätigen"
+                },
                 "2fa": {
                     "title": "2-Faktor-Authentifizierung",
                     "enable": "2FA aktivieren",
@@ -829,7 +835,8 @@
                 "sub": {
                     "general": "Allgemein",
                     "layout": "Layout",
-                    "interface": "Benutzer-Interface"
+                    "interface": "Benutzer-Interface",
+                    "security": "Sicherheit"
                 },
                 "is_empty": "Keine Einstellungen in dieser Kategorie"
             },
@@ -862,6 +869,10 @@
                     "projection": "Kartenprojektion",
                     "epsg": "EPSG-Code"
                 }
+            },
+            "security": {
+                "update-password": "Passwort aktualisieren",
+                "two_factor_authentication": "Zwei-Faktor-Authentifizierung (2FA)"
             }
         },
         "plugins": {

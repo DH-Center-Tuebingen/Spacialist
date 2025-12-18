@@ -1,18 +1,21 @@
 <template>
-    <div :class="classes">
+    <div>
+        <!-- We reset the input-goups width (100%) width the width:auto style -->
         <form
             class="input-group"
+            style="width: auto;"
             :class="inputClasses"
             @submit.prevent="confirmChallenge"
         >
             <input
                 id="confirm-2fa-code"
                 :value="challenge"
-                class="form-control py-1"
+                class="form-control py-1 text-center"
                 style="font-size: .8rem;"
                 type="text"
                 placeholder="XXX XXX"
                 @input="styleChallenge"
+                :style="{ width: '100px' }"
             >
             <button
                 id="confirm-2fa-code-btn"
@@ -43,11 +46,6 @@
 
     export default {
         props: {
-            classes: {
-                type: String,
-                required: false,
-                default: 'w-25 mx-auto',
-            },
             inputClasses: {
                 type: String,
                 required: false,
@@ -65,7 +63,7 @@
 
             const challenge = ref('');
             const format = new RegExp(/\d{6}/);
-            const onlyDigits = new RegExp(/\d+/);
+            const onlyDigits = new RegExp(/^\d+$/);
 
             const confirmChallenge = _ => {
                 const trimmedChallenge = challenge.value.replace(/ /g, '');
@@ -79,19 +77,27 @@
 
             const styleChallenge = event => {
                 let currentValue = event.target.value.replaceAll(' ', '');
+
+                if(currentValue === '') {
+                    challenge.value = '';
+                    event.target.value = '';
+                    return;
+                }
+
                 if(currentValue.length > 6) {
                     currentValue = currentValue.substring(0, 6);
+                    event.target.value = challenge.value;
+                    return
                 }
                 if(!onlyDigits.test(currentValue)) {
-                    // TODO set error?
+                    event.target.value = challenge.value;
                     return;
                 }
 
                 if(currentValue.length > 3) {
                     currentValue = currentValue.substring(0, 3) + ' ' + currentValue.substring(3);
                 }
-                // need to reset it to trigger update
-                challenge.value = '';
+              
                 challenge.value = currentValue;
             };
 

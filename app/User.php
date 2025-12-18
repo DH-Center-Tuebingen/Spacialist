@@ -47,7 +47,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $hidden = [
-        'password', 'remember_token',
+        'password', 'remember_token', /*'two_factor_secret', 'two_factor_recovery_codes',*/
     ];
 
     public function getActivitylogOptions() : LogOptions

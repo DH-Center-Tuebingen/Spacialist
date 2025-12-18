@@ -94,10 +94,12 @@ class RouteServiceProvider extends ServiceProvider
             $namespace = "App\\Plugins\\$plugin->name\\Controllers";
             $routesPath = "app/Plugins/$plugin->name/routes/api.php";
 
-            Route::prefix($prefix)
-                 ->middleware('api')
-                 ->namespace($namespace)
-                 ->group(base_path($routesPath));
+            if(file_exists(base_path($routesPath))) {
+                Route::prefix($prefix)
+                    ->middleware('api')
+                    ->namespace($namespace)
+                    ->group(base_path($routesPath));
+            }
         }
     }
 }

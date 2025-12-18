@@ -101,24 +101,24 @@
                     </div>
                 </form>
                 <div v-else>
-                    <Alert
-                        type="info"
-                        :dismissible="true"
-                        :message="t('global.user.security.2fa.login_info')"
-                    />
+                    
                     <label
                         for="2fa-code"
                         class="text-center w-100 col-form-label"
                     >
                         {{ t('global.2fa_code') }}
-                        <i class="fas fa-fw fa-qrcode" />
                     </label>
 
                     <TwoFactorChallenge
-                        classes="w-50 mx-auto"
+                        class="mb-3"
                         input-classes="w-50 mx-auto"
                         :errors="state.twoFa.errors"
                         @confirm="confirmSecondFactor"
+                    />
+
+                    <Alert
+                        type="info"
+                        :message="t('global.user.security.2fa.login_info')"
                     />
                 </div>
             </div>

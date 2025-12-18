@@ -148,11 +148,11 @@ return [
         // Features::resetPasswords(),
         // Features::emailVerification(),
         // Features::updateProfileInformation(),
-        // Features::updatePasswords(),
+        //Features::updatePasswords(),
         Features::twoFactorAuthentication([
             'confirm' => true,
             'confirmPassword' => false,
-            // 'window' => 0,
+            'window' => 30,
         ]),
     ],
 

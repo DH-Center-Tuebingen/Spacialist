@@ -11,13 +11,17 @@ import {
     deleteUserAvatar,
     getCsrfCookie,
     login,
-    confirmTwoFactorChallenge,
     logout,
     patchUserData,
     patchRoleData,
     reactivateUser,
     setUserAvatar,
 } from '@/api.js';
+
+import {
+    confirmTwoFactorChallenge,
+} from '@/api/user.js';
+
 
 import {
     only,

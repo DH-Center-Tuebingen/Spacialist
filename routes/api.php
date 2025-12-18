@@ -131,6 +131,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function() {
     Route::get('/access/groups', 'UserController@getAccessGroups');
 
     Route::post('/user', 'UserController@addUser');
+    Route::post('/user/reset-password', 'UserController@resetPassword');
     Route::post('/user/avatar', 'UserController@addAvatar')->where('id', '[0-9]+');
     Route::post('/role', 'UserController@addRole');
 
@@ -206,35 +207,35 @@ Route::middleware('auth:sanctum')->prefix('v1/tag')->group(function() {
 
 // EXTENSIONS
 
-// FILE
-Route::middleware('auth:sanctum')->prefix('v1/file')->group(function() {
-    Route::get('/{id}', 'FileController@getFile')->where('id', '[0-9]+');
-    Route::get('/{id}/link_count', 'FileController@getLinkCount')->where('id', '[0-9]+');
-    Route::get('/{id}/sub_files', 'FileController@getSubFiles')->where('id', '[0-9]+');
+// // FILE
+// Route::middleware('auth:sanctum')->prefix('v1/file')->group(function() {
+//     Route::get('/{id}', 'FileController@getFile')->where('id', '[0-9]+');
+//     Route::get('/{id}/link_count', 'FileController@getLinkCount')->where('id', '[0-9]+');
+//     Route::get('/{id}/sub_files', 'FileController@getSubFiles')->where('id', '[0-9]+');
 
-    Route::post('/unlinked', 'FileController@getUnlinkedFiles');
-    Route::post('/linked/{cid}', 'FileController@getLinkedFiles')->where('cid', '[0-9]+');
+//     Route::post('/unlinked', 'FileController@getUnlinkedFiles');
+//     Route::post('/linked/{cid}', 'FileController@getLinkedFiles')->where('cid', '[0-9]+');
 
-    Route::delete('/{id}', 'FileController@deleteFile')->where('id', '[0-9]+');
-});
+//     Route::delete('/{id}', 'FileController@deleteFile')->where('id', '[0-9]+');
+// });
 
-// MAP
-Route::middleware('auth:sanctum')->prefix('v1/map')->group(function() {
-    Route::post('epsg/text', 'MapController@getEpsgByText');
+// // MAP
+// Route::middleware('auth:sanctum')->prefix('v1/map')->group(function() {
+//     Route::post('epsg/text', 'MapController@getEpsgByText');
 
-    Route::patch('/{id}', 'MapController@updateGeometry')->where('id', '[0-9]+');
-    Route::patch('/layer/{id}/switch', 'MapController@changeLayerPositions')->where('id', '[0-9]+');
-    Route::patch('/layer/{id}/move', 'MapController@moveLayer')->where('id', '[0-9]+');
+//     Route::patch('/{id}', 'MapController@updateGeometry')->where('id', '[0-9]+');
+//     Route::patch('/layer/{id}/switch', 'MapController@changeLayerPositions')->where('id', '[0-9]+');
+//     Route::patch('/layer/{id}/move', 'MapController@moveLayer')->where('id', '[0-9]+');
 
-    Route::delete('/{id}', 'MapController@delete')->where('id', '[0-9]+');
-});
+//     Route::delete('/{id}', 'MapController@delete')->where('id', '[0-9]+');
+// });
 
-// ANALYSIS
-Route::middleware('auth:sanctum')->prefix('v1/analysis')->group(function() {
-    Route::post('export', 'AnalysisController@export');
-    Route::post('export/{type}', 'AnalysisController@export');
-    Route::post('filter', 'AnalysisController@applyFilterQuery');
-});
+// // ANALYSIS
+// Route::middleware('auth:sanctum')->prefix('v1/analysis')->group(function() {
+//     Route::post('export', 'AnalysisController@export');
+//     Route::post('export/{type}', 'AnalysisController@export');
+//     Route::post('filter', 'AnalysisController@applyFilterQuery');
+// });
 
 // Open Access
 Route::prefix('v1/open')->group(function() {

@@ -64,19 +64,25 @@
             >
                 <table
                     v-dcan="'preferences_write'"
-                    class="table table-light table-striped table-hover mb-0"
+                    class="table table-light table-striped table mb-0"
                 >
                     <tbody>
                         <tr
                             v-for="preferencesBlock in state.categoryPreferences"
                             :key="preferencesBlock.label"
                         >
-                            <td>
+                            <td class="col-md-4">
                                 <strong>
                                     {{ t(preferencesBlock.title) }}
                                 </strong>
+                                <p
+                                    v-if="preferencesBlock.description"
+                                    class="fs-small text-muted fst-italic"
+                                >
+                                    {{ t(preferencesBlock.description) }}
+                                </p>
                             </td>
-                            <td>
+                            <td class="col-md-8">
                                 <component
                                     :is="preferencesBlock.component"
                                     :model-value="(preferencesBlock.data === 'v-model') ? state.preferences[preferencesBlock.label] : null"
@@ -124,25 +130,16 @@
     import GuiLanguage from '@/components/preferences/GuiLanguage.vue';
     import Color from '@/components/preferences/Color.vue';
     import ResetEmail from '@/components/preferences/ResetEmail.vue';
+    import UpdatePassword from '@/components/user/UpdatePassword.vue';
     import Columns from '@/components/preferences/Columns.vue';
     import ShowTooltips from '@/components/preferences/ShowTooltips.vue';
     import Tags from '@/components/preferences/Tags.vue';
     import ThesaurusLink from '@/components/preferences/ThesaurusLink.vue';
     import ProjectName from '@/components/preferences/ProjectName.vue';
     import ProjectMaintainer from '@/components/preferences/ProjectMaintainer.vue';
+    import TwoFactor from '@/components/user/TwoFactor.vue';
 
     export default {
-        components: {
-            'gui-language-preference': GuiLanguage,
-            'color-preference': Color,
-            'reset-email-preference': ResetEmail,
-            'columns-preference': Columns,
-            'tooltips-preference': ShowTooltips,
-            'tags-preference': Tags,
-            'thesaurus-link-preference': ThesaurusLink,
-            'project-name-preference': ProjectName,
-            'project-maintainer-preference': ProjectMaintainer,
-        },
         setup(props, context) {
             const { t, locale } = useI18n();
             const systemStore = useSystemStore();
@@ -259,21 +256,33 @@
             // DATA
             const preferencesConfig = {
                 user: {
-                    general: {
-                        preferences: [],
+                    security: {
+                        preferences: [
+                            {
+                                title: 'main.preference.security.update-password',
+                                label: 'update-password',
+                                component: UpdatePassword,
+                            },
+                            {
+                                title: 'main.preference.security.two_factor_authentication',
+                                label: 'two-factor-authentication',
+                                description: 'global.user.security.2fa.enable_info',
+                                component: TwoFactor,
+                            }
+                        ],
                     },
                     layout: {
                         preferences: [
                             {
                                 title: 'main.preference.key.language',
                                 label: 'prefs.gui-language',
-                                component: 'gui-language-preference',
+                                component: GuiLanguage,
                                 data: 'v-model'
                             },
                             {
                                 title: 'main.preference.key.color.title',
                                 label: 'prefs.color',
-                                component: 'color-preference',
+                                component: Color,
                             },
                         ],
                     },
@@ -282,12 +291,12 @@
                             {
                                 title: 'main.preference.key.columns.title',
                                 label: 'prefs.columns',
-                                component: 'columns-preference',
+                                component: Columns,
                             },
                             {
                                 title: 'main.preference.key.tooltips',
                                 label: 'prefs.show-tooltips',
-                                component: 'tooltips-preference',
+                                component: ShowTooltips,
                             },
                         ],
                     },
@@ -298,28 +307,28 @@
                             {
                                 title: 'main.preference.key.password_reset',
                                 label: 'prefs.enable-password-reset-link',
-                                component: 'reset-email-preference',
+                                component: ResetEmail,
                             },
                             {
                                 title: 'main.preference.key.tag_root',
                                 label: 'prefs.tag-root',
-                                component: 'tags-preference',
+                                component: Tags,
                             },
                             {
                                 title: 'main.preference.key.link_thesaurex',
                                 label: 'prefs.link-to-thesaurex',
-                                component: 'thesaurus-link-preference',
+                                component: ThesaurusLink,
                             },
                             {
                                 title: 'main.preference.key.project.name',
                                 label: 'prefs.project-name',
-                                component: 'project-name-preference',
+                                component: ProjectName,
                                 data: 'v-model'
                             },
                             {
                                 title: 'main.preference.key.project.maintainer',
                                 label: 'prefs.project-maintainer',
-                                component: 'project-maintainer-preference',
+                                component: ProjectMaintainer,
                             },
                         ],
                     },
@@ -328,13 +337,13 @@
                             {
                                 title: 'main.preference.key.language',
                                 label: 'prefs.gui-language',
-                                component: 'gui-language-preference',
+                                component: GuiLanguage,
                                 data: 'v-model'
                             },
                             {
                                 title: 'main.preference.key.color.title',
                                 label: 'prefs.color',
-                                component: 'color-preference',
+                                component: Color,
                             },
                         ],
                     },
@@ -343,12 +352,12 @@
                             {
                                 title: 'main.preference.key.columns.title',
                                 label: 'prefs.columns',
-                                component: 'columns-preference',
+                                component: Columns,
                             },
                             {
                                 title: 'main.preference.key.tooltips',
                                 label: 'prefs.show-tooltips',
-                                component: 'tooltips-preference',
+                                component: ShowTooltips,
                             },
                         ],
                     },
