@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Attribute;
 use App\AttributeValue;
+use App\AttributeTypes\AttributeBase;
+use App\AttributeTypes\SuperiorAttributeBase;
 use App\Entity;
 use App\EntityAttribute;
 use App\EntityFile;
@@ -902,21 +904,38 @@ class EntityController extends Controller {
             ], 400);
         }
         try {
-            Attribute::findOrFail($aid);
+            $attribute = Attribute::findOrFail($aid);
         } catch(ModelNotFoundException $e) {
             return response()->json([
                 'error' => __('This attribute does not exist'),
             ], 400);
         }
 
-        $attrValue = AttributeValue::firstOrCreate([
+        // Check if this is a superior attribute type and get the appropriate model class
+        $attributeClass = AttributeBase::getMatchingClass($attribute->datatype);
+        
+        // Debug logging
+        Log::info('patchAttribute debug', [
+            'datatype' => $attribute->datatype,
+            'attributeClass' => get_class($attributeClass),
+            'isSuperior' => is_a($attributeClass, SuperiorAttributeBase::class),
+            'hasModelClass' => method_exists($attributeClass, 'getModelClass'),
+        ]);
+        
+        $modelClass = (is_a($attributeClass, SuperiorAttributeBase::class)) 
+            ? $attributeClass::getModelClass() 
+            : AttributeValue::class;
+            
+        Log::info('Using model class: ' . $modelClass);
+
+        $attrValue = $modelClass::firstOrCreate([
             'entity_id' => $id,
             'attribute_id' => $aid,
         ], [
             'user_id' => $user->id,
         ]);
-        // When attribute value already exists and nothing changed
-        // (same certainty)
+        
+        // When attribute value already exists and nothing changed (same certainty)
         if(
             !$attrValue->wasRecentlyCreated
             &&
@@ -924,6 +943,7 @@ class EntityController extends Controller {
         ) {
             return response()->json($attrValue);
         }
+        
         $attrValue->user_id = $user->id;
         $values = $request->only(array_keys(AttributeValue::patchRules));
         $attrValue->patch($values);

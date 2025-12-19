@@ -27,7 +27,7 @@
     />
 
     <integer-attribute
-        v-else-if="data.datatype == 'integer'"
+        v-else-if="data.datatype == 'integer' || data.datatype == 'superior-integer'"
         :ref="el => setRef(el)"
         :disabled="state.disabled"
         :name="`attr-${data.id}`"

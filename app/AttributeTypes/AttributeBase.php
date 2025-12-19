@@ -10,6 +10,7 @@ use App\Exceptions\InvalidDataException;
 use App\Registries\AttributeRegistry;
 use App\User;
 use App\Utils\StringUtils;
+use Illuminate\Database\Eloquent\Model;
 
 abstract class AttributeBase
 {
@@ -60,9 +61,14 @@ abstract class AttributeBase
         return isset(static::$hasSelection) && static::$hasSelection;
     }
 
-    public static function serializeValue(AttributeValue $value) : mixed {
+    public static function serializeValue(AttributeValue|Model $value) : mixed {
         $class = self::getMatchingClass($value->attribute->datatype);
         if($class !== false) {
+            // For typed values (not the old EAV AttributeValue), use value directly
+            if(!($value instanceof AttributeValue)) {
+                return $class::serialize($value->value);
+            }
+            // For old EAV model, use field name (int_val, str_val, etc.)
             $field = $class::getField();
             return $class::serialize($value->{$field});
         } else {
@@ -70,9 +76,14 @@ abstract class AttributeBase
         }
     }
 
-    public static function serializeExportData(AttributeValue $value) : mixed {
+    public static function serializeExportData(AttributeValue|Model $value) : mixed {
         $class = self::getMatchingClass($value->attribute->datatype);
         if($class !== false) {
+            // For typed values (not the old EAV AttributeValue), use value directly
+            if(!($value instanceof AttributeValue)) {
+                return $class::parseExport($value->value);
+            }
+            // For old EAV model, use field name (int_val, str_val, etc.)
             $field = $class::getField();
             return $class::parseExport($value->{$field});
         } else {

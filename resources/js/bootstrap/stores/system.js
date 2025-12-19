@@ -150,8 +150,8 @@ export const useSystemStore = defineStore('system', {
         },
         async checkAccess(route) {
             const accessResponse = await checkAccess(route);
-            if(accessResponse.status == 200 && accessResponse?.data?.redirect) {
-                router.push(accessResponse.data.redirect);
+            if(accessResponse?.redirect) {
+                router.push(accessResponse.redirect);
                 return false;
             }
 

@@ -66,7 +66,7 @@ export async function fetchEntityMetadata(id) {
 }
 
 export async function fetchUser() {
-    return await $httpQueue.add(() => http.get('/auth/user').then(response => response.data));
+    return await $httpQueue.add(() => http.get('/auth/user').then(response => response.data.data));
 }
 
 export async function fetchAttributes() {
@@ -250,7 +250,7 @@ export async function checkAccess(endpoint = '/') {
     const data = {
         endpoint: endpoint,
     };
-    return $httpQueue.add(() => http.post('/access/check', data));
+    return $httpQueue.add(() => http.post('/access/check', data).then(response => response.data));
 }
 
 export async function login(credentials) {

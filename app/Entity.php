@@ -483,22 +483,53 @@ class Entity extends Model implements Searchable {
         $attributes = [];
         if(isset($aid)) {
             try {
-                Attribute::findOrFail($aid);
+                $attribute = Attribute::findOrFail($aid);
             } catch(ModelNotFoundException $e) {
                 return response()->json([
                     'error' => __('This attribute does not exist'),
                 ], 400);
             }
-            $attributes = AttributeValue::whereHas('attribute')
-                ->where('entity_id', $this->id)
-                ->where('attribute_id', $aid)
-                ->withModerated()
-                ->get();
+            
+            // Check if this is a superior type attribute
+            $attributeClass = \App\AttributeTypes\AttributeBase::getMatchingClass($attribute->datatype);
+            $isSuperiorType = is_a($attributeClass, \App\AttributeTypes\SuperiorAttributeBase::class);
+            
+            if($isSuperiorType) {
+                // Query from typed table
+                $modelClass = $attributeClass::getModelClass();
+                $attributes = $modelClass::where('entity_id', $this->id)
+                    ->where('attribute_id', $aid)
+                    ->get();
+            } else {
+                // Query from old EAV table
+                $attributes = AttributeValue::whereHas('attribute')
+                    ->where('entity_id', $this->id)
+                    ->where('attribute_id', $aid)
+                    ->withModerated()
+                    ->get();
+            }
         } else {
-            $attributes = AttributeValue::whereHas('attribute')
+            // Get all attributes - need to query both old and new tables
+            $oldAttributes = AttributeValue::whereHas('attribute')
                 ->where('entity_id', $this->id)
                 ->withModerated()
                 ->get();
+            
+            // Get superior type attributes
+            $superiorAttributes = collect();
+            $entityTypeAttributes = $this->entity_type->attributes()->get();
+            foreach($entityTypeAttributes as $attr) {
+                $attributeClass = \App\AttributeTypes\AttributeBase::getMatchingClass($attr->datatype);
+                if(is_a($attributeClass, \App\AttributeTypes\SuperiorAttributeBase::class)) {
+                    $modelClass = $attributeClass::getModelClass();
+                    $typedValues = $modelClass::where('entity_id', $this->id)
+                        ->where('attribute_id', $attr->id)
+                        ->get();
+                    $superiorAttributes = $superiorAttributes->merge($typedValues);
+                }
+            }
+            
+            $attributes = $oldAttributes->merge($superiorAttributes);
         }
 
         $data = AttributeValue::generateObject($attributes);

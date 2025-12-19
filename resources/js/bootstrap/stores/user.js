@@ -166,6 +166,7 @@ export const useUserStore = defineStore('user', {
             this.setActiveUser({});
         },
         setActiveUser(user, merge = false) {
+            console.trace('Setting active user:', user, 'Merge:', merge);
             if(merge) {
                 this.user = {
                     ...this.user,

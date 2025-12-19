@@ -4,6 +4,7 @@ namespace App;
 
 use App\Geodata;
 use App\AttributeTypes\AttributeBase;
+use App\AttributeTypes\SuperiorAttributeBase;
 use App\Exceptions\InvalidDataException;
 use Illuminate\Database\Eloquent\Model;
 use Clickbar\Magellan\Data\Geometries\Geometry;
@@ -93,9 +94,23 @@ class AttributeValue extends Model implements Searchable
     public static function handlePatch(int $entity_id, int $attribute_id, mixed $value, string $operation, User $user, array &$added = [], array &$deleted = []) {
         $error = null;
         $code = 400;
+        
+        // Get attribute to determine if it's a superior type
+        $attr = Attribute::find($attribute_id);
+        if(!$attr) {
+            return [
+                'message' => __('This attribute does not exist'),
+                'code' => 404,
+            ];
+        }
+        
+        $attributeClass = AttributeBase::getMatchingClass($attr->datatype);
+        $isSuperiorType = is_a($attributeClass, SuperiorAttributeBase::class);
+        $modelClass = $isSuperiorType ? $attributeClass::getModelClass() : AttributeValue::class;
+        
         switch($operation) {
             case 'remove':
-                $attrval = AttributeValue::where([
+                $attrval = $modelClass::where([
                     ['entity_id', '=', $entity_id],
                     ['attribute_id', '=', $attribute_id],
                 ])->first();
@@ -121,24 +136,27 @@ class AttributeValue extends Model implements Searchable
              */
             case 'add':
             case 'replace':
-                $alreadyModerated = AttributeValue::where('entity_id', $entity_id)
-                    ->where('attribute_id', $attribute_id)
-                    ->onlyModerated()
-                    ->exists();
+                if(!$isSuperiorType) {
+                    // Old EAV model logic
+                    $alreadyModerated = AttributeValue::where('entity_id', $entity_id)
+                        ->where('attribute_id', $attribute_id)
+                        ->onlyModerated()
+                        ->exists();
 
-                // Currently the logic is that a moderated state cannot be changed
-                // by a moderated user.
-                if($alreadyModerated && $user->isModerated()) {
-                    $error = __('This attribute value is in moderation state. A user with appropriate permissions has to accept or deny it first.');
-                    break;
+                    if($alreadyModerated && $user->isModerated()) {
+                        $error = __('This attribute value is in moderation state. A user with appropriate permissions has to accept or deny it first.');
+                        break;
+                    }
                 }
-                $attrval = AttributeValue::firstOrNew([
+                
+                $attrval = $modelClass::firstOrNew([
                     'entity_id' => $entity_id,
                     'attribute_id' => $attribute_id,
                 ], [
                     'certainty' => null
                 ]);
-                if($user->isModerated()) {
+                
+                if(!$isSuperiorType && $user->isModerated()) {
                     $attrval = $attrval->moderate('pending', false, true);
                     unset($attrval->comments_count);
                 }
@@ -160,8 +178,14 @@ class AttributeValue extends Model implements Searchable
         }
 
         try {
-            $attr = Attribute::findOrFail($attribute_id);
-            $formKeyValue = AttributeValue::getFormattedKeyValue($attr->datatype, $value);
+            if($isSuperiorType) {
+                // For superior types, set value directly
+                $attrval->value = $attributeClass::serialize($value);
+            } else {
+                // For old EAV model, use the formatted key/value
+                $formKeyValue = AttributeValue::getFormattedKeyValue($attr->datatype, $value);
+                $attrval->{$formKeyValue->key} = $formKeyValue->val;
+            }
         } catch(InvalidDataException $ide) {
             return [
                 'message' => $ide->getMessage(),
@@ -169,7 +193,6 @@ class AttributeValue extends Model implements Searchable
             ];
         }
 
-        $attrval->{$formKeyValue->key} = $formKeyValue->val;
         $attrval->user_id = $user->id;
         $attrval->save();
 
