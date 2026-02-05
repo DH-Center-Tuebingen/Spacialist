@@ -35,7 +35,6 @@ class PluginMigration extends Model
     }
 
     static function exec(Plugin $plugin, $rollback = false){
-        info("Running " . ($rollback ? "rollback" : "migrations") . " for plugin {$plugin->name}");
         //Determine the next batch number
         $nextBatch = PluginMigration::max('batch') + 1;
         $migrations = self::getMissingMigrations($plugin, $rollback);
@@ -69,13 +68,13 @@ class PluginMigration extends Model
             throw new \Exception("Invalid migration file name: $migrationFile");
         }
         $className = Str::studly($matches[2]);
-        require(base_path("app/Plugins/$pluginName/Migration/$migrationFile"));
+        require($plugin->getPath("Migration/$migrationFile"));
         $prefixedClassName = "App\\Plugins\\$pluginName\\Migration\\$className";
         return new $prefixedClassName();
     }
 
     static function getMigrationPath(Plugin $plugin): string {
-        return base_path("app/Plugins/{$plugin->name}/Migration");
+        return $plugin->getPath("Migration");
     }
 
     static function getMigrationState(Plugin $plugin): array {
@@ -114,21 +113,15 @@ class PluginMigration extends Model
 
     static function getMigrationList(Plugin $plugin, $rollback = false){
         $path = self::getMigrationPath($plugin);
-        info("Looking for migrations in $path");
         if(file_exists($path) && is_dir($path)) {
             $migrations = collect(File::files($path))->map(function($f) {
-                info($f->getFilename());
                 return $f->getFilename();
             });
-
-            info($migrations->toArray());
 
             $migrations = $migrations->filter(function($f) {
                 preg_match('/^(\d{4}_\d{2}_\d{2}_\d{6})_(.+)\.php$/', $f, $matches);
                 return count($matches) == 3;
             });
-
-            info($migrations->toArray());
 
             if($rollback) {
                 $migrations = $migrations->sortDesc();

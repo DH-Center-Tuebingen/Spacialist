@@ -325,4 +325,18 @@ XML;
         // Reset time after test
         Carbon::setTestNow();
     }
+
+        /**
+     * Test getting the migration state of a plugin.
+     *
+     * @return void
+     */
+    public function testGetPluginMigrationState()
+    {
+        $response = $this->userRequest()
+            ->get('/api/v1/plugin/migrate/1/check');
+
+        info($response->getContent());
+        $response->assertStatus(200);
+    }
 }

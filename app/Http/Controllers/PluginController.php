@@ -239,7 +239,6 @@ class PluginController extends Controller
      /**
      * Get the migration state for a plugin.
      */
-
     public function getMigrationState(Request $request, Plugin $plugin) {
         return response()->json($plugin->getMigrationState());
     }

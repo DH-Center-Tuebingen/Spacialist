@@ -130,14 +130,16 @@
     import { isInstalled as isPluginInstalled } from '@/helpers/plugins.js';
 
     import ChangelogTab from '@/components/plugins/tab/Changelog.vue';
-    import MigrationTab from '@/components/plugins/tab/Migration.vue';
+    import MigrationTab from '@/components/plugins/tab/Migration/Migration.vue';
     import InformationTab from './tab/Information.vue';
+    import Switch from '../forms/Switch.vue';
 
     export default {
         components: {
             ChangelogTab,
-            MigrationTab,
             InformationTab,
+            MigrationTab,
+            Switch,
         },
         props: {
             value: {
@@ -148,6 +150,7 @@
         setup(props) {
             const { t } = useI18n();
             const page = ref('info');
+            const installing = ref(false);
 
             const sections = ['info', 'changelog', 'migrations'];
 
@@ -162,26 +165,38 @@
             const showChangelog = _ => {
                 showChangelogModal();
             };
-            const install = _ => {
-                systemStore.installPlugin(props.value.id);
+            const install = async _ => {
+                await systemStore.installPlugin(props.value.id);
             };
-            const uninstall = _ => {
-                systemStore.uninstallPlugin(props.value.id);
+            const uninstall = async _ => {
+                await systemStore.uninstallPlugin(props.value.id);
             };
             const remove = _ => {
                 systemStore.removePlugin(props.value.id);
             };
 
+            const toggleActiveState = async (active) => {
+                installing.value = true;
+                if(isInstalled() !== active) {
+                    await install();
+                } else {
+                    await uninstall();
+                }
+                installing.value = false;
+            };
+
             return {
-                t,
-                isInstalled,
-                updateAvailable,
-                showChangelog,
+                installing,
                 install,
-                uninstall,
-                remove,
+                isInstalled,
                 page,
+                remove,
                 sections,
+                showChangelog,
+                t,
+                toggleActiveState,
+                uninstall,
+                updateAvailable,
             };
         }
     };
