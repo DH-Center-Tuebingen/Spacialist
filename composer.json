@@ -28,7 +28,8 @@
         "spatie/laravel-permission": "^6.16.0",
         "spatie/laravel-searchable": "^1.13",
         "tecnickcom/tcpdf": "^6.8.2",
-        "wapmorgan/unified-archive": "^1.1.10"
+        "wapmorgan/unified-archive": "^1.1.10",
+        "wikimedia/composer-merge-plugin": "^2.1"
     },
     "require-dev": {
         "beyondcode/laravel-dump-server": "^2.0",
@@ -58,6 +59,15 @@
     "extra": {
         "laravel": {
             "dont-discover": []
+        },
+        "merge-plugin": {
+            "include": [
+                "app/Plugins/*/composer.json"
+            ],
+            "recurse": true,
+            "replace": false,
+            "ignore-duplicates": false,
+            "merge-dev": false
         }
     },
     "scripts": {
@@ -75,6 +85,9 @@
     "config": {
         "preferred-install": "dist",
         "sort-packages": true,
-        "optimize-autoloader": true
+        "optimize-autoloader": true,
+        "allow-plugins": {
+            "wikimedia/composer-merge-plugin": false
+        }
     }
 }

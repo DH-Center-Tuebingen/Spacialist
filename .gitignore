@@ -10,7 +10,8 @@ node_modules
 ### Plugins ###
 thesaurex
 /db
-/app/Plugins/
+/app/Plugins/*
+!/app/Plugins/PLUGIN.md
 
 
 ## PHPUnit
