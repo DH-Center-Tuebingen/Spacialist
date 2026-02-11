@@ -1,6 +1,6 @@
 <?php
 
-use App\Plugin;
+use App\Models\Plugin;
 use App\ThConcept;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\File;

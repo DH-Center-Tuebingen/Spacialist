@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Plugin;
 use App\Preference;
-use App\PluginMigration;
+use App\Models\Plugin\Migration as PluginMigration;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use ZipArchive;

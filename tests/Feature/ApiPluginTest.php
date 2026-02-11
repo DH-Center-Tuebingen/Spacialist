@@ -326,7 +326,7 @@ XML;
         Carbon::setTestNow();
     }
 
-        /**
+    /**
      * Test getting the migration state of a plugin.
      *
      * @return void

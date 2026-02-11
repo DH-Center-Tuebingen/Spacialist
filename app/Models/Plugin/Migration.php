@@ -1,8 +1,8 @@
 <?php
 
-namespace App;
+namespace App\Models\Plugin;
 
-use App\Plugin;
+use App\Models\Plugin;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
@@ -15,10 +15,10 @@ use Illuminate\Support\Str;
  * This is necesarry to ensure when a plugin is updated, what migrations have already been run and what
  * still need to be run.
  */
-class PluginMigration extends Model
+class Migration extends Model
 {
 
-    protected $table = 'migration_plugin';
+    protected $table = 'plugin_migrations';
 
     protected $fillable = [
         'plugin_id',
@@ -36,7 +36,7 @@ class PluginMigration extends Model
 
     static function exec(Plugin $plugin, $rollback = false){
         //Determine the next batch number
-        $nextBatch = PluginMigration::max('batch') + 1;
+        $nextBatch = self::max('batch') + 1;
         $migrations = self::getMissingMigrations($plugin, $rollback);
         foreach($migrations as $migration) {
             $migrationInstance = self::getMigrationClassName($plugin->name, $migration);
@@ -44,12 +44,12 @@ class PluginMigration extends Model
                 call_user_func([$migrationInstance, $rollback ? 'rollback' : 'migrate']);
                 if($rollback) {
                     //Remove the record of the migration
-                    PluginMigration::where('plugin_id', $plugin->id)
+                    self::where('plugin_id', $plugin->id)
                         ->where('migration', $migration)
                         ->delete();
                 } else {
                     //Record the migration as run
-                    PluginMigration::create([
+                    self::create([
                         'plugin_id' => $plugin->id,
                         'migration' => $migration,
                         'batch' => $nextBatch
@@ -78,7 +78,7 @@ class PluginMigration extends Model
     }
 
     static function getMigrationState(Plugin $plugin): array {
-        $ranMigrations = PluginMigration::where('plugin_id', $plugin->id)
+        $ranMigrations = self::where('plugin_id', $plugin->id)
             ->pluck('migration')
             ->toArray();
 
@@ -96,7 +96,7 @@ class PluginMigration extends Model
     }
 
     static function getMissingMigrations(Plugin $plugin, $rollback = false): array {
-        $ranMigrations = PluginMigration::where('plugin_id', $plugin->id)
+        $ranMigrations = self::where('plugin_id', $plugin->id)
             ->pluck('migration')
             ->toArray();
 

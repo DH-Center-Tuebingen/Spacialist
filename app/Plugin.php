@@ -2,7 +2,7 @@
 
 namespace App;
 
-use App\PluginMigration;
+use App\Models\Plugin\Migration as PluginMigration;
 use App\File\Directory;
 use App\Services\AccessPointsService;
 use Carbon\Carbon;

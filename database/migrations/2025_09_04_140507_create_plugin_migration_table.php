@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('migration_plugin', function (Blueprint $table) {
+        Schema::create('plugin_migrations', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
             $table->foreignId('plugin_id')->constrained('plugins')->onDelete('cascade');
@@ -25,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('plugin_migration');
+        Schema::dropIfExists('plugin_migrations');
     }
 };
