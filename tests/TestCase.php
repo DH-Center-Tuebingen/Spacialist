@@ -10,6 +10,7 @@ use Laravel\Sanctum\Sanctum;
 use App\User;
 use Database\Seeders\TestingSeeder;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Testing\TestResponse;
 
 abstract class TestCase extends BaseTestCase {
     use CreatesApplication;

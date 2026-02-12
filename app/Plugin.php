@@ -3,6 +3,7 @@
 namespace App;
 
 use App\Models\Plugin\Migration as PluginMigration;
+
 use App\File\Directory;
 use App\Services\AccessPointsService;
 use Carbon\Carbon;
@@ -41,6 +42,8 @@ class Plugin extends Model
         'licence',
         'title',
     ];
+    
+    public function __construct() { }
 
     private static function pluginDirectory() {
         $pluginDirectory = config('app.plugin_directory');
@@ -212,7 +215,7 @@ class Plugin extends Model
                             continue;
                         }
                         $className = Str::replaceEnd('.php', '', $src);
-                        $namespacedSrc = "App\\Plugins\\$this->name\\Scopes\\$className";
+                        $namespacedSrc = $this->getNamespace("\\Scopes\\$className");
 
                         if(!array_key_exists($on, $scopes)) {
                             $scopes[$on] = [];
@@ -224,6 +227,22 @@ class Plugin extends Model
             }
             return $scopes;
         });
+    }
+    
+    /**
+     * Get the namespace for a given path within the plugin. If no path is provided, 
+     * returns the base namespace for the plugin.
+     * 
+     * @param string|null $path Optional path within the plugin to get the namespace for, separated 
+     * by backslashes or forward slashes. For example, "Controllers/MyController.php" or 
+     * "Controllers\MyController.php". Can start with or without a leading slash.
+     */
+    public function getNamespace(string $path = null): string{
+        $basePath = "App\\Plugins\\$this->name";
+        if($path) {
+            $basePath .= Str::start(str_replace('/', '\\', $path), '\\');
+        }
+        return $basePath;
     }
 
     /**
@@ -354,56 +373,24 @@ class Plugin extends Model
     }
 
     public function clearCache(): void {
-        Cache::forget($this->getScopeCacheKey());
-        
-        // TODO: Models are meant for the data layer only, 
-        // we should restructure the code into service classes (e.g. PluginMigrationService) 
-        app(AccessPointsService::class)->clearCache();
+        app(\App\Services\PluginManager::class)->clearCache($this);
     }
 
     public function handleInstallation(bool $isUpdate = false): void {
-        $this->runMigrations();
-        $this->publishScript();
-        $this->addPermissions();
-        $this->installPresetsFromFile();
-        $this->clearCache();
-
-        if(!$isUpdate) {
-            $this->installed_at = Carbon::now();
-        }
-        $this->save();
+        app(\App\Services\PluginManager::class)->install($this, $isUpdate);
     }
 
     public function handleUpdate(): string {
-        $oldVersion = $this->version;
-        // TODO is it really the same as install?
-        $this->handleInstallation(true);
-        $info = $this->getInfo();
-        $this->update_available = null;
-        $this->version = $info['version'];
-        $this->save();
-        return $oldVersion;
+        return app(\App\Services\PluginManager::class)->update($this);
     }
 
     public function handleUninstall(): void {
-        $this->removeScript();
-        $this->clearCache();
-        $this->installed_at = null;
-        $this->save();
+        app(\App\Services\PluginManager::class)->uninstall($this);
     }
 
     public function handleRemove(): void {
         // if installed, first rollback migrations and delete all files and presets
-        if(isset($this->installed_at)) {
-            $this->handleUninstall();
-            $this->rollbackMigrations();
-            $this->removePermissions();
-            $this->uninstallPresets();
-        }
-
-        $this->removePreferences();
-        sp_remove_dir($this->getPath());
-        $this->delete();
+        app(\App\Services\PluginManager::class)->remove($this);
     }
 
     public function getPermissions(): mixed {
@@ -420,12 +407,7 @@ class Plugin extends Model
     }
 
     public function getRolePresets(): mixed {
-        $rolePresets = $this->getPath('App/role-presets.json');
-        if(!File::isFile($rolePresets)) {
-            return [];
-        }
 
-        return json_decode(file_get_contents($rolePresets), true);
     }
 
     public function getMigrationState(): array {
@@ -433,78 +415,20 @@ class Plugin extends Model
     }
 
     public function runMigrations(): void {
-        PluginMigration::run($this);
+        app(\App\Services\PluginManager::class)->runMigrations($this);
     }
 
     public function rollbackMigrations(): void {
-        PluginMigration::rollback($this);
+        app(\App\Services\PluginManager::class)->rollbackMigrations($this);
     }
 
-    private function publishScript(): void {
-        $name = $this->name;
-        $scriptPath = $this->getPath("js/script.js");
-        if(file_exists($scriptPath)) {
-            $filehandle = fopen($scriptPath, 'r');
+    // private function uninstallPresets(): void {
+    //     RolePresetPlugin::where('from', $this->id)->delete();
+    // }
 
-            if(!$filehandle) {
-                throw new \Exception("Could not open script file for plugin $name.");
-            }
-
-            self::getDirectory()->store(
-                $this->publicName(false),
-                $filehandle
-            );
-            fclose($filehandle);
-        } else {
-            throw new \Exception("Script file for plugin $name does not exist at $scriptPath.");
-        }
-    }
-
-    private function removeScript(): void {
-        self::getDirectory()->delete($this->publicName(false));
-    }
-
-    private function addPermissions(): void {
-        $permGroups = $this->getPermissions();
-        foreach($permGroups as $group => $permSet) {
-            foreach($permSet as $perm) {
-                $permission = new Permission();
-                $permission->name = $group . "_" . $perm['name'];
-                $permission->display_name = $perm['display_name'];
-                $permission->description = $perm['description'];
-                $permission->guard_name = 'web';
-                $permission->save();
-            }
-        }
-    }
-
-    private function removePermissions(): void {
-        $permGroups = $this->getPermissions();
-        foreach($permGroups as $group => $permSet) {
-            foreach($permSet as $perm) {
-                Permission::where('name', $group . "_" . $perm['name'])->delete();
-            }
-        }
-    }
-
-    private function installPresetsFromFile(): void {
-        $rolePresets = $this->getRolePresets();
-        foreach($rolePresets as $preset) {
-            $baseRolePreset = RolePreset::where('name', $preset['extends'])->firstOrFail();
-            $pluginPreset = new RolePresetPlugin();
-            $pluginPreset->rule_set = $preset['rule_set'];
-            $pluginPreset->extends = $baseRolePreset->id;
-            $pluginPreset->from = $this->id;
-            $pluginPreset->save();
-        }
-    }
-
-    private function uninstallPresets(): void {
-        RolePresetPlugin::where('from', $this->id)->delete();
-    }
-
-    private function removePreferences(): void {
-        $id = Str::kebab($this->name);
-        Preference::where('label', 'ilike', "plugin.$id.%")->delete();
-    }
+    // private function removePreferences(): void {
+    //     $id = Str::kebab($this->name);
+    //     Preference::where('label', 'ilike', "plugin.$id.%")->delete();
+    // }
+    
 }
