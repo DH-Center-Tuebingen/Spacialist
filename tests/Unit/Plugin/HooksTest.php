@@ -13,7 +13,7 @@ class HooksTest extends PluginHookTestCase
     public function testAddHookSuccessfully()
     {
         $hookData = [
-            'on'    => 'HomeController@getGlobalData',
+            'on'    => 'api/v1/pre',
             'src'   => 'Hooks\\AddPreData@apply',
             'order' => 1,
         ];
@@ -24,7 +24,7 @@ class HooksTest extends PluginHookTestCase
 
         $this->assertDatabaseHas('plugin_hooks', [
             'plugin_id' => $this->plugin->id,
-            'on'        => 'HomeController@getGlobalData',
+            'on'        => 'api/v1/pre',
             'src'       => 'Hooks\\AddPreData@apply',
             'order'     => 1,
         ]);
@@ -45,7 +45,7 @@ class HooksTest extends PluginHookTestCase
 
     public function testAddHookToServiceSuccessfully() {
         $hookData = [
-            'on' => 'HomeController@getGlobalData',
+            'on' => 'api/v1/pre',
             'src' => 'Hooks\\AddPreData@apply',
             'order' => 1
         ];
@@ -55,7 +55,7 @@ class HooksTest extends PluginHookTestCase
 
         $this->assertDatabaseHas('plugin_hooks', [
             'plugin_id' => $this->plugin->id,
-            'on' => 'HomeController@getGlobalData',
+            'on' => 'api/v1/pre',
             'src' => 'Hooks\\AddPreData@apply',
             'order' => 1
         ]);
@@ -66,7 +66,7 @@ class HooksTest extends PluginHookTestCase
      *
      * @return void
      */
-    #[DataProvider('HookServiceExceptionProvider')]
+    #[DataProvider('hookServiceExceptionProvider')]
     public function testAddHookServiceExceptions($data, $message)
     {
         $this->expectException(\Exception::class);
@@ -79,19 +79,19 @@ class HooksTest extends PluginHookTestCase
     {
         return [
             "no fields"             => [[], "Hook is missing field(s): on, src"],
-            "on only"               => [['on' => 'HomeController@getGlobalData'], "Hook is missing field(s): src"],
+            "on only"               => [['on' => 'api/v1/pre'], "Hook is missing field(s): src"],
             "src only"              => [['src' => 'addPreData'], "Hook is missing field(s): on"],
-            "src in invalid format" => [['on' => 'HomeController@getGlobalData', 'src' => 'addPreData'], "Hook 'src' field must be in the format 'class@method'"],
+            "src in invalid format" => [['on' => 'api/v1/pre', 'src' => 'addPreData'], "Hook 'src' field must be in the format 'class@method'"],
             "on is invalid hook"    => [['on' => 'Invalid@method', 'src' => 'NonExistentClass@method'], "Hook 'Invalid@method' is not a valid hook."],
         ];
     }
 
-    public static function HookServiceExceptionProvider()
+    public static function hookServiceExceptionProvider()
     {
         $hookExceptions        = static::hookExceptionProvider();
         $hookServiceExceptions = [
-            "src class does not exist"  => [['on' => 'HomeController@getGlobalData', 'src' => 'Hooks\\NonExistentClass@method'], "Hook src 'Hooks\\NonExistentClass@method' does not exist in plugin 'HookPlugin', Class was resolved to: 'App\\Plugins\\HookPlugin\\Hooks\\NonExistentClass'"],
-            "src method does not exist" => [['on' => 'HomeController@getGlobalData', 'src' => 'Hooks\\AddPreData@nonExistentMethod'], "Hook src 'Hooks\\AddPreData@nonExistentMethod' does not exist in plugin 'HookPlugin', Class was resolved to: 'App\\Plugins\\HookPlugin\\Hooks\\AddPreData'"],
+            "src class does not exist"  => [['on' => 'api/v1/pre', 'src' => 'Hooks\\NonExistentClass@method'], "Hook src 'Hooks\\NonExistentClass@method' does not exist in plugin 'HookPlugin', Class was resolved to: 'App\\Plugins\\HookPlugin\\Hooks\\NonExistentClass'"],
+            "src method does not exist" => [['on' => 'api/v1/pre', 'src' => 'Hooks\\AddPreData@nonExistentMethod'], "Hook src 'Hooks\\AddPreData@nonExistentMethod' does not exist in plugin 'HookPlugin', Class was resolved to: 'App\\Plugins\\HookPlugin\\Hooks\\AddPreData'"],
         ];
         return array_merge($hookExceptions, $hookServiceExceptions);
     }

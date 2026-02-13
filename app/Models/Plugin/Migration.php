@@ -2,7 +2,7 @@
 
 namespace App\Models\Plugin;
 
-use App\Models\Plugin;
+use App\Plugin;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
@@ -56,7 +56,6 @@ class Migration extends Model
                     ]);
                 }
             } catch(\Exception $e) {
-                info("Failed to run migration for plugin {$plugin->name}: " . $e->getMessage());
                 throw $e;
             }
         }

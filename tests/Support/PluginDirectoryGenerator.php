@@ -5,22 +5,21 @@ use App\Plugin;
 
 use Illuminate\Support\Facades\File;
 
+/**
+ * This class provides helper methods to generate a plugin directory structure for testing purposes. 
+ * It allows you to create a mock plugin directory with the necessary files and folders based on a 
+ * given Plugin instance. The generated structure includes a package.json file, an info.xml file, and 
+ * any additional files or directories specified in the input.
+ */
 class PluginDirectoryGenerator
 {
-    protected static array $createdPluginDir = [];
-
     /**
-     * Deletes the created plugin directory if it exists. This method should be called after the tests are done to clean up the file system.
      */
-    public static function cleanup(): void {
-        if(!isset(static::$createdPluginDir[static::class])) {
-            return;
-        }
-            
-        $pluginDir = static::$createdPluginDir[static::class];
-        if($pluginDir && file_exists($pluginDir) && is_dir($pluginDir)) {
-            File::deleteDirectory($pluginDir);
-            unset(static::$createdPluginDir[static::class]);
+    public static function cleanup(string $pluginDir): bool {
+        if(file_exists($pluginDir) && is_dir($pluginDir)) {
+            return File::deleteDirectory($pluginDir);
+        } else {
+            return false;
         }
     }
 
@@ -37,7 +36,7 @@ class PluginDirectoryGenerator
             "package.json" => self::generatePackageJSON($plugin),
             "CHANGELOG.md" => "# Changelog",
             "js"           => [
-                strtolower($plugin['name']) . "-" . $plugin['uuid'] . ".js" => "// Plugin main JS file",
+                'script.js',
             ],
             "App"          => [
                 "info.xml" => self::generateInfoXml($plugin, $additionalInfoContent),
@@ -74,24 +73,22 @@ class PluginDirectoryGenerator
 
     /**
      * Mocks the plugin directory by creating the necessary files and folders based on the defined structure.
-     * This method runs once before the structure is cleaned up, to let it be called inside the setUp method of the test case
-     * without the need for additional safeguards.
      * 
      * @param {array} $additionalStructure An associative array representing additional files or directories to be added to the plugin structure.
      * @param {string} $additionalInfoContent Additional XML content to be included in the info.xml file of the plugin.
      */
-    public static function mockPluginDirectory(Plugin $plugin, array $additionalStructure = [], string $additionalInfoContent = ''): void
+    public static function mockPluginDirectory(Plugin $plugin, array $additionalStructure = [], string $additionalInfoContent = ''): string
     {
-        if(isset(self::$createdPluginDir[static::class])) {
-            // When the directory has already been created, we should not create it again.
-            return;
-        }
+        // Work on a clone so we don't mutate the caller's Plugin instance (array access
+        // inside this helper may set attributes on the Eloquent model which causes
+        // unexpected side effects such as trying to insert arrays into the DB).
+        $pluginCopy = clone $plugin;
 
         $required_fields = ['name', 'uuid', 'version'];
 
         $missing_fields = [];
         foreach($required_fields as $field) {
-            if(! isset($plugin[$field]) || empty($plugin[$field])) {
+            if(! isset($pluginCopy[$field]) || empty($pluginCopy[$field])) {
                 $missing_fields[] = $field;
             }
         }
@@ -101,12 +98,12 @@ class PluginDirectoryGenerator
         }
 
         // Create plugin directory structure
-        $pluginDir = self::getPluginDirectory($plugin['name']);
+        $pluginDir = self::getPluginDirectory($pluginCopy['name']);
         if(! file_exists($pluginDir)) {
             mkdir($pluginDir, 0755, true);
         }
 
-        $structure = self::defineStructure($plugin, $additionalStructure, $additionalInfoContent);
+        $structure = self::defineStructure($pluginCopy, $additionalStructure, $additionalInfoContent);
         // Process structure array
         foreach($structure as $name => $content) {
             $path = $pluginDir . '/' . $name;
@@ -117,15 +114,20 @@ class PluginDirectoryGenerator
                     mkdir($path, 0755, true);
                 }
                 foreach($content as $subName => $subContent) {
-                    file_put_contents($path . '/' . $subName, $subContent);
+                    if(is_int($subName) && is_string($subContent)) {
+                        // Numeric key with string value means a filename placeholder
+                        file_put_contents($path . '/' . $subContent, '');
+                    } else {
+                        file_put_contents($path . '/' . $subName, $subContent);
+                    }
                 }
             } else {
                 // Create file with content
                 file_put_contents($path, $content);
             }
         }
-        
-        static::$createdPluginDir[static::class] = $pluginDir;
+
+        return $pluginDir;
     }
 
     /**

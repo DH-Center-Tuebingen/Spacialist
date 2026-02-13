@@ -97,7 +97,6 @@ class Plugin extends Model
         }
 
         $xmlObject = simplexml_load_string($xmlString);
-
         return json_decode(json_encode($xmlObject), true);
     }
 
@@ -407,7 +406,7 @@ class Plugin extends Model
     }
 
     public function getRolePresets(): mixed {
-
+        return [];
     }
 
     public function getMigrationState(): array {

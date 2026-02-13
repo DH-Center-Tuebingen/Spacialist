@@ -29,16 +29,16 @@ class PluginManager
     private array $pluggableServices = [];
 
     public function __construct(
-        HookService $hooks, 
+        protected HookService $hooks, 
         // AccessPointsService $accessPoints,
         // ScopeService $scopeService,
-        // RolePresetService $rolePresetService
+        protected RolePresetService $rolePresetService
     ) {
         $this->pluggableServices = [
             $hooks,
             // $accessPoints,
             // $scopeService,
-            // $rolePresetService,
+            $rolePresetService,
         ];    
      }
 
@@ -90,7 +90,6 @@ class PluginManager
             $this->uninstall($plugin);
             $this->rollbackMigrations($plugin);
             $this->removePermissions($plugin);
-            $this->rolePresetService->uninstallFromPlugin($plugin);
         }
         
         foreach($this->pluggableServices as $service) {

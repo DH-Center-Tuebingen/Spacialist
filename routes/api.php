@@ -24,7 +24,7 @@ Route::middleware('auth:sanctum')->prefix('download')->group(function () {
 });
 
 Route::middleware('auth:sanctum')->prefix('v1')->group(function() {
-    Route::middleware(PluginHooks::class)->get('/pre', 'HomeController@getGlobalData');
+    Route::get('/pre', 'HomeController@getGlobalData')->middleware(PluginHooks::class);
     Route::get('/version', function() {
         $versionInfo = new App\VersionInfo();
         return response()->json([

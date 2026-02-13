@@ -32,8 +32,8 @@ class HookService extends CachedPluggableService {
         
         DB::transaction(function() use ($hooks, $plugin) {
             Hook::where('plugin_id', $plugin->id)->delete();
-            foreach($hooks as $hook) {
-                $this->addHook($hook, $plugin);
+            foreach($hooks as $hookXml) {
+                $this->addHook($hookXml['@attributes'], $plugin);
             }
         });
         
@@ -54,25 +54,22 @@ class HookService extends CachedPluggableService {
         $hookModel->save();
     }
     
-    public function executeHooks(string $hookName, ...$args) {
-        info("Executing hooks for '$hookName'");
+    public function executeHooks(string $hookName, $request, $response) {
         $hooks = $this->getHooksFor($hookName);
         foreach($hooks as $hook) {
             try{
-                info("Executing hook '".$hook->src."' for plugin '".$hook->plugin->name."'");
                 $method = Method::parseFromString($hook->src);
                 $fullClass = $method->expandNamespace($hook->plugin->getNamespace());
                 $instance = app()->make($fullClass);
                 // Call the hook method with the first argument passed by-reference so
                 // hooks can modify the response or payload directly. Use call_user_func_array
                 // to preserve reference semantics.
-                $params = [&$args[0]];
-                call_user_func_array([$instance, $method->method], $params);
+                call_user_func_array([$instance, $method->method], [$request, $response]);
             }catch(\Exception $e) {
                 Log::error("Error executing hook '".$hook->src."' for plugin '".$hook->plugin->name."': " . $e->getMessage());
             }
         }
-        return $args[0];
+        return $response;
     }
     
     public function getHooksFor(string $hookName) {
@@ -83,7 +80,7 @@ class HookService extends CachedPluggableService {
                 return $hooks;
             });
         }
-        return $hooks->where('on', $hookName)->sortBy('order');
+        return $hooks->where('on', $hookName)->sortByDesc('order');
     }
     
     public function install(Plugin $plugin): void

@@ -12,12 +12,17 @@ use Illuminate\Support\Facades\File;
 /**
  * Service for managing role presets, including those defined by plugins.
  */
-class RolePresetService
+class RolePresetService extends CachedPluggableService
 {   
+    protected function getCacheKey(): string
+    {
+        return 'plugin_role_presets';
+    }
+
     /**
      * Install role presets defined in a plugin's role-presets.json
      */
-    public function installFromPlugin(Plugin $plugin): void
+    public function install(Plugin $plugin): void
     {
         $rolePresets = $plugin->getRolePresets();
 
@@ -36,9 +41,18 @@ class RolePresetService
     /**
      * Remove all role presets that belong to a plugin
      */
-    public function uninstallFromPlugin(Plugin $plugin): void
+    public function uninstall(Plugin $plugin): void
     {
         RolePresetPlugin::where('from', $plugin->id)->delete();
+    }
+
+    /***
+     * Update role presets by uninstalling the old ones and installing the new ones.
+     */
+    public function update(Plugin $plugin): void
+    {
+        $this->uninstall($plugin);
+        $this->install($plugin);
     }
     
     public function getRolePresetsForPlugin(Plugin $plugin): array
@@ -71,4 +85,6 @@ class RolePresetService
 
         return json_decode(file_get_contents($rolePresets), true);
     }
+
+    public function remove(Plugin $plugin): void {}
 }

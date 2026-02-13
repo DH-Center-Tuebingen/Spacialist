@@ -8,9 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Hook extends Model
 {
     public const AVAILABLE_HOOKS = [
-        'App\Http\Controllers\HomeController@getGlobalData',
-        'EditorController@setRelationInfo',
-        'EditorController@getEntityType'
+        'api/v1/pre',
     ];        
 
     protected $table = 'plugin_hooks';
@@ -29,20 +27,18 @@ class Hook extends Model
      * @throws \Exception if the json is missing required fields or has invalid values.
      * @return {Model(unsaved)} An unsaved Hook model instance.
      */
-    public static function getHookFromJson($hookJson, Plugin $plugin = null): Hook {
+    public static function getHookFromJson(array $hookJson, ?Plugin $plugin = null): Hook {
         $hook = $hookJson;
         
         $missingFields = [];
         $requiredFields = ['on', 'src'];
-        
-        foreach($requiredFields as $reqiredField){
-            if(!isset($hook[$reqiredField])) {
-                $missingFields[] = $reqiredField;
+        foreach($requiredFields as $requiredField){
+            if(!isset($hook[$requiredField])) {
+                $missingFields[] = $requiredField;
                 }
         }
         
         if(count($missingFields) > 0){
-            info("MISSING FIELDS IN HOOK JSON: " . implode(", ", $missingFields) . " in hook json: " . json_encode($hookJson));
             throw new \Exception("Hook is missing field(s): " . implode(", ", $missingFields));
         }
         
@@ -69,5 +65,13 @@ class Hook extends Model
         }
         
         return $hookModel;
+    }
+
+    /**
+     * The plugin this hook belongs to.
+     */
+    public function plugin()
+    {
+        return $this->belongsTo(\App\Plugin::class, 'plugin_id');
     }
 }
