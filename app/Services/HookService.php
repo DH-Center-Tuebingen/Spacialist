@@ -16,6 +16,27 @@ class HookService extends CachedPluggableService {
         return 'plugin_hooks';
     }
 
+        
+    public function install(Plugin $plugin): void
+    {
+        $this->updateOrInstall($plugin);
+    }
+    
+    public function update(Plugin $plugin): void
+    {
+        $this->updateOrInstall($plugin);
+    }
+    
+    public function uninstall(Plugin $plugin): void
+    {
+        Hook::where('plugin_id', $plugin->id)->delete();
+    }
+    
+    public function remove(Plugin $plugin): void
+    {
+        // No separate remove logic needed for hooks
+    }
+
     /**
      * Update hooks for a plugin.
      *
@@ -82,24 +103,5 @@ class HookService extends CachedPluggableService {
         }
         return $hooks->where('on', $hookName)->sortByDesc('order');
     }
-    
-    public function install(Plugin $plugin): void
-    {
-        $this->updateOrInstall($plugin);
-    }
-    
-    public function update(Plugin $plugin): void
-    {
-        $this->updateOrInstall($plugin);
-    }
-    
-    public function uninstall(Plugin $plugin): void
-    {
-        Hook::where('plugin_id', $plugin->id)->delete();
-    }
-    
-    public function remove(Plugin $plugin): void
-    {
-        // No separate remove logic needed for hooks
-    }
+
 }

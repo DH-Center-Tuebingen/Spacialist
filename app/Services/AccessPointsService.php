@@ -2,11 +2,12 @@
 
 namespace App\Services;
 
+use App\Interfaces\IPluggable;
 use App\Plugin;
+use Exception;
 use Illuminate\Support\Facades\Cache;
 
-class AccessPointsService {
-    private const CACHE_KEY = 'access_points';
+class AccessPointsService extends CachedService implements IPluggable{
 
     public const /*array*/ CORE_ACCESSPOINTS = [
         "Default" => [
@@ -15,12 +16,32 @@ class AccessPointsService {
         ],
     ];
 
-    public function clearCache(): void {
-        Cache::forget(self::CACHE_KEY);
+    protected function getCacheKey(): string {
+        return 'plugin_access_points';
+    } 
+      
+    public function install(Plugin $plugin): void
+    {
+     throw new Exception("NOT IMPLEMENTED");
+    }
+    
+    public function update(Plugin $plugin): void
+    {
+     throw new Exception("NOT IMPLEMENTED");
+    }
+    
+    public function uninstall(Plugin $plugin): void
+    {
+     throw new Exception("NOT IMPLEMENTED");
+    }
+    
+    public function remove(Plugin $plugin): void
+    {
+        // No separate remove logic needed for hooks
     }
 
     public function get(): array {
-        return Cache::rememberForever(self::CACHE_KEY, function() {
+        return $this->updateCache(function () {
             $accesspoints = self::CORE_ACCESSPOINTS;
             $accesspoints = array_merge($accesspoints, $this->loadAccessPointsFromPlugins());
             return $accesspoints;
@@ -35,4 +56,6 @@ class AccessPointsService {
         }
         return $accesspoints;
     }
+
+
 }

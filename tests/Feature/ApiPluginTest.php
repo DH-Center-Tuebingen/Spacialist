@@ -251,7 +251,6 @@ class ApiPluginTest extends TestCase {
         $response = $this->userRequest()
             ->get('/api/v1/plugin/migrate/1/check');
 
-        info($response->getContent());
         $response->assertStatus(200);
     }
 }

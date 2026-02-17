@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Interfaces\IPluggable;
 use App\Plugin;
 use App\RolePreset;
 use App\RolePresetPlugin;
@@ -10,31 +11,48 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 
 /**
- * Service for managing role presets, including those defined by plugins.
+ * Service for managing role presets.
+ * 
+ * 
  */
-class RolePresetService extends CachedPluggableService
+class RolePresetService implements IPluggable
 {   
-    protected function getCacheKey(): string
-    {
-        return 'plugin_role_presets';
-    }
 
     /**
      * Install role presets defined in a plugin's role-presets.json
      */
     public function install(Plugin $plugin): void
     {
-        $rolePresets = $plugin->getRolePresets();
-
+        $rolePresets = $this->getRolePresetsForPlugin($plugin);
         DB::transaction(function() use ($rolePresets, $plugin) {
-            foreach($rolePresets as $preset) {
-                $baseRolePreset = RolePreset::where('name', $preset['extends'])->firstOrFail();
-                $pluginPreset = new RolePresetPlugin();
-                $pluginPreset->rule_set = $preset['rule_set'];
-                $pluginPreset->extends = $baseRolePreset->id;
-                $pluginPreset->from = $plugin->id;
-                $pluginPreset->save();
-            }
+
+                foreach($rolePresets as $preset) {
+
+                    if(!$preset["rule_set"]) {
+                        info("Role preset entry in plugin '{$plugin->name}' is missing 'rule_set'. Skipping.");
+                        continue;
+                    }
+
+                    if(!$preset["extends"]) {
+                        info("Role preset entry in plugin '{$plugin->name}' is missing 'extends'. Skipping.");
+                        continue;
+                    }
+
+                    $extends = $preset["extends"];
+                    $ruleSet = $preset["rule_set"];
+
+                    if(!is_array($ruleSet)) {
+                        info("Role preset entry in plugin '{$plugin->name}' has 'rule_set' attribute that is not an array. Skipping.");
+                        continue;   
+                    }
+
+                    $baseRolePreset = RolePreset::where('name', $extends)->firstOrCreate(['name'=> $extends]);
+                    $pluginPreset = new RolePresetPlugin();
+                    $pluginPreset->rule_set = $ruleSet;
+                    $pluginPreset->extends = $baseRolePreset->id;
+                    $pluginPreset->from = $plugin->id;
+                    $pluginPreset->save();
+                }
         });
     }
 
@@ -58,33 +76,60 @@ class RolePresetService extends CachedPluggableService
     public function getRolePresetsForPlugin(Plugin $plugin): array
     {
         $pluginInfo = $plugin->getInfo();
-        if(empty($pluginInfo['role_presets'] ?? [])) {
+
+        if(empty($pluginInfo['role-presets'])) {
             return [];
-        } 
-        
-        $presets = $pluginInfo['role_presets'];
-        
-        foreach($presets as &$preset) {
-            if(empty($preset['extends'])) {
-                throw new \Exception("Preset '".$preset['name']."' in plugin '".$plugin->name."' is missing 'extends' field");
-            }
-        
-            $basePreset = RolePreset::where('name', $preset['extends'])->first();
-            if($basePreset) {
-                $preset['extends'] = $basePreset->id;
-            } else {
-                throw new \Exception("Base preset '".$preset['extends']."' not found for plugin '".$plugin->name."'");
-            }
-        }
-        
-        
-    
-        if(!File::isFile($rolePresets)) {
+        }        
+        $infoRolePresets = $pluginInfo['role-presets'];
+
+        if(empty($infoRolePresets['role-preset'])) {
             return [];
         }
 
-        return json_decode(file_get_contents($rolePresets), true);
+        $rolePresetFiles = $infoRolePresets['role-preset'];
+
+        // When the XML contains  a single <role-preset> entry, it is parsed as an associative array instead of an array of arrays. 
+        // We need to normalize it to always be an array of arrays for consistent processing.
+        if(!empty($rolePresetFiles['@attributes'])) {
+            $rolePresetFiles = [$rolePresetFiles];
+        }
+
+        $rolePresets = [];
+        foreach($rolePresetFiles as $roleFilePreset) {
+            $parsedjson = $this->getRolePresetfromObject($roleFilePreset, $plugin);
+            if($parsedjson !== null) {
+                $rolePresets = array_merge($rolePresets, $parsedjson);
+            }
+        }
+        
+        return $rolePresets;
     }
 
     public function remove(Plugin $plugin): void {}
+
+
+
+    private function getRolePresetfromObject($obj, Plugin $plugin): ?array{
+            if(empty($obj['@attributes']['src'])) {
+                info("Plugin '{$plugin->name}' has a role preset entry without 'src' field. Skipping.");
+                return null;
+            }
+            
+            $src = $obj['@attributes']['src'];
+            $pluginSrc = $plugin->getPath($src);
+
+            if(!File::isFile($pluginSrc)) {
+                info("Plugin '{$plugin->name}' has a role preset entry with 'src' field pointing to a non-existing file ('{$pluginSrc}'). Skipping.");
+                return null;
+            }
+            
+            $parsedjson = json_decode(File::get($pluginSrc), true);
+            if($parsedjson === null) {
+                info("Plugin '{$plugin->name}' has a role preset entry with 'src' field pointing to a file ('{$pluginSrc}') that does not contain valid JSON. Skipping.\nJSON error: " . json_last_error_msg());
+                return null;
+            }
+
+            return $parsedjson;
+    }
+
 }

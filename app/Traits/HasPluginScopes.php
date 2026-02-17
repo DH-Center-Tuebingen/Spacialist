@@ -3,8 +3,11 @@
 namespace App\Traits;
 
 use App\Plugin;
+use App\Services\PluginManager;
+use App\Services\ScopeService;
 
 trait HasPluginScopes {
+
     /**
      * Register plugin scopes for this model
      *
@@ -13,7 +16,8 @@ trait HasPluginScopes {
     protected static function bootHasPluginScopes(): void {
         // The try-catch is to prevent issues during installation/package discovery
         try {
-            $pluginScopes = Plugin::getScopesFor(static::class);
+    
+            $pluginScopes = app(ScopeService::class)->getScopesFor(static::class);
             foreach($pluginScopes as $pluginScope) {
                 static::addGlobalScope(new $pluginScope);
             }

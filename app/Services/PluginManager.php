@@ -29,15 +29,14 @@ class PluginManager
     private array $pluggableServices = [];
 
     public function __construct(
-        protected HookService $hooks, 
+        public HookService $hooks, 
         // AccessPointsService $accessPoints,
-        // ScopeService $scopeService,
-        protected RolePresetService $rolePresetService
+        public RolePresetService $rolePresetService
     ) {
         $this->pluggableServices = [
             $hooks,
             // $accessPoints,
-            // $scopeService,
+            // $migrationService,
             $rolePresetService,
         ];    
      }

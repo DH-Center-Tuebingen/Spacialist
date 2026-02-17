@@ -17,8 +17,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
-class Plugin extends Model
-{
+class Plugin extends Model {
     /**
      * The attributes that are assignable.
      *
@@ -42,16 +41,17 @@ class Plugin extends Model
         'licence',
         'title',
     ];
-    
-    public function __construct() { }
+
+    public function __construct() {
+    }
 
     private static function pluginDirectory() {
         $pluginDirectory = config('app.plugin_directory');
         return base_path($pluginDirectory);
     }
 
-    public static function getPluginPath(string $path = ''):string {
-        if($path === ''){
+    public static function getPluginPath(string $path = ''): string {
+        if($path === '') {
             return self::pluginDirectory();
         }
         return self::pluginDirectory() . Str::start($path, '/');
@@ -71,13 +71,13 @@ class Plugin extends Model
 
     public function getPath(string $path = ''): string {
         $pluginPath = $this->name;
-        if($path !== ''){
+        if($path !== '') {
             $pluginPath .= Str::start($path, '/');
         }
         return self::getPluginPath($pluginPath);
     }
 
-    public function publicName($withPath = true): string {
+    public function publicName($withPath = TRUE): string {
         $slug = $this->slugName();
         $uuid = $this->uuid;
         $name = "{$slug}-{$uuid}.js";
@@ -87,26 +87,27 @@ class Plugin extends Model
         return $name;
     }
 
-    public static function getPluginInfo($path, $isString = false): mixed {
+    public static function getPluginInfo($path, $isString = FALSE): mixed {
         if(!$isString) {
             $infoPath = Str::finish($path, '/') . 'App/info.xml';
-            if(!File::isFile($infoPath)) return false;
+            if(!File::isFile($infoPath))
+                return FALSE;
             $xmlString = file_get_contents($infoPath);
         } else {
             $xmlString = $path;
         }
 
         $xmlObject = simplexml_load_string($xmlString);
-        return json_decode(json_encode($xmlObject), true);
+        return json_decode(json_encode($xmlObject), TRUE);
     }
 
-    public function getInfo(){
+    public function getInfo() {
         return self::getPluginInfo($this->getPath());
     }
 
     public function getMetadata(): array {
         $info = $this->getInfo();
-        if($info !== false) {
+        if($info !== FALSE) {
             $metadata = [];
             foreach($this->metadataFields as $field) {
                 if($field == 'authors') {
@@ -131,11 +132,12 @@ class Plugin extends Model
         }
     }
 
-    public function getChangelog(?string $since = null): string {
+    public function getChangelog(?string $since = NULL): string {
         $changelog = $this->getPath('CHANGELOG.md');
-        if(!File::isFile($changelog)) return '';
+        if(!File::isFile($changelog))
+            return '';
         $changes = file_get_contents($changelog);
-        if(isset($since) && preg_match("/\\n#+\s(v\s?)?$since(\s-\s.+)?\\n/i", $changes, $matches, PREG_OFFSET_CAPTURE) !== false) {
+        if(isset($since) && preg_match("/\\n#+\s(v\s?)?$since(\s-\s.+)?\\n/i", $changes, $matches, PREG_OFFSET_CAPTURE) !== FALSE) {
             if(count($matches) > 0) {
                 $changes = substr($changes, 0, $matches[0][1]);
             }
@@ -175,59 +177,6 @@ class Plugin extends Model
         return $accesspoints;
     }
 
-    private function getScopeCacheKey(): string {
-        return 'plugin_scopes_' . $this->id;
-    }
-
-    public function getScopes(): array {
-        return Cache::rememberForever($this->getScopeCacheKey(), function() {
-            $info = self::getInfo();
-            $scopes = [];
-            if($info !== false) {
-                if(array_key_exists('scopes', $info)) {
-                    foreach($info['scopes'] as $scope) {
-                        $attributes = $scope['@attributes'];
-                        if(!array_key_exists('src', $attributes)) {
-                            Log::error('<scope> attribute \'src\' is required');
-                            continue;
-                        }
-                        if(!array_key_exists('on', $attributes)) {
-                            Log::error('<scope> attribute \'on\' is required');
-                            continue;
-                        }
-
-                        $src = $attributes['src'];
-                        $on = $attributes['on'];
-
-                        $srcDir = $this->getPath("Scopes");
-                        if(!file_exists($srcDir) || !is_dir($srcDir)) {
-                            Log::error('Missing \'Scopes\' directory');
-                            continue;
-                        }
-                        $srcPath = $srcDir . DIRECTORY_SEPARATOR . $src;
-                        if(!file_exists($srcPath)) {
-                            Log::error("Missing file '$src'");
-                            continue;
-                        }
-                        if(!class_exists($on)) {
-                            Log::error("Class '{$on}' does not exist!");
-                            continue;
-                        }
-                        $className = Str::replaceEnd('.php', '', $src);
-                        $namespacedSrc = $this->getNamespace("\\Scopes\\$className");
-
-                        if(!array_key_exists($on, $scopes)) {
-                            $scopes[$on] = [];
-                        }
-
-                        $scopes[$on][] = $namespacedSrc;
-                    }
-                }
-            }
-            return $scopes;
-        });
-    }
-    
     /**
      * Get the namespace for a given path within the plugin. If no path is provided, 
      * returns the base namespace for the plugin.
@@ -236,7 +185,7 @@ class Plugin extends Model
      * by backslashes or forward slashes. For example, "Controllers/MyController.php" or 
      * "Controllers\MyController.php". Can start with or without a leading slash.
      */
-    public function getNamespace(string $path = null): string{
+    public function getNamespace(string $path = NULL): string {
         $basePath = "App\\Plugins\\$this->name";
         if($path) {
             $basePath .= Str::start(str_replace('/', '\\', $path), '\\');
@@ -244,29 +193,10 @@ class Plugin extends Model
         return $basePath;
     }
 
-    /**
-     * Get all scopes defined in Plugins for a given model class (e.g. App\Entity).
-     */
-    public static function getScopesFor(string $modelClass) {
-        $scopes = [];
-
-        $installedPlugins = Plugin::getInstalled();
-        foreach($installedPlugins as $plugin) {
-            $pluginScopes = $plugin->getScopes();
-            if(array_key_exists($modelClass, $pluginScopes)) {
-                foreach($pluginScopes[$modelClass] as $scope) {
-                    $scopes[] = $scope;
-                }
-            }
-        }
-
-        return $scopes;
-    }
-
     public function getRegisteredAttributes(): array {
         $info = $this->getInfo();
         $attributes = [];
-        if($info !== false) {
+        if($info !== FALSE) {
             if(array_key_exists('attributes', $info)) {
                 $attributes = $info['attributes']['attribute'];
                 // If only one <attribute> exists, this <attribute> is returned
@@ -319,7 +249,7 @@ class Plugin extends Model
     public static function discoverPlugins(array $list): void {
         foreach($list as $ap) {
             $info = self::getPluginInfo($ap);
-            if($info !== false) {
+            if($info !== FALSE) {
                 self::updateOrCreateFromInfo($info);
             }
         }
@@ -328,8 +258,8 @@ class Plugin extends Model
     public static function discoverPluginByName($name): ?Plugin {
         $pluginPath = self::getPluginPath($name);
         $info = self::getPluginInfo($pluginPath);
-        if($info === false) {
-            return null;
+        if($info === FALSE) {
+            return NULL;
         }
 
         $plugin = self::updateOrCreateFromInfo($info);
@@ -365,7 +295,7 @@ class Plugin extends Model
             ) {
                 $this->update_available = $fromInfoVersion;
             } else {
-                $this->update_available = null;
+                $this->update_available = NULL;
             }
             $this->save();
         }
@@ -375,7 +305,7 @@ class Plugin extends Model
         app(\App\Services\PluginManager::class)->clearCache($this);
     }
 
-    public function handleInstallation(bool $isUpdate = false): void {
+    public function handleInstallation(bool $isUpdate = FALSE): void {
         app(\App\Services\PluginManager::class)->install($this, $isUpdate);
     }
 
@@ -398,15 +328,11 @@ class Plugin extends Model
             return [];
         }
 
-        return json_decode(file_get_contents($pluginPermissionPath), true);
+        return json_decode(file_get_contents($pluginPermissionPath), TRUE);
     }
 
     public function getPermissionGroups(): array {
         return array_keys($this->getPermissions());
-    }
-
-    public function getRolePresets(): mixed {
-        return [];
     }
 
     public function getMigrationState(): array {
@@ -429,5 +355,5 @@ class Plugin extends Model
     //     $id = Str::kebab($this->name);
     //     Preference::where('label', 'ilike', "plugin.$id.%")->delete();
     // }
-    
+
 }
