@@ -4,14 +4,10 @@ namespace App\Services;
 
 use App\Plugin;
 use App\Models\Plugin\Migration as PluginMigration;
-use App\File\Directory;
 use App\Permission;
 use App\Preference;
 use App\Services\RolePresetService;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\File as FileFacade;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 
@@ -31,6 +27,7 @@ class PluginManager
     public function __construct(
         public HookService $hooks, 
         // AccessPointsService $accessPoints,
+        public MigrationService $migrationService,
         public RolePresetService $rolePresetService
     ) {
         $this->pluggableServices = [
