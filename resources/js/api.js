@@ -66,7 +66,7 @@ export async function fetchEntityMetadata(id) {
 }
 
 export async function fetchUser() {
-    return await $httpQueue.add(() => http.get('/auth/user').then(response => response.data));
+    return await $httpQueue.add(() => http.get('/auth/user').then(response => response?.data?.data));
 }
 
 export async function fetchAttributes() {

@@ -5,15 +5,33 @@ namespace App\Services;
 use App\Plugin;
 use App\Models\Plugin\Hook;
 use App\Support\Method;
+use App\Support\BootstrapCache;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
-class HookService extends CachedPluggableService {
+class HookService extends BootstrapCache {
+
+    public function __construct() {
+        parent::__construct();
+    }
     
-    protected function getCacheKey(): string
+    protected function fetch(): array
     {
-        return 'plugin_hooks';
+        return Hook::all()->mapToGroups(function ($hook) {
+            return [$hook->on => [
+                "id" => $hook->id,
+                "plugin_id" => $hook->plugin_id,
+                "plugin-name" => $hook->plugin->name ?? null,
+                "plugin-namespace" => $hook->plugin->getNamespace() ?? null,
+                "src" => $hook->src,
+            ]];
+        })->toArray();
+    }
+
+    protected function getPath(): string
+    {
+        return 'plugin-hooks';
     }
 
         
@@ -58,9 +76,7 @@ class HookService extends CachedPluggableService {
             }
         });
         
-        $this->updateCache(function() {
-            return Hook::all();
-        });
+        $this->cache();
     }
     
     public function addHook(array $hook, Plugin $plugin){
@@ -79,29 +95,23 @@ class HookService extends CachedPluggableService {
         $hooks = $this->getHooksFor($hookName);
         foreach($hooks as $hook) {
             try{
-                $method = Method::parseFromString($hook->src);
-                $fullClass = $method->expandNamespace($hook->plugin->getNamespace());
+                $method = Method::parseFromString($hook["src"]);
+                $fullClass = $method->expandNamespace($hook["plugin-namespace"]);
                 $instance = app()->make($fullClass);
                 // Call the hook method with the first argument passed by-reference so
                 // hooks can modify the response or payload directly. Use call_user_func_array
                 // to preserve reference semantics.
                 call_user_func_array([$instance, $method->method], [$request, $response]);
             }catch(\Exception $e) {
-                Log::error("Error executing hook '".$hook->src."' for plugin '".$hook->plugin->name."': " . $e->getMessage());
+                Log::error("Error executing hook '".$hook["src"]."' for plugin '".$hook["plugin-name"]."': " . $e->getMessage());
             }
         }
         return $response;
     }
     
     public function getHooksFor(string $hookName) {
-        $hooks = $this->getCachedData();
-        if($hooks === null) {
-            $hooks = Hook::all();
-            $this->updateCache(function() use ($hooks) {
-                return $hooks;
-            });
-        }
-        return $hooks->where('on', $hookName)->sortByDesc('order');
+        $hooks = $this->get();
+        return $hooks[$hookName] ?? [];
     }
 
 }

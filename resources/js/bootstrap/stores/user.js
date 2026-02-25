@@ -141,6 +141,7 @@ export const useUserStore = defineStore('user', {
         async checkAuth() {
             try{
                 const user = await fetchUser();
+                console.log('Fetched user', user);
                 this.setActiveUser(user);
                 return user;
             } catch {

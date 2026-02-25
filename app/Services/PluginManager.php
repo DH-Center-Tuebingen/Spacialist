@@ -9,6 +9,7 @@ use App\Preference;
 use App\Services\RolePresetService;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\File;
 
 
 /**
@@ -27,7 +28,7 @@ class PluginManager
     public function __construct(
         public HookService $hooks, 
         // AccessPointsService $accessPoints,
-        public MigrationService $migrationService,
+        // public MigrationService $migrationService,
         public RolePresetService $rolePresetService
     ) {
         $this->pluggableServices = [
@@ -36,6 +37,37 @@ class PluginManager
             // $migrationService,
             $rolePresetService,
         ];    
+     }
+
+     public function rebuildPluginCache(){
+        //Iterate over Plugin directory and cache all available plugins
+        // $plugins = require(base_path('app/Plugins'));
+
+        $dirs = File::allDirectories(base_path('app/Plugins'));
+        $cachedPlugins = [];
+        foreach($dirs as $dir) {
+            $info = Plugin::getPluginInfo($dir);
+            if($info !== false) {
+                $cachedPluginInfo = [
+                    'name' => $info['name'],
+                    'version' => $info['version'],
+                    'provider' => null,
+                ];
+                $cachedPlugins[] = $cachedPluginInfo;
+            }
+        }
+        $cacheContent = "<?php\n\nreturn " . var_export($cachedPlugins, true) . ";\n";
+        File::put(base_path('bootstrap/cache/plugins.php'), $cacheContent);
+     }
+
+    public  function getCachedPlugins(){
+        try{
+            $plugins = require(base_path('bootstrap/cache/plugins.php'));
+        }catch(\Exception $e){
+            $this->rebuildPluginCache();
+            $plugins = require(base_path('bootstrap/cache/plugins.php'));
+        }
+        return $plugins;
      }
 
     public function install(Plugin $plugin): void

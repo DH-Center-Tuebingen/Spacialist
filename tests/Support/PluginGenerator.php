@@ -2,6 +2,7 @@
 
 namespace Tests\Support;
 
+use App\Models\Plugin\Hook;
 
 
 /*
@@ -18,23 +19,26 @@ class PluginGenerator {
 
     public function __construct(private array $templates) {}
 
-    public function use(callable $callback, bool $skipTearDown = false): void {
+    public static function with(array $templates, callable $callback, bool $skipTearDown = false): static {
+        return (new static($templates))->use($callback, $skipTearDown);
+    }
+
+    public function use(callable $callback, bool $skipTearDown = false): static {
         $this->setUp();
         try {
             $callback();
         } finally { 
             if(! $skipTearDown) {
-            $this->tearDown();
+                $this->tearDown();
             }
         }
+        return $this;
     }
 
     protected function setUp(): void {
         foreach($this->templates as $template) {
             $plugin = $template->plugin;
-            $additionalStructure = $template->getAdditionalStructure();
-            $additionalInfoContent = $template->getAdditionalInfoContent();
-            $this->directoriesToCleanup[] = PluginDirectoryGenerator::mockPluginDirectory($plugin, $additionalStructure, $additionalInfoContent);
+            $this->directoriesToCleanup[] = PluginDirectoryGenerator::mockPluginDirectory($template);
             $plugin->save();
             $plugin->handleInstallation();
         }

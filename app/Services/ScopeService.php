@@ -2,43 +2,103 @@
 
 namespace App\Services;
 
+use App\Models\Plugin\Scopes;
 use App\Plugin;
-use Illuminate\Support\Facades\Cache;
+use App\Support\BootstrapCache;
+use App\Support\Log\PluginLog;
 
-class ScopeService extends CachedPluggableService
-{
+use Illuminate\Support\Str;
 
-    protected function getCacheKey(): string
-    {
+class ScopeService extends BootstrapCache {
+
+    protected function getPath(): string {
         return 'plugin_scopes';
     }
-    
-    public function install(Plugin $plugin): void
-    {
-        $this->refreshCache();
+
+    public function install(Plugin $plugin): void {
+        $scopes = $this->getScopesFor($plugin);
+        $this->clearScopesOf($plugin);
+        $this->createScopesFor($plugin, $scopes);
+        $this->cache();
     }
-    
-    public function update(Plugin $plugin): void
-    {
-        $this->refreshCache();
+
+    public function update(Plugin $plugin): void {
     }
-    
-    public function uninstall(Plugin $plugin): void
-    {
-        $this->refreshCache();
+
+    public function uninstall(Plugin $plugin): void {
     }
-    
-    public function remove(Plugin $plugin): void
-    {
-        // No separate remove logic needed for hooks
-        $this->refreshCache();
+
+    public function remove(Plugin $plugin): void {
+    }
+
+    protected function clearScopesOf(Plugin $plugin): void {
+        Scopes::where('plugin_id', $plugin->id)->delete();
+    }
+
+    protected function createScopesFor(Plugin $plugin, array $scopes): void {
+        foreach($scopes as $on => $scopeClasses) {
+            foreach($scopeClasses as $scopeClass) {
+                Scopes::create([
+                    'plugin_id' => $plugin->id,
+                    'namespace' => $scopeClass,
+                    'on' => $on,
+                ]);
+            }
+        }
+    }
+
+    protected function getScopesOf(Plugin $plugin): array {
+        $info = $plugin->getInfo();
+        $scopes = [];
+        if($info !== false) {
+            if(array_key_exists('scopes', $info)) {
+                $pluginLogger = new PluginLog($plugin->getName());
+                foreach($info['scopes'] as $scope) {
+                    $attributes = $scope['@attributes'];
+                    if(!array_key_exists('src', $attributes)) {
+                        $pluginLogger->error('<scope> attribute \'src\' is required');
+                        continue;
+                    }
+                    if(!array_key_exists('on', $attributes)) {
+                        $pluginLogger->error('<scope> attribute \'on\' is required');
+                        continue;
+                    }
+
+                    $src = $attributes['src'];
+                    $on = $attributes['on'];
+
+                    $srcDir = $plugin->getPath(path: "Scopes");
+                    if(!file_exists($srcDir) || !is_dir($srcDir)) {
+                        $pluginLogger->error('Missing \'Scopes\' directory');
+                        continue;
+                    }
+                    $srcPath = $srcDir . DIRECTORY_SEPARATOR . $src;
+                    if(!file_exists($srcPath)) {
+                        $pluginLogger->error("Missing file '$src'");
+                        continue;
+                    }
+                    if(!class_exists($on)) {
+                        $pluginLogger->error("Class '{$on}' does not exist!");
+                        continue;
+                    }
+                    $className = Str::replaceEnd('.php', '', $src);
+                    $namespacedSrc = $plugin->getNamespace("\\Scopes\\$className");
+
+                    if(!array_key_exists($on, $scopes)) {
+                        $scopes[$on] = [];
+                    }
+
+                    $scopes[$on][] = $namespacedSrc;
+                }
+            }
+        }
+        return $scopes;
     }
 
     /**
      * Get all scopes defined in Plugins for a given model class (e.g. App\Entity).
      */
-    public static function getScopesFor(string $modelClass)
-    {
+    public static function getScopesFor(string $modelClass) {
         $scopes = [];
 
         $installedPlugins = Plugin::getInstalled();
@@ -54,53 +114,9 @@ class ScopeService extends CachedPluggableService
         return $scopes;
     }
 
-    public function refreshCache(): array
-    {
-        return $this->updateCache(function () {
-            $info = self::getInfo();
-            $scopes = [];
-            if($info !== false) {
-                if(array_key_exists('scopes', $info)) {
-                    foreach($info['scopes'] as $scope) {
-                        $attributes = $scope['@attributes'];
-                        if(!array_key_exists('src', $attributes)) {
-                            Log::error('<scope> attribute \'src\' is required');
-                            continue;
-                        }
-                        if(!array_key_exists('on', $attributes)) {
-                            Log::error('<scope> attribute \'on\' is required');
-                            continue;
-                        }
-
-                        $src = $attributes['src'];
-                        $on = $attributes['on'];
-
-                        $srcDir = $this->getPath("Scopes");
-                        if(!file_exists($srcDir) || !is_dir($srcDir)) {
-                            Log::error('Missing \'Scopes\' directory');
-                            continue;
-                        }
-                        $srcPath = $srcDir . DIRECTORY_SEPARATOR . $src;
-                        if(!file_exists($srcPath)) {
-                            Log::error("Missing file '$src'");
-                            continue;
-                        }
-                        if(!class_exists($on)) {
-                            Log::error("Class '{$on}' does not exist!");
-                            continue;
-                        }
-                        $className = Str::replaceEnd('.php', '', $src);
-                        $namespacedSrc = $this->getNamespace("\\Scopes\\$className");
-
-                        if(!array_key_exists($on, $scopes)) {
-                            $scopes[$on] = [];
-                        }
-
-                        $scopes[$on][] = $namespacedSrc;
-                    }
-                }
-            }
-            return $scopes;
-        });
+    public function fetch(): array {
+        return Scopes::all()->mapToGroups(function ($item) {
+            return [$item->on => $item->namespace];
+        })->toArray();
     }
 }

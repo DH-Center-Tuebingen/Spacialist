@@ -4,9 +4,9 @@ namespace Tests\Unit\Plugin;
 use App\Models\Plugin\Hook;
 use App\Services\HookService;
 use PHPUnit\Framework\Attributes\DataProvider;
-use Tests\Cases\Plugin\PluginHookTestCase;
+use Tests\Cases\Plugin\PluginTestCase;
 
-class HooksTest extends PluginHookTestCase
+class HooksTest extends TestCase
 {
 
 

@@ -4,9 +4,9 @@ namespace App\Support\Log;
 
 use Illuminate\Support\Facades\Log;
 
-
 /*
- *
+ *  Should be overloaded inside a plugin to log with it's own name.
+ * 
  * Log Levels as used in Laravel (RFC 5424)*:
  *  0       Emergency: system is unusable
  *  1       Alert: action must be taken immediately
@@ -21,6 +21,14 @@ use Illuminate\Support\Facades\Log;
  */
 class PluginLog extends Log {
     const CHANNEL_NAME = "plugin";
+    
+    public function __construct(private string $pluginName) { }
+    
+    protected function formatMessage(string $message, array $context = []): string {
+        $pluginName = strtoupper($this->pluginName);
+        return "[$pluginName] " . $message;
+    }
+
     public static function log($message, array $context = []) {
         self::info($message, $context);
     }

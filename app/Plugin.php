@@ -5,16 +5,10 @@ namespace App;
 use App\Models\Plugin\Migration as PluginMigration;
 
 use App\File\Directory;
-use App\Services\AccessPointsService;
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class Plugin extends Model {
@@ -41,9 +35,6 @@ class Plugin extends Model {
         'licence',
         'title',
     ];
-
-    public function __construct() {
-    }
 
     private static function pluginDirectory() {
         $pluginDirectory = config('app.plugin_directory');

@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Attribute;
 use App\Registries\AttributeRegistry;
-use App\Services\AccessPointsService;
+// use App\Services\AccessPointsService;
 use App\Bibliography;
 use App\Entity;
 use App\EntityType;
@@ -28,7 +28,7 @@ class HomeController extends Controller
      *
      * @return void
      */
-    public function __construct(private readonly AccessPointsService $accessPointsService)
+    public function __construct(/*private readonly AccessPointsService $accessPointsService*/)
     {
         parent::__construct();
         if(!Preference::hasPublicAccess()) {
@@ -38,33 +38,33 @@ class HomeController extends Controller
     }
 
     public function checkAccesspointAccess(Request $request) {
-        $user = auth()->user();
-        $accessPath = Str::finish($request->get('endpoint', '/'), '/');
+        // $user = auth()->user();
+        // $accessPath = Str::finish($request->get('endpoint', '/'), '/');
 
-        if(!isset($user->accesspoints)) {
-            // do not redirect if user has no access points defined (aka access to everything)
-            return response()->json(null, 204);
-        }
+        // if(!isset($user->accesspoints)) {
+        //     // do not redirect if user has no access points defined (aka access to everything)
+        //     return response()->json(null, 204);
+        // }
 
-        $availableAccesspoints = $this->accessPointsService->get();
-        foreach($user->accesspoints as $accesspointId) {
-            if(array_key_exists($accesspointId, $availableAccesspoints)) {
-                if($availableAccesspoints[$accesspointId]['path'] == $accessPath) {
-                    return response()->json(null, 204);
-                }
-            }
-        }
+        // $availableAccesspoints = $this->accessPointsService->get();
+        // foreach($user->accesspoints as $accesspointId) {
+        //     if(array_key_exists($accesspointId, $availableAccesspoints)) {
+        //         if($availableAccesspoints[$accesspointId]['path'] == $accessPath) {
+        //             return response()->json(null, 204);
+        //         }
+        //     }
+        // }
 
-        $firstUserAccesspoint = $user->accesspoints[0];
-        if(array_key_exists($firstUserAccesspoint, $availableAccesspoints)) {
-            return response()->json([
-                'redirect' => $availableAccesspoints[$firstUserAccesspoint]['path'],
-            ]);
-        } else {
-            return response()->json([
-                'error' => __('Selected accesspoint is not found in the system'),
-            ], 403);
-        }
+        // $firstUserAccesspoint = $user->accesspoints[0];
+        // if(array_key_exists($firstUserAccesspoint, $availableAccesspoints)) {
+        //     return response()->json([
+        //         'redirect' => $availableAccesspoints[$firstUserAccesspoint]['path'],
+        //     ]);
+        // } else {
+        //     return response()->json([
+        //         'error' => __('Selected accesspoint is not found in the system'),
+        //     ], 403);
+        // }
     }
 
     public function getGlobalData() {
@@ -106,7 +106,7 @@ class HomeController extends Controller
             }
         }
 
-        $accesspoints = $this->accessPointsService->get();
+        // $accesspoints = $this->accessPointsService->get();
 
         // TODO handle layer relation in Map Plugin
         // $entityTypes = EntityType::with(['sub_entity_types', 'layer', 'attributes'])
@@ -121,7 +121,7 @@ class HomeController extends Controller
             'concepts' => $concepts,
             'entityTypes' => $entityTypeMap,
             'datatype_data' => $datatypeData,
-            'accesspoints' => $accesspoints,
+            // 'accesspoints' => $accesspoints,
             'colorsets' => sp_get_themes(),
             'analysis' => sp_has_analysis(),
             'attributes' => $attributes,

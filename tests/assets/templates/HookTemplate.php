@@ -7,52 +7,76 @@ use Tests\Support\PluginTemplate;
 
 class HookTemplate extends PluginTemplate {
 
-    protected function __construct(protected ?string $name="HookPlugin", protected ?string $content="Executed", protected ?string $key = "hook-plugin-message", protected ?string $version = "1.0.0", protected ?string $uuid = "123e4567-e89b-12d3-a456-426614174000", protected ?int $order = 0)
-    {
-        return parent::__construct($name, $uuid, $version);
+    public function __construct(?string $name = null, ?string $uuid = null, ?string $version = null) {
+        parent::__construct(
+            $name ?? "HookPlugin",
+            $uuid ?? "123e4567-e89b-12d3-a456-426614174001",
+            $version ?? "1.0.0",
+        );
     }
 
-
-    public function getAdditionalStructure() : array{
-        return [
-                'Hooks' => [
-                    "AddPreData.php" => <<<ADD_PRE_DATA
+    public function getPredataFileContent(string $key, string $content): string{
+        return <<<ADD_PRE_DATA
 <?php
-namespace App\Plugins\\$this->name\Hooks;
+namespace App\Plugins\\{$this->plugin->name}\Hooks;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 
 class AddPreData {
     public static function apply(Request \$request, JsonResponse \$response): void {
         \$data = \$response->getData(true);
-        \$data['$this->key'] = '$this->content';
+        \$data['$key'] = '$content';
         \$response->setData(\$data);
     }
 }
-ADD_PRE_DATA,
-                ]
-            ];
+ADD_PRE_DATA;
     }
-    public function getAdditionalInfoContent() : string {
-        $hook ="<hooks>\n<hook on=\"api/v1/pre\" src=\"Hooks\\AddPreData@apply\"";
-        if($this->order) {
-            $hook .= " order=\"{$this->order}\"";
+
+    public function addPreHookFile(
+            ?string $key = null, 
+            ?string $content = null
+        ):static {
+        if($key === null) {
+            $key = "hook-plugin-message";
         }
-        return $hook . " />\n</hooks>";
-    }
+        if($content === null) {
+            $content = "Executed";
+        }
 
-    public static function createFrom(?string $name = null , ?string $content = null, ?string $key = null, ?string $version = null, ?string $uuid = null, ?int $order = 0) : static {
-        return new static(
-            name: $name ?? 'HookPlugin',
-            content: $content ?? 'Executed',
-            key: $key ?? 'hook-plugin-message',
-            version: $version ?? '1.0.0',
-            uuid: $uuid ?? '123e4567-e89b-12d3-a456-426614174000',
-            order: $order ?? 0
+        $this->addFile(
+            "Hooks/AddPreData.php",
+            $this->getPredataFileContent($key, $content)
         );
+        return $this;
+    } 
+ 
+
+    public function addPreHook() : static {
+        $this->addHook(
+            on: 'api/v1/pre',
+            src: "Hooks\\AddPreData@apply"
+        );
+        return $this;
     }
 
-    public static function create() : static {
-        return static::createFrom();
+    public function addBasic(?string $key = null, ?string $content = null) : static {
+        return parent::addBasic()
+                     ->addPreHookFile($key, $content)
+                     ->addPreHook();
     }
+
+    public static function getBasic(?string $key = null, ?string $content = null): static{
+        return (new static())->addBasic($key, $content)->generate();
+    }
+
+    public static function createFrom(
+        ?string $name,
+        ?string $uuid,
+        ?string $version,
+        ?string $key, 
+        ?string $content,
+    ): static {
+        return (new static($name, $uuid, $version));
+    }
+
 }

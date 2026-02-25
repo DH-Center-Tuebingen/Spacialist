@@ -15,7 +15,7 @@ app/Plugins/YourPlugin/
 │   ├── Models/                                 # Laravel database models
 │   ├── Scopes/                                 # Model scopes
 │   ├── Support/                                # Support classes
-│   ├── Services/                               # Service classes that can be autoloaded into other classed
+│   ├── Services/                               # Service classes that can be autoloaded into other classes
 │   ├── Utils/                                  # Static utility functions
 │   └── ...             
 ├── migrations/                                 # Plugin migrations

@@ -132,14 +132,12 @@
     import ChangelogTab from '@/components/plugins/tab/Changelog.vue';
     import MigrationTab from '@/components/plugins/tab/Migration/Migration.vue';
     import InformationTab from './tab/Information.vue';
-    import Switch from '../forms/Switch.vue';
 
     export default {
         components: {
             ChangelogTab,
             InformationTab,
             MigrationTab,
-            Switch,
         },
         props: {
             value: {
