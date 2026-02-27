@@ -10,7 +10,7 @@
 <script>
     import { computed } from 'vue';
     import { useI18n } from 'vue-i18n';
-    import MarkdownText from '../../mde/MarkdownText.vue';
+    import MarkdownText from '@/components/mde/MarkdownText.vue';
 
     export default {
         components: {

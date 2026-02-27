@@ -1,6 +1,7 @@
 import { only } from '@/helpers/helpers.js';
 import useAttributeStore from './stores/attribute.js';
 import useEntityStore from './stores/entity.js';
+import usePluginStore from './stores/plugin.js';
 import useSystemStore from './stores/system.js';
 import useUserStore from './stores/user.js';
 import i18n from './i18n.js';
@@ -146,6 +147,7 @@ export const SpPS = {
         SpPS.data.t = t;
         SpPS.api.store.attributeStore = useAttributeStore();
         SpPS.api.store.entityStore = useEntityStore();
+        SpPS.api.store.pluginStore = usePluginStore();
         SpPS.api.store.systemStore = useSystemStore();
         SpPS.api.store.userStore = useUserStore();
     },
@@ -212,7 +214,7 @@ export const SpPS = {
             SpPS.registerRoutes(mergedOptions.id, mergedOptions.routes);
         }
         if(mergedOptions.store) {
-            SpPS.api.store.systemStore.addPluginStore(mergedOptions.id, mergedOptions.store);
+            SpPS.api.store.pluginStore.addStore(mergedOptions.id, mergedOptions.store);
         }
         SpPS.data.plugins[options.id] = mergedOptions;
     },
@@ -271,7 +273,17 @@ export const SpPS = {
                 SpPS.data.app.component(mergedOptions.componentTag, mergedOptions.component);
             }
         }
-        SpPS.api.store.systemStore.registerPluginInSlot(mergedOptions);
+        SpPS.api.store.pluginStore.registerInSlot(mergedOptions);
+    },
+    registerSlot: (options) => {
+        if(!options.of || !SpPS.data.plugins[options.of]) {
+            throw new Error('This plugin part has no associated plugin or that plugin is not installed!');
+        }
+        if(!options.name) {
+            throw new Error('No slot for plugin provided!');
+        }
+        
+        usePluginStore().registerSlot(options.of, options.name);
     },
     registerComponent: (options) => {
         if(!options.of || !SpPS.data.plugins[options.of]) {
@@ -299,7 +311,7 @@ export const SpPS = {
                 }
             }
         } else {
-            SpPS.api.store.systemStore.registerPluginAttribute(mergedOptions);
+            SpPS.api.store.pluginStore.registerAttribute(mergedOptions);
         }
     },
     registerPreference: (options) => {
@@ -339,7 +351,7 @@ export const SpPS = {
                 SpPS.data.app.component(mergedOptions.componentTag, mergedOptions.component);
             }
         }
-        SpPS.api.store.systemStore.registerPluginPreference(mergedOptions);
+        SpPS.api.store.pluginStore.registerPreference(mergedOptions);
     },
 };
 

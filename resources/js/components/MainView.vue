@@ -87,6 +87,7 @@
     } from 'vue-router';
 
     import useEntityStore from '@/bootstrap/stores/entity.js';
+    import usePluginStore from '@/bootstrap/stores/plugin.js';
     import useSystemStore from '@/bootstrap/stores/system.js';
     import router from '%router';
 
@@ -119,6 +120,7 @@
             const { t } = useI18n();
             const currentRoute = useRoute();
             const entityStore = useEntityStore();
+            const pluginStore = usePluginStore();
             const systemStore = useSystemStore();
             useWebSocketConnectionToast();
 
@@ -156,7 +158,7 @@
                 entityTypes: computed(_ => entityStore.entityTypes),
                 columnPref: computed(_ => systemStore.getPreference('prefs.columns')),
                 isDetailLoaded: computed(_ => state.entity?.id > 0),
-                tabPlugins: computed(_ => systemStore.getSlotPlugins('tab')),
+                tabPlugins: computed(_ => pluginStore.getSlotItems('tab')),
             });
             const channels = {};
 

@@ -46,6 +46,7 @@ Route::middleware('auth:sanctum')->prefix('v1/plugin')->group(function() {
     Route::get('/migrate/{plugin}/check', 'PluginController@getMigrationState');
 
     Route::post('', 'PluginController@uploadPlugin');
+    Route::post('/{plugin}/publish_script', 'PluginController@publishPluginScript');
     Route::post('/migrate/{plugin}', 'PluginController@migrate');
     Route::post('/rollback/{plugin}', 'PluginController@rollback');
     Route::post('/migrate/{plugin}/force_add', 'PluginController@addMigrationToDatabase');

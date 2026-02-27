@@ -28,39 +28,6 @@ export async function refreshSession() {
     return $httpQueue.add(() => http.get('/refresh'));
 }
 
-export async function uploadPlugin(file) {
-    const formData = new FormData();
-    formData.append('file', file);
-
-    return $httpQueue.add(
-        () => http.post(`/plugin`, formData).then(response => response.data)
-    );
-}
-
-export async function installPlugin(id) {
-    return $httpQueue.add(
-        () => http.get(`/plugin/${id}`).then(response => response.data)
-    );
-}
-
-export async function updatePlugin(id) {
-    return $httpQueue.add(
-        () => http.patch(`/plugin/${id}`).then(response => response.data)
-    );
-}
-
-export async function uninstallPlugin(id) {
-    return $httpQueue.add(
-        () => http.delete(`/plugin/${id}`).then(response => response.data)
-    );
-}
-
-export async function removePlugin(id) {
-    return $httpQueue.add(
-        () => http.delete(`/plugin/remove/${id}`).then(response => response.data)
-    );
-}
-
 export async function fetchEntityMetadata(id) {
     return await $httpQueue.add(() => http.get(`entity/${id}/metadata`).then(response => response.data));
 }

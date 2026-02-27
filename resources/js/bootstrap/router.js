@@ -33,6 +33,7 @@ import SingleSearch from '@/components/openaccess/SingleSearch.vue';
 
 import DummyComponent from '@/components/DummyComponent.vue';
 import NotFound from '@/components/NotFound.vue';
+import useUserStore from './stores/user';
 
 export {
     onBeforeRouteUpdate,
@@ -287,6 +288,14 @@ export const router = createRouter({
             component: Login,
             meta: {
                 auth: false
+            },
+            beforeEnter: (to, from, next) => {
+                const userStore = useUserStore();
+                if(userStore.userLoggedIn) {
+                    next({ name: 'home' });
+                } else {
+                    next();
+                }
             }
         },
         {

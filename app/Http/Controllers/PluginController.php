@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Plugin;
 use App\Preference;
 use App\Models\Plugin\Migration as PluginMigration;
+use App\Services\PluginManager;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use ZipArchive;
@@ -115,6 +116,18 @@ class PluginController extends Controller
         }
 
         $plugin->metadata = $plugin->getMetadata();
+        return response()->json($plugin);
+    }
+    
+    public function publishPluginScript(Plugin $plugin)
+    {
+        if(!isset($plugin->installed_at)) {
+            return response()->json([
+                    'error' => __('This plugin is not installed.'),
+                ], 403);
+        }
+    
+        app(PluginManager::class)->publishScript($plugin);
         return response()->json($plugin);
     }
 

@@ -269,7 +269,7 @@ class Plugin extends Model {
     }
 
     public static function getDirectory(): Directory {
-        return new Directory('plugins');
+        return new Directory('plugins', 'private');
     }
 
     public function updateUpdateState($fromInfoVersion): void {

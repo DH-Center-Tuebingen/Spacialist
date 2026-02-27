@@ -43,7 +43,7 @@ abstract class BootstrapCache
         } catch(\Exception $e) {
             if(! File::exists($this->getAppPath())) {
                 throw new \Exception(
-                    static::class . ' could not rebuild cache.'
+                    static::class . ' could not rebuild cache. File not found. Original error: ' . $e->getMessage()
                 );
             }
         }
@@ -76,7 +76,6 @@ abstract class BootstrapCache
         File::ensureDirectoryExists(dirname($this->getAppPath()));
 
         $this->data = $this->fetch();
-        info('fetch:: ' . json_encode($this->data));
         File::put(
             $this->getAppPath(),
             $this->export($this->data)

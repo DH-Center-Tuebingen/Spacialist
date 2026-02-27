@@ -862,6 +862,7 @@
             "changelog_info": "Show Changelog",
             "not_found": "No plugins found.",
             "migrate": "Run",
+            "refresh-script": "Renew script file",
             "rollback": "Rollback",
             "section": {
                 "info": "Information",

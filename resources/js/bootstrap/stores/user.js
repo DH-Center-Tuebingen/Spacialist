@@ -59,7 +59,6 @@ const updateUserAt = (context, userId, data, isProfile) => {
 
 export const useUserStore = defineStore('user', {
     state: _ => ({
-        userLoggedIn: false,
         user: null,
         users: [],
         deletedUsers: [],
@@ -136,6 +135,9 @@ export const useUserStore = defineStore('user', {
                 return state.rolePresets.find(preset => preset[prop] = value) || {};
             };
         },
+        userLoggedIn(state) {
+            return !!state.user;
+        }
     },
     actions: {
         async checkAuth() {

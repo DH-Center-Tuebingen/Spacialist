@@ -190,7 +190,7 @@
                                     {{ t('main.importer.title') }}
                                 </router-link>
                                 <router-link
-                                    v-for="plugin in state.plugins.tools"
+                                    v-for="plugin in pluginStore.getSlotItems('tools')"
                                     :key="plugin.key"
                                     class="dropdown-item"
                                     :to="`/${plugin.of}/${plugin.href}`"
@@ -283,7 +283,7 @@
                                     {{ t('global.settings.system') }}
                                 </router-link>
                                 <router-link
-                                    v-for="plugin in state.plugins.settings"
+                                    v-for="plugin in pluginStore.getSlotItems('settings')"
                                     :key="plugin.key"
                                     class="dropdown-item"
                                     :to="`/${plugin.of}/${plugin.href}`"
@@ -427,6 +427,7 @@
         router,
     } from '@/bootstrap/router.js';
 
+    import usePluginStore from '../bootstrap/stores/plugin';
     import useSystemStore from '@/bootstrap/stores/system.js';
     import useUserStore from '@/bootstrap/stores/user.js';
     import { useI18n } from 'vue-i18n';
@@ -453,6 +454,8 @@
         setup(props) {
             const { t, locale } = useI18n();
             const currentRoute = useRoute();
+            
+            const pluginStore = usePluginStore();
             const systemStore = useSystemStore();
             const userStore = useUserStore();
 
@@ -480,7 +483,6 @@
             const state = reactive({
                 recordingTimeout: 0,
                 isRecording: false,
-                plugins: computed(_ => systemStore.getSlotPlugins()),
                 hasAnalysis: computed(_ => systemStore.hasAnalysis),
                 appName: computed(_ => systemStore.getProjectName()),
                 hasThesaurexLink: computed(_ => systemStore.hasPreference('prefs.link-to-thesaurex')),
@@ -596,6 +598,7 @@
                 // PROPS
                 // STATE
                 state,
+                pluginStore,
             };
         }
     };

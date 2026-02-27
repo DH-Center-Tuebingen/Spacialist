@@ -862,6 +862,7 @@
             "changelog_info": "Änderungen anzeigen",
             "not_found": "Keine Erweiterungen gefunden.",
             "migrate": "Migrieren",
+            "refresh-script": "Skriptdatei erneuern",
             "rollback": "Zurücksetzen",
             "section": {
                 "info": "Informationen",

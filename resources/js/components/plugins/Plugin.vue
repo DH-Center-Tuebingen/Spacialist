@@ -5,22 +5,51 @@
     >
         <div
             class="card h-100"
-            :class="{
-                ['opacity-50']: !isInstalled()
-            }"
+            :style="computedStyle"
         >
             <div class="card-body">
                 <header class="d-flex justify-content-between gap-2 mb-1">
                     <h5 class="card-title mb-2">
                         {{ value.metadata.title }}
                     </h5>
-                    <div>
-                        <span class="badge bg-dark">
-                            v{{ value.version }}
-                        </span>
-                        <span class="badge bg-primary ms-1">
-                            {{ value.metadata.licence ? value.metadata.licence.toUpperCase() : '–' }}
-                        </span>
+                    <div class="toolbar d-flex align-items-center gap-1">
+                        <div>
+                            <span class="badge bg-dark">
+                                v{{ value.version }}
+                            </span>
+                            <span class="badge bg-primary ms-1">
+                                {{ value.metadata?.licence?.toUpperCase ? value.metadata.licence.toUpperCase() : '–' }}
+                            </span>
+                        </div>
+
+                        <div class="user-select-none" style="z-index: 10;">
+                            <span
+                                :id="`plugin-${value.id}-dropdown`"
+                                class="clickable text-body align-middle"
+                                data-bs-toggle="dropdown"
+                                role="button"
+                                aria-haspopup="true"
+                                aria-expanded="false"
+                            >
+                                <i class="fas fa-fw fa-ellipsis-vertical" />
+                            </span>
+                            <div
+                                :id="`plugin-settings-${value.id}-contextmenu`"
+                                class="dropdown-menu dropdown-menu-end"
+                                @click.stop.prevent
+                                :aria-labelledby="`plugin-${value.id}-dropdown`"
+                            >
+                                <a
+                                    href="#"
+                                    class="dropdown-item"
+                                    @click="pluiginStore.publishScript(value)"
+                                >
+                                    <span class="ms-2">
+                                        {{ t('main.plugins.refresh-script') }}
+                                    </span>
+                                </a>
+                            </div>
+                        </div>
                     </div>
                 </header>
 
@@ -90,7 +119,7 @@
                     <button
                         type="button"
                         class="btn btn-sm btn-outline-primary"
-                        @click="update()"
+                        @click="pluiginStore.update(value.id)"
                     >
                         <i class="fas fa-fw fa-download" />
                         <!-- eslint-disable-next-line vue/no-v-html -->
@@ -119,14 +148,14 @@
 </template>
 
 <script>
-    import { ref } from 'vue';
+    import { computed, ref } from 'vue';
     import { useI18n } from 'vue-i18n';
 
     import {
         showChangelogModal,
     } from '@/helpers/modal.js';
 
-    import useSystemStore from '@/bootstrap/stores/system.js';
+    import usePluginStore from '@/bootstrap/stores/plugin.js';
     import { isInstalled as isPluginInstalled } from '@/helpers/plugins.js';
 
     import ChangelogTab from '@/components/plugins/tab/Changelog.vue';
@@ -152,7 +181,7 @@
 
             const sections = ['info', 'changelog', 'migrations'];
 
-            const systemStore = useSystemStore();
+            const pluiginStore = usePluginStore();
             // FUNCTIONS
             const isInstalled = _ => {
                 return isPluginInstalled(props.value);
@@ -164,13 +193,13 @@
                 showChangelogModal();
             };
             const install = async _ => {
-                await systemStore.installPlugin(props.value.id);
+                await pluiginStore.install(props.value.id);
             };
             const uninstall = async _ => {
-                await systemStore.uninstallPlugin(props.value.id);
+                await pluiginStore.uninstall(props.value.id);
             };
             const remove = _ => {
-                systemStore.removePlugin(props.value.id);
+                pluiginStore.remove(props.value.id);
             };
 
             const toggleActiveState = async (active) => {
@@ -182,8 +211,18 @@
                 }
                 installing.value = false;
             };
+            
+            const computedStyle = computed(() => {
+                if(!isInstalled()) {
+                    return {
+                        filter: 'brightness(97%)',
+                    };
+                }
+                return {};
+            });
 
             return {
+                computedStyle,
                 installing,
                 install,
                 isInstalled,
@@ -195,9 +234,8 @@
                 toggleActiveState,
                 uninstall,
                 updateAvailable,
+                pluiginStore,
             };
         }
     };
 </script>
-
-<style lang='scss' scoped></style>

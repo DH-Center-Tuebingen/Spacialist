@@ -1,21 +1,24 @@
 <template>
     <div class="markdown-text">
-        <VueMarkdownIt :source="value" />
+        <VueMarkdownIt :source="stringValue" />
     </div>
 </template>
 
-<script>
+<script setup>
     import { VueMarkdownIt } from '@f3ve/vue-markdown-it';
+import { computed } from 'vue';
 
-    export default {
-        components: {
-            VueMarkdownIt,
+    const props = defineProps({
+        value: {
+            type: String,
+            required: true,
         },
-        props: {
-            value: {
-                type: String,
-                required: true,
-            },
-        },
-    };
+    });
+    
+    const stringValue = computed(() => {
+        if(typeof props.value === 'string') {
+            return props.value;
+        }
+        return '';
+    });
 </script>

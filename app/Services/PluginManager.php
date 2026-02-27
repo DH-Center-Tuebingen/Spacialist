@@ -144,10 +144,15 @@ class PluginManager
         PluginMigration::rollback($plugin);
     }
 
-    private function publishScript(Plugin $plugin): void
+    public function publishScript(Plugin $plugin): void
     {
         $name = $plugin->name;
         $scriptPath = $plugin->getPath("js/script.js");
+        
+        if(is_link($scriptPath)) {
+            $scriptPath = readlink($scriptPath);
+        }
+        
         if(file_exists($scriptPath)) {
             $filehandle = fopen($scriptPath, 'r');
 

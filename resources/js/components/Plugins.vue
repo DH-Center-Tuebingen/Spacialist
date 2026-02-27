@@ -22,13 +22,13 @@
         </h4>
         <div class="row row-cols-3 g-3">
             <Plugin
-                v-for="plugin in state.sortedPlugins"
+                v-for="plugin in pluginStore.pluginsSortedByTitle"
                 :key="plugin.name"
                 :value="plugin"
                 class="col col-12 col-md-6 col-xl-4"
             />
             <alert
-                v-if="(!state.sortedPlugins || state.sortedPlugins.length == 0)"
+                v-if="(!pluginStore.pluginsSortedByTitle || pluginStore.pluginsSortedByTitle == 0)"
                 :message="t('main.plugins.not_found')"
                 :type="'info'"
                 :noicon="false"
@@ -47,7 +47,8 @@
 
 
     import { useI18n } from 'vue-i18n';
-    import useSystemStore from '@/bootstrap/stores/system.js';
+    
+    import usePluginStore from '../bootstrap/stores/plugin';
 
     import { useToast } from '@/plugins/toast.js';
 
@@ -56,7 +57,7 @@
     } from '@/helpers/helpers.js';
 
     import Plugin from './plugins/Plugin.vue';
-    import { isInstalled } from '../helpers/plugins';
+    import { getPluginTitle } from '../helpers/plugins';
 
     export default {
         components: {
@@ -64,7 +65,7 @@
         },
         setup(props) {
             const { t } = useI18n();
-            const systemStore = useSystemStore();
+            const pluginStore = usePluginStore();
 
             let toast = null;
             onMounted(() => {
@@ -74,12 +75,11 @@
                 });
             });
 
-
             const update = plugin => {
-                systemStore.patchPlugin(plugin.id).then(_ => {
+                pluginStore.update(plugin.id).then(_ => {
                     const vo = plugin.version;
                     const label = t('main.plugins.toasts.update.message', {
-                        name: plugin.metadata.title,
+                        name: getPluginTitle(plugin),
                         vo: vo,
                         v: plugin.version,
                     });
@@ -102,23 +102,13 @@
                 }
             };
             const uploadZip = (file, component) => {
-                return systemStore.uploadPlugin(file.file).then(_ => {
+                return pluginStore.upload(file.file).then(_ => {
                     state.files = [];
                 });
             };
 
             // DATA
             const state = reactive({
-                plugins: computed(_ => systemStore.plugins),
-                sortedPlugins: computed(_ => {
-                    return Object.values(state.plugins).sort((a, b) => {
-
-                        if(isInstalled(a) && !isInstalled(b)) return -1;
-                        if(!isInstalled(a) && isInstalled(b)) return 1;
-
-                        return a.metadata.title.localeCompare(b.metadata.title);
-                    });
-                }),
                 files: [],
             });
 
@@ -139,6 +129,7 @@
                 // STATE
                 state,
                 columnClasses,
+                pluginStore,
             };
         },
     };

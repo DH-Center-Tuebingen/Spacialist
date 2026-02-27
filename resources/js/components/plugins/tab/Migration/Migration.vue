@@ -14,11 +14,11 @@
                 {{ t('main.plugins.info.no_migrations') }}
             </template>
             <template v-else>
-                <ul class="list-unstyled mb-0 overflow-x-auto">
+                <ul class="list-unstyled mb-0 overflow-x-auto pt-1">
                     <li
                         v-for="migration in migrationList"
                         :key="migration.name"
-                        class="d-flex justify-content-between align-items-center mb-1"
+                        class="mb-1"
                     >
                         <MigrationItem
                             :migration="migration"

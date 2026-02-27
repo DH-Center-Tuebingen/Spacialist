@@ -18,3 +18,7 @@ export const removeScript = location => {
 export const isInstalled = (plugin) => {
     return plugin?.installed_at !== null;
 }
+
+export const getPluginTitle = (plugin) => {
+    return plugin.metadata?.title || plugin.name;
+}
