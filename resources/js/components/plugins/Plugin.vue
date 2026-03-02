@@ -10,7 +10,7 @@
             <div class="card-body">
                 <header class="d-flex justify-content-between gap-2 mb-1">
                     <h5 class="card-title mb-2">
-                        {{ value.metadata.title }}
+                        {{ getPluginTitle(value) }}
                     </h5>
                     <div class="toolbar d-flex align-items-center gap-1">
                         <div>
@@ -22,7 +22,10 @@
                             </span>
                         </div>
 
-                        <div class="user-select-none" style="z-index: 10;">
+                        <div
+                            class="user-select-none"
+                            style="z-index: 10;"
+                        >
                             <span
                                 :id="`plugin-${value.id}-dropdown`"
                                 class="clickable text-body align-middle"
@@ -46,6 +49,15 @@
                                 >
                                     <span class="ms-2">
                                         {{ t('main.plugins.refresh-script') }}
+                                    </span>
+                                </a>
+                                <a
+                                    href="#"
+                                    class="dropdown-item"
+                                    @click="pluiginStore.refreshInfo(value)"
+                                >
+                                    <span class="ms-2">
+                                        {{ t('main.global.refresh') }}
                                     </span>
                                 </a>
                             </div>
@@ -161,6 +173,7 @@
     import ChangelogTab from '@/components/plugins/tab/Changelog.vue';
     import MigrationTab from '@/components/plugins/tab/Migration/Migration.vue';
     import InformationTab from './tab/Information.vue';
+    import { getPluginTitle } from '../../helpers/plugins';
 
     export default {
         components: {
@@ -211,7 +224,7 @@
                 }
                 installing.value = false;
             };
-            
+
             const computedStyle = computed(() => {
                 if(!isInstalled()) {
                     return {
@@ -226,6 +239,7 @@
                 installing,
                 install,
                 isInstalled,
+                getPluginTitle,
                 page,
                 remove,
                 sections,

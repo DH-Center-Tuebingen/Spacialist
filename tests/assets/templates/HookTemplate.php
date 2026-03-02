@@ -73,8 +73,6 @@ ADD_PRE_DATA;
         ?string $name,
         ?string $uuid,
         ?string $version,
-        ?string $key, 
-        ?string $content,
     ): static {
         return (new static($name, $uuid, $version));
     }

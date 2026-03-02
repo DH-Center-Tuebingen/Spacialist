@@ -61,8 +61,6 @@ class PluginTemplate {
             $hook['order'] = $order;
         }
         $this->hooks[] = $hook;
-
-        info("Added hook to plugin '{$this->plugin->name}': " . json_encode($hook));
     }
 
     public function getHooks(): array {

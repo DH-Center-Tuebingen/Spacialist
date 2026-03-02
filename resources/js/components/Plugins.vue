@@ -19,6 +19,12 @@
                     <i class="fas fa-fw fa-file-import" /> {{ t('main.plugins.upload') }}
                 </span>
             </file-upload>
+            <div
+                class="btn btn-rimary"
+                @click="pluginStore.refresh()"
+            >
+                refresh
+            </div>
         </h4>
         <div class="row row-cols-3 g-3">
             <Plugin
@@ -47,7 +53,7 @@
 
 
     import { useI18n } from 'vue-i18n';
-    
+
     import usePluginStore from '../bootstrap/stores/plugin';
 
     import { useToast } from '@/plugins/toast.js';

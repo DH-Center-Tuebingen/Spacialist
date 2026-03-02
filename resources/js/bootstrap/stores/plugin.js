@@ -5,6 +5,7 @@ import {
     install,
     publishScript,
     remove,
+    refresh,
     uninstall,
     update,
     upload,
@@ -121,7 +122,7 @@ export const usePluginStore = defineStore('plugin', {
             if(pluginName) {
                 slotName = this.getSlotName(slotName, pluginName);
             }
-            
+
             if(!this.registeredSlots[slotName]) {
                 console.error('Plugin slot does not exist', slotName);
                 return [];
@@ -129,7 +130,7 @@ export const usePluginStore = defineStore('plugin', {
 
             return this.registeredSlots[slotName] ?? [];
         },
-        async publishScript(plugin){
+        async publishScript(plugin) {
             removeScript(plugin.install_location)
             await publishScript(plugin.id).then(data => {
                 appendScript(data.install_location);
@@ -137,6 +138,17 @@ export const usePluginStore = defineStore('plugin', {
         },
         set(plugins) {
             this.plugins = plugins;
+        },
+        async refresh() {
+            const plugins = await refresh()
+            this.set(plugins);
+        },
+        async refreshInfo(plugin) {
+            const data = await refreshInfo(plugin.id);
+            const idx = this.plugins.find(p => p.id == data.id)
+            if(idx > -1) {
+                this.plugins[idx] = data;
+            }
         },
         registerSlot(slot) {
             if(this.registeredSlots[slot]) {
@@ -169,16 +181,16 @@ export const usePluginStore = defineStore('plugin', {
                 console.error('Plugin preference category does not exist', data.category);
                 return;
             }
-            
-            
+
+
             const preferenceCategory = this.registeredPreferences[category];
-            
+
             const subcategory = data.subcategory;
             if(!subcategory) {
                 console.error('Plugin preference is missing subcategory', data);
                 return;
             }
-            
+
             if(!preferenceCategory[data.subcategory]) {
                 preferenceCategory[data.subcategory] = {
                     preferences: [],

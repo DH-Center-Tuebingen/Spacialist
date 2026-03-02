@@ -68,7 +68,7 @@ class Plugin extends Model {
         return self::getPluginPath($pluginPath);
     }
 
-    public function publicName($withPath = TRUE): string {
+    public function publicName($withPath = true): string {
         $slug = $this->slugName();
         $uuid = $this->uuid;
         $name = "{$slug}-{$uuid}.js";
@@ -78,18 +78,24 @@ class Plugin extends Model {
         return $name;
     }
 
-    public static function getPluginInfo($path, $isString = FALSE): mixed {
+    public static function getPluginInfo($path, $isString = false): mixed {
         if(!$isString) {
             $infoPath = Str::finish($path, '/') . 'App/info.xml';
-            if(!File::isFile($infoPath))
-                return FALSE;
+            if(is_link($infoPath)) {
+                $infoPath = readlink($infoPath);
+                info("is Symlink to $infoPath");
+            }
+            
+            if(!File::isFile($infoPath)){
+                return false;
+            }
             $xmlString = file_get_contents($infoPath);
         } else {
             $xmlString = $path;
         }
 
         $xmlObject = simplexml_load_string($xmlString);
-        return json_decode(json_encode($xmlObject), TRUE);
+        return json_decode(json_encode($xmlObject), true);
     }
 
     public function getInfo() {
@@ -189,6 +195,13 @@ class Plugin extends Model {
         $attributes = [];
         if($info !== FALSE) {
             if(array_key_exists('attributes', $info)) {
+                
+                // When an empty <attributes> tag is provided, it is possible that the 'attribute' key does not exist in the $info array.
+                // In this case, we return an empty array.
+                if(!array_key_exists('attribute', $info['attributes'])) {
+                    return [];
+                }
+                
                 $attributes = $info['attributes']['attribute'];
                 // If only one <attribute> exists, this <attribute> is returned
                 // instead of an array, but we always want an array
@@ -201,12 +214,14 @@ class Plugin extends Model {
     }
 
     public static function updateOrCreateFromInfo(array $info): Plugin {
-        $id = $info['name'];
-        $plugin = self::where('name', $id)->first();
+        $name = $info['name'];
+        $plugin = self::where('name', $name)->first();
         // discovered new Plugin, add it to DB
+        
         if(!isset($plugin)) {
+            info("Create plugin with name $name and version {$info['version']}");
             $plugin = new self();
-            $plugin->name = $id;
+            $plugin->name = $name;
             $plugin->version = $info['version'];
             $plugin->uuid = Str::uuid();
             $plugin->save();
@@ -231,8 +246,8 @@ class Plugin extends Model {
         }
 
         $nonExistingPlugins = self::whereNotIn('name', $pluginNames)->get();
-
         foreach($nonExistingPlugins as $removedPlugin) {
+            info("Plugin '{$removedPlugin->name}' does not exist anymore and will be removed from database.");
             $removedPlugin->handleRemove();
         }
     }
@@ -319,7 +334,7 @@ class Plugin extends Model {
             return [];
         }
 
-        return json_decode(file_get_contents($pluginPermissionPath), TRUE);
+        return json_decode(file_get_contents($pluginPermissionPath), true);
     }
 
     public function getPermissionGroups(): array {

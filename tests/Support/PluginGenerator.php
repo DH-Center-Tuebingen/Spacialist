@@ -35,7 +35,7 @@ class PluginGenerator {
         return $this;
     }
 
-    protected function setUp(): void {
+    public function setUp(): void {
         foreach($this->templates as $template) {
             $plugin = $template->plugin;
             $this->directoriesToCleanup[] = PluginDirectoryGenerator::mockPluginDirectory($template);
@@ -44,7 +44,7 @@ class PluginGenerator {
         }
     }
 
-    protected function tearDown(): void {
+    public function tearDown(): void {
         foreach($this->directoriesToCleanup as $dir) {
             PluginDirectoryGenerator::cleanup($dir);
         }

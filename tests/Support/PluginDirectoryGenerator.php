@@ -23,10 +23,6 @@ class PluginDirectoryGenerator
         }
     }
 
-    public static function use(PluginTemplate $pluginTemplate): bool {
-        return File::exists($pluginTemplate->path());
-    }
-
     /**
      * Creates the basic directory structure for a plugin.
      *
@@ -76,7 +72,7 @@ class PluginDirectoryGenerator
         if(! file_exists($pluginDir)) {
             mkdir($pluginDir, 0755, true);
         }
-
+        
         // Process structure array
         foreach($template->getStructure() as $name => $content) {
             $path = $pluginDir . '/' . $name;

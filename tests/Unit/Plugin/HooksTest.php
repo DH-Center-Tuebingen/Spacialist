@@ -1,14 +1,36 @@
 <?php
 namespace Tests\Unit\Plugin;
 
-use App\Models\Plugin\Hook;
 use App\Services\HookService;
+use App\Plugin;
 use PHPUnit\Framework\Attributes\DataProvider;
-use Tests\Cases\Plugin\PluginTestCase;
+use Tests\Assets\Templates\HookTemplate;
+use Tests\Support\PluginGenerator;
+use Tests\TestCase;
 
 class HooksTest extends TestCase
 {
 
+    protected PluginGenerator $pluginGenerator;
+    protected HookService $hookService;
+    protected Plugin $plugin;
+
+    public function setUp(): void
+    {
+        parent::setUp();
+        $this->hookService = app(HookService::class);
+        
+        $hookTemplate = HookTemplate::getBasic()->generate();
+        $this->plugin = $hookTemplate->plugin;
+        $this->pluginGenerator = new PluginGenerator([$hookTemplate]);
+        $this->pluginGenerator->setUp();
+    }
+    
+    public function tearDown(): void
+    {
+        $this->pluginGenerator->tearDown();
+        parent::tearDown();
+    }
 
     public function testAddHookSuccessfully()
     {
@@ -18,7 +40,7 @@ class HooksTest extends TestCase
             'order' => 1,
         ];
 
-        $hookModel            = Hook::getHookFromJson($hookData, $this->plugin);
+        $hookModel            = $this->hookService->createHookFromJson($hookData, $this->plugin);
         $hookModel->plugin_id = $this->plugin->id;
         $hookModel->save();
 
@@ -36,30 +58,30 @@ class HooksTest extends TestCase
      * @return void
      */
     #[DataProvider('hookExceptionProvider')]
-    public function testAddHookExceptions($data, $message)
+     public function testAddHookExceptions($data, $message)
     {
         $this->expectException(\Exception::class);
         $this->expectExceptionMessage($message);
-        Hook::getHookFromJson($data, $this->plugin);
+        $this->hookService->createHookFromJson($data, $this->plugin);
     }
 
-    public function testAddHookToServiceSuccessfully() {
+    public function testAddHookToServiceSuccessfully()
+    {
         $hookData = [
-            'on' => 'api/v1/pre',
-            'src' => 'Hooks\\AddPreData@apply',
-            'order' => 1
+            'on'    => 'api/v1/pre',
+            'src'   => 'Hooks\\AddPreData@apply',
+            'order' => 1,
         ];
 
-        $hookService = new HookService();
-        $hookService->addHook($hookData, $this->plugin);
+        $this->hookService->addHook($hookData, $this->plugin);
 
         $this->assertDatabaseHas('plugin_hooks', [
             'plugin_id' => $this->plugin->id,
-            'on' => 'api/v1/pre',
-            'src' => 'Hooks\\AddPreData@apply',
-            'order' => 1
+            'on'        => 'api/v1/pre',
+            'src'       => 'Hooks\\AddPreData@apply',
+            'order'     => 1,
         ]);
-    }
+    } 
 
     /**
      * Test addHook method of HookService class
@@ -71,9 +93,8 @@ class HooksTest extends TestCase
     {
         $this->expectException(\Exception::class);
         $this->expectExceptionMessage($message);
-        $hookService = new HookService();
-        $hookService->addHook($data, $this->plugin);
-    }
+        $this->hookService->addHook($data, $this->plugin);
+    } 
 
     public static function hookExceptionProvider()
     {

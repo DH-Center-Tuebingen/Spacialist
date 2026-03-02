@@ -8,6 +8,7 @@ use App\Permission;
 use App\Preference;
 use App\Services\RolePresetService;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\File;
 
@@ -41,16 +42,22 @@ class PluginManager
 
      public function rebuildPluginCache(){
         //Iterate over Plugin directory and cache all available plugins
-        // $plugins = require(base_path('app/Plugins'));
-
-        $dirs = File::allDirectories(base_path('app/Plugins'));
+        $dirs = File::directories(base_path('app/Plugins'));
         $cachedPlugins = [];
         foreach($dirs as $dir) {
             $info = Plugin::getPluginInfo($dir);
             if($info !== false) {
+            
+                if(!isset($info['name']) || !isset($info['version'])) {
+                    continue;
+                }
+                
+                $plugin = Plugin::updateOrCreateFromInfo($info);
+                
                 $cachedPluginInfo = [
-                    'name' => $info['name'],
-                    'version' => $info['version'],
+                    'name' => $plugin->name,
+                    'uuid' => $plugin->uuid,
+                    'version' => $plugin->version,
                     'provider' => null,
                 ];
                 $cachedPlugins[] = $cachedPluginInfo;

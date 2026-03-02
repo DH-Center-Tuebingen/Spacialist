@@ -24,7 +24,7 @@ Route::middleware('auth:sanctum')->prefix('download')->group(function () {
 });
 
 Route::middleware('auth:sanctum')->prefix('v1')->group(function() {
-    Route::get('/pre', 'HomeController@getGlobalData')->middleware(PluginHooks::class);
+    Route::get('/pre', 'HomeController@getGlobalData');
     Route::get('/version', function() {
         $versionInfo = new App\VersionInfo();
         return response()->json([
@@ -46,6 +46,8 @@ Route::middleware('auth:sanctum')->prefix('v1/plugin')->group(function() {
     Route::get('/migrate/{plugin}/check', 'PluginController@getMigrationState');
 
     Route::post('', 'PluginController@uploadPlugin');
+    Route::post('/refresh', 'PluginController@refresh');
+    Route::post('/refresh_info/{plugin}', 'PluginController@refreshInfo');
     Route::post('/{plugin}/publish_script', 'PluginController@publishPluginScript');
     Route::post('/migrate/{plugin}', 'PluginController@migrate');
     Route::post('/rollback/{plugin}', 'PluginController@rollback');

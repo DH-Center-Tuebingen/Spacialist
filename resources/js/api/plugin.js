@@ -29,6 +29,18 @@ export async function uninstall(id) {
     );
 }
 
+export async function refresh() {
+    return $httpQueue.add(
+        () => http.post(`/plugin/refresh`).then(response => response.data)
+    );
+}
+
+export async function refreshInfo(id) {
+    return $httpQueue.add(
+        () => http.post(`/plugin/refresh_info/${id}`).then(response => response.data)
+    );
+}
+
 export async function remove(id) {
     return $httpQueue.add(
         () => http.delete(`/plugin/remove/${id}`).then(response => response.data)

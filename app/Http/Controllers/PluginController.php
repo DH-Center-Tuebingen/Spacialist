@@ -141,7 +141,7 @@ class PluginController extends Controller
             try {
                 $plugin->handleInstallation();
             } catch(ModelNotFoundException $e) {
-                info("odelNotFoundException: " . $e->getMessage());
+                info("ModelNotFoundException: " . $e->getMessage());
                 return response()->json([
                     'error' => __('Error while installing plugin. Preset does not exist.')
                 ], 403);
@@ -255,10 +255,14 @@ class PluginController extends Controller
     public function getMigrationState(Request $request, Plugin $plugin) {
         return response()->json($plugin->getMigrationState());
     }
-
-    //// REBASING:: Plugin Attribute
-    // public function downloadScript(Request $request) {
-    //     $file = "plugins/" . $request->query('src');
-    //     return Plugin::getDirectory()->download($file);
-    // }
+    
+    public function refresh(Request $request) {
+        app(PluginManager::class)->rebuildPluginCache();
+        return response()->json(Plugin::getWithMetadata());
+    }
+    
+    public function refreshInfo(Request $request, Plugin $plugin) {
+        $plugin->metadata = $plugin->getMetadata(true);
+        return response()->json($plugin);
+    }
 }
