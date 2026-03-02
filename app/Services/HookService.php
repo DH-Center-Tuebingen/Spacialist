@@ -15,10 +15,6 @@ class HookService extends BootstrapCache {
     const AVAILABLE_HOOKS = [
         'api/v1/pre',
     ];
-
-    public function __construct() {
-        parent::__construct();
-    }
     
     protected function fetch(): array
     {
@@ -37,7 +33,6 @@ class HookService extends BootstrapCache {
     {
         return 'plugin-hooks';
     }
-
         
     public function install(Plugin $plugin): void
     {

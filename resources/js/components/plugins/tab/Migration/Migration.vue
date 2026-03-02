@@ -31,7 +31,7 @@
         <div class="d-flex gap-2 flex-row-reverse">
             <button
                 class="btn btn-sm btn-outline-secondary"
-                :disabled="hasMissingMigrations"
+                :disabled="!hasMissingMigrations"
                 @click="migrate()"
             >
                 {{ t('main.plugins.migrate') }}
@@ -123,7 +123,9 @@
             });
 
             const hasMissingMigrations = computed(() => {
-                return migrationList.value.filter(m => !m.ran);
+                const missingMigrations = migrationList.value.filter(m => m.ran === false)
+                console.log("Missing Migrations: ", missingMigrations);
+                return missingMigrations.length > 0;
             });
 
             return {

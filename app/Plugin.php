@@ -83,7 +83,6 @@ class Plugin extends Model {
             $infoPath = Str::finish($path, '/') . 'App/info.xml';
             if(is_link($infoPath)) {
                 $infoPath = readlink($infoPath);
-                info("is Symlink to $infoPath");
             }
             
             if(!File::isFile($infoPath)){
@@ -341,17 +340,17 @@ class Plugin extends Model {
         return array_keys($this->getPermissions());
     }
 
-    public function getMigrationState(): array {
-        return PluginMigration::getMigrationState($this);
-    }
+    // public function getMigrationState(): array {
+    //     return PluginMigration::getMigrationState($this);
+    // }
 
-    public function runMigrations(): void {
-        app(\App\Services\PluginManager::class)->runMigrations($this);
-    }
+    // public function runMigrations(): void {
+    //     app(\App\Services\PluginManager::class)->runMigrations($this);
+    // }
 
-    public function rollbackMigrations(): void {
-        app(\App\Services\PluginManager::class)->rollbackMigrations($this);
-    }
+    // public function rollbackMigrations(): void {
+    //     app(\App\Services\PluginManager::class)->rollbackMigrations($this);
+    // }
 
     // private function uninstallPresets(): void {
     //     RolePresetPlugin::where('from', $this->id)->delete();

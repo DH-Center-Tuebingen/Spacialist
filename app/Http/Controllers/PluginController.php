@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Plugin;
 use App\Preference;
 use App\Models\Plugin\Migration as PluginMigration;
+use App\Services\MigrationService;
 use App\Services\PluginManager;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
@@ -218,12 +219,12 @@ class PluginController extends Controller
     }
 
     public function migrate(Request $request, Plugin $plugin) {
-        $plugin->runMigrations();
+        app(MigrationService::class)->run($plugin);
         return response()->json($plugin);
     }
 
     public function rollback(Request $request, Plugin $plugin) {
-        $plugin->rollbackMigrations();
+        app(MigrationService::class)->rollback($plugin);
         return response()->json($plugin);
     }
 
@@ -238,14 +239,8 @@ class PluginController extends Controller
                 'error' => __('This migration does not exist or has already been run.')
             ], 400);
         }
-        //Determine the next batch number
-        $nextBatch = PluginMigration::max('batch') + 1;
-        //Record the migration as run   
-        PluginMigration::create([
-            'plugin_id' => $plugin->id,
-            'migration' => $migrationName,
-            'batch' => $nextBatch
-        ]);
+
+        app(MigrationService::class)->set($migrationName, $plugin);
         return response()->json($plugin->getMigrationState());
     }
 

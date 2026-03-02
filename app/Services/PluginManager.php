@@ -29,13 +29,13 @@ class PluginManager
     public function __construct(
         public HookService $hooks, 
         // AccessPointsService $accessPoints,
-        // public MigrationService $migrationService,
+        public MigrationService $migrationService,
         public RolePresetService $rolePresetService
     ) {
         $this->pluggableServices = [
             $hooks,
             // $accessPoints,
-            // $migrationService,
+            $migrationService,
             $rolePresetService,
         ];    
      }
@@ -83,7 +83,6 @@ class PluginManager
             $service->install($plugin);
         }
         
-        $this->runMigrations($plugin);
         $this->publishScript($plugin);
         $this->addPermissions($plugin);
         $this->clearCache($plugin);
@@ -99,7 +98,6 @@ class PluginManager
             $service->update($plugin);   
         }
         
-        // $this->install($plugin, true);
         $info = $plugin->getInfo();
         $plugin->update_available = null;
         $plugin->version = $info['version'];
@@ -123,7 +121,6 @@ class PluginManager
     {
         if(isset($plugin->installed_at)) {
             $this->uninstall($plugin);
-            $this->rollbackMigrations($plugin);
             $this->removePermissions($plugin);
         }
         
@@ -139,16 +136,6 @@ class PluginManager
     public function clearCache(Plugin $plugin): void
     {
         
-    }
-
-    public function runMigrations(Plugin $plugin): void
-    {
-        PluginMigration::run($plugin);
-    }
-
-    public function rollbackMigrations(Plugin $plugin): void
-    {
-        PluginMigration::rollback($plugin);
     }
 
     public function publishScript(Plugin $plugin): void
