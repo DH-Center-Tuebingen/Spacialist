@@ -851,18 +851,13 @@
                 let isValid = true;
                 const dirtyValues = getDirtyValues(grps);
 
-                for(let attributeId in state.requiredAttributes) {
-                    const attribute = state.requiredAttributes[attributeId];
-
+                for(let attribute of state.requiredAttributes) {
+                    const dataExists = Boolean(state.entity.data[attribute.id]?.id);
+                    const isKeyInDirtyValue = hasKey(dirtyValues, attribute.id);
+                    const isDirtyValueEmpty = isEmpty(dirtyValues[attribute.id]);
                     // check if existing value has an empty dirty value
                     // -> delete operation
-                    if(
-                        state.entity.data[attribute.id]?.id
-                        &&
-                        hasKey(dirtyValues, attribute.id)
-                        &&
-                        isEmpty(dirtyValues[attribute.id])
-                    ) {
+                    if(dataExists && isKeyInDirtyValue && isDirtyValueEmpty) {
                         isValid = false;
                         break;
                     }
@@ -870,15 +865,8 @@
                     // a) an existing entry in dirty values
                     // b) or the dirty value is empty
                     // -> missing
-                    if(
-                        !state.entity.data[attribute.id]?.id
-                        &&
-                        (
-                            !hasKey(dirtyValues, attribute.id)
-                            ||
-                            isEmpty(dirtyValues[attribute.id])
-                        )
-                    ) {
+                    const noDirtyData = !isKeyInDirtyValue || isDirtyValueEmpty;
+                    if(!dataExists && noDirtyData) {
                         isValid = false;
                         break;
                     }
