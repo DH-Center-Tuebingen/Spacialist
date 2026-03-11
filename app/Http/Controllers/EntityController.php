@@ -857,9 +857,9 @@ class EntityController extends Controller {
             $aid = $patch['params']['aid'];
             // FIXME [VR]: `?? null` is only necessary, because of temporary AttributeValue::handlePatch() implementation
             $value = $patch['value'] ?? null;
-            $error = AttributeValue::handlePatch($id, $aid, $value, $op, $user, $addedAttributes, $removedAttributes);
+            $error = AttributeValue::handlePatch($entity, $aid, $value, $op, $user, $addedAttributes, $removedAttributes);
             if($error !== false) {
-                DB::rollback();
+                DB::rollBack();
                 return response()->json([
                     'error' => $error['message'],
             ], $error['code']);
