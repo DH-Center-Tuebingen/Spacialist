@@ -1,6 +1,8 @@
-import { only } from '@/helpers/helpers';
-import useSystemStore from './stores/system.js';
+import { only } from '@/helpers/helpers.js';
+import useAttributeStore from './stores/attribute.js';
 import useEntityStore from './stores/entity.js';
+import useSystemStore from './stores/system.js';
+import useUserStore from './stores/user.js';
 import i18n from './i18n.js';
 import {
     router,
@@ -19,6 +21,9 @@ import * as Vue from 'vue';
 import * as filters from '@/helpers/filters.js';
 import * as helpers from '@/helpers/helpers.js';
 import * as colors from '@/helpers/colors.js';
+import {
+    showUserInfo,
+} from '@/helpers/modal.js';
 import {
     getLayers,
     switchLayerPositions,
@@ -94,6 +99,9 @@ export const SpPS = {
         filters: filters,
         helpers: helpers,
         colors: colors,
+        modals: {
+            showUserInfo,
+        },
         mapHelpers: {
             getLayers,
             switchLayerPositions,
@@ -136,8 +144,10 @@ export const SpPS = {
         SpPS.data.app = app;
         SpPS.data.pinia = pinia;
         SpPS.data.t = t;
-        SpPS.api.store.systemStore = useSystemStore();
+        SpPS.api.store.attributeStore = useAttributeStore();
         SpPS.api.store.entityStore = useEntityStore();
+        SpPS.api.store.systemStore = useSystemStore();
+        SpPS.api.store.userStore = useUserStore();
     },
     registerI18n: (id, messages) => {
         for(let k in messages) {
@@ -182,7 +192,7 @@ export const SpPS = {
                 children: r.children,
             });
         });
-        router.addRoute(pluginRoute);
+        router.addRoute('app', pluginRoute);
     },
     register: (options) => {
         if(!options.id) {
@@ -205,6 +215,34 @@ export const SpPS = {
             SpPS.api.store.systemStore.addPluginStore(mergedOptions.id, mergedOptions.store);
         }
         SpPS.data.plugins[options.id] = mergedOptions;
+    },
+    registerAccessPoint: (options) => {
+        if(!options.id) {
+            throw new Error('Your plugin needs an id to be installed!');
+        }
+        if(!SpPS.data.plugins[options.id]) {
+            throw new Error('No plugin with that ID is installed! Register it first, before registering an access point.');
+        }
+        const defaultOptions = {
+            id: null,
+            path: null,
+            component: null,
+            routes: [],
+        };
+        const mergedOptions = {
+            ...defaultOptions,
+            ...only(options, Object.keys(defaultOptions)),
+        };
+        const pluginRoute = {
+            path: `/${mergedOptions.path}`,
+            name: `${mergedOptions.id}_${mergedOptions.path}`,
+            component: mergedOptions.component,
+            children: mergedOptions.routes,
+            meta: {
+                auth: true
+            }
+        };
+        router.addRoute(pluginRoute);
     },
     intoSlot: (options) => {
         if(!options.of || !SpPS.data.plugins[options.of]) {

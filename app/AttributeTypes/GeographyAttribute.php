@@ -42,7 +42,7 @@ class GeographyAttribute extends AttributeBase
 
     public static function serialize(mixed $data): mixed {
         if($data instanceof Geometry) {
-            return $data;
+            return Geodata::toWKT($data);
         } else {
             return Geodata::wkb2wkt($data);
         }

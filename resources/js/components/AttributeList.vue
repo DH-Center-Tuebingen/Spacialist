@@ -13,7 +13,7 @@
         <template #item="{ element, index }">
             <div
                 v-if="!state.hiddenAttributeList[element.id] || showHidden"
-                class="mt-3 px-2"
+                class="attribute-list-item mt-3 px-2"
                 :class="additionalRowClasses(element)"
                 @mouseenter="onEnter(index)"
                 @mouseleave="onLeave(index)"

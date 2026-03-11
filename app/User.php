@@ -37,6 +37,7 @@ class User extends Authenticatable
 
     protected $casts = [
         'metadata' => 'array',
+        'accesspoints' => 'array',
     ];
 
     /**

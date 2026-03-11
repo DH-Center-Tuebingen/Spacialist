@@ -7,6 +7,7 @@ use App\AttributeTypes\SqlAttribute;
 use App\Exceptions\AmbiguousValueException;
 use App\Import\EntityImporter;
 use App\Traits\CommentTrait;
+use App\Traits\HasPluginScopes;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -25,6 +26,7 @@ class Entity extends Model implements Searchable {
     use CommentTrait;
     use SearchableTrait;
     use LogsActivity;
+    use HasPluginScopes;
 
     /**
      * The attributes that are assignable.
@@ -97,6 +99,7 @@ class Entity extends Model implements Searchable {
     public static function getSearchCols(): array {
         return array_keys(self::searchCols);
     }
+
 
     public static function getFromPath($path, $delimiter = "\\\\"): ?int {
         if(!isset($path)) {
@@ -215,7 +218,7 @@ class Entity extends Model implements Searchable {
         $entity->save();
 
         // TODO workaround to get all (optional, not part of request) attributes
-        $entity = self::find($entity->id);
+        $entity = self::withoutGlobalScopes()->find($entity->id);
         AttributeBase::onCreateHandler($entity, $user);
         $entity->children_count = 0;
 
@@ -269,7 +272,7 @@ class Entity extends Model implements Searchable {
         }
         return $query;
     }
-    
+
     public function move($parentId, $rank, $user) {
         if($rank == null){
             if(isset($parentId)) {

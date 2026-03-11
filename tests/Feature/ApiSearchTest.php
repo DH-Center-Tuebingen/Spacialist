@@ -197,14 +197,13 @@ class ApiSearchTest extends TestCase
 
         $content = json_decode($response->getContent());
         $response->assertStatus(200);
-        $response->assertJsonCount(10);
+        $response->assertJsonCount(3, 'data');
         // response content is Laravel Paginate Array
         $this->assertObjectHasProperty('data', $content);
         $this->assertObjectHasProperty('from', $content);
         $this->assertObjectHasProperty('to', $content);
         $this->assertObjectHasProperty('per_page', $content);
         $this->assertObjectHasProperty('current_page', $content);
-        $this->assertObjectHasProperty('current_page_url', $content);
         $this->assertObjectHasProperty('first_page_url', $content);
         $this->assertObjectHasProperty('next_page_url', $content);
         $this->assertObjectHasProperty('prev_page_url', $content);

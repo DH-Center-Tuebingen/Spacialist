@@ -1,5 +1,5 @@
 <template>
-    <div class="col-md-4 offset-md-4">
+    <div class="col-md-4 mx-auto mt-5">
         <div class="login-header mb-3">
             <h1>Spacialist</h1>
             <img

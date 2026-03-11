@@ -3,7 +3,9 @@ All notable changes to this project will be documented in this file.
 
 ## 0.12 - (Luxor)
 ### Added
+- Access Points (Plugins can define additional access points to restrict user access to certain parts of the plugin)
 - Plugin-System now supports custom components, e.g. attribute types
+- Plugin-System now supports PluginScopes
 - .env variable `ALLOW_FILESYSTEM_MIGRATIONS` to explcitly enable filesystem migrations
 - API endpoint for getting all entity details data in one request: GET::v1/entity/{id}/entity_detail
 - Option to set entity attributes as required fields

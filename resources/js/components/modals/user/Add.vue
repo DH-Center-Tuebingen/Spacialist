@@ -44,7 +44,7 @@
                                 required
                                 @input="e => handleChange(e, 'name')"
                             >
-    
+
                             <div class="invalid-feedback">
                                 <span
                                     v-for="(msg, i) in state.errors.name"
@@ -73,7 +73,7 @@
                                 required
                                 @input="e => handleChange(e, 'nickname')"
                             >
-    
+
                             <div class="invalid-feedback">
                                 <span
                                     v-for="(msg, i) in state.errors.nickname"
@@ -102,7 +102,7 @@
                                 required
                                 @input="e => handleChange(e, 'email')"
                             >
-    
+
                             <div class="invalid-feedback">
                                 <span
                                     v-for="(msg, i) in state.errors.email"
@@ -144,7 +144,7 @@
                                     <i class="fas fa-fw fa-eye-slash" />
                                 </span>
                             </a>
-    
+
                             <div class="invalid-feedback">
                                 <span
                                     v-for="(msg, i) in state.errors.password"
@@ -173,7 +173,7 @@
                                 required
                                 @input="e => handleChange(e, 'password_confirm')"
                             >
-    
+
                             <div class="invalid-feedback">
                                 <span
                                     v-for="(msg, i) in state.errors.password_confirm"
@@ -182,6 +182,27 @@
                                     {{ msg }}
                                 </span>
                             </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label
+                            class="col-form-label col-12"
+                            for="accesspoints"
+                        >
+                            {{ t('global.accesspoints') }}:
+                        </label>
+                        <div class="col-12">
+                            <multiselect
+                                v-model="v.fields.accesspoints.value"
+                                :name="'accesspoints'"
+                                :object="true"
+                                :label="'label'"
+                                :track-by="'path'"
+                                :value-prop="'path'"
+                                :close-on-select="false"
+                                :mode="'tags'"
+                                :options="state.accessPointsArray"
+                            />
                         </div>
                     </div>
                 </form>
@@ -220,6 +241,8 @@
 
     import * as yup from 'yup';
 
+    import useSystemStore from '@/bootstrap/stores/system.js';
+
     import {
         can,
         getClassByValidation,
@@ -239,6 +262,7 @@
                 errors,
             } = toRefs(props);
             const { t } = useI18n();
+            const systemStore = useSystemStore();
 
             // FUNCTIONS
             const closeModal = _ => {
@@ -256,7 +280,20 @@
                     nickname: v.fields.nickname.value,
                     email: v.fields.email.value,
                     password: v.fields.password.value,
+                    password_confirm: v.fields.password_confirm.value,
                 };
+
+                if(v.fields.accesspoints.value.length > 0) {
+                    user.accesspoints = [];
+                    v.fields.accesspoints.value.forEach(ap => {
+                        for(let key in state.accessPoints) {
+                            if(state.accessPoints[key].path == ap.path) {
+                                user.accesspoints.push(key);
+                                break;
+                            }
+                        }
+                    });
+                }
                 context.emit('add', user);
             };
             const togglePasswordVisibility = _ => {
@@ -276,6 +313,7 @@
                 email: yup.string().required().email().max(255),
                 password: yup.string().required().min(6),
                 password_confirm: yup.string().oneOf([yup.ref('password'), null]).required(),
+                accesspoints: yup.array(),
             });
             const {
                 meta: formMeta
@@ -312,15 +350,23 @@
                 value: vpc,
                 handleChange: hcpc,
             } = useField('password_confirm');
+            const {
+                errors: eap,
+                meta: map,
+                value: vap,
+                handleChange: hcap,
+            } = useField('accesspoints');
 
             const state = reactive({
                 showPassword: false,
                 form: formMeta,
+                accessPoints: computed(_ => systemStore.accessPoints),
+                accessPointsArray: computed(_ => systemStore.getAccessPointsAsArray),
                 errors: computed(_ => {
                     const errList = {};
                     const fields = Object.keys(v.fields);
                     const hasApiErrors = errors.value && Object.keys(errors.value).length > 0;
-                    fields.forEach(f => { 
+                    fields.forEach(f => {
                         errList[f] = v.fields[f].errors;
                         if(hasApiErrors && errors.value[f]) {
                             errList[f].push(...errors.value[f]);
@@ -361,6 +407,12 @@
                         value: vpc,
                         handleChange: hcpc,
                     },
+                    accesspoints: {
+                        errors: eap,
+                        meta: map,
+                        value: vap,
+                        handleChange: hcap,
+                    }
                 },
                 schema: schema,
             });

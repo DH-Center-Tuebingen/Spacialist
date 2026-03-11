@@ -62,8 +62,8 @@ export default function useWebSocketConnectionToast() {
         }
     });
 
-
     const bsToast = ref(null);
+
     function createToastIfNecessary() {
         if(!bsToast.value) {
             bsToast.value = toast.$toast(message.value, '', {

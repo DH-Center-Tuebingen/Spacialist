@@ -16,6 +16,7 @@ import {
     patchRoleData,
     reactivateUser,
     setUserAvatar,
+    fetchUser,
 } from '@/api.js';
 
 import {
@@ -137,6 +138,15 @@ export const useUserStore = defineStore('user', {
         },
     },
     actions: {
+        async checkAuth() {
+            try{
+                const user = await fetchUser();
+                this.setActiveUser(user);
+                return user;
+            } catch {
+                return null;
+            }
+        },
         setLoginState(value) {
             this.userLoggedIn = value;
         },

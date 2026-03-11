@@ -341,6 +341,7 @@
         "description": "Description",
         "roles": "Roles",
         "permissions": "Permissions",
+        "accesspoints": "Access Points",
         "added_at": "Added",
         "created_at": "Created",
         "updated_at": "Updated",
@@ -651,6 +652,9 @@
             "active_users": "Active Users",
             "deactivated_users": "Deactivated Users",
             "empty_list": "User-list is empty",
+            "accesspoints": {
+                "default": "Spacialist (default)"
+            },
             "toasts": {
                 "updated": {
                     "title": "User updated",
