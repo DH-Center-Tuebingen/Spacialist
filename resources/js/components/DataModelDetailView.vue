@@ -271,29 +271,9 @@
                     pivot: e.element.pivot,
                 });
             };
-            const onRequireEntityAttribute = e => {
-                const attribute = state.entityAttributes.find(attribute => {
-                    return attribute.id == e.element.id;
-                });
-                if(attribute) {
-                    const isRequired = e.active === true;
-                    const metadata = {
-                        required: isRequired,
-                    };
-                    const attributeId = e.element.id;
-                    const entityAttributeId = e.element.pivot.id;
-                    entityStore.patchEntityMetadata(
-                        state.entityType.id,
-                        attributeId,
-                        entityAttributeId,
-                        metadata,
-                    ).then(_ => {
-                        if(!attribute.pivot.metadata) {
-                            attribute.pivot.metadata = {};
-                        }
-                        attribute.pivot.metadata.required = isRequired;
-                    });
-                }
+            const onRequireEntityAttribute = async e => {
+                const isRequired = e.active === true;
+                await entityStore.setEntityAttributeRequired(state.entityType.id, e.element.id, e.element.pivot.id, isRequired);
             };
             const onRemoveAttributeFromEntityType = e => {
                 const etid = currentRoute.params.id;
