@@ -6,20 +6,7 @@ import {
  } from 'vue';
 import useEntityStore from '@/bootstrap/stores/entity.js';
 import { getNodeFromPath } from 'tree-component';
-import {
-    fetchChildren as fetchChildrenApi,
-} from '@/api.js';
 
-export async function fetchChildren(id, sort = {by: 'rank', dir: 'asc'}) {
-    const entityStore = useEntityStore();
-    return fetchChildrenApi(id).then(data => {
-        return entityStore.setDescendants({
-            entities: data,
-            sort: sort,
-        });
-    });
-
-}
 
 export function sortTree(by, dir, tree) {
     const entityStore = useEntityStore();
@@ -94,7 +81,7 @@ export async function openPath(ids, sort = {by: 'rank', dir: 'asc'}) {
     }
     if(!elem.childrenLoaded) {
         elem.state.loading = true;
-        const children = await fetchChildren(elem.id, sort);
+        const children = await entityStore.fetchChildren(elem.id, sort);
         elem.state.loading = false;
         elem.children = children;
         elem.childrenLoaded = true;

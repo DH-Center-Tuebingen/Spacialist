@@ -97,13 +97,15 @@
 
             const migrate = async _ => {
                 if(confirm(t('main.plugins.info.migration-confirm'))) {
-                    return http.post(`/plugin/migrate/${props.value.id}`);
+                    const response = await http.post(`/plugin/migrate/${props.value.id}`);
+                    migrationList.value = response.data;
                 }
             };
 
             const rollback = async _ => {
                 if(confirm(t('main.plugins.info.rollback-confirm'))) {
-                    return http.post(`/plugin/migrate/${props.value.id}/rollback`);
+                     const response = await http.post(`/plugin/migrate/${props.value.id}/rollback`);
+                     migrationList.value = response.data;
                 }
             };
 
