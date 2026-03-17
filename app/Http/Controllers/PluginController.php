@@ -220,12 +220,14 @@ class PluginController extends Controller
 
     public function migrate(Request $request, Plugin $plugin) {
         app(MigrationService::class)->run($plugin);
-        return response()->json($plugin);
+        $migrationState = app(MigrationService::class)->inspect($plugin);
+        return response()->json($migrationState);
     }
 
     public function rollback(Request $request, Plugin $plugin) {
         app(MigrationService::class)->rollback($plugin);
-        return response()->json($plugin);
+        $migrationState = app(MigrationService::class)->inspect($plugin);
+        return response()->json($migrationState);
     }
 
     public function addMigrationToDatabase(Request $request, Plugin $plugin) {
@@ -241,14 +243,16 @@ class PluginController extends Controller
         }
 
         app(MigrationService::class)->set($migrationName, $plugin);
-        return response()->json($plugin->getMigrationState());
+        $migrationState = app(MigrationService::class)->inspect($plugin);
+        return response()->json($migrationState );
     }
 
      /**
      * Get the migration state for a plugin.
      */
     public function getMigrationState(Request $request, Plugin $plugin) {
-        return response()->json($plugin->getMigrationState());
+        $migrationState = app(MigrationService::class)->inspect($plugin);
+        return response()->json($migrationState);
     }
     
     public function refresh(Request $request) {

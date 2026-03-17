@@ -50,7 +50,7 @@ Route::middleware('auth:sanctum')->prefix('v1/plugin')->group(function() {
     Route::post('/refresh_info/{plugin}', 'PluginController@refreshInfo');
     Route::post('/{plugin}/publish_script', 'PluginController@publishPluginScript');
     Route::post('/migrate/{plugin}', 'PluginController@migrate');
-    Route::post('/rollback/{plugin}', 'PluginController@rollback');
+    Route::post('/migrate/{plugin}/rollback', 'PluginController@rollback');
     Route::post('/migrate/{plugin}/force_add', 'PluginController@addMigrationToDatabase');
 
     Route::patch('/{id}', 'PluginController@updatePlugin')->where('id', '[0-9]+');

@@ -56,7 +56,7 @@ class MigrationService implements IPluggable {
         $this->exec($plugin, true);
     }
 
-    function exec(Plugin $plugin, $rollback = false) {
+    protected function exec(Plugin $plugin, $rollback = false) {
         //Determine the next batch number
         $nextBatch = PluginMigration::getNextBatchNumber();
         $migrations = $this->getMissingMigrations($plugin, $rollback);
@@ -81,8 +81,8 @@ class MigrationService implements IPluggable {
                 throw $e;
             }
         }
-    }
-
+    } 
+    
     /**
      * Adds a migration entry to the database without running it.
      * This is required for legacy plugins that were not yet using the
