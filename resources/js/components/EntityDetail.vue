@@ -807,7 +807,7 @@
                     // -> delete operation
                     if(dataExists && isKeyInDirtyValue && isDirtyValueEmpty) {
                         missingRequiredAttributes.push(translateConcept(attribute.thesaurus_url));
-                        break;
+                        continue;
                     }
                     // check if there is neither an existing valur nor:
                     // a) an existing entry in dirty values
@@ -816,7 +816,7 @@
                     const noDirtyData = !isKeyInDirtyValue || isDirtyValueEmpty;
                     if(!dataExists && noDirtyData) {
                         missingRequiredAttributes.push(translateConcept(attribute.thesaurus_url));
-                        break;
+                        continue;
                     }
                 }
 
