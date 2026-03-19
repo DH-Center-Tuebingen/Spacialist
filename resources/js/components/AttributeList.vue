@@ -73,7 +73,7 @@
                                     v-if="!element.is_system"
                                     v-show="hasEmitter('onRequireElement')"
                                     class="btn btn-fab rounded-circle"
-                                    :class="{'btn-outline-primary': !element.pivot?.metadata?.required, 'btn-primary': element.pivot?.metadata?.required}"
+                                    :class="{'btn-primary': !element.pivot?.metadata?.required, 'btn-outline-primary': element.pivot?.metadata?.required}"
                                     data-bs-toggle="popover"
                                     :data-content="t('global.required')"
                                     data-trigger="hover"

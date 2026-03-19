@@ -115,7 +115,14 @@ dl.dl-0-mb > dd:last-child {
     padding: 0;
     height: 1.8rem;
     width: 1.8rem;
-    background-color: $white;
+}
+
+// As fab buttons are often used hovering over other elements, the default transparent
+// background of outline buttons is inappropriate. Therefore we add a solid background-color.
+@each $color, $value in $theme-colors {
+  .btn-fab.btn-outline-#{$color}:not(:hover) {
+    background-color: $fab-btn-bg;
+  }
 }
 
 .btn-fab:disabled {
