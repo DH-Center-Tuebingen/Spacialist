@@ -507,7 +507,7 @@
                 },
                 "required_missing": {
                     "title": "Required fields missing",
-                    "msg": "Please fill in all required fields."
+                    "msg": "Please fill in all required fields: {missing}"
                 }
             },
             "tree": {

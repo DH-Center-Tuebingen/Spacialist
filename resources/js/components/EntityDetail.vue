@@ -796,8 +796,8 @@
                 state.hiddenAttributeState = false;
             };
             const isFormValid = (grps, asToast = true) => {
-                let isValid = true;
                 const dirtyValues = getDirtyValues(grps);
+                const missingRequiredAttributes = [];
 
                 for(let attribute of state.requiredAttributes) {
                     const dataExists = Boolean(state.entity.data[attribute.id]?.id);
@@ -806,7 +806,7 @@
                     // check if existing value has an empty dirty value
                     // -> delete operation
                     if(dataExists && isKeyInDirtyValue && isDirtyValueEmpty) {
-                        isValid = false;
+                        missingRequiredAttributes.push(translateConcept(attribute.thesaurus_url));
                         break;
                     }
                     // check if there is neither an existing valur nor:
@@ -815,14 +815,15 @@
                     // -> missing
                     const noDirtyData = !isKeyInDirtyValue || isDirtyValueEmpty;
                     if(!dataExists && noDirtyData) {
-                        isValid = false;
+                        missingRequiredAttributes.push(translateConcept(attribute.thesaurus_url));
                         break;
                     }
                 }
 
-                if(!isValid && asToast) {
+                const allRequirementsMet = missingRequiredAttributes.length === 0;
+                if(!allRequirementsMet && asToast) {
                     toast.$toast(
-                        t('main.entity.toasts.required_missing.msg'),
+                        t('main.entity.toasts.required_missing.msg', {missing: missingRequiredAttributes.join(', ')}),
                         t('main.entity.toasts.required_missing.title'),
                         {
                             channel: 'warning',
@@ -831,7 +832,7 @@
                         },
                     );
                 }
-                return isValid;
+                return allRequirementsMet;
             };
             const confirmDeleteEntity = _ => {
                 if(!can('entity_delete')) return;
