@@ -8,6 +8,7 @@ All notable changes to this project will be documented in this file.
 - Plugin-System now supports PluginScopes
 - .env variable `ALLOW_FILESYSTEM_MIGRATIONS` to explcitly enable filesystem migrations
 - API endpoint for getting all entity details data in one request: GET::v1/entity/{id}/entity_detail
+- Multi move in entity tree: Select multi edit mode, select multiple entities in the tree and then right click 'move' to move all selected entities at once
 ### Fixed
 - Removed redundant calls to the entity endpoint
 - Metadata tab error on submit (unknown variable)

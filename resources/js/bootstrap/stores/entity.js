@@ -42,6 +42,7 @@ import {
     getEntityParentMetadata,
     handleModeration,
     moveEntity,
+    moveMultipleEntities,
     patchEntityType,
     patchAttribute as apiPatchAttribute,
     patchAttributes as apiPatchAttributes,
@@ -390,6 +391,12 @@ export const useEntityStore = defineStore('entity', {
                 to_end: to_end,
             });
             this.processEntityMove(entityId, parentId, rank, to_end);
+        },
+        async moveMultiple(entityIds, parentId) {
+            await moveMultipleEntities(entityIds, parentId);
+            for(const entityId of entityIds) {
+                this.processEntityMove(entityId, parentId, 0, true);
+            }
         },
         processEntityMove(entityId, parentId, rank, to_end) {
             const entity = this.getEntity(entityId);
