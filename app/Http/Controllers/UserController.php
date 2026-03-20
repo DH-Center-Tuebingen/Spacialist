@@ -223,7 +223,6 @@ class UserController extends Controller {
             $request->get('accesspoints'),
         );
 
-        // TODO is this necessary? The user should already be up to date after creation [SO]
         $user = User::find($user->id);
         
         return response()->json($user);
