@@ -52,6 +52,7 @@
                 <button
                     type="button"
                     class="btn btn-outline-success btn-sm"
+                    :disabled="!state.hasDirtyData"
                     @click="savePreferences()"
                 >
                     <i class="fas fa-fw fa-save" />
@@ -130,6 +131,7 @@
     import ThesaurusLink from '@/components/preferences/ThesaurusLink.vue';
     import ProjectName from '@/components/preferences/ProjectName.vue';
     import ProjectMaintainer from '@/components/preferences/ProjectMaintainer.vue';
+    import { scalePropotionallyInteger } from '../helpers/math';
 
     export default {
         components: {
@@ -202,15 +204,25 @@
                     updatedLanguage = state.dirtyData.user['prefs.gui-language'].value;
                 }
                 const changes = [];
-                for(let k in state.dirtyData.user) {
-                    const curr = state.dirtyData.user[k];
-                    curr.user = true;
-                    changes.push(curr);
-                }
-                for(let k in state.dirtyData.system) {
-                    const curr = state.dirtyData.system[k];
-                    changes.push(curr);
-                }
+
+                ['user', 'system'].forEach(category => {
+                    for(let prefLabel in state.dirtyData[category]) {
+                        const curr = state.dirtyData[category][prefLabel];
+
+                        let preference = getPreferenceCategory(category);
+
+                        // Execute onSave hook if exists
+                        const config = findPreferenceConfig(category, prefLabel);
+                        if(config?.hooks?.onSave) {
+                            curr.value = config.hooks.onSave(curr.value);
+                        }
+                        preference[prefLabel] = curr.value;
+
+                        curr.user = category === 'user';
+                        changes.push(curr);
+                    }
+                });
+
                 const data = {
                     changes: changes,
                 };
@@ -228,6 +240,30 @@
                         simple: true,
                     });
                 });
+            };
+
+            const getPreferenceCategory = (category) => {
+                if(category == 'system') {
+                    return state.systemPreferences;
+                } else {
+                    return state.userPreferences;
+                }
+            };
+
+            const findPreferenceConfig = (category, label) => {
+                const categoryConfig = preferencesConfig[category];
+                const configMap = {};
+                for(let subcatKey in categoryConfig) {
+                    const subcat = categoryConfig[subcatKey];
+                    subcat.preferences.forEach(pref => {
+                        configMap[pref.label] = pref;
+                    });
+                }
+                if(configMap[label]) {
+                    return configMap[label];
+                }
+
+                return null;
             };
 
             const setProgramPreferences = (categories, name) => {
@@ -283,6 +319,14 @@
                                 title: 'main.preference.key.columns.title',
                                 label: 'prefs.columns',
                                 component: 'columns-preference',
+                                data: 'v-model',
+                                hooks: {
+                                    onSave(value) {                                        
+                                        const values = ['left', 'center', 'right'].map(key => value[key]);
+                                        const twelveBased = scalePropotionallyInteger(values, 12);
+                                        return { left: twelveBased[0], center: twelveBased[1], right: twelveBased[2] };
+                                    }
+                                }
                             },
                             {
                                 title: 'main.preference.key.tooltips',
