@@ -857,13 +857,24 @@ class EntityController extends Controller {
             $aid = $patch['params']['aid'];
             // FIXME [VR]: `?? null` is only necessary, because of temporary AttributeValue::handlePatch() implementation
             $value = $patch['value'] ?? null;
-            $error = AttributeValue::handlePatch($id, $aid, $value, $op, $user, $addedAttributes, $removedAttributes);
+            $error = AttributeValue::handlePatch($entity, $aid, $value, $op, $user, $addedAttributes, $removedAttributes);
             if($error !== false) {
-                DB::rollback();
+                DB::rollBack();
                 return response()->json([
                     'error' => $error['message'],
             ], $error['code']);
             }
+        }
+
+        $requiredAttributes = $entity->entity_type->required_attributes->pluck('attribute_id');
+        $existingValues = AttributeValue::where('entity_id', $entity->id)
+            ->whereIn('attribute_id', $requiredAttributes)
+            ->count();
+        if(count($requiredAttributes) != $existingValues) {
+            DB::rollBack();
+            return response()->json([
+                'error' => __('Required attribute is missing.'),
+            ], 422);
         }
 
         // Save model if last editor changed

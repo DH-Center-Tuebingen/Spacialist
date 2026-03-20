@@ -138,6 +138,7 @@
                     type="submit"
                     form="entity-attribute-form"
                     class="btn-outline-success btn-sm d-flex flex-row gap-1 align-items-center"
+                    :disabled="!state.formDirty"
                     :loading="state.saving"
                     @click.prevent="saveEntity()"
                 >
@@ -440,20 +441,25 @@
     import {
         can,
         userId,
+        hasKey,
+        isEmpty,
         translateConcept,
         _cloneDeep,
     } from '@/helpers/helpers.js';
+
     import {
         showDiscard,
         showDeleteEntity,
         showUserInfo,
         canShowReferenceModal,
     } from '@/helpers/modal.js';
+
     import {
         listenToList,
         joinEntityRoom,
         leaveEntityRoom,
     } from '@/helpers/websocket.js';
+
     import {
         handleEntityDataUpdated,
         handleAttributeValueCreated,
@@ -546,6 +552,9 @@
                         if(state.dirtyStates[k]) return true;
                     }
                     return false;
+                }),
+                requiredAttributes: computed(_ => {
+                    return state.entityAttributes.filter(attribute => attribute?.pivot?.metadata?.required === true);
                 }),
                 filteredEntityGroups: computed(_ => {
                     return state.entityGroups.filter(g => !g.hidden);
@@ -786,6 +795,44 @@
             const hideHiddenAttributes = _ => {
                 state.hiddenAttributeState = false;
             };
+            const isFormValid = (grps, asToast = true) => {
+                let isValid = true;
+                const dirtyValues = getDirtyValues(grps);
+
+                for(let attribute of state.requiredAttributes) {
+                    const dataExists = Boolean(state.entity.data[attribute.id]?.id);
+                    const isKeyInDirtyValue = hasKey(dirtyValues, attribute.id);
+                    const isDirtyValueEmpty = isEmpty(dirtyValues[attribute.id]);
+                    // check if existing value has an empty dirty value
+                    // -> delete operation
+                    if(dataExists && isKeyInDirtyValue && isDirtyValueEmpty) {
+                        isValid = false;
+                        break;
+                    }
+                    // check if there is neither an existing valur nor:
+                    // a) an existing entry in dirty values
+                    // b) or the dirty value is empty
+                    // -> missing
+                    const noDirtyData = !isKeyInDirtyValue || isDirtyValueEmpty;
+                    if(!dataExists && noDirtyData) {
+                        isValid = false;
+                        break;
+                    }
+                }
+
+                if(!isValid && asToast) {
+                    toast.$toast(
+                        t('main.entity.toasts.required_missing.msg'),
+                        t('main.entity.toasts.required_missing.title'),
+                        {
+                            channel: 'warning',
+                            autohide: true,
+                            icon: true,
+                        },
+                    );
+                }
+                return isValid;
+            };
             const confirmDeleteEntity = _ => {
                 if(!can('entity_delete')) return;
 
@@ -899,20 +946,25 @@
                 e.preventDefault();
                 if(e.shiftKey) {
                     if(!state.formDirty) return;
+                    if(!isFormValid()) return;
                     saveEntity();
                 } else {
                     if(!state.dirtyStates[grp]) return;
+                    if(!isFormValid(grp)) return;
                     saveEntity(grp);
                 }
             };
 
             const saveEntity = async grps => {
                 if(!can('entity_data_write')) return;
+                if(!state.formDirty) return;
+                if(!isFormValid(grps)) return;
 
                 const dirtyValues = getDirtyValues(grps);
+
+                if(Object.keys(dirtyValues).length == 0) return;
                 const patches = [];
                 const moderations = [];
-                if(Object.keys(dirtyValues).length == 0) return;
 
                 for(let v in dirtyValues) {
                     const aid = v;

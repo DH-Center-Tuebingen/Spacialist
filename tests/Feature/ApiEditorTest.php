@@ -778,6 +778,34 @@ class ApiEditorTest extends TestCase
         }
     }
 
+    #[TestDox('PATCH /api/v1/editor/dm/entity_type/attribute/1/metadata  -   Test patching entity type attribute metadata (id=1).')]
+    public function testPatchEntityTypeAttributeMetadataEndpoint()
+    {
+        $patchData = [
+            'title' => 'Test Title',
+            'width' => 50,
+            'required' => true,
+        ];
+        $response = $this->userRequest()
+            ->patch('/api/v1/editor/dm/entity_type/attribute/1/metadata', $patchData);
+
+        $this->assertStatus($response, 200);
+
+        $entityAttribute = EntityAttribute::find(1);
+        $this->assertArrayHasKey('metadata', $entityAttribute);
+        $this->assertEquals((object) $patchData, $entityAttribute->metadata);
+    }
+
+    #[TestDox('PATCH /api/v1/editor/dm/entity_type/attribute/1/metadata  -   Test validation error on patching entity type attribute metadata (id=1).')]
+    public function testValidationErrorPatchEntityTypeAttributeMetadataEndpoint()
+    {
+        $patchData = [];
+        $response = $this->userRequest()
+            ->patch('/api/v1/editor/dm/entity_type/attribute/1/metadata', $patchData);
+
+        $this->assertStatus($response, 422);
+    }
+
     #[TestDox('PATCH /api/v1/editor/dm/entity_type/{id}/attribute/{aid}/dependency  -   Test adding dependency to an attribute of an entity type (id=4).')]
     public function testAddDependencyToEntiyTypeAttributeEndpoint()
     {
@@ -997,25 +1025,28 @@ class ApiEditorTest extends TestCase
 
         return [
             'exception on get entity type'                         => Permission::for("get", "/api/v1/editor/entity_type/99", $entityDoesNotExist),
-            'exception on view entity data'                        => Permission::for("post", "/api/v1/editor/dm/entity_type/99/attribute", $entityDoesNotExist,[
+            'exception on view entity data'                        => Permission::for("post", "/api/v1/editor/dm/entity_type/99/attribute", $entityDoesNotExist, [
                 'attribute_id' => 2,
                 'position' => 1
             ]),
             // TODO check if necessary to replace old set relation logic with new logic in EditorController::patchEntityType
             // 'exception on modify entity relations'                 => Permission::for("post", "/api/v1/editor/dm/99/relation", $entityDoesNotExist),
-            'exception on add attributes to an entity type'        => Permission::for("post", "/api/v1/editor/dm/entity_type/99/attribute", $entityDoesNotExist,[
+            'exception on add attributes to an entity type'        => Permission::for("post", "/api/v1/editor/dm/entity_type/99/attribute", $entityDoesNotExist, [
                 'attribute_id' => 2,
                 'position' => 1
             ]),
-            'exception on add already added attribute'             => Permission::for("post", "/api/v1/editor/dm/entity_type/3/attribute", $attributeAlreadyAdded,[
+            'exception on add already added attribute'             => Permission::for("post", "/api/v1/editor/dm/entity_type/3/attribute", $attributeAlreadyAdded, [
                 'attribute_id' => 15,
                 'position' => 1
             ]),
             'exception on duplicate an entity type'                => Permission::for("post", "/api/v1/editor/dm/entity_type/99/duplicate", $entityDoesNotExist),
-            'exception on modify entity-type'                      => Permission::for("patch", "/api/v1/editor/dm/entity_type/99", $entityDoesNotExist,[
+            'exception on modify entity-type'                      => Permission::for("patch", "/api/v1/editor/dm/entity_type/99", $entityDoesNotExist, [
                 'data' => [
                     'thesaurus_url' => 'https://spacialist.escience.uni-tuebingen.de/<user-project>/fundstelle#20171220094911'
                 ]
+            ]),
+            'exception on entity attribute not found'              => Permission::for("patch", "/api/v1/editor/dm/entity_type/attribute/99/metadata", $entityAttributeNotFound, [
+                'title' => 'NoTitle',
             ]),
             'exception on reorder attributes'                      => Permission::for("patch", "/api/v1/editor/dm/entity_type/1/attribute/99/position", $entityAttributeNotFound, [
                 'position' => 1

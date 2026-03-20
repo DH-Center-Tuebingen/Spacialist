@@ -1,4 +1,3 @@
-
 import useAttributeStore from '@/bootstrap/stores/attribute.js';
 import useBibliographyStore from '@/bootstrap/stores/bibliography.js';
 import useEntityStore from '@/bootstrap/stores/entity.js';
@@ -735,7 +734,7 @@ export function showMultiEditAttribute(entityIds, attributes) {
                     entries.push(entry);
                 }
                 multieditAttributes(entityIds, entries).then(_ => {
-                    useEntityStore().setTreeSeletionMode(false);
+                    useEntityStore().setTreeSelectionMode(false);
                     modal.destroy();
                     const title = t('main.entity.tree.multiedit.toast.saved.title');
                     const msg = t('main.entity.tree.multiedit.toast.saved.msg', {

@@ -336,6 +336,20 @@ export function getEmptyAttributeValue(type) {
     }
 }
 
+export function hasKey(data, key) {
+    if(!data || !key) return false;
+
+    return key in data;
+}
+
+export function isEmpty(value) {
+    if(!value) return true;
+    if(Array.isArray(value) && value.length === 0) return true;
+    if(typeof value == 'object' && Object.keys(value).length === 0) return true;
+
+    return false;
+}
+
 export function getAttributeValueAsString(rawValue, datatype) {
     if(!rawValue || !datatype) {
         return null;

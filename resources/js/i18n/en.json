@@ -10,6 +10,7 @@
         "reset_password": "Reset Password",
         "cancel": "Cancel",
         "close": "Close",
+        "required": "Required",
         "add": "Add",
         "edit": "Edit",
         "edited": "edited",
@@ -503,6 +504,10 @@
                 "deleted": {
                     "title": "Entity deleted",
                     "msg": "{name} successful deleted."
+                },
+                "required_missing": {
+                    "title": "Required fields missing",
+                    "msg": "Please fill in all required fields."
                 }
             },
             "tree": {

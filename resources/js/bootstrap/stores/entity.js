@@ -816,6 +816,28 @@ export const useEntityStore = defineStore('entity', {
                 return data;
             });
         },
+        async setEntityAttributeRequired(entityTypeId, attributeId, entityAttributeId, isRequired) {
+            const attributes = this.getEntityTypeAttributes(entityTypeId);
+            const attribute = attributes.find(attribute => {
+                return attribute.id == attributeId;
+            });
+            if(attribute) {
+                const metadata = {
+                    required: isRequired,
+                };
+                return this.patchEntityMetadata(
+                    entityTypeId,
+                    attributeId,
+                    entityAttributeId,
+                    metadata,
+                ).then(_ => {
+                    if(!attribute.pivot.metadata) {
+                        attribute.pivot.metadata = {};
+                    }
+                    attribute.pivot.metadata.required = isRequired;
+                });
+            }
+        },
         async removeEntityTypeAttribute(id, entityTypeId) {
             return removeEntityTypeAttribute(id).then(_ => {
                 const attributes = this.getEntityTypeAttributes(entityTypeId);
