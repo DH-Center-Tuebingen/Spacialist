@@ -215,21 +215,17 @@ class UserController extends Controller {
             'accesspoints' => 'array',
         ]);
 
-        $name = $request->get('name');
-        $nickname = $request->get('nickname');
-        $email = $request->get('email');
-        $password = Hash::make($request->get('password'));
-        $accesspoints = $request->get('accesspoints');
+        $user = User::create(
+            $request->get('name'),
+            $request->get('nickname'),
+            $request->get('email'),
+            $request->get('password'),
+            $request->get('accesspoints'),
+        );
 
-        $user = new User();
-        $user->name = $name;
-        $user->nickname = Str::lower($nickname);
-        $user->email = Str::lower($email);
-        $user->password = $password;
-        $user->accesspoints = $accesspoints;
-        $user->save();
+        // TODO is this necessary? The user should already be up to date after creation [SO]
         $user = User::find($user->id);
-
+        
         return response()->json($user);
     }
 
