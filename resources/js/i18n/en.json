@@ -14,7 +14,7 @@
         "edit": "Edit",
         "edited": "edited",
         "duplicate": "Duplicate",
-        "export":"Export",
+        "export": "Export",
         "sort": "Sort",
         "resort": "Re-sort",
         "update": "Update",
@@ -29,6 +29,11 @@
         "file": "File",
         "remove_file": "Remove file",
         "no_file": "No file",
+        "positions": {
+            "center": "Center",
+            "left": "Left",
+            "right": "Right"
+        },
         "list": {
             "and_more": "and more | and {cnt} more",
             "nr_of_entries": "No Entries | 1 Entry | {cnt} Entries",
@@ -831,10 +836,7 @@
                     }
                 },
                 "columns": {
-                    "title": "Columns in Main View",
-                    "left": "Left Column",
-                    "center": "Center Column",
-                    "right": "Right Column"
+                    "title": "Columns in Main View"
                 },
                 "tooltips": "Show Tooltips",
                 "tag_root": "Thesaurus-URI for Tags",

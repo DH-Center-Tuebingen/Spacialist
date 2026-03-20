@@ -29,6 +29,11 @@
         "file": "Datei",
         "remove_file": "Datei entfernen",
         "no_file": "Keine Datei vorhanden",
+        "positions": {
+            "center": "Mitte",
+            "left": "Links",
+            "right": "Rechts"
+        },
         "list": {
             "and_more": "und weitere | und {cnt} weitere",
             "nr_of_entries": "Keine Einträge | 1 Eintrag | {cnt} Einträge",
@@ -831,10 +836,7 @@
                     }
                 },
                 "columns": {
-                    "title": "Spalten Hauptansicht",
-                    "left": "Linke Spalte",
-                    "center": "Mittlere Spalte",
-                    "right": "Rechte Spalte"
+                    "title": "Spalten Hauptansicht"
                 },
                 "tooltips": "Infos anzeigen",
                 "tag_root": "Thesaurus-URI für Schlagworte",

@@ -46,9 +46,9 @@
             const { t } = useI18n();
 
             const sections = [
-                { id: 'left', label: t('main.preference.key.columns.left') },
-                { id: 'center', label: t('main.preference.key.columns.center') },
-                { id: 'right', label: t('main.preference.key.columns.right') },
+                { id: 'left', label: t('global.positions.left') },
+                { id: 'center', label: t('global.positions.center') },
+                { id: 'right', label: t('global.positions.right') },
             ];
 
             // FUNCTIONS
