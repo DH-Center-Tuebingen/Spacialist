@@ -1115,7 +1115,7 @@ class EntityController extends Controller {
         ]);
 
         $entity;
-        try{
+        try {
             $entity = Entity::findOrFail($id);
         } catch(ModelNotFoundException $e) {
             return response()->json([
@@ -1126,7 +1126,7 @@ class EntityController extends Controller {
         $rank = $request->get('rank') ?? null;
         $parent_id = $request->get('parent_id') ?? null;
 
-        try{
+        try {
             $entity->move($parent_id, $rank, $user);
         } catch(Exception $e) {
             return response()->json([
@@ -1152,8 +1152,8 @@ class EntityController extends Controller {
         $entityIds = $request->get('entity_ids');
         $parentId = $request->get('parent_id');
 
-        foreach($entityIds as $id){
-            if($id == $parentId){
+        foreach($entityIds as $id) {
+            if($id == $parentId) {
                 return response()->json([
                     'error' => __('An entity cannot be its own parent'),
                 ], 400);

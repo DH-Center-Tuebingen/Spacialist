@@ -8,7 +8,7 @@
             <div class="modal-header">
                 <h5 class="modal-title">
                     {{ t('main.entity.modals.move.title') }}
-                    <small>
+                    <small v-if="!isMoveModeMulti">
                         {{ entity.name }}
                     </small>
                 </h5>
@@ -27,7 +27,6 @@
                     role="form"
                     @submit.prevent="move()"
                 >
-
                     <div
                         v-if="isMoveModeMulti"
                         class="alert alert-warning"
@@ -108,6 +107,8 @@
     } from 'vue';
     import { useI18n } from 'vue-i18n';
 
+    import useEntityStore from '@/bootstrap/stores/entity.js';
+
     import {
         searchEntity,
     } from '@/api.js';
@@ -119,8 +120,6 @@
     import {
         isPaginated,
     } from '@/helpers/pagination.js';
-
-    import useEntityStore from '../../../bootstrap/stores/entity';
 
     import Alert from '@/components/Alert.vue';
 
@@ -164,11 +163,11 @@
                 }
             };
 
-            const filterForMultiMove = (results) => {
+            const filterForMultiMove = results => {
                 if(invalidSelection.value) {
                     return [];
                 } else {
-                    // As we reqire the same entity type, we can just take the first one
+                    // As we require the same entity type, we can just take the first one
                     const entity = Object.values(entityStore.treeSelection)[0];
                     const entities = Object.keys(entityStore.treeSelection).map(id => parseInt(id));
                     const entityTypeId = entity.entity_type_id;
@@ -179,7 +178,7 @@
                         return isAllowedSubEntityType(result.entity_type_id, entityTypeId);
                     });
                 }
-            }
+            };
 
             const move = _ => {
                 if(state.dataMissing) {
@@ -189,6 +188,7 @@
                 let targets = isMoveModeMulti.value ? Object.keys(entityStore.treeSelection).map(id => parseInt(id)) : [];
                 context.emit('confirm', state.moveToRoot ? null : state.parent.id, targets);
             };
+
             const closeModal = _ => {
                 context.emit('cancel', false);
             };
@@ -213,7 +213,9 @@
                     }
 
                     return false;
-                } else return false;
+                } else {
+                    return false;
+                }
             });
 
             // DATA

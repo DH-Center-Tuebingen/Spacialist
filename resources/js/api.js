@@ -601,7 +601,7 @@ export async function moveMultipleEntities(entityIds, parentId) {
         parent_id: parentId,
         entity_ids: entityIds,
     };
-    return $httpQueue.add(() => http.post(`/entity/moveMultiple`, data));
+    return $httpQueue.add(() => http.patch(`/entity/move`, data));
 }
 
 export async function patchEntityType(etid, updatedProps) {

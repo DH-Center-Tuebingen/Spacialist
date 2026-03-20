@@ -322,7 +322,7 @@ class Entity extends Model implements Searchable {
         DB::commit();
     }
 
-    public static function getNextRank($parent_id = null){
+    public static function getNextRank($parent_id = null) {
         $rank=0;
         if(isset($parent_id)) {
             $rank = Entity::where('root_entity_id', $parent_id)->max('rank');

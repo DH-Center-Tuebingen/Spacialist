@@ -78,7 +78,7 @@ Route::middleware('auth:sanctum')->prefix('v1/entity')->group(function() {
     Route::patch('/{id}/name', 'EntityController@patchName')->where('id', '[0-9]+');
     Route::patch('/{id}/metadata', 'EntityController@patchMetadata')->where('id', '[0-9]+');
     Route::patch('/{id}/rank', 'EntityController@moveEntity')->where('id', '[0-9]+');
-    Route::post('/moveMultiple', 'EntityController@moveEntities');
+    Route::patch('/move', 'EntityController@moveEntities');
     Route::patch('/reference/{id}', 'ReferenceController@patchReference')->where('id', '[0-9]+');
 
     Route::delete('/{id}', 'EntityController@deleteEntity')->where('id', '[0-9]+');

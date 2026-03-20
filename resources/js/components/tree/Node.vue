@@ -16,8 +16,13 @@
                 >
                     <i class="fas fa-fw fa-circle-check" />
                 </span>
-                <span v-show="!state.multieditSelected">
-                    <i class="far fa-fw fa-circle" />
+                <span
+                    v-show="!state.multieditSelected"
+                    :class="{'opacity-50': state.isSelectionDisabled}"
+                >
+                    <i
+                        class="far fa-fw fa-circle"
+                    />
                 </span>
             </span>
             <a
@@ -57,6 +62,7 @@
         <TreeMenu
             v-if="state.ddVisible"
             :data="data"
+            :disabled-options="state.disabledMenuEntries"
             @close="hidePopup()"
         />
     </div>
@@ -128,6 +134,9 @@
 
                 event.stopPropagation();
                 event.preventDefault();
+
+                if(state.isSelectionDisabled) return;
+
                 state.multieditSelected = !state.multieditSelected;
                 if(state.multieditSelected) {
                     entityStore.addToTreeSelection({
@@ -154,6 +163,22 @@
                         return false;
                     }
                     return !entityStore.hasIntersectionWithEntityAttributes(data.value.entity_type_id, entityStore.treeSelectionTypeIds);
+                }),
+                disabledMenuEntries: computed(_ => {
+                    const options = {};
+                    const entityIds = Object.keys(entityStore.treeSelection).map(id => parseInt(id));
+                    // Disable move option if:
+                    // 1. currently clicked node is not is selection
+                    // OR
+                    // 2. more than one entity type is selected
+                    if(
+                        (entityIds.length > 0 && !entityIds.includes(data.value.id))
+                        ||
+                        entityStore.treeSelectionTypeIds.length > 1
+                    ) {
+                        options.move = true;
+                    }
+                    return options;
                 }),
             });
 
