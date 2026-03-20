@@ -5,7 +5,10 @@
         @dragleave="onDragLeave"
         @click="e => addToMSList(e)"
     >
-        <div class="d-flex">
+        <div
+            class="d-flex"
+            :class="{ 'opacity-50': state.isSelectionDisabled }"
+        >
             <span
                 v-if="state.isSelectionMode"
                 class="mx-1"
@@ -16,13 +19,8 @@
                 >
                     <i class="fas fa-fw fa-circle-check" />
                 </span>
-                <span
-                    v-show="!state.multieditSelected"
-                    :class="{'opacity-50': state.isSelectionDisabled}"
-                >
-                    <i
-                        class="far fa-fw fa-circle"
-                    />
+                <span v-show="!state.multieditSelected">
+                    <i class="far fa-fw fa-circle" />
                 </span>
             </span>
             <a
@@ -167,15 +165,11 @@
                 disabledMenuEntries: computed(_ => {
                     const options = {};
                     const entityIds = Object.keys(entityStore.treeSelection).map(id => parseInt(id));
-                    // Disable move option if:
-                    // 1. currently clicked node is not is selection
-                    // OR
-                    // 2. more than one entity type is selected
-                    if(
-                        (entityIds.length > 0 && !entityIds.includes(data.value.id))
-                        ||
-                        entityStore.treeSelectionTypeIds.length > 1
-                    ) {
+
+                    const clickedNodeNotInSelection = (entityIds.length > 0 && !entityIds.includes(data.value.id))
+                    const multipleEntityTypesSelected = entityStore.treeSelectionTypeIds.length > 1;
+
+                    if(clickedNodeNotInSelection || multipleEntityTypesSelected) {
                         options.move = true;
                     }
                     return options;
