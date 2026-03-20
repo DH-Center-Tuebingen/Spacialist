@@ -6,6 +6,7 @@ use Carbon\Carbon;
 
 use App\AttributeValue;
 use App\Entity;
+use App\EntityAttribute;
 use App\User;
 use Tests\TestCase;
 use Tests\Permission;
@@ -448,6 +449,31 @@ class ApiEntityTest extends TestCase
                 $this->assertEquals('Test', $attr->value);
             }
         }
+    }
+
+    #[TestDox('PATCH  /api/v1/entity/{entity_id}/attributes  -  Test modifying attributes of an entity (id=4) with missing required attributes.')]
+    public function testPatchMissingRequiredAttributesEndpoint()
+    {
+        // Set attribute of entity type as required ('entity_type_id' => 5, 'attribute_id' => 2)
+        $entityTypeAttribute = EntityAttribute::find(5);
+        $metadata = $entityTypeAttribute->metadata ?? new \stdClass();
+        $metadata->required = true;
+        $entityTypeAttribute->metadata = $metadata;
+        $entityTypeAttribute->save();
+
+        $response = $this->userRequest()
+            ->patch('/api/v1/entity/4/attributes', [
+                [
+                    'params' => [
+                        'id' => 36,
+                        'aid' => 2,
+                        'cid' => 4
+                    ],
+                    'op' => 'remove'
+                ],
+            ]);
+
+        $response->assertStatus(422);
     }
 
     #[TestDox('PATCH  /api/v1/entity/{entity_id}/attributes  -  Test setting wrong values for epoch attribute of an entity (id=2).')]

@@ -70,6 +70,22 @@
                                     />
                                 </button>
                                 <button
+                                    v-if="!element.is_system"
+                                    v-show="hasEmitter('onRequireElement')"
+                                    class="btn btn-fab rounded-circle"
+                                    :class="{'btn-primary': !element.pivot?.metadata?.required, 'btn-outline-primary': element.pivot?.metadata?.required}"
+                                    data-bs-toggle="popover"
+                                    :data-content="t('global.required')"
+                                    data-trigger="hover"
+                                    data-placement="bottom"
+                                    @click="onRequireHandler(element)"
+                                >
+                                    <i
+                                        class="fas fa-fw fa-xs fa-asterisk"
+                                        style="vertical-align: 0;"
+                                    />
+                                </button>
+                                <button
                                     v-show="hasEmitter('onRemoveElement')"
                                     class="btn btn-outline-danger btn-fab rounded-circle"
                                     data-bs-toggle="popover"
@@ -111,6 +127,12 @@
                                     {{ translateConcept(element.thesaurus_url) }}
                                 </span>
                             </div>
+                            <span
+                                v-if="element.pivot?.metadata?.required"
+                                class="text-danger"
+                            >
+                                <i class="fas fa-fw fa-xs fa-asterisk align-top" />
+                            </span>
                             <a
                                 v-if="getConceptNote(element.thesaurus_url)"
                                 tabindex="0"
@@ -595,6 +617,12 @@
                     element: element
                 });
             };
+            const onRequireHandler = element => {
+                context.emit('require-element', {
+                    element: element,
+                    active: !element.pivot?.metadata?.required,
+                });
+            };
             const onRemoveHandler = element => {
                 context.emit('remove-element', {
                     element: element,
@@ -664,7 +692,7 @@
                 expansionStates: new Array(attributes.value.length).fill(false),
                 componentLoaded: computed(_ => state.attributeValues),
                 isHoveringPossible: computed(_ => {
-                    return !!attrs.onReorderList || !!attrs.onEditElement || !!attrs.onRemoveElement || !!attrs.onDeleteElement;
+                    return !!attrs.onReorderList || !!attrs.onEditElement || !!attrs.onRequireElement || !!attrs.onRemoveElement || !!attrs.onDeleteElement;
                 }),
                 hiddenAttributeList: computed(_ => {
                     if(!state.componentLoaded) return {};
@@ -748,6 +776,7 @@
                 getAttributeChangeIndicatorDescription,
                 setRef,
                 onEditHandler,
+                onRequireHandler,
                 onRemoveHandler,
                 onDeleteHandler,
                 onMetadataHandler,

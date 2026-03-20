@@ -1,4 +1,3 @@
-
 import useAttributeStore from '@/bootstrap/stores/attribute.js';
 import useBibliographyStore from '@/bootstrap/stores/bibliography.js';
 import useEntityStore from '@/bootstrap/stores/entity.js';

@@ -69,6 +69,10 @@ class EntityType extends Model
             ->using(EntityAttributePivot::class);
     }
 
+    public function required_attributes() {
+        return $this->hasMany('App\EntityAttribute')->whereJsonContains('metadata->required', true);
+    }
+
     public function sub_entity_types() {
         return $this->belongsToMany('App\EntityType', 'entity_type_relations', 'parent_id', 'child_id')->orderBy('entity_type_relations.child_id');
     }

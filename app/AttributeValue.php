@@ -90,11 +90,20 @@ class AttributeValue extends Model implements Searchable
 
     // [VR] Temporary solution to allow patching entities/attribute values outside of controller
     // But this is also already fixed (in a different way) on pull/585 (0.11.2-fix-attribute-value-list-error)
-    public static function handlePatch(int $entity_id, int $attribute_id, mixed $value, string $operation, User $user, array &$added = [], array &$deleted = []) {
+    public static function handlePatch(Entity $entity, int $attribute_id, mixed $value, string $operation, User $user, array &$added = [], array &$deleted = []) {
         $error = null;
         $code = 400;
+        $entity_id = $entity->id;
+        $entityAttribute = EntityAttribute::where('entity_type_id', $entity->entity_type_id)
+            ->where('attribute_id', $attribute_id)
+            ->first();
         switch($operation) {
             case 'remove':
+                if($entityAttribute->isRequired()) {
+                    $error = __('This attribute is required.');
+                    $code = 422;
+                    break;
+                }
                 $attrval = AttributeValue::where([
                     ['entity_id', '=', $entity_id],
                     ['attribute_id', '=', $attribute_id],
@@ -145,6 +154,11 @@ class AttributeValue extends Model implements Searchable
                 break;
             default:
                 $error = __('Unknown operation');
+        }
+
+        if($operation != 'remove' && !isset($value)) {
+            $error = __('Required attribute is missing.');
+            $code = 422;
         }
 
         if($error !== null) {
