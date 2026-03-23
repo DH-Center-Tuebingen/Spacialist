@@ -5,7 +5,10 @@
         @dragleave="onDragLeave"
         @click="e => addToMSList(e)"
     >
-        <div class="d-flex">
+        <div
+            class="d-flex"
+            :class="{ 'opacity-50': state.isSelectionDisabled }"
+        >
             <span
                 v-if="state.isSelectionMode"
                 class="mx-1"
@@ -57,6 +60,7 @@
         <TreeMenu
             v-if="state.ddVisible"
             :data="data"
+            :disabled-options="state.disabledMenuEntries"
             @close="hidePopup()"
         />
     </div>
@@ -128,6 +132,9 @@
 
                 event.stopPropagation();
                 event.preventDefault();
+
+                if(state.isSelectionDisabled) return;
+
                 state.multieditSelected = !state.multieditSelected;
                 if(state.multieditSelected) {
                     entityStore.addToTreeSelection({
@@ -154,6 +161,18 @@
                         return false;
                     }
                     return !entityStore.hasIntersectionWithEntityAttributes(data.value.entity_type_id, entityStore.treeSelectionTypeIds);
+                }),
+                disabledMenuEntries: computed(_ => {
+                    const options = {};
+                    const entityIds = Object.keys(entityStore.treeSelection).map(id => parseInt(id));
+
+                    const clickedNodeNotInSelection = (entityIds.length > 0 && !entityIds.includes(data.value.id))
+                    const multipleEntityTypesSelected = entityStore.treeSelectionTypeIds.length > 1;
+
+                    if(clickedNodeNotInSelection || multipleEntityTypesSelected) {
+                        options.move = true;
+                    }
+                    return options;
                 }),
             });
 

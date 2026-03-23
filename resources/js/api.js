@@ -66,7 +66,7 @@ export async function fetchEntityMetadata(id) {
 }
 
 export async function fetchUser() {
-    return await $httpQueue.add(() => http.get('/auth/user').then(response => response.data));
+    return await $httpQueue.add(() => http.get('/auth/user').then(response => { return response.data.data; }));
 }
 
 export async function fetchAttributes() {
@@ -594,6 +594,14 @@ export async function moveEntity(entityId, {
     return $httpQueue.add(
         () => http.patch(`/entity/${entityId}/rank`, data).then(response => response.data)
     );
+}
+
+export async function moveMultipleEntities(entityIds, parentId) {
+    const data = {
+        parent_id: parentId,
+        entity_ids: entityIds,
+    };
+    return $httpQueue.add(() => http.patch(`/entity/move`, data));
 }
 
 export async function patchEntityType(etid, updatedProps) {
