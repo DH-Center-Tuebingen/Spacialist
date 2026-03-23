@@ -8,6 +8,8 @@ use App\File\Directory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Spatie\Activitylog\Traits\CausesActivity;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
@@ -125,6 +127,17 @@ class User extends Authenticatable
 
     public static function getDirectory(): Directory {
         return new Directory('avatars');
+    }
+    
+    public static function create($name, $nickname, $email, $password, $accesspoints = []) :User {
+        $user = new User();
+        $user->name = $name;
+        $user->nickname = Str::lower($nickname);
+        $user->email = Str::lower($email);
+        $user->accesspoints = $accesspoints;
+        $user->password = Hash::make($password);
+        $user->save();
+        return $user;
     }
 
     // public function roles() {
