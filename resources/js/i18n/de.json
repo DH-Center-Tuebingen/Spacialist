@@ -22,8 +22,8 @@
         "replace": "Ersetzen",
         "clear": "Leeren",
         "confirm": "Ok",
-        "apply": "Anwenden",
         "create": "Anlegen",
+        "apply": "Anwenden",
         "move": "Verschieben",
         "parse": "Parsen",
         "conflict": "Konflikt",
@@ -537,7 +537,7 @@
                 "multiedit": {
                     "title": "Mehrfachauswahl umschalten",
                     "open": "Mehrfach-Bearbeitungs-Werkzeug öffnen",
-                    "warning": "Diese Aktion wird alle ausgewählten Entitäten betreffen.", 
+                    "warning": "Diese Aktion wird alle ausgewählten Entitäten betreffen.",
                     "toast": {
                         "saved": {
                             "title": "Mehrfach-Bearbeitung erfolgreich",
@@ -611,6 +611,8 @@
                 },
                 "table": {
                     "add_row": "Neue Zeile hinzufügen",
+                    "add_row_above": "Neue Zeile darüber hinzufügen",
+                    "add_row_below": "Neue Zeile darunter hinzufügen",
                     "error": {
                         "deleted_entity": "Gelöschte Entität"
                     },

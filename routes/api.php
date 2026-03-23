@@ -208,7 +208,7 @@ Route::middleware('auth:sanctum')->prefix('v1/activity')->group(function() {
 
 // TAGS
 Route::middleware('auth:sanctum')->prefix('v1/tag')->group(function() {
-    Route::get('', 'TagController@all');
+    Route::get('', 'TagController@getAll');
 });
 
 /**

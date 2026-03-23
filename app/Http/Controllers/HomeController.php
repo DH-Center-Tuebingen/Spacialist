@@ -41,7 +41,7 @@ class HomeController extends Controller
         $user = auth()->user();
         $accessPath = Str::finish($request->get('endpoint', '/'), '/');
 
-        if(!isset($user->accesspoints)) {
+        if(!isset($user->accesspoints) || count($user->accesspoints) == 0) {
             // do not redirect if user has no access points defined (aka access to everything)
             return response()->json(null, 204);
         }

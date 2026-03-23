@@ -611,6 +611,8 @@
                 },
                 "table": {
                     "add_row": "Add row",
+                    "add_row_above": "Add row above",
+                    "add_row_below": "Add row below",
                     "error": {
                         "deleted_entity": "Deleted Entity"
                     },
