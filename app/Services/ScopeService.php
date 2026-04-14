@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Interfaces\IPluggable;
 use App\Models\Plugin\Scopes;
 use App\Plugin;
 use App\Support\BootstrapCache;
@@ -9,9 +10,11 @@ use App\Support\Log\PluginLog;
 
 use Illuminate\Support\Str;
 
-class ScopeService extends BootstrapCache {
+class ScopeService implements IPluggable{
 
-    protected function getPath(): string {
+    use BootstrapCache;
+
+    protected function getCacheName(): string {
         return 'plugin_scopes';
     }
 

@@ -3,15 +3,15 @@
 namespace App\Services;
 
 use App\Plugin;
-use App\Models\Plugin\Migration as PluginMigration;
 use App\Permission;
 use App\Preference;
 use App\Services\RolePresetService;
+use App\Support\BootstrapCache;
+
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
+
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\File;
-
 
 /**
  * A service class that manages all plugin related business logic,
@@ -23,25 +23,37 @@ use Illuminate\Support\Facades\File;
 
 class PluginManager
 {
+    use BootstrapCache;
      
     private array $pluggableServices = [];
+    private array $cachedServices = [];
 
     public function __construct(
         public HookService $hooks, 
         // AccessPointsService $accessPoints,
         public MigrationService $migrationService,
         public RolePresetService $rolePresetService
-    ) {
+    ) { 
         $this->pluggableServices = [
             $hooks,
             // $accessPoints,
             $migrationService,
             $rolePresetService,
-        ];    
+        ];
+        
+        foreach($this->pluggableServices as $service) {
+            $traitsList = class_uses($service);
+            if(in_array(BootstrapCache::class, $traitsList)){
+                $this->cachedServices[] = $service;
+            }
+        }
      }
-
-     public function rebuildPluginCache(){
-        //Iterate over Plugin directory and cache all available plugins
+     
+    protected function getCacheName() : string {
+       return 'plugins';
+    }
+    
+    protected function fetch(): array {
         $dirs = File::directories(base_path('app/Plugins'));
         $cachedPlugins = [];
         foreach($dirs as $dir) {
@@ -63,19 +75,49 @@ class PluginManager
                 $cachedPlugins[] = $cachedPluginInfo;
             }
         }
-        $cacheContent = "<?php\n\nreturn " . var_export($cachedPlugins, true) . ";\n";
-        File::put(base_path('bootstrap/cache/plugins.php'), $cacheContent);
-     }
+        return $cachedPlugins;
+    }
+    
+    public function rebuildPluginCache(){
+        $this->cache();
+    }
 
-    public  function getCachedPlugins(){
-        try{
-            $plugins = require(base_path('bootstrap/cache/plugins.php'));
-        }catch(\Exception $e){
-            $this->rebuildPluginCache();
-            $plugins = require(base_path('bootstrap/cache/plugins.php'));
-        }
-        return $plugins;
-     }
+    //  public function rebuildPluginCache(){
+    //     //Iterate over Plugin directory and cache all available plugins
+    //     $dirs = File::directories(base_path('app/Plugins'));
+    //     $cachedPlugins = [];
+    //     foreach($dirs as $dir) {
+    //         $info = Plugin::getPluginInfo($dir);
+    //         if($info !== false) {
+            
+    //             if(!isset($info['name']) || !isset($info['version'])) {
+    //                 continue;
+    //             }
+                
+    //             $plugin = Plugin::updateOrCreateFromInfo($info);
+                
+    //             $cachedPluginInfo = [
+    //                 'name' => $plugin->name,
+    //                 'uuid' => $plugin->uuid,
+    //                 'version' => $plugin->version,
+    //                 'provider' => null,
+    //             ];
+    //             $cachedPlugins[] = $cachedPluginInfo;
+    //         }
+    //     }
+    //     $cacheContent = "<?php\n\nreturn " . var_export($cachedPlugins, true) . ";\n";
+    //     File::put(base_path('bootstrap/cache/plugins.php'), $cacheContent);
+    //  }
+
+    // public  function getCachedPlugins(){
+    //     try{
+    //         $plugins = require(base_path('bootstrap/cache/plugins.php'));
+    //     }catch(\Exception $e){
+    //         $this->rebuildPluginCache();
+    //         $plugins = require(base_path('bootstrap/cache/plugins.php'));
+    //     }
+    //     return $plugins;
+    //  }
 
     public function install(Plugin $plugin): void
     {
@@ -135,7 +177,11 @@ class PluginManager
 
     public function clearCache(Plugin $plugin): void
     {
-        
+        info("Clearing cache for plugin " . $plugin->name);
+        info(json_encode($this->cachedServices));
+        foreach($this->cachedServices as $service) {
+            $service->clearCache($plugin);   
+        }
     }
 
     public function publishScript(Plugin $plugin): void

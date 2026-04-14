@@ -3,7 +3,7 @@
 namespace Tests\Support;
 
 use App\Models\Plugin\Hook;
-
+use App\Services\PluginManager;
 
 /*
 * Generates plugin directories based on provided templates and ensures cleanup after tests.
@@ -40,7 +40,7 @@ class PluginGenerator {
             $plugin = $template->plugin;
             $this->directoriesToCleanup[] = PluginDirectoryGenerator::mockPluginDirectory($template);
             $plugin->save();
-            $plugin->handleInstallation();
+            app(PluginManager::class)->install($plugin);
         }
     }
 

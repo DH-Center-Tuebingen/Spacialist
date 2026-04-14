@@ -120,8 +120,7 @@ class PluginController extends Controller
         return response()->json($plugin);
     }
     
-    public function publishPluginScript(Plugin $plugin)
-    {
+    public function publishPluginScript(Plugin $plugin) {
         if(!isset($plugin->installed_at)) {
             return response()->json([
                     'error' => __('This plugin is not installed.'),
@@ -140,7 +139,7 @@ class PluginController extends Controller
         } catch(ModelNotFoundException $e) {            
             $plugin = Plugin::where('id', $id)->whereNull('installed_at')->first();
             try {
-                $plugin->handleInstallation();
+                app(\App\Services\PluginManager::class)->install($plugin);
             } catch(ModelNotFoundException $e) {
                 info("ModelNotFoundException: " . $e->getMessage());
                 return response()->json([
@@ -169,7 +168,7 @@ class PluginController extends Controller
             ], 403);
         }
         try {
-            $updatedFrom = $plugin->handleUpdate();
+            $updatedFrom = app(\App\Services\PluginManager::class)->update($plugin);
         } catch(\Exception $e) {
             return response()->json([
                 'error' => __('Error while updating plugin. Please check file permissions or ask your system administrator.')
@@ -193,6 +192,9 @@ class PluginController extends Controller
         }
     }
 
+    /**
+     * Removes the plugin from the system 
+     */
     public function removePlugin(Request $request, $id) {
         try {
             $plugin = Plugin::findOrFail($id);
@@ -202,13 +204,17 @@ class PluginController extends Controller
             ], 403);
         }
 
-        $plugin->handleRemove();
+        app(\App\Services\PluginManager::class)->remove($plugin);
         $plugin->delete();
         return response()->json([
             'uninstall_location' => $plugin->publicName(false),
         ]);
     }
 
+    /**
+     * Downloads the plugin script from the directory.
+     * @return \Symfony\Component\HttpFoundation\BinaryFileResponse|\Illuminate\Http\JsonResponse - Returns the file as BinaryFileResponse or Response if the file is not inside the directory.
+     */
     public function downloadScript(Request $request, string $filepath) {
         if($filepath === ''){
             return response()->json([
@@ -218,22 +224,36 @@ class PluginController extends Controller
         return Plugin::getDirectory()->downloadRelative($filepath);
     }
 
+    /** 
+     * Runs all missing migrations of a plugin.
+     * @return \Illuminate\Http\JsonResponse - Returns the current migration state after execution
+     */
     public function migrate(Request $request, Plugin $plugin) {
         app(MigrationService::class)->run($plugin);
         $migrationState = app(MigrationService::class)->inspect($plugin);
         return response()->json($migrationState);
     }
 
+    /**
+     * Rolls back all applied migrations of a plugin.
+     * @return \Illuminate\Http\JsonResponse - Returns the current migration state after execution
+     */
     public function rollback(Request $request, Plugin $plugin) {
         app(MigrationService::class)->rollback($plugin);
         $migrationState = app(MigrationService::class)->inspect($plugin);
         return response()->json($migrationState);
     }
 
+    /**
+     * Adds a migration to the database without running it.
+     * This is primarily used if the plugin was installed before the migration system was implemented.
+     * @return \Illuminate\Http\JsonResponse - Returns the current migration state after execution
+     */
     public function addMigrationToDatabase(Request $request, Plugin $plugin) {
         $this->validate($request, [
             'name' => 'required|string'
         ]);
+        
         $migrationName = $request->input('name');
         $missingMigrations = PluginMigration::getMissingMigrations($plugin);
         if(!in_array($migrationName, $missingMigrations)) {
@@ -244,22 +264,31 @@ class PluginController extends Controller
 
         app(MigrationService::class)->set($migrationName, $plugin);
         $migrationState = app(MigrationService::class)->inspect($plugin);
-        return response()->json($migrationState );
+        return response()->json($migrationState);
     }
 
      /**
      * Get the migration state for a plugin.
+     * @return \Illuminate\Http\JsonResponse - Returns the current migration state after execution
      */
     public function getMigrationState(Request $request, Plugin $plugin) {
         $migrationState = app(MigrationService::class)->inspect($plugin);
         return response()->json($migrationState);
     }
     
+    /**
+     * Rebuilds the plugin cache and returns all plugins with their metadata.
+     * @return \Illuminate\Http\JsonResponse - Returns all plugins with their metadata after rebuilding the cache.
+     */
     public function refresh(Request $request) {
         app(PluginManager::class)->rebuildPluginCache();
         return response()->json(Plugin::getWithMetadata());
     }
     
+    /**
+     * Refreshes the metadata of a plugin.
+     * @return \Illuminate\Http\JsonResponse - Returns the plugin with its metadata.
+     */
     public function refreshInfo(Request $request, Plugin $plugin) {
         $plugin->metadata = $plugin->getMetadata(true);
         return response()->json($plugin);

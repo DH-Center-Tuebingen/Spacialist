@@ -11,29 +11,19 @@ use RuntimeException;
  * Stores a compiled set of data, directly as php file inside Laravel's 'bootstrap/cache' 
  * directory to allow fast access with little to no overhead.
  */
-abstract class BootstrapCache
+trait BootstrapCache
 {
 
     /**
-     * Path to the cache file inside 'bootstrap/cache'.
-     */
-    protected string $path;
-
-    /**
-     * Cached data.
-     */
+    * Cached data.
+    */
     protected ?array $data = null;
-
-    public function __construct()
-    {
-        $this->path = $this->getPath();
-    }
-
+    
     /**
      * Retrieves the cached data. If the cache is not loaded, it will attempt to load it from disk.
       * If the cache file does not exist or is invalid, it will throw an exception.
      */
-    public function get(): array {
+    public function getData(): array {
         if($this->data !== null) {
             return $this->data;
         }
@@ -61,7 +51,7 @@ abstract class BootstrapCache
     /**
      * Returns the relative path inside 'bootstrap/cache' where the cache should be stored.
      */
-    abstract protected function getPath(): string;
+    abstract protected function getCacheName(): string;
 
     /**
      * Defines how the cache should be built from the source of truth. 
@@ -115,12 +105,11 @@ abstract class BootstrapCache
     }
 
     /**
-     * Get's the absolute path to the cache store.
-     * 
+     * Get's the absolute system path to the cache file.
      * @return string
      */
-    public function getAppPath(): string {
-        if(!$this->getPath()) {
+    protected function getAppPath(): string {
+        if(!$this->getCacheName()) {
             throw new RuntimeException(
                 static::class . ' cache path is not defined.'
             );
@@ -128,7 +117,7 @@ abstract class BootstrapCache
 
         // To ensure we don't use the same cache file for testing and production, 
         // we append '-testing' to the file name when in testing environment.
-        $fileName = $this->getPath();
+        $fileName = $this->getCacheName();
         if(env('APP_ENV') === 'testing') {
             $fileName = $fileName . '-testing';
         }
@@ -136,11 +125,19 @@ abstract class BootstrapCache
         $phpFile = Str::finish($fileName, '.php');
         return base_path('bootstrap' . DIRECTORY_SEPARATOR . 'cache' .  Str::start($phpFile, DIRECTORY_SEPARATOR));
     }
-
+    
+    /**
+     * Get's the absolute path to the cache file.
+     * @return string - absolute system path to the cache file
+     */
+    public function getCachedFilePath(): string {
+        return $this->getAppPath();
+    }
+    
     /**
      * Determine if the cache exists.
      */
-    public function exists(): bool
+    public function cacheExists(): bool
     {
         return File::exists($this->getAppPath());
     }
@@ -148,7 +145,7 @@ abstract class BootstrapCache
     /**
      * Delete the cache.
      */
-    public function clear(): void
+    public function clearCache(): void
     {
         File::delete($this->getAppPath());
         $this->data = null;
@@ -161,7 +158,6 @@ abstract class BootstrapCache
     {
         return <<<PHP
 <?php
-
 return {$this->varExport($data)};
 PHP;
     }

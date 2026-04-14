@@ -25,6 +25,9 @@
         <script src="api/download/plugin/{!! sp_slug($plugin->name) !!}-{!! $plugin->uuid !!}.js" defer>
         </script>
     @endforeach
+    
+    {{-- TODO ==> Plgin Manager must manage css files --}}
+    <link rel="stylesheet" href="/storage/css/multimediatree.css" />
 </head>
 <body>
     <div id="app" class="d-flex flex-column"></div>

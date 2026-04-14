@@ -17,6 +17,7 @@ return new class extends Migration
             $table->foreignId('plugin_id')->constrained('plugins')->onDelete('cascade');
             $table->string('on');
             $table->string('src');
+            $table->string('method');
             $table->integer('order')->default(0);
         });
     }

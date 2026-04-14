@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Models\Plugin;
 
 use App\Plugin;
@@ -7,10 +6,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class Hook extends Model
 {
-    public const AVAILABLE_HOOKS = [
-        'api/v1/pre',
-    ];        
-
     protected $table = 'plugin_hooks';
 
     protected $fillable = [
@@ -18,6 +13,7 @@ class Hook extends Model
         'src',
         'order',
         'on',
+        'method',
     ];
 
     /**
@@ -27,4 +23,8 @@ class Hook extends Model
     {
         return $this->belongsTo(\App\Plugin::class, 'plugin_id');
     }
+    
+    public function getApiIdentifier(): string {
+        return $this->method . "::" . $this->on;
+    }    
 }

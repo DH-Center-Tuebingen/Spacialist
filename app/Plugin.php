@@ -306,27 +306,6 @@ class Plugin extends Model {
         }
     }
 
-    public function clearCache(): void {
-        app(\App\Services\PluginManager::class)->clearCache($this);
-    }
-
-    public function handleInstallation(bool $isUpdate = FALSE): void {
-        app(\App\Services\PluginManager::class)->install($this, $isUpdate);
-    }
-
-    public function handleUpdate(): string {
-        return app(\App\Services\PluginManager::class)->update($this);
-    }
-
-    public function handleUninstall(): void {
-        app(\App\Services\PluginManager::class)->uninstall($this);
-    }
-
-    public function handleRemove(): void {
-        // if installed, first rollback migrations and delete all files and presets
-        app(\App\Services\PluginManager::class)->remove($this);
-    }
-
     public function getPermissions(): mixed {
         $pluginPermissionPath = $this->getPath('App/permissions.json');
         if(!File::isFile($pluginPermissionPath)) {

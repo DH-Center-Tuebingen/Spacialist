@@ -9,15 +9,23 @@ use App\Support\BootstrapCache;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Route;
 
-class HookService extends BootstrapCache {
-    
-    const AVAILABLE_HOOKS = [
-        'api/v1/pre',
+class HookService {
+
+    use BootstrapCache;
+
+    const FORBIDDEN_HOOKS = [
+        "GET::sanctum/csrf-cookie",
+        
+        "GET::broadcasting/auth",
+        "POST::broadcasting/auth",
     ];
     
     protected function fetch(): array
     {
+        $hooksByMethod = [];
+        
         return Hook::all()->mapToGroups(function ($hook) {
             return [$hook->on => [
                 "id" => $hook->id,
@@ -29,7 +37,7 @@ class HookService extends BootstrapCache {
         })->toArray();
     }
 
-    protected function getPath(): string
+    protected function getCacheName(): string
     {
         return 'plugin-hooks';
     }
@@ -109,7 +117,7 @@ class HookService extends BootstrapCache {
     }
     
     public function getHooksFor(string $hookName) {
-        $hooks = $this->get();
+        $hooks = $this->getData();
         return $hooks[$hookName] ?? [];
     }
 
@@ -129,15 +137,25 @@ class HookService extends BootstrapCache {
         foreach($requiredFields as $requiredField){
             if(!isset($hook[$requiredField])) {
                 $missingFields[] = $requiredField;
-                }
+            } else {
+                $hook[$requiredField] = trim($hook[$requiredField]);
+            }
         }
         
         if(count($missingFields) > 0){
             throw new \Exception("Hook is missing field(s): " . implode(", ", $missingFields));
         }
         
-        if(!in_array($hook['on'], self::AVAILABLE_HOOKS)) {
-            throw new \Exception("Hook '".$hook['on']."' is not a valid hook.");
+        // If no method is specified in the 'on' field, default to GET
+        $method = isset($hook['method']) ? strtoupper($hook['method']) : "GET";
+        
+        if(!in_array($method, ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'])) {
+            throw new \Exception("Hook 'on' field has invalid method '$method'. Allowed methods are GET, POST, PUT, DELETE, PATCH.");
+        }
+        
+        info($method);
+        if(!$this->routeExists($method, $hook['on'])) {
+            throw new \Exception("Hook on invalid route  '".$method."::".$hook['on']."'.");
         }
 
         $src = $hook['src'];
@@ -151,13 +169,25 @@ class HookService extends BootstrapCache {
 
         $hookModel = new Hook();
         $hookModel->on = $hook['on'];
+        $hookModel->method = $method;
         $hookModel->src = $hook['src'];
         $hookModel->order = $order;
+        
+        if(in_array($hookModel->getApiIdentifier(), self::FORBIDDEN_HOOKS)) {
+            throw new \Exception("Hook on '".$hook['on']."' is not allowed.");
+        }
         
         if($plugin) {
             $hookModel->plugin_id = $plugin->id;
         }
         
         return $hookModel;
+    }
+    
+    private function routeExists(string $method, string $url) {
+        $methodRoutes = Route::getRoutes()->getRoutesByMethod()[$method] ?? [];
+        info($url);
+        info(array_keys($methodRoutes));
+        return isset($methodRoutes[$url]);
     }
 }
