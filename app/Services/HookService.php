@@ -17,15 +17,12 @@ class HookService {
 
     const FORBIDDEN_HOOKS = [
         "GET::sanctum/csrf-cookie",
-        
+
         "GET::broadcasting/auth",
         "POST::broadcasting/auth",
     ];
-    
-    protected function fetch(): array
-    {
-        $hooksByMethod = [];
-        
+
+    protected function fetch(): array {
         return Hook::all()->mapToGroups(function ($hook) {
             return [$hook->on => [
                 "id" => $hook->id,
@@ -37,28 +34,23 @@ class HookService {
         })->toArray();
     }
 
-    protected function getCacheName(): string
-    {
+    protected function getCacheName(): string {
         return 'plugin-hooks';
     }
-        
-    public function install(Plugin $plugin): void
-    {
+
+    public function install(Plugin $plugin): void {
         $this->updateOrInstall($plugin);
     }
-    
-    public function update(Plugin $plugin): void
-    {
+
+    public function update(Plugin $plugin): void {
         $this->updateOrInstall($plugin);
     }
-    
-    public function uninstall(Plugin $plugin): void
-    {
+
+    public function uninstall(Plugin $plugin): void {
         Hook::where('plugin_id', $plugin->id)->delete();
     }
-    
-    public function remove(Plugin $plugin): void
-    {
+
+    public function remove(Plugin $plugin): void {
         // No separate remove logic needed for hooks
     }
 
@@ -71,21 +63,20 @@ class HookService {
      * @param Plugin|null $plugin
      * @return void
      */
-    public function updateOrInstall(Plugin $plugin): void
-    {
+    public function updateOrInstall(Plugin $plugin): void {
         $info = $plugin->getInfo();
-        $hooks = $info['hooks'] ?? [];
-        
-        DB::transaction(function() use ($hooks, $plugin) {
+        $hookDefinitions = $info['hooks'] ?? [];
+
+        DB::transaction(function () use ($hookDefinitions, $plugin) {
             Hook::where('plugin_id', $plugin->id)->delete();
-            foreach($hooks as $hookXml) {
+            foreach($hookDefinitions as $hookXml) {
                 $this->addHook($hookXml['@attributes'], $plugin);
             }
         });
-        
+
         $this->cache();
     }
-    
+
     public function addHook(array $hook, Plugin $plugin){
         $hookModel = self::createHookFromJson($hook, $plugin);
         
@@ -97,11 +88,11 @@ class HookService {
         
         $hookModel->save();
     }
-    
+
     public function executeHooks(string $hookName, $request, $response) {
         $hooks = $this->getHooksFor($hookName);
         foreach($hooks as $hook) {
-            try{
+            try {
                 $method = Method::parseFromString($hook["src"]);
                 $fullClass = $method->expandNamespace($hook["plugin-namespace"]);
                 $instance = app()->make($fullClass);
@@ -109,85 +100,110 @@ class HookService {
                 // hooks can modify the response or payload directly. Use call_user_func_array
                 // to preserve reference semantics.
                 call_user_func_array([$instance, $method->method], [$request, $response]);
-            }catch(\Exception $e) {
-                Log::error("Error executing hook '".$hook["src"]."' for plugin '".$hook["plugin-name"]."': " . $e->getMessage());
+            } catch(\Exception $e) {
+                Log::error("Error executing hook '" . $hook["src"] . "' for plugin '" . $hook["plugin-name"] . "': " . $e->getMessage());
             }
         }
         return $response;
     }
-    
+
     public function getHooksFor(string $hookName) {
         $hooks = $this->getData();
         return $hooks[$hookName] ?? [];
     }
 
-    
     /**
      * When a plugin xml is parsed, this method is used to create a Hook model from 
      * the json representation of the hook in the plugin's info.xml.
      * 
      * @throws \Exception if the json is missing required fields or has invalid values.
-     * @return {Model(unsaved)} An unsaved Hook model instance.
+     * @return Hook - The unsaved Hook model instance.
      */
     public function createHookFromJson(array $hookJson, ?Plugin $plugin = null): Hook {
-        $hook = $hookJson;
-        
-        $missingFields = [];
-        $requiredFields = ['on', 'src'];
-        foreach($requiredFields as $requiredField){
-            if(!isset($hook[$requiredField])) {
-                $missingFields[] = $requiredField;
-            } else {
-                $hook[$requiredField] = trim($hook[$requiredField]);
-            }
-        }
-        
-        if(count($missingFields) > 0){
-            throw new \Exception("Hook is missing field(s): " . implode(", ", $missingFields));
-        }
-        
-        // If no method is specified in the 'on' field, default to GET
-        $method = isset($hook['method']) ? strtoupper($hook['method']) : "GET";
-        
-        if(!in_array($method, ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'])) {
-            throw new \Exception("Hook 'on' field has invalid method '$method'. Allowed methods are GET, POST, PUT, DELETE, PATCH.");
-        }
-        
-        info($method);
-        if(!$this->routeExists($method, $hook['on'])) {
-            throw new \Exception("Hook on invalid route  '".$method."::".$hook['on']."'.");
-        }
+        $hook = $this->ensureRequiredFields($hookJson);
+        $hook = $this->trimFields($hook);
+        $this->evaluateMethodFormat($hook);
+        $method = $this->evaluateMethod($hook);
+        $order = $this->evaluateOrder($hook);
 
-        $src = $hook['src'];
-        $parts = explode('@', $src);
-        if(count($parts) != 2) {
-            throw new \Exception("Hook 'src' field must be in the format 'class@method'");
-        }
-
-        $order = isset($hook['order']) ? $hook['order'] : 0;
-        $order = intval($order);
 
         $hookModel = new Hook();
         $hookModel->on = $hook['on'];
         $hookModel->method = $method;
         $hookModel->src = $hook['src'];
         $hookModel->order = $order;
-        
-        if(in_array($hookModel->getApiIdentifier(), self::FORBIDDEN_HOOKS)) {
-            throw new \Exception("Hook on '".$hook['on']."' is not allowed.");
-        }
-        
+
+        $this->validateOn($hookModel);
+        $this->validateRouteIsNotForbidden($hookModel);
+
         if($plugin) {
             $hookModel->plugin_id = $plugin->id;
         }
-        
+
         return $hookModel;
     }
-    
-    private function routeExists(string $method, string $url) {
+
+    function ensureRequiredFields(array $hookJson) {
+        $missingFields = [];
+        $requiredFields = ['on', 'src'];
+        foreach($requiredFields as $requiredField) {
+            if(!isset($hookJson[$requiredField])) {
+                $missingFields[] = $requiredField;
+            }
+        }
+
+        if(count($missingFields) > 0) {
+            throw new \Exception("Hook is missing field(s): " . implode(", ", $missingFields));
+        }
+        return $hookJson;
+    }
+
+    function trimFields(array $hookJson) {
+        $fieldsToTrim = ['on', 'src', 'method'];
+        foreach($fieldsToTrim as $field) {
+            if(isset($hookJson[$field]) && is_string($hookJson[$field])) {
+                $hookJson[$field] = trim($hookJson[$field]);
+            }
+        }
+        return $hookJson;
+    }
+
+    function evaluateMethodFormat(array $hookJson): void {
+        $method = Method::parseFromString($hookJson['src']); // This will throw an exception if the format is invalid, we just use it for validation here.
+        if(!$method->isValid()) {
+            throw new \Exception("Hook 'src' field must be in the format 'class@method'. Given: '{$hookJson['src']}'");
+        }
+    }
+
+    function evaluateMethod(array $hookJson): string {
+        $method = isset($hookJson['method']) ? strtoupper($hookJson['method']) : "GET";
+
+        if(!in_array($method, ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'])) {
+            throw new \Exception("Hook 'on' field has invalid method '$method'. Allowed methods are GET, POST, PUT, DELETE, PATCH.");
+        }
+
+        return $method;
+    }
+
+    function evaluateOrder(array $hookJson): int {
+        $order = isset($hookJson['order']) ? $hookJson['order'] : 0;
+        return intval($order);
+    }
+
+    function validateOn(Hook $hookModel): void {
+        if(!$this->routeExists($hookModel->method, $hookModel->on)) {
+            throw new \Exception("Hook on invalid route '" . $hookModel->getApiIdentifier() . "'.");
+        }
+    }
+
+    function validateRouteIsNotForbidden(Hook $hookModel): void {
+        if(in_array($hookModel->getApiIdentifier(), self::FORBIDDEN_HOOKS)) {
+            throw new \Exception("Hook on '" . $hookModel->getApiIdentifier() . "' is not allowed.");
+        }
+    }
+
+    private function routeExists(string $method, string $url): bool {
         $methodRoutes = Route::getRoutes()->getRoutesByMethod()[$method] ?? [];
-        info($url);
-        info(array_keys($methodRoutes));
         return isset($methodRoutes[$url]);
     }
 }

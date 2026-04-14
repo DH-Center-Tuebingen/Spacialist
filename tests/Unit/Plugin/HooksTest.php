@@ -102,9 +102,9 @@ class HooksTest extends TestCase
             "no fields"             => [[], "Hook is missing field(s): on, src"],
             "on only"               => [['on' => 'api/v1/pre'], "Hook is missing field(s): src"],
             "src only"              => [['src' => 'addPreData'], "Hook is missing field(s): on"],
-            "src in invalid format" => [['on' => 'api/v1/pre', 'src' => 'addPreData'], "Hook 'src' field must be in the format 'class@method'"],
-            "on is invalid hook"    => [['on' => 'POST::invalid/api/route', 'src' => 'Hooks\\AddPreData@apply'], "Hook on invalid route 'POST::invalid/api/route'."],
-            "on has invalid method" => [['on' => 'api/v1/pre', 'src' => 'Hooks\\AddPreData@apply', 'method' => 'INVALID'], "Hook 'on' field has invalid method 'INVALID'. Allowed methods are GET, POST, PUT, DELETE, PATCH."],
+            "src in invalid format" => [['on' => 'api/v1/pre', 'src' => 'addPreData'], "Hook 'src' field must be in the format 'class@method'. Given: 'addPreData'"],
+            "on is invalid hook"    => [['on' => 'invalid/api/route', 'src' => 'Hooks\\AddPreData@apply', 'method' => 'POST'], "Hook on invalid route 'POST::invalid/api/route'."],
+            "on has invalid request method" => [['on' => 'api/v1/pre', 'src' => 'Hooks\\AddPreData@apply', 'method' => 'INVALID'], "Hook 'on' field has invalid method 'INVALID'. Allowed methods are GET, POST, PUT, DELETE, PATCH."],
             "on is forbidden hook"  => [['on' => 'broadcasting/auth', 'src' => 'Hooks\\AddPreData@apply', 'method' => 'POST'], "Hook on 'POST::broadcasting/auth' is not allowed."],
         ];
     }

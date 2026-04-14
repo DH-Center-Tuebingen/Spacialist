@@ -90,7 +90,7 @@ export const useUserStore = defineStore('user', {
             return (value, prop = 'id') => {
                 if(!value) return null;
 
-                if(state.userLoggedIn) {
+                if(this.userLoggedIn) {
                     const isNum = !isNaN(value);
                     const lValue = isNum ? value : value.toLowerCase();
                     if(prop == 'id' && value == state.user?.id) {
@@ -150,22 +150,22 @@ export const useUserStore = defineStore('user', {
                 return null;
             }
         },
-        setLoginState(value) {
-            this.userLoggedIn = value;
-        },
+        // setLoginState(value) {
+        //     this.userLoggedIn = value;
+        // },
         setPreferences(preferences) {
             this.preferences = preferences;
         },
         async login(credentials) {
             await getCsrfCookie();
             const user = await login(credentials);
-            this.userLoggedIn = true;
+            // this.userLoggedIn = true;
             this.setActiveUser(user);
             await useSystemStore().initialize();
         },
         async logout() {
             await logout();
-            this.setLoginState(false);
+            // this.setLoginState(false);
             this.setActiveUser({});
         },
         setActiveUser(user, merge = false) {
