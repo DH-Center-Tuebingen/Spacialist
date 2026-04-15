@@ -51,9 +51,10 @@
                     value: value.value
                 });
             };
-            const undirtyField = _ => {
+            const undirtyField = setTo => {
+                setTo = setTo || v.value;
                 v.resetField({
-                    value: v.value,
+                    value: setTo,
                 });
             };
 

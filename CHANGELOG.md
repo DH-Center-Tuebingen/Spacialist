@@ -19,6 +19,7 @@ All notable changes to this project will be documented in this file.
 - Now entity metadata is only loaded when accessing the metadata tab
 - Migrations now have logging automatically disabled
 - Migrations that require filesystem changes can now be handled using the `App\Traits\FilesystemMigration` trait (call `$this->safelyMoveDirectoryBetweenDisks(...)` with `ALLOW_FILESYTEM_MIGRATIONS` set to `true`)
+- Disable Caret in disabled _Single Choice Dropdowns_ and _Multiple Choice Dropdowns_
 
 ## 0.11.1
 ### Added

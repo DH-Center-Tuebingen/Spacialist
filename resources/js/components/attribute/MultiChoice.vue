@@ -7,6 +7,7 @@
         :object="true"
         :mode="'tags'"
         :disabled="disabled"
+        :caret="!disabled"
         :options="state.filteredSelections"
         :name="name"
         :searchable="true"
@@ -103,9 +104,10 @@
                     value: value.value
                 });
             };
-            const undirtyField = _ => {
+            const undirtyField = x => {
+                x = x || v.value;
                 v.resetField({
-                    value: v.value,
+                    value: x,
                 });
             };
 
