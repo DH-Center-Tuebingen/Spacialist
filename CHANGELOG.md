@@ -15,6 +15,8 @@ All notable changes to this project will be documented in this file.
 - Removed "Remember Me" toggle from login screen
 
 ## 0.11.1
+### Added
+- Unit Tests for Directory.php
 ### Fixed
 - Login not possible on instances in subfolder
 - Last editor not visible in _Entity Detail_ tab
