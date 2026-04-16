@@ -38,7 +38,7 @@
             <tbody>
                 <template
                     v-for="(row, $index) in state.actualShow"
-                    :key="`tabular-row-${uniqueRowIndex(row, $index)}`"
+                    :key="`tabular-row-${row.index}`"
                 >
                     <td
                         v-if="row.hidden_info"
