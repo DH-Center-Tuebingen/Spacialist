@@ -2,8 +2,6 @@
 
 namespace App\Utils;
 
-use Illuminate\Support\Str;
-
 class UrlUtils {
     /**
      * When serving multiple applications (also already spacialist + thesaurex)
