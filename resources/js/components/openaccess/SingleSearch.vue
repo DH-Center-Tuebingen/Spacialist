@@ -39,7 +39,7 @@
                                 :src="entityType.image_url" -->
                             <img
                                 :src="`https://picsum.photos/400?random=${entityType.id}`"
-                                class="card-img-top"
+                                class="card-img-top rounded-top-4"
                                 :alt="`${translateConcept(entityType.thesaurus_url)} Image missing`"
                             >
                             <!-- <div
