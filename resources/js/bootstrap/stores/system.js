@@ -25,6 +25,7 @@ import {
 } from '@/bootstrap/router.js';
 
 import {
+    fetchEntityTypes,
     fetchGlobals,
 } from '@/open_api.js';
 
@@ -101,7 +102,7 @@ export const useSystemStore = defineStore('system', {
             return useUserStore().getPreferenceByKey(key);
         },
         getProjectName: state => slug => {
-            const projectName = useUserStore().getPreferenceByKey('prefs.project-name');
+            const projectName = state.getPreference('prefs.project-name');
             return slug ? slugify(projectName) : projectName;
         },
         hasPlugin: state => nameId => {
@@ -192,11 +193,14 @@ export const useSystemStore = defineStore('system', {
             attributeStore.setAttributeTypes(preData.attributeTypes);
         },
         async initializeOpenAccess() {
-            return fetchGlobals().then(data => {
-                this.concepts = data.concepts;
-                this.preferences = data.preferences;
-                return data;
-            });
+            const userStore = useUserStore();
+            const globalData = await fetchGlobals();
+            const entityTypes = await fetchEntityTypes();
+            this.concepts = globalData.concepts;
+            this.systemPreferences = globalData.preferences;
+            userStore.setPreferences(globalData.preferences);
+            userStore.setUsers(globalData.users, globalData.deleted_users);
+            useEntityStore().initializeEntityTypes(entityTypes);
         },
         addPlugin(data) {
             const idx = this.plugins.findIndex(p => p.id == data.id);

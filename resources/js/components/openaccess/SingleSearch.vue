@@ -2,9 +2,10 @@
     <div class="row">
         <h3>
             <a
+                v-show="state.selectedEntityType"
                 href="#"
                 class="text-decoration-none text-muted"
-                @click.prevent="unsetEntityType()" v-show="state.selectedEntityType"
+                @click.prevent="unsetEntityType()"
             >
                 <i class="fa fa-fw fa-arrow-turn-up fa-flip-horizontal fa-xs" />
             </a>
@@ -18,12 +19,48 @@
     <div class="row flex-grow-1 overflow-hidden">
         <div
             v-if="!state.selectedEntityType"
-            class="col-12 h-100 overflow-hidden"
+            class="col-12 h-100 overflow-hidden d-flex flex-column"
         >
-            <p class="lead">
+            <p class="lead mb-0">
                 Please select an entity type first to search through the database
             </p>
-            <ul class="list-group">
+            <div class="col mt-4 overflow-y-auto overflow-x-hidden">
+                <div class="row row-cols-1 row-cols-md-4 row-cols-sm-2 g-4">
+                    <div
+                        v-for="entityType in state.availableEntityTypes"
+                        :key="entityType.id"
+                        class="col"
+                    >
+                        <div
+                            class="card rounded-4 clickable"
+                            @click.prevent="selectEntityType(entityType)"
+                        >
+                            <!-- v-if="entityType.image_url"
+                                :src="entityType.image_url" -->
+                            <img
+                                :src="`https://picsum.photos/400?random=${entityType.id}`"
+                                class="card-img-top"
+                                :alt="`${translateConcept(entityType.thesaurus_url)} Image missing`"
+                            >
+                            <!-- <div
+                                v-else
+                                class="card-img-top text-white bg-secondary aspect-ratio-1 d-flex align-items-center justify-content-center rounded-top-4"
+                            >
+                                <i class="fas fa-fw fa-monument fa-2xl" />
+                            </div> -->
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    {{ translateConcept(entityType.thesaurus_url) }}
+                                </h5>
+                                <p class="card-text text-truncate">
+                                    This is a longer card with supporting text below as a natural lead-in to additional content. This content is a little bit longer.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- <ul class="list-group">
                 <li
                     v-for="entityType in state.availableEntityTypes"
                     :key="entityType.id"
@@ -37,7 +74,7 @@
                         {{ translateConcept(entityType.thesaurus_url) }}
                     </a>
                 </li>
-            </ul>
+            </ul> -->
         </div>
         <div
             v-if="state.selectedEntityType"
@@ -221,9 +258,10 @@
     import {
         reactive,
         computed,
-        onMounted,
         watch,
     } from 'vue';
+
+    import useEntityStore from '@/bootstrap/stores/entity.js';
 
     import {
         translateConcept,
@@ -231,7 +269,6 @@
     } from '@/helpers/helpers.js';
 
     import {
-        fetchEntityTypes,
         fetchAttributes,
         getFilterResultsForType,
     } from '@/open_api.js';
@@ -241,17 +278,13 @@
     export default {
         setup(props) {
             const { t } = useI18n();
-
-            // FETCH
-            fetchEntityTypes().then(data => {
-                state.availableEntityTypes = data;
-            });
+            const entityStore = useEntityStore();
 
             // DATA
             const state = reactive({
                 allAttributesData: {},
                 pages: {},
-                availableEntityTypes: [],
+                availableEntityTypes: entityStore.entityTypes,
                 availableAttributes: {},
                 filterableAttributes: computed(_ => {
                     const data = {

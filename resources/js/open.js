@@ -1,26 +1,21 @@
 import { createApp } from 'vue';
 
 // Third-Party Libs
-import PQueue from "p-queue";
+import PQueue from 'p-queue';
 
 // Init plugins
 
 // Helpers/Filter
 
 // Reusable Components
-import AttributeList from "@/components/AttributeList.vue";
 import ResultCard from '@/components/openaccess/Card.vue';
-import MarkdownViewer from '@/components/mde/Viewer.vue';
+// dhc-components
+import { LoadingSpinner } from 'dhc-components';
 
 // Init Libs
 // PQueue, httpQueue
 const queue = new PQueue({concurrency: 1});
 window.$httpQueue = queue;
-
-// Third-Party Components
-import Multiselect from "@vueform/multiselect";
-import DatePicker from "vue-datepicker-next";
-import draggable from "vuedraggable";
 
 // Components
 import App from '@/components/openaccess/App.vue';
@@ -34,21 +29,27 @@ import {
 } from '@/bootstrap/router.js';
 // vue-i18n
 import i18n from '@/bootstrap/i18n.js';
+// vue-final-modal
+import { createVfm } from 'vue-final-modal';
 // Font Awesome
 import '@/bootstrap/font.js';
+// Plugin System
+import { SpPS } from '@/bootstrap/plugins.js';
+
+import initGlobalComponents from '@/bootstrap/global-components.js';
 
 const app = createApp(App);
 app.use(i18n);
 app.use(router);
 app.use(pinia);
+app.use(createVfm());
 
-app.component("attribute-list", AttributeList);
-app.component('result-card', ResultCard);
-// Third-Party components
-app.component("multiselect", Multiselect);
-app.component("date-picker", DatePicker);
-app.component("draggable", draggable);
-app.component('md-viewer', MarkdownViewer);
+initGlobalComponents(app);
+
+SpPS.initialize(app, i18n.global.t);
+
+app.component('ResultCard', ResultCard);
+app.component('LoadingSpinner', LoadingSpinner);
 
 // Mount Vue
-app.mount("#app");
+app.mount('#app');

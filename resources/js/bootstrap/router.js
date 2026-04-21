@@ -28,6 +28,10 @@ import UserActivity from '@/components/UserActivity.vue';
 import UserNotifications from '@/components/notification/UserNotifications.vue';
 // Open Access Router Pages
 import Landing from '@/components/openaccess/Landing.vue';
+import EntryView from '@/components/openaccess/EntityView.vue';
+import Modules from '@/components/openaccess/Modules.vue';
+import SitesContainer from '@/components/openaccess/SitesContainer.vue';
+import WebGis from '@/components/openaccess/WebGis.vue';
 import FreeSearch from '@/components/openaccess/FreeSearch.vue';
 import SingleSearch from '@/components/openaccess/SingleSearch.vue';
 
@@ -321,20 +325,62 @@ export const openRouter = createRouter({
             },
         },
         {
-            path: '/free',
-            name: 'freesearch',
-            component: FreeSearch,
+            path: '/modules',
+            name: 'modules',
+            component: Modules,
             meta: {
                 auth: false,
             },
         },
         {
-            path: '/single',
-            name: 'singlesearch',
-            component: SingleSearch,
+            path: '/entry/:id',
+            name: 'entryview-entity',
+            component: EntryView,
             meta: {
                 auth: false,
             },
+        },
+        {
+            path: '/site',
+            name: 'sites',
+            component: SitesContainer,
+            meta: {
+                auth: false,
+            },
+            children: [
+                {
+                    path: 'webgis',
+                    name: 'webgis',
+                    component: WebGis,
+                    meta: {
+                        auth: false,
+                    },
+                },
+                {
+                    path: 'search',
+                    meta: {
+                        auth: false,
+                    },
+                    children: [
+                        {
+                            path: 'free',
+                            name: 'freesearch',
+                            component: FreeSearch,
+                            meta: {
+                                auth: false,
+                            },
+                        },
+                        {
+                            path: 'single',
+                            name: 'singlesearch',
+                            component: SingleSearch,
+                            meta: {
+                                auth: false,
+                            },
+                        },
+                    ],
+                },
+            ],
         },
         {
             path: '/:pathMatch(.*)',

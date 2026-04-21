@@ -4,6 +4,11 @@
             <h3>
                 Results
             </h3>
+            <LoadingSpinner
+                v-if="state.loading"
+                size="2x"
+                class="d-flex flex-row align-items-center justify-content-center h-100 w-100 bg-secondary bg-opacity-50 text-body fs-1 position-absolute start-50 top-50 translate-middle"
+            />
             <div class="">
                 <a
                     v-for="entityType in state.selectedEntityTypes"
@@ -171,12 +176,13 @@
         watch,
     } from 'vue';
 
+    import useEntityStore from '@/bootstrap/stores/entity.js';
+
     import {
         translateConcept,
     } from '@/helpers/helpers.js';
 
     import {
-        fetchEntityTypes,
         fetchAttributes,
         getFilterResults,
     } from '@/open_api.js';
@@ -186,27 +192,21 @@
     export default {
         setup(props) {
             const { t } = useI18n();
-
-            // FETCH
-            fetchEntityTypes().then(data => {
-                state.availableEntityTypes = data;
-            });
-            fetchAttributes().then(data => {
-                state.availableAttributes = data.filter(a => a.attribute.datatype != 'system-separator');
-            });
+            const entityStore = useEntityStore();
 
             // DATA
             const state = reactive({
                 pages: {},
+                loading: false,
                 selectedEntityTypes: [],
                 selectedAttributes: [],
-                availableEntityTypes: [],
+                availableEntityTypes: entityStore.entityTypes,
                 availableAttributes: [],
                 selectableEntityTypes: computed(_ => {
                     let list = state.availableEntityTypes.filter(et => {
                         return !state.selectedEntityTypeIds.includes(et.id);
                     });
-                    // TODO 
+                    // TODO
                     // if(state.selectedAttributes.length > 0) {
                     //     list = list.filter(et => {
                     //         return state.selectedEntityTypeAttributeIds.includes(et.id);
@@ -218,7 +218,7 @@
                     let list = state.availableAttributes.filter(attr => {
                         return !state.selectedAttributeIds.includes(attr.id);
                     });
-                    // TODO 
+                    // TODO
                     // if(state.selectedEntityTypes.length > 0) {
                     //     list = list.filter(attr => {
                     //         return state.selectedEntityTypeIds.includes(attr.entity_type_id);
@@ -232,6 +232,21 @@
             });
 
             // FUNCTIONS
+            const fetchData = async () => {
+                state.loading = true;
+                state.availableEntityTypes = await fetchEntityTypes();
+                const attributes = await fetchAttributes();
+                state.availableAttributes = attributes.filter(a => a.attribute.datatype != 'system-separator');
+                state.loading = false;
+            };
+
+            const wrapFilter = async (entityTypes, attributes) => {
+                state.loading = true;
+                const result = await getFilterResults(entityTypes, attributes);
+                state.loading = false;
+                return result;
+            };
+
             const setResult = resData => {
                 const {
                     data,
@@ -272,7 +287,7 @@
                     return;
                 }
 
-                getFilterResults(state.selectedEntityTypes.map(et => et.id), state.selectedAttributes.map(attr => attr.id), page).then(data => setResult(data));
+                wrapFilter(state.selectedEntityTypes.map(et => et.id), state.selectedAttributes.map(attr => attr.id), page).then(data => setResult(data));
             };
             const pageClass = label => {
                 const list = [];
@@ -309,12 +324,15 @@
                 return list;
             };
 
+            // FETCH
+            fetchData();
+
             // WATCHER
             watch(_ => state.selectedEntityTypes.length, (newValue, oldValue) => {
-                getFilterResults(state.selectedEntityTypes.map(et => et.id), state.selectedAttributes.map(attr => attr.id)).then(data => setResult(data));
+                wrapFilter(state.selectedEntityTypes.map(et => et.id), state.selectedAttributes.map(attr => attr.id)).then(data => setResult(data));
             });
             watch(_ => state.selectedAttributes.length, (newValue, oldValue) => {
-                getFilterResults(state.selectedEntityTypes.map(et => et.id), state.selectedAttributes.map(attr => attr.id)).then(data => setResult(data));
+                wrapFilter(state.selectedEntityTypes.map(et => et.id), state.selectedAttributes.map(attr => attr.id)).then(data => setResult(data));
             });
 
             // RETURN

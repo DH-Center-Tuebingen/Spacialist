@@ -916,8 +916,10 @@ export const useEntityStore = defineStore('entity', {
             this.entityTypeAttributes = {};
             for(let k in data) {
                 const entityType = data[k];
-                this.entityTypeAttributes[entityType.id] = entityType.attributes.slice();
-                delete entityType.attributes;
+                if(entityType.attributes) {
+                    this.entityTypeAttributes[entityType.id] = entityType.attributes.slice();
+                    delete entityType.attributes;
+                }
             }
             this.entityTypes = data;
         },
