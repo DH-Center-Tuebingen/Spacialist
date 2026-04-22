@@ -49,8 +49,13 @@
                                 <i class="fas fa-fw fa-monument fa-2xl" />
                             </div> -->
                             <div class="card-body">
-                                <h5 class="card-title">
-                                    {{ translateConcept(entityType.thesaurus_url) }}
+                                <h5 class="card-title d-flex align-items-center justify-content-between">
+                                    <span>
+                                        {{ translateConcept(entityType.thesaurus_url) }}
+                                    </span>
+                                    <span class="text-secondary fw-bold">
+                                        {{ entityType.entities_count }}
+                                    </span>
                                 </h5>
                                 <p class="card-text text-truncate">
                                     This is a longer card with supporting text below as a natural lead-in to additional content. This content is a little bit longer.
@@ -80,9 +85,14 @@
             v-if="state.selectedEntityType"
             class="col-8 h-100 overflow-hidden d-flex flex-column"
         >
-            <p v-if="state.pages.pagination">
+            <Pagination
+                class="pb-2"
+                :data="state.pages.pagination"
+                :hide-navigation="true"
+            />
+            <!-- <p v-if="state.pages.pagination">
                 Displaying results <span class="fw-bold">{{ state.pages.pagination.from }} - {{ state.pages.pagination.to }}</span> of <span class="fw-bold">{{ state.pages.pagination.total }}</span> in total.
-            </p>
+            </p> -->
             <div class="overflow-y-auto">
                 <result-card
                     v-for="entry in state.pages.data"
@@ -91,88 +101,13 @@
                     :entity="entry"
                 />
             </div>
-            <nav
-                v-if="state.pages.pagination"
+            <Pagination
                 class="mt-2"
-                aria-label="Search result pagination"
-            >
-                <ul class="pagination pagination-sm justify-content-center mb-0">
-                    <li
-                        class="page-item"
-                        :class="pageClass('first')"
-                    >
-                        <a
-                            class="page-link"
-                            href="#"
-                            aria-label="First"
-                            @click.prevent="gotoPage(1)"
-                        >
-                            <span aria-hidden="true">
-                                <i class="fas fa-fw fa-angle-double-left" />
-                            </span>
-                        </a>
-                    </li>
-                    <li
-                        class="page-item"
-                        :class="pageClass('previous')"
-                    >
-                        <a
-                            class="page-link"
-                            href="#"
-                            aria-label="Previous"
-                            @click.prevent="gotoPage(state.pages.pagination.current_page - 1)"
-                        >
-                            <span aria-hidden="true">
-                                <i class="fas fa-fw fa-chevron-left" />
-                            </span>
-                        </a>
-                    </li>
-                    <li
-                        v-for="page in state.pages.pagination.cleanLinks"
-                        :key="`page-${page.label}`"
-                        class="page-item"
-                        :class="pageClass(page.label)"
-                    >
-                        <a
-                            class="page-link"
-                            href="#"
-                            @click.prevent="gotoPage(page.label)"
-                        >
-                            {{ page.label }}
-                        </a>
-                    </li>
-                    <li
-                        class="page-item"
-                        :class="pageClass('next')"
-                    >
-                        <a
-                            class="page-link"
-                            href="#"
-                            aria-label="Next"
-                            @click.prevent="gotoPage(state.pages.pagination.current_page + 1)"
-                        >
-                            <span aria-hidden="true">
-                                <i class="fas fa-fw fa-chevron-right" />
-                            </span>
-                        </a>
-                    </li>
-                    <li
-                        class="page-item"
-                        :class="pageClass('last')"
-                    >
-                        <a
-                            class="page-link"
-                            href="#"
-                            aria-label="Last"
-                            @click.prevent="gotoPage(state.pages.pagination.last_page)"
-                        >
-                            <span aria-hidden="true">
-                                <i class="fas fa-fw fa-angle-double-right" />
-                            </span>
-                        </a>
-                    </li>
-                </ul>
-            </nav>
+                :data="state.pages.pagination"
+                :hide-metadata="true"
+                size="sm"
+                @goto="gotoPage"
+            />
         </div>
         <div
             v-if="state.selectedEntityType"
@@ -261,6 +196,8 @@
         watch,
     } from 'vue';
 
+    import { Pagination } from 'dhc-components';
+
     import useEntityStore from '@/bootstrap/stores/entity.js';
 
     import {
@@ -276,6 +213,9 @@
     import { useI18n } from 'vue-i18n';
 
     export default {
+        components: {
+            Pagination,
+        },
         setup(props) {
             const { t } = useI18n();
             const entityStore = useEntityStore();
@@ -360,10 +300,7 @@
                 }
 
                 state.pages.data = data;
-                state.pages.pagination = {
-                    ...pagination,
-                    cleanLinks: pagination.links.slice(1, -1),
-                };
+                state.pages.pagination = pagination;
             };
             const resetFilter = attributeId => {
                 delete state.filters[attributeId];
@@ -384,40 +321,6 @@
                 getFilterResultsForType(state.selectedEntityTypeId, state.filters, page).then(data => {
                     setResultData(data);
                 });
-            };
-            const pageClass = label => {
-                const list = [];
-                switch(label) {
-                    case 'first':
-                        if(state.pages.pagination.current_page == 1) {
-                            list.push('disabled');
-                        }
-                        break;
-                    case 'previous':
-                        if(!state.pages.pagination.prev_page_url) {
-                            list.push('disabled');
-                        }
-                        break;
-                    case 'last':
-                        if(state.pages.pagination.current_page == state.pages.pagination.last_page) {
-                            list.push('disabled');
-                        }
-                        break;
-                    case 'next':
-                        if(!state.pages.pagination.next_page_url) {
-                            list.push('disabled');
-                        }
-                        break;
-                    case '...':
-                        list.push('disabled');
-                        break;
-                    default:
-                        if(state.pages.pagination.current_page == label) {
-                            list.push('active');
-                        }
-                        break;
-                }
-                return list;
             };
 
             // WATCHER
@@ -453,7 +356,6 @@
                 resetFilter,
                 handleFilterChange,
                 gotoPage,
-                pageClass,
                 // PROPS
                 // STATE
                 state,

@@ -103,7 +103,10 @@ class OpenAccessController extends Controller {
         if(!Preference::hasPublicAccess()) {
             return response()->json();
         }
-        return response()->json(EntityType::all());
+        return response()->json(
+            EntityType::withCount('entities')
+            ->get()
+        );
     }
 
     public function getAttributes(Request $request) {
