@@ -1,15 +1,16 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Plugin;
 
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 
-use App\Interfaces\IPluggable;
 use App\Models\Plugin\Migration as PluginMigration;
 use App\Plugin;
+use App\Plugin\PluginDirectory;
+use Illuminate\Database\Migrations\Migration;
 
-class MigrationService implements IPluggable {
+class MigrationService extends PluginService {
 
     protected function getPath(): string {
         return 'plugin-migrations';
@@ -21,10 +22,6 @@ class MigrationService implements IPluggable {
 
     public function update(Plugin $plugin): void {
         $this->run($plugin);
-    }
-
-    public function uninstall(Plugin $plugin): void {
-        // Nothing needs to be done here...
     }
 
     public function remove(Plugin $plugin): void {
@@ -103,7 +100,14 @@ class MigrationService implements IPluggable {
         ]);
     }
 
-    function getMigrationList(Plugin $plugin, $rollback = false) {
+    /**
+     * Get's a list of migration files in the plugin on the filesystem.
+     * 
+     * @param Plugin $plugin - The plugin to get the migration list for
+     * @param mixed $rollback - If true, get the list in descending order. Required for rollbacks to get the last migration first.
+     * @return array - A list of migration file names, e.g. ["2024_01_01_000000_create_users_table.php", "2024_01_02_000000_create_posts_table.php"]
+     */
+    function getMigrationList(Plugin $plugin, $rollback = false): array {
         $path = $this->getMigrationPath($plugin);
         if(file_exists($path) && is_dir($path)) {
             $migrations = collect(File::files($path))->map(function ($f) {
@@ -127,15 +131,31 @@ class MigrationService implements IPluggable {
         return [];
     }
 
-    function getMigrationPath(Plugin $plugin, ?string $subpath = null): string {
-        $path = $plugin->getPath("Migrations");
-        if($subpath) {
-            $path .= '/' . $subpath;
+    /**
+     * Get path to the plugin's migration directory (./Migrations)
+     * @param Plugin $plugin - The plugin to get the migration path for
+     * @param mixed $migrationFile - optional name of specific migration file, e.g. "2024_01_01_000000_create_users_table.php"
+     * @return string - The path to the plugin's migration directory or to a specific migration file if $migrationFile is provided
+     */
+    function getMigrationPath(Plugin $plugin, ?string $migrationFile = null): string {
+        $pluginDir = new PluginDirectory($plugin);
+        $path = $pluginDir->getPluginPath("Migrations");
+        if($migrationFile) {
+            $path .= '/' . $migrationFile;
         }
         return  $path;
     }
 
-    function getMigrationClassName(Plugin $plugin, $migrationFile): object {
+    /**
+     * Validates if the migration file does match the Laravel migration file naming convention.
+     * If it's a valid migration, the migration class will be returned, otherwise an exception will be thrown.
+     * 
+     * @param Plugin $plugin - The plugin the migration belongs to
+     * @param mixed $migrationFile - The migration file name, e.g. "2024_01_01_000000_create_users_table.php"
+     * @throws \Exception throws an exeption if the migration has in incompatible name
+     * @return Migration - An instance of the migration class 
+     */
+    function getMigrationClassName(Plugin $plugin, $migrationFile): Migration {
         preg_match('/^(\d{4}_\d{2}_\d{2}_\d{6})_(.+)\.php$/', $migrationFile, $matches);
         if(count($matches) != 3) {
             throw new \Exception("Invalid migration file name: $migrationFile");
@@ -146,6 +166,15 @@ class MigrationService implements IPluggable {
         return new $prefixedClassName();
     }
 
+
+    /**
+     * Get's all plugin migrations in the database and compares them with all file
+     * migrations and retuns all migrations that are not yet in the database.  
+     * 
+     * @param Plugin $plugin - The plugin to check for missing migrations
+     * @param mixed $rollback - If true, get all that are in the database and on the file system. To get a list of migrations that can be rolled back.
+     * @return array - A list of migration file names that are missing in the database (or that can be rolled back if $rollback is true)
+     */
     function getMissingMigrations(Plugin $plugin, $rollback = false): array {
         $ranMigrations = PluginMigration::where('plugin_id', $plugin->id)
             ->pluck('migration')

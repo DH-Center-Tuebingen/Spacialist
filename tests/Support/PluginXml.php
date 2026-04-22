@@ -8,19 +8,16 @@ class PluginXml {
     public function __construct(protected PluginTemplate $template) {
     }
 
-    public static function generate(PluginTemplate $template): string {
+    public static function generate(PluginTemplate $template, string $additionalXML): string {
         $pluginXML = new static($template);
-        return $pluginXML->generateInfoXml();
+        return $pluginXML->generateInfoXml($additionalXML);
     }
 
 
-    public function generateInfoXml(): string {
+    public function generateInfoXml($additionalXML): string {
         $plugin = $this->template->plugin;
         $description = isset($plugin['description']) ? $plugin['description'] : "";
         $licence = isset($plugin['licence']) ? $plugin['licence'] : "";
-
-
-        $hooksText = $this->generateHooks();
         $authorsText = $this->generateAuthors();
 
         return <<<XML
@@ -33,32 +30,10 @@ class PluginXml {
         <version>{$plugin['version']}</version>
         <license>{$licence}</license>
         {$authorsText}
-        {$hooksText}
+        {$additionalXML}
     </info>
     XML;
     }
-    private function generateHooks(): string {
-        $hooks = $this->template->getHooks();
-        if($hooks === null || count($hooks) === 0) {
-            return "";
-        }
-        $hooksXml = "";
-        foreach($hooks as $hook) {
-            $hooksXml .= "    <hook";
-            if(isset($hook['on'])) {
-                $hooksXml .= " on=\"{$hook['on']}\"";
-            }
-            if(isset($hook['src'])) {
-                $hooksXml .= " src=\"{$hook['src']}\"";
-            }
-            if(isset($hook['order'])) {
-                $hooksXml .= " order=\"{$hook['order']}\"";
-            }
-            $hooksXml .= " />\n";
-        }
-        return "<hooks>\n" . $hooksXml . "</hooks>";
-    }
-
     protected function generateAuthors(): string {
         $authors = $this->template->plugin['authors'] ?? [];
         if(count($authors) === 0) {

@@ -4,16 +4,14 @@ namespace App\Models\Plugin;
 use App\Plugin;
 use Illuminate\Database\Eloquent\Model;
 
-class Hook extends Model
+class CssFile extends Model
 {
-    protected $table = 'plugin_service_hooks';
+    protected $table = 'plugin_service_css_files';
 
     protected $fillable = [
         'plugin_id',
         'src',
         'order',
-        'on',
-        'method',
     ];
 
     /**
@@ -21,10 +19,7 @@ class Hook extends Model
      */
     public function plugin()
     {
-        return $this->belongsTo(\App\Plugin::class, 'plugin_id');
+        return $this->belongsTo(Plugin::class, 'plugin_id');
     }
     
-    public function getApiIdentifier(): string {
-        return $this->method . "::" . $this->on;
-    }    
 }

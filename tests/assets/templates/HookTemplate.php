@@ -3,7 +3,7 @@
 namespace Tests\Assets\Templates;
 
 use Tests\Support\PluginTemplate;
-
+use Tests\Support\PluginTemplateFeatures\HookTemplateFeature;
 
 class HookTemplate extends PluginTemplate {
 
@@ -15,7 +15,7 @@ class HookTemplate extends PluginTemplate {
         );
     }
 
-    public function getPredataFileContent(string $key, string $content): string{
+    public function getPredataFileContent(string $key, string $content): string {
         return <<<ADD_PRE_DATA
 <?php
 namespace App\Plugins\\{$this->plugin->name}\Hooks;
@@ -33,9 +33,9 @@ ADD_PRE_DATA;
     }
 
     public function addPreHookFile(
-            ?string $key = null, 
-            ?string $content = null
-        ):static {
+        ?string $key = null,
+        ?string $content = null
+    ): static {
         if($key === null) {
             $key = "hook-plugin-message";
         }
@@ -48,24 +48,26 @@ ADD_PRE_DATA;
             $this->getPredataFileContent($key, $content)
         );
         return $this;
-    } 
- 
+    }
 
-    public function addPreHook() : static {
-        $this->addHook(
+
+    public function addPreHook(): static {
+        $hookFeature = new HookTemplateFeature();
+        $hookFeature->addHook(
             on: 'api/v1/pre',
             src: "Hooks\\AddPreData@apply"
         );
+        $this->addFeature($hookFeature);
         return $this;
     }
 
-    public function addBasic(?string $key = null, ?string $content = null) : static {
-        return parent::addBasic()
-                     ->addPreHookFile($key, $content)
-                     ->addPreHook();
+    public function addBasic(?string $key = null, ?string $content = null): static {
+        parent::addBasic();
+        
+        return static::addPreHookFile($key, $content)->addPreHook();
     }
 
-    public static function getBasic(?string $key = null, ?string $content = null): static{
+    public static function getBasic(?string $key = null, ?string $content = null): static {
         return (new static())->addBasic($key, $content)->generate();
     }
 
@@ -75,6 +77,27 @@ ADD_PRE_DATA;
         ?string $version,
     ): static {
         return (new static($name, $uuid, $version));
+    }
+
+    public static function generateHooksXML(array $hooks) {
+        if($hooks === null || count($hooks) === 0) {
+            return "";
+        }
+        $hooksXml = "";
+        foreach($hooks as $hook) {
+            $hooksXml .= "    <hook";
+            if(isset($hook['on'])) {
+                $hooksXml .= " on=\"{$hook['on']}\"";
+            }
+            if(isset($hook['src'])) {
+                $hooksXml .= " src=\"{$hook['src']}\"";
+            }
+            if(isset($hook['order'])) {
+                $hooksXml .= " order=\"{$hook['order']}\"";
+            }
+            $hooksXml .= " />\n";
+        }
+        return "<hooks>\n" . $hooksXml . "</hooks>";
     }
 
 }

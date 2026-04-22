@@ -11,21 +11,26 @@ class PluginTemplate {
     public Plugin $plugin;
 
     protected $structure = [];
-    protected $hooks = [];
+    protected $features = [];
     public ?string $changelog = "[DEFAULT CHANGELOG]";
     public ?string $packageJson = null;
-    private bool $generateCalled = false; 
+    private bool $generateCalled = false;
 
 
     public function __construct(
-        string $name, 
-        string $uuid, 
+        string $name,
+        string $uuid,
         string $version,
-        ) {
-        $this->plugin          = new Plugin();
-        $this->plugin->name    = $name;
-        $this->plugin->uuid    = $uuid;
+    ) {
+        $this->plugin = new Plugin();
+        $this->plugin->name = $name;
+        $this->plugin->uuid = $uuid;
         $this->plugin->version = $version;
+    }
+
+    public function addFeature(PluginTemplateFeature $feature): static {
+        $this->features[] = $feature;
+        return $this;
     }
 
     public function changelog(?string $changelog = null): static {
@@ -38,34 +43,7 @@ class PluginTemplate {
         return $this;
     }
 
-    /**
-     * Adds a plugin hook to the template. In production'src' and 'on' are required.
-     * In testing all values are optional.
-     * 
-     * @param mixed $on - The hook point, e.g. 'api/v1/pre'
-     * @param mixed $src - The php function for the hook, e.g. 'Hooks\\AddPreData@apply'
-     * @param mixed $order - The order of the hook, lower numbers run first. Default is 0.
-     * @return void
-     */
-    public function addHook(mixed $on = null, mixed $src = null, mixed $order = null): void {
-        $hook = [];
-        if($on !== null) {
-            $hook['on'] = $on;
-        }
 
-        if($src !== null) {
-            $hook['src'] = $src;
-        }
-
-        if($order !== null) {
-            $hook['order'] = $order;
-        }
-        $this->hooks[] = $hook;
-    }
-
-    public function getHooks(): array {
-        return $this->hooks;
-    }
 
     public function addFile(string $filePath, string $fileContent): void {
         $filePath = str_replace('\\', '/', $filePath);
@@ -92,7 +70,7 @@ class PluginTemplate {
 
     public function addBasic(): static {
         return $this->addBasicChangelog()
-             ->addBasicJs();
+            ->addBasicJs();
     }
 
     public function addBasicJs(): static {
@@ -123,8 +101,8 @@ class PluginTemplate {
         if(count($parts) === 0) {
             throw new \Exception("Invalid file path: $path");
         }
-        
-        $fileName =array_pop($parts); // Remove file name
+
+        $fileName = array_pop($parts); // Remove file name
 
         $current = &$this->structure;
         while(count($parts) > 0) {
@@ -137,7 +115,12 @@ class PluginTemplate {
             $current = &$current[$part];
         }
 
-        $this->structure['app'][$fileName] = PluginXml::generate($this);
+        $additionalXml = "";
+        foreach($this->features as $feature) {
+            $additionalXml .= $feature->generateXml();
+        }
+
+        $current[$fileName] = PluginXml::generate($this, $additionalXml);
         return $this;
     }
 

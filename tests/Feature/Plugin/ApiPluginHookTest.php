@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use App\Services\HookService;
+use App\Services\Plugin\HookService;
 use Tests\TestCase;
 
 use Tests\Assets\Templates\HookTemplate;
@@ -10,43 +10,41 @@ use Tests\Support\PluginGenerator;
 
 class ApiPluginHookTest extends TestCase {
 
-    
-    function testHookInteraction(){
+
+    function testHookInteraction() {
 
         PluginGenerator::with(
             [HookTemplate::getBasic()->generate()],
-            function() {
+            function () {
                 $response = $this->userRequest()->get('/api/v1/pre');
-            
+
                 $this->assertStatus($response, 200);
-                
+
                 $response->assertJson([
                     'hook-plugin-message' => 'Executed'
                 ]);
-        });
+            });
     }
 
-    function testHookOrder(){
+    function testHookOrder() {
         $generator = new PluginGenerator([
             HookTemplate::createFrom(
                 name: "HookOrderSecond",
-                key: "hook-order",
-                content: "Second",
                 uuid: "123e4567-e89b-12d3-a456-426614174003",
-            )->addPreDataHook(),
+                version: "1.0.0"
+            )->addPreHook(),
             HookTemplate::createFrom(
                 name: "HookOrderFirst",
-                key: "hook-order",
-                content: "First",
                 uuid: "123e4567-e89b-12d3-a456-426614174002",
-            )->addPreDataHook()
+                version: "1.0.0"
+            )->addPreHook()
         ]);
 
-        $generator->use(function() {
+        $generator->use(function () {
             $response = $this->userRequest()->get('/api/v1/pre');
-            
+
             $this->assertStatus($response, 200);
-            
+
             $response->assertJson([
                 'hook-order' => 'First'
             ]);

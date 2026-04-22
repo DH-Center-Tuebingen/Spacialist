@@ -11,14 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('plugin_hooks', function (Blueprint $table) {
+        Schema::create('plugin_service_migrations', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
             $table->foreignId('plugin_id')->constrained('plugins')->onDelete('cascade');
-            $table->string('on');
-            $table->string('src');
-            $table->string('method');
-            $table->integer('order')->default(0);
+            $table->string('migration');
+            $table->integer('batch');
         });
     }
 
@@ -27,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('plugin_hooks');
+        Schema::dropIfExists('plugin_service_migrations');
     }
 };

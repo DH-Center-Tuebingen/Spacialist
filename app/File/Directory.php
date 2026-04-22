@@ -78,6 +78,7 @@ class Directory {
      * @return string The path to the file
      */
     public function store(string $filename, $file): string|false {
+        info("Storing file in directory {$this->directory} with filename {$filename}.");
         if($file instanceof UploadedFile) {
             return $file->storeAs($this->directory, $filename, $this->disk);
         } else {

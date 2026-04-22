@@ -10,6 +10,7 @@ use App\User;
 use App\Http\Controllers\Controller;
 use App\Plugin;
 use App\RolePreset;
+use App\Services\PluginManager;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
@@ -137,7 +138,7 @@ class UserController extends Controller {
         $groups['core'] = sp_get_permission_groups(true);
 
         if($withPlugins) {
-            $installedPlugins = Plugin::getInstalled();
+            $installedPlugins = app(PluginManager::class)->getInstalledPlugins();
             $groups['plugins'] = [];
             foreach($installedPlugins as $plugin) {
                 $slug = $plugin->slugName();

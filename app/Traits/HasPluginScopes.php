@@ -2,8 +2,6 @@
 
 namespace App\Traits;
 
-use App\Plugin;
-use App\Services\PluginManager;
 use App\Services\ScopeService;
 
 trait HasPluginScopes {

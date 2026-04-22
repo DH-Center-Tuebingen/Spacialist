@@ -4,6 +4,7 @@ namespace App\Registries;
 
 use App\AttributeTypes\AttributeBase;
 use App\Plugin;
+use App\Services\PluginManager;
 use Illuminate\Support\Arr;
 
 class AttributeRegistry {
@@ -40,25 +41,25 @@ class AttributeRegistry {
     }
 
     private static function registerPluginTypes(): void {
-        $installedPlugins = Plugin::getInstalled();
+        $installedPlugins = app(PluginManager::class)->getInstalledPlugins();
 
         foreach($installedPlugins as $plugin) {
-            $attributeTypes = $plugin->getRegisteredAttributes();
-            foreach($attributeTypes as $attributeType) {
-                $AttributeNamespace = "App\\Plugins\\{$plugin->name}\\" . $attributeType['@attributes']['src'];
+            // $attributeTypes = $plugin->getRegisteredAttributes();
+            // foreach($attributeTypes as $attributeType) {
+            //     $AttributeNamespace = "App\\Plugins\\{$plugin->name}\\" . $attributeType['@attributes']['src'];
 
-                if(!class_exists($AttributeNamespace)) {
-                    info("Attribute class '{$AttributeNamespace}' does not exist.");
-                    continue;
-                }
+            //     if(!class_exists($AttributeNamespace)) {
+            //         info("Attribute class '{$AttributeNamespace}' does not exist.");
+            //         continue;
+            //     }
                 
-                if(!is_subclass_of($AttributeNamespace, AttributeBase::class)) {
-                    info("Attribute class '{$AttributeNamespace}' is not a subclass of AttributeBase.");
-                    continue;
-                }
+            //     if(!is_subclass_of($AttributeNamespace, AttributeBase::class)) {
+            //         info("Attribute class '{$AttributeNamespace}' is not a subclass of AttributeBase.");
+            //         continue;
+            //     }
 
-                self::register(new $AttributeNamespace(), $plugin->name);
-            }
+            //     self::register(new $AttributeNamespace(), $plugin->name);
+            // }
         }
     }
 

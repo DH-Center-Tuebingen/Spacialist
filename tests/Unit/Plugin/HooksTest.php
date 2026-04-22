@@ -1,7 +1,7 @@
 <?php
 namespace Tests\Unit\Plugin;
 
-use App\Services\HookService;
+use App\Services\Plugin\HookService;
 use App\Plugin;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\Assets\Templates\HookTemplate;
@@ -28,7 +28,7 @@ class HooksTest extends TestCase
     
     public function tearDown(): void
     {
-        $this->pluginGenerator->tearDown();
+        // $this->pluginGenerator->tearDown();
         parent::tearDown();
     }
 

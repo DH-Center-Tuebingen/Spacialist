@@ -98,7 +98,7 @@ class ApiPluginTest extends TestCase {
         $installedBarPlugin['updated_at'] = '2020-05-15T05:25:06.000000Z';
         $response->assertJson([
             'plugin' => $installedBarPlugin,
-            'install_location' => 'barplugin-123e4567-e89b-12d3-a456-426614174002.js',
+            'scripts' => 'barplugin-123e4567-e89b-12d3-a456-426614174002.js',
         ]);
         // Reset time after test
         Carbon::setTestNow();
@@ -135,7 +135,7 @@ class ApiPluginTest extends TestCase {
         $uninstalledFooPlugin['updated_at'] = '2020-07-20T10:15:30.000000Z';
         $response->assertJson([
             'plugin' => $uninstalledFooPlugin,
-            'uninstall_location' => 'fooplugin-123e4567-e89b-12d3-a456-426614174000.js',
+            'scripts' => 'fooplugin-123e4567-e89b-12d3-a456-426614174000.js',
         ]);
 
         // Reset time after test
@@ -166,7 +166,7 @@ class ApiPluginTest extends TestCase {
 
         $response->assertStatus(200);
         $response->assertJson([
-            'uninstall_location' => 'unregisteredplugin-123e4567-e89b-12d3-a456-426614174003.js',
+            'scripts' => 'unregisteredplugin-123e4567-e89b-12d3-a456-426614174003.js',
         ]);
         $this->assertDatabaseMissing('plugins', [
             'name' => 'UnregisteredPlugin',

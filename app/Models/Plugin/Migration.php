@@ -16,7 +16,7 @@ use Illuminate\Database\Eloquent\Model;
 class Migration extends Model
 {
 
-    protected $table = 'plugin_migrations';
+    protected $table = 'plugin_service_migrations';
 
     protected $fillable = [
         'plugin_id',

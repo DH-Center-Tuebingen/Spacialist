@@ -108,5 +108,6 @@
     "This tag does not exist": "This tag does not exist",
     "HTML not supported for file type": "HTML not supported for file type :mime",
     "Presentations not yet supported!": "Presentations not yet supported!",
-    "Start date of a time period must not be after it's end date": "Start date of a time period must not be after it's end date"
+    "Start date of a time period must not be after it's end date": "Start date of a time period must not be after it's end date",
+    "A plugin with the name ':pluginName' and the same or later version (:uploadedVersion and :existingVersion) already exists. Aborting.": "A plugin with the name ':pluginName' and the same or later version (:uploadedVersion and :existingVersion) already exists. Aborting."
 }

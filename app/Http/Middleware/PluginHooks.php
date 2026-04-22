@@ -2,7 +2,7 @@
 
 namespace App\Http\Middleware;
 
-use App\Services\HookService;
+use App\Services\Plugin\HookService;
 use Closure;
 use Illuminate\Http\Request;
 

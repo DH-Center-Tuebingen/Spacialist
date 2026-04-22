@@ -64,9 +64,10 @@ class PluginDirectoryGenerator
         }
 
         if(count($missing_fields) > 0) {
+            info("Plugin is missing required fields: " . implode(", ", $missing_fields));
             throw new \Exception("Plugin is missing required fields: " . implode(", ", $missing_fields));
         }
-
+        
         // Create plugin directory structure
         $pluginDir = self::getPluginDirectory($pluginCopy['name']);
         if(! file_exists($pluginDir)) {
@@ -80,6 +81,7 @@ class PluginDirectoryGenerator
             if(is_array($content)) {
                 // Create directory and process contents
                 if(! file_exists($path)) {
+                    info("Create directory: $path");
                     mkdir($path, 0755, true);
                 }
                 foreach($content as $subName => $subContent) {

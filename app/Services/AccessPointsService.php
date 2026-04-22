@@ -1,61 +1,36 @@
 <?php
 
-// namespace App\Services;
+namespace App\Services;
 
-// use App\Interfaces\IPluggable;
-// use App\Plugin;
-// use Exception;
-// use Illuminate\Support\Facades\Cache;
+use App\Services\PluginManager;
 
-// class AccessPointsService extends  implements IPluggable{
+/**
+ * Adds capability to publish custom CSS files to a plugin.
+ * 
+ * '''xml
+ * ...
+ * <accesspoint>
+ *     <path>/path_to_access_point</path> <!-- full path e.g. https://spacialist.example.com/path_to_access_point -->
+ *     <id>ExamplePluginId</id>
+ *     <label>path.to.accesspoint.label</label>
+ * </accesspoint>
+ * ...
+ * '''
+ */
+class AccessPointsService{
 
-//     public const /*array*/ CORE_ACCESSPOINTS = [
-//         "Default" => [
-//             "label" => "main.user.accesspoints.default",
-//             "path" => "/",
-//         ],
-//     ];
+    public const /*array*/ CORE_ACCESSPOINTS = [
+        "Default" => [
+            "label" => "main.user.accesspoints.default",
+            "path" => "/",
+        ],
+    ];
 
-//     protected function getCacheKey(): string {
-//         return 'plugin_access_points';
-//     } 
-      
-//     public function install(Plugin $plugin): void
-//     {
-//      throw new Exception("NOT IMPLEMENTED");
-//     }
-    
-//     public function update(Plugin $plugin): void
-//     {
-//      throw new Exception("NOT IMPLEMENTED");
-//     }
-    
-//     public function uninstall(Plugin $plugin): void
-//     {
-//      throw new Exception("NOT IMPLEMENTED");
-//     }
-    
-//     public function remove(Plugin $plugin): void
-//     {
-//         // No separate remove logic needed for hooks
-//     }
+    public function get(): array {
+        $accesspoints = self::CORE_ACCESSPOINTS;
+        $pluginAccessPoints = app(PluginManager::class)->accessPoints->getData();
+        $accesspoints = array_merge($accesspoints, $pluginAccessPoints);
+        return $accesspoints;
+    }
 
-//     public function get(): array {
-//         return $this->updateCache(function () {
-//             $accesspoints = self::CORE_ACCESSPOINTS;
-//             $accesspoints = array_merge($accesspoints, $this->loadAccessPointsFromPlugins());
-//             return $accesspoints;
-//         });
-//     }
-
-//     private function loadAccessPointsFromPlugins(): array {
-//         $installedPlugins = Plugin::getInstalled();
-//         $accesspoints = [];
-//         foreach($installedPlugins as $plugin) {
-//             $accesspoints = array_merge($accesspoints, $plugin->getAccessPoints());
-//         }
-//         return $accesspoints;
-//     }
-
-
-// }
+}

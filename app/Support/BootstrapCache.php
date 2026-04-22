@@ -21,7 +21,7 @@ trait BootstrapCache
     
     /**
      * Retrieves the cached data. If the cache is not loaded, it will attempt to load it from disk.
-      * If the cache file does not exist or is invalid, it will throw an exception.
+     * If the cache file does not exist or is invalid, it will throw an exception.
      */
     public function getData(): array {
         if($this->data !== null) {

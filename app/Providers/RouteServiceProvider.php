@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Plugin;
+use App\Services\Plugin\RouteService;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
@@ -41,9 +42,8 @@ class RouteServiceProvider extends ServiceProvider
 
         $this->mapWebRoutes();
 
-        $this->mapPluginRoutes();
-
-        //
+        // Load all plugin routes
+        app(RouteService::class)->mapRoutes();
     }
 
     /**
@@ -73,33 +73,5 @@ class RouteServiceProvider extends ServiceProvider
              ->middleware('api')
              ->namespace($this->namespace)
              ->group(base_path('routes/api.php'));
-    }
-
-    /**
-     * Define the "api" routes for the application.
-     *
-     * These routes are typically stateless.
-     *
-     * @return void
-     */
-    protected function mapPluginRoutes()
-    {
-        if(!Schema::hasTable('plugins')) return;
-
-        $installedPlugins = Plugin::whereNotNull('installed_at')->get();
-
-        foreach($installedPlugins as $plugin) {
-            $slug = $plugin->slugName();
-            $prefix = "api/v1/$slug";
-            $namespace = "App\\Plugins\\$plugin->name\\Controllers";
-            $routesPath = Plugin::getPluginPath($plugin->name. "/routes/api.php");
-
-            if(file_exists($routesPath)) {
-                Route::prefix($prefix)
-                    ->middleware('api')
-                    ->namespace($namespace)
-                    ->group($routesPath);
-            }
-        }
     }
 }

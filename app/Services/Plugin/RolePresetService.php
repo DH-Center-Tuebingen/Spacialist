@@ -1,8 +1,7 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Plugin;
 
-use App\Interfaces\IPluggable;
 use App\Plugin;
 use App\RolePreset;
 use App\RolePresetPlugin;
@@ -15,7 +14,7 @@ use Illuminate\Support\Facades\File;
  * 
  * 
  */
-class RolePresetService implements IPluggable
+class RolePresetService extends PluginService
 {   
 
     /**
