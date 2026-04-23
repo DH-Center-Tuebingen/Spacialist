@@ -21,6 +21,7 @@ All notable changes to this project will be documented in this file.
 - Migrations now have logging automatically disabled
 - Migrations that require filesystem changes can now be handled using the `App\Traits\FilesystemMigration` trait (call `$this->safelyMoveDirectoryBetweenDisks(...)` with `ALLOW_FILESYTEM_MIGRATIONS` set to `true`)
 - Disable Caret in disabled _Single Choice Dropdowns_ and _Multiple Choice Dropdowns_
+- _Attribute Usage Indicator_ in _Data Model Editor_ now also displays names of _Entity Types_ that use this _Attribute_
 
 ## 0.11.1
 ### Added

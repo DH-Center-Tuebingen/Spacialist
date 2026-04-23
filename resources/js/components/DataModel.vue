@@ -232,7 +232,7 @@
                                             @delete-element="onDeleteAttribute"
                                         >
                                             <template #after="{ attribute }">
-                                                <AttributeUsageIndicator :count="attribute.entity_types_count" />
+                                                <AttributeUsageIndicator :list="toEntityTypeNames(attribute.entity_types)" />
                                             </template>
                                         </attribute-list>
                                     </div>
@@ -255,7 +255,7 @@
                     @delete-element="onDeleteAttribute"
                 >
                     <template #after="{ attribute }">
-                        <AttributeUsageIndicator :count="attribute.entity_types_count" />
+                        <AttributeUsageIndicator :list="toEntityTypeNames(attribute.entity_types)" />
                     </template>
                 </attribute-list>
                 <Alert
@@ -391,6 +391,11 @@
 
                 return attributeGroupItemCount(items) > 0;
             };
+            const toEntityTypeNames = typeList => {
+                return typeList.map(entityType => {
+                    return translateConcept(entityType.thesaurus_url);
+                });
+            }
 
             const isFromPlugin = datatype => attributeStore.isFromPlugin(datatype);
             const getPluginLabel = datatype => attributeStore.getPluginAttributeLabel(datatype);
@@ -478,6 +483,7 @@
                 attributeGroupHasItems,
                 isFromPlugin,
                 getPluginLabel,
+                toEntityTypeNames,
                 // STATE
                 accordionRef,
                 state,
