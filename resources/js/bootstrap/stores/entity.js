@@ -517,7 +517,7 @@ export const useEntityStore = defineStore('entity', {
                     }
                 }
                 delete this.entities[entityId];
-                handlePostDelete(entityId);
+                handlePostDelete(this, entityId);
             } catch(e) {
                 console.error(e);
             }
