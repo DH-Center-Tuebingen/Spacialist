@@ -1,11 +1,11 @@
 <template>
     <a
         href="#"
-        class="d-flex flex-row text-decoration-none"
+        class="d-flex flex-row text-decoration-none align-items-center"
         @click.prevent="showUserInfo(user)"
     >
         <div
-            class="badge bg-tertiary border pe-4 d-flex align-items-center pb-0"
+            class="badge bg-tertiary border p-1 ps-2 pe-4 d-flex align-items-center"
             :class="colorClass"
         >
             <span>
