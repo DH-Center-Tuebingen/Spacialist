@@ -18,6 +18,7 @@ All notable changes to this project will be documented in this file.
 - Alignment of _User Label_ in _Metadata_ tab
 - Submit Epoch/Timeperiod without start or end value
 - Save data with unconfigured/disconnected Websockets
+- Overflow of _Richtext_ in Attributes list
 ### Changed
 - Alerts can now be dismissed
 - Now entity metadata is only loaded when accessing the metadata tab

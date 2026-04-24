@@ -20,7 +20,7 @@
             >
                 <div class="d-flex align-items-center gap-2">
                     <div
-                        class="row gx-3 flex-fill"
+                        class="row gx-3 flex-fill overflow-hidden"
                         :class="addModerationStateClasses(element.id)"
                     >
                         <label
