@@ -34,6 +34,7 @@ import SitesContainer from '@/components/openaccess/SitesContainer.vue';
 import WebGis from '@/components/openaccess/WebGis.vue';
 import FreeSearch from '@/components/openaccess/FreeSearch.vue';
 import SingleSearch from '@/components/openaccess/SingleSearch.vue';
+import SingleSearchTypeView from '@/components/openaccess/SingleSearchTypeView.vue';
 
 import DummyComponent from '@/components/DummyComponent.vue';
 import NotFound from '@/components/NotFound.vue';
@@ -52,83 +53,6 @@ export const router = createRouter({
         };
     },
     routes: [
-        // deprecated pre-0.6 routes
-        // {
-        //     path: '/s',
-        //     redirect: { name: 'home' },
-        //     children: [
-        //         {
-        //             path: 'context/:id',
-        //             redirect: to => {
-        //                 return {
-        //                     name: 'entitydetail',
-        //                     params: {
-        //                         id: to.params.id
-        //                     }
-        //                 }
-        //             },
-        //             children: [{
-        //                 path: 'sources/:aid',
-        //                 redirect: to => {
-        //                     return {
-        //                         name: 'entityrefs',
-        //                         params: {
-        //                             id: to.params.id,
-        //                             aid: to.params.aid,
-        //                         }
-        //                     }
-        //                 }
-        //             }]
-        //         },
-        //         {
-        //             path: 'f/:id',
-        //             redirect: to => {
-        //                 return {
-        //                     name: 'file',
-        //                     params: {
-        //                         id: to.params.id
-        //                     }
-        //                 }
-        //             }
-        //         },
-        //         {
-        //             path: 'user',
-        //             redirect: { name: 'users' },
-        //             // TODO user edit route (redirect to users or add it)
-        //         },
-        //         {
-        //             path: 'role',
-        //             redirect: { name: 'roles' },
-        //             // TODO role edit route (redirect to roles or add it)
-        //         },
-        //         {
-        //             path: 'editor/data-model',
-        //             redirect: { name: 'dme' },
-        //             children: [{
-        //                 path: 'contexttype/:id',
-        //                 redirect: to => {
-        //                     return {
-        //                         name: 'dmdetail',
-        //                         params: {
-        //                             id: to.params.id
-        //                         }
-        //                     }
-        //                 }
-        //             }]
-        //         },
-        //         {
-        //             path: 'preferences/:id',
-        //             redirect: to => {
-        //                 return {
-        //                     name: 'userpreferences',
-        //                     params: {
-        //                         id: to.params.id
-        //                     }
-        //                 }
-        //             }
-        //         }
-        //     ]
-        // },
         {
             path: '/',
             name: 'app',
@@ -374,6 +298,14 @@ export const openRouter = createRouter({
                             path: 'single',
                             name: 'singlesearch',
                             component: SingleSearch,
+                            meta: {
+                                auth: false,
+                            },
+                        },
+                        {
+                            path: 'single/:entityTypeId',
+                            name: 'singlesearch-type',
+                            component: SingleSearchTypeView,
                             meta: {
                                 auth: false,
                             },

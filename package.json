@@ -26,8 +26,10 @@
     "scripts": {
         "dev": "vite",
         "dev:open": "IS_OPEN=true vite",
+        "dev:open:win": "set IS_OPEN=true && vite",
         "build": "vite build",
         "build:open": "IS_OPEN=true vite build",
+        "build:open:win": "set IS_OPEN=true && vite build",
         "lint": "npx eslint --ext .js,.vue resources/js",
         "lint:fix": "npx eslint --ext .js,.vue resources/js --fix"
     },

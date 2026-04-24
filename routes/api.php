@@ -255,6 +255,7 @@ Route::prefix('v1/open')->group(function() {
     Route::get('global', 'OpenAccessController@getGlobals');
     Route::get('types', 'OpenAccessController@getEntityTypes');
     Route::get('attributes', 'OpenAccessController@getAttributes');
+    Route::get('entity_type/{entityType}/attribute_values', 'OpenAccessController@getAttributeValuesForEntityType');
     Route::get('entity/{id}', 'OpenAccessController@getEntity')->where('id', '[0-9]+');
     Route::get('entity/{id}/data', 'OpenAccessController@getEntityData')->where('id', '[0-9]+');
 

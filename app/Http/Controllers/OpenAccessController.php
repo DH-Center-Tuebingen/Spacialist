@@ -49,34 +49,53 @@ class OpenAccessController extends Controller {
         $attributes = EntityAttribute::with(['attribute'])
             ->where('entity_type_id', $entityTypeId)
             ->get();
-        if(empty($filteredEntityIds)) {
-            $entityIds = Entity::where('entity_type_id', $entityTypeId)
-                ->get()
-                ->pluck('id');
-        } else {
-            $entityIds = $filteredEntityIds;
+        $entityIds = empty($filteredEntityIds)
+            ? Entity::where('entity_type_id', $entityTypeId)->pluck('id')
+            : collect($filteredEntityIds);
+
+        if($entityIds->isEmpty()) {
+            return [];
         }
 
         $attrData = [];
+        $attributeIdsByDatatype = [];
+
         foreach($attributes as $attr) {
             $datatype = $attr->attribute->datatype;
-            if(!in_array($datatype, self::$supported_attributes)) {
+            if(!in_array($datatype, self::$supported_attributes, true)) {
                 continue;
             }
-            $currData = [];
-            $attributeValues = AttributeValue::where('attribute_id', $attr->attribute_id)->whereIn('entity_id', $entityIds)->get();
-            foreach($attributeValues as $attrVal) {
-                $value = $this->getValueKey($datatype, $attrVal->getValue());
-                info($value);
-                info($currData);
-                if(!array_key_exists($value, $currData)) {
-                    $currData[$value] = 0;
-                }
-                $currData[$value]++;
 
+            $attributeId = $attr->attribute_id;
+            $attrData[$attributeId] = [];
+
+            if(!array_key_exists($datatype, $attributeIdsByDatatype)) {
+                $attributeIdsByDatatype[$datatype] = [];
             }
-            $attrData[$attr->attribute_id] = $currData;
+            $attributeIdsByDatatype[$datatype][] = $attributeId;
         }
+
+        foreach($attributeIdsByDatatype as $datatype => $attributeIds) {
+            $valueColumn = AttributeValue::getValueColumn($datatype);
+            if(!isset($valueColumn)) {
+                continue;
+            }
+
+            $groupedValues = AttributeValue::query()
+                ->select(['attribute_id', $valueColumn])
+                ->selectRaw('COUNT(*) as value_count')
+                ->whereIn('attribute_id', $attributeIds)
+                ->whereIn('entity_id', $entityIds)
+                ->groupBy('attribute_id', $valueColumn)
+                ->get();
+
+            foreach($groupedValues as $groupedValue) {
+                $attributeId = $groupedValue->attribute_id;
+                $valueKey = $this->getValueKey($datatype, $groupedValue->{$valueColumn});
+                $attrData[$attributeId][$valueKey] = (int) $groupedValue->value_count;
+            }
+        }
+
         return $attrData;
     }
 
@@ -115,21 +134,37 @@ class OpenAccessController extends Controller {
         }
 
         $forEntityType = $request->query('entity_type', null);
-        $withData = $request->query('with_data', false);
         if(isset($forEntityType)) {
             $attributes = EntityAttribute::with(['attribute', 'entity_type'])->where('entity_type_id', $forEntityType)->get();
-            if($withData) {
-                $attrData = $this->getAttributeValueCount($forEntityType);
-                $attributes = [
-                    'attributes' => $attributes,
-                    'data' => $attrData,
-                ];
-            }
         } else {
             $attributes = EntityAttribute::with(['attribute', 'entity_type'])->get();
         }
 
         return response()->json($attributes);
+    }
+
+    public function getAttributeValuesForEntityType(Request $request, EntityType $entityType) {
+        if(!Preference::hasPublicAccess()) {
+            return response()->json();
+        }
+
+        $attributes = EntityAttribute::with('attribute')->where('entity_type_id', $entityType->id)->get();
+        $attributeValues = [];
+        foreach($attributes as $attr) {
+            if(in_array($attr->attribute->datatype, self::$supported_attributes, true)) {
+                $values = AttributeValue::where('attribute_id', $attr->attribute_id)
+                    ->whereHas('entity', function (Builder $q) use ($entityType) {
+                        $q->where('entity_type_id', $entityType->id);
+                    })
+                    ->pluck(AttributeValue::getValueColumn($attr->attribute->datatype))
+                    ->unique()
+                    ->values();
+                $attributeValues[$attr->attribute_id] = $values;
+            }
+        }
+
+        return response()->json($attributeValues);
+
     }
 
     public function getEntity(Request $request, int $id) {
@@ -255,27 +290,24 @@ class OpenAccessController extends Controller {
             }
         }
 
-        $results = $query->with('attributes')->paginate();
+        $entities = $query->with('attributes')->paginate();
 
-        if($page == 1) {
-            $attrData = $this->getAttributeValueCount($id, $query->get()->pluck('id'));
-        } else {
-            $attrData = [];
-        }
+        // if($page == 1) {
+        //     $attrData = $this->getAttributeValueCount($id, $query->get()->pluck('id'));
+        // } else {
+        //     $attrData = [];
+        // }
 
-        foreach($results as $entity) {
-            foreach($entity->attributes as $attribute) {
-                $attribute->value = $attribute->getAttributeValueFromEntityPivot();
-                $name = $attribute->getEntityAttributeValueName();
-                if(isset($name)) {
-                    $attribute->name = $name;
-                }
-            }
-        }
+        // foreach($results as $entity) {
+        //     foreach($entity->attributes as $attribute) {
+        //         $attribute->value = $attribute->getAttributeValueFromEntityPivot();
+        //         $name = $attribute->getEntityAttributeValueName();
+        //         if(isset($name)) {
+        //             $attribute->name = $name;
+        //         }
+        //     }
+        // }
 
-        return response()->json([
-            'entities' => $results,
-            'data' => $attrData,
-        ]);
+        return response()->json($entities);
     }
 }

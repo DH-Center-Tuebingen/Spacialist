@@ -4,8 +4,12 @@ import vue from '@vitejs/plugin-vue';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
-const isOpen = process.env.IS_OPEN === 'true';
+const isOpen = true;
 const buildDir = isOpen ? 'build_open' : 'build';
+
+if(isOpen) {
+    console.log('Building in Open Access mode');
+}
 
 const _dirname = dirname(fileURLToPath(import.meta.url));
 

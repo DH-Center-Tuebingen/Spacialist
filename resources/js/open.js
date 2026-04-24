@@ -20,6 +20,8 @@ window.$httpQueue = queue;
 // Components
 import App from '@/components/openaccess/App.vue';
 
+console.log('Running in Open Access mode');
+
 // Init required libs
 // Pinia
 import pinia from '@/bootstrap/store.js';
