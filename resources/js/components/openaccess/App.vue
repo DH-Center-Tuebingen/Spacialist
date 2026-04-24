@@ -3,8 +3,8 @@
         <nav class="navbar navbar-dark bg-dark navbar-expand-lg overlay-all">
             <div class="container">
                 <!-- Branding Image -->
-                <a
-                    href="/open"
+                <router-link
+                    :to="{ name: 'landing' }"
                     class="navbar-brand"
                 >
                     <img
@@ -13,7 +13,23 @@
                         alt="spacialist logo"
                     >
                     {{ state.projectName }}
-                </a>
+                </router-link>
+            </div>
+            <div
+                id="navbar-shortcuts"
+                class="collapse navbar-collapse"
+            >
+                <!-- Left Side Of Navbar -->
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <router-link
+                            :to="{ name: 'modules' }"
+                            class="nav-link"
+                        >
+                            Modules
+                        </router-link>
+                    </li>
+                </ul>
             </div>
         </nav>
         <div class="container my-3 col overflow-hidden d-flex flex-column">
@@ -29,10 +45,6 @@
     } from 'vue';
 
     import useSystemStore from '@/bootstrap/stores/system.js';
-
-    import {
-        fetchGlobals,
-    } from '@/open_api.js';
 
     import { useI18n } from 'vue-i18n';
 
@@ -63,5 +75,5 @@
                 state,
             };
         }
-    }
+    };
 </script>

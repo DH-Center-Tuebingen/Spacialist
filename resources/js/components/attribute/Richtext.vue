@@ -67,6 +67,11 @@
                 type: String,
                 required: true,
             },
+            classes: {
+                type: String,
+                required: false,
+                default: 'mt-0 bg-none h-100 form-control px-4 py-3',
+            },
         },
         emits: ['change'],
         setup(props, context) {
@@ -107,7 +112,7 @@
             };
 
             const state = reactive({
-                classes: 'mt-0 bg-none h-100 form-control px-4 py-3',
+                classes: props.classes,
                 hovered: false,
                 onHoverBtnClasses: computed(_ => {
                     if(state.hovered) {

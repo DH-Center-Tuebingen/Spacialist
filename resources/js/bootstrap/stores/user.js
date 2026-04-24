@@ -91,13 +91,14 @@ export const useUserStore = defineStore('user', {
             return (value, prop = 'id') => {
                 if(!value) return null;
 
-                if(state.userLoggedIn) {
+                const maintainerPreference = state.preferences['prefs.project-maintainer'];
+                if(this.userLoggedIn || maintainerPreference?.public) {
                     const isNum = !isNaN(value);
                     const lValue = isNum ? value : value.toLowerCase();
-                    if(prop == 'id' && value == state.user?.id) {
-                        return state.user;
+                    if(prop == 'id' && value == this.user?.id) {
+                        return this.user;
                     } else {
-                        return state.users
+                        return this.users
                             .find(u => isNum ? (u[prop] == lValue) : (u[prop].toLowerCase() == lValue));
                     }
                 } else {
