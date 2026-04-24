@@ -19,6 +19,7 @@ All notable changes to this project will be documented in this file.
 - Submit Epoch/Timeperiod without start or end value
 - Save data with unconfigured/disconnected Websockets
 - Overflow of _Richtext_ in Attributes list
+- Unsmooth editing of long _Richtext_ attributes
 ### Changed
 - Alerts can now be dismissed
 - Now entity metadata is only loaded when accessing the metadata tab
