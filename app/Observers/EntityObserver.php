@@ -27,7 +27,7 @@ class EntityObserver
         foreach($userIds as $uid) {
             try {
                 User::findOrFail($uid)->notify(new EntityUpdatedNotification($entity));
-            } catch(ModelNotFoundException $e) {
+            } catch(ModelNotFoundException|BroadcastException $e) {
             }
         }
     }
