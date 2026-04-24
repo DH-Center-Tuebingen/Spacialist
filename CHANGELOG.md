@@ -16,6 +16,7 @@ All notable changes to this project will be documented in this file.
 - Errors in _map.js_
 - Error on _Entity_ delete
 - Alignment of _User Label_ in _Metadata_ tab
+- Submit Epoch/Timeperiod without start or end value
 ### Changed
 - Alerts can now be dismissed
 - Now entity metadata is only loaded when accessing the metadata tab
