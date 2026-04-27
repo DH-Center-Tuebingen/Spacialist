@@ -298,13 +298,14 @@ class OpenAccessController extends Controller {
         //     $attrData = [];
         // }
 
-        foreach($results as $entity) {
+        foreach($results as $key => $entity) {
+            
+            $attributePivots = $entity->getData();
             foreach($entity->attributes as $attribute) {
-                $attribute->value = $attribute->getAttributeValueFromEntityPivot();
-                $name = $attribute->getEntityAttributeValueName();
-                if(isset($name)) {
-                    $attribute->name = $name;
-                }
+                $data = array_find($attributePivots, function($pivot) use ($attribute) {                
+                    return $pivot->attribute_id == $attribute->id;
+                });               
+                $attribute->value = isset($data) ? $data->value : null;
             }
         }
 

@@ -65,7 +65,7 @@
                     </div>
                     <div
                         class="bg-white rounded-2 p-3 mt-2"
-                        v-show="state.showData"
+                        v-if="state.showData"
                     >
                         <h6 class="card-text fw-bold">
                             Entity Data
@@ -75,7 +75,7 @@
                             class="fade-in-fast"
                             :attributes="state.attributes"
                             :selections="{}"
-                            :options="{'hide_labels': true, 'hide_entity_link': true}"
+                            :options="{'hide_labels': false, 'hide_entity_link': true}"
                             :values="state.values"
                             :disable-drag="true"
                         />
