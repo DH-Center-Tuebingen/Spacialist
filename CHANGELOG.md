@@ -5,7 +5,8 @@ All notable changes to this project will be documented in this file.
 ### Added
 - The user is now automatically logged out when they log out from other Spacialist related services (e.g. ThesauRex)
 ### Fixed
-- Fixed Broadcasting exception in EntityObserver
+- Broadcasting exception in EntityObserver
+- Import of float values in Percentage Attribute
 ### Changed
 - XSRF Token get's a custom name depending on the deployed app-name. Allows for deploying multiple instances on the same domain at different paths.
 - Removed legacy remember functionality (was replaced by Laravel Sanctum)
