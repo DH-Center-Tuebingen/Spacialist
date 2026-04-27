@@ -23,7 +23,13 @@ import {
 
 import { isInstalled } from '@/helpers/plugins.js';
 import { filterAllChildArrays } from "@/helpers/object";
-import { getPluginTitle } from "../../helpers/plugins";
+import {
+    appendScripts,
+    appendScriptsAndStyles,
+    getPluginTitle,
+    removeScripts,
+    removeScriptsAndStyles
+} from "../../helpers/plugins";
 
 export const usePluginStore = defineStore('plugin', {
     state: _ => ({
@@ -104,7 +110,8 @@ export const usePluginStore = defineStore('plugin', {
                         updated_at: data.plugin.updated_at,
                     },
                 });
-                appendScript(data.install_location);
+
+                appendScriptsAndStyles(data);
             });
         },
         /**
@@ -131,9 +138,9 @@ export const usePluginStore = defineStore('plugin', {
             return this.registeredSlots[slotName] ?? [];
         },
         async publishScript(plugin) {
-            removeScript(plugin.install_location)
+            removeScripts(plugin.scripts);
             await publishScript(plugin.id).then(data => {
-                appendScript(data.install_location);
+                appendScripts(data);
             });
         },
         set(plugins) {
@@ -236,7 +243,7 @@ export const usePluginStore = defineStore('plugin', {
                     plugin_id: id,
                     deleted: true,
                 });
-                removeScript(data.uninstall_location);
+                removeScriptsAndStyles(data);
             });
         },
         async uninstall(id) {
@@ -262,7 +269,8 @@ export const usePluginStore = defineStore('plugin', {
                         updated_at: plugin.updated_at,
                     },
                 });
-                removeScript(data.uninstall_location);
+
+                removeScriptsAndStyles(data);
             });
         },
         async update(id) {
@@ -295,7 +303,7 @@ export const usePluginStore = defineStore('plugin', {
     },
     getters: {
         pluginsSortedByTitle() {
-            return this.plugins.sort((a, b) => {
+            return Object.values(this.plugins).sort((a, b) => {
 
                 if(isInstalled(a) && !isInstalled(b)) return -1;
                 if(!isInstalled(a) && isInstalled(b)) return 1;

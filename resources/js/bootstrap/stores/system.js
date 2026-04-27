@@ -128,7 +128,7 @@ export const useSystemStore = defineStore('system', {
             this.colorSets = preData.colorSets;
             this.hasAnalysis = preData.analysis;
             this.datatypeData = preData.datatype_data;
-            this.accessPoints = preData.accesspoints;
+            this.accessPoints = preData.accesspoints ?? {};
             entityStore.initializeEntityTypes(preData.entityTypes);
             userStore.setPreferences(preData.preferences);
             pluginStore.set(preData.plugins);
