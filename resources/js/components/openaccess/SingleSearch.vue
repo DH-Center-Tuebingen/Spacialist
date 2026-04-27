@@ -30,12 +30,19 @@
     import EntityTypeSelector from '@/components/openaccess/single-search/EntityTypeSelector.vue';
 
     import { useI18n } from 'vue-i18n';
+    import { sortTranslated } from '../../helpers/helpers';
 
     const { t } = useI18n();
     const router = useRouter();
     const entityStore = useEntityStore();
 
-    const availableEntityTypes = computed(() => Object.values(entityStore.entityTypes));
+    const availableEntityTypes = computed(() =>  {
+        if(!entityStore.entityTypes) {
+            return [];
+        }
+        const filtered = Object.values(entityStore.entityTypes).filter(entityType => entityType.entities_count > 0)
+        return filtered.sort(sortTranslated());
+    });
 
     const selectEntityType = entityType => {
         router.push({

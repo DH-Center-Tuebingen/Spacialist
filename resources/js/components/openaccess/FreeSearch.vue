@@ -40,7 +40,7 @@
                 :hide-navigation="true"
             />
             <div class="overflow-y-auto">
-                <result-card
+                <Card
                     v-for="entity in state.pages.results"
                     :key="entity.id"
                     class="bg-primary text-dark bg-opacity-25"
@@ -114,8 +114,15 @@
     } from '@/open_api.js';
 
     import { useI18n } from 'vue-i18n';
+    
+    import Card from '@/components/openaccess/Card.vue';
+    import { LoadingSpinner } from 'dhc-components';
 
     export default {
+        components: {
+            Card,
+            LoadingSpinner,
+        },
         setup(props) {
             const { t } = useI18n();
             const entityStore = useEntityStore();

@@ -1,7 +1,6 @@
 <template>
     <div class="col-4 h-100 pe-0 overflow-hidden d-flex flex-column">
         <h4>Filters</h4>
-        <details><summary>Attribute Values</summary> {{ attributeValues }}</details>
         <div class="d-flex flex-column pe-3 overflow-y-auto flex-grow-1">
             <div
                 v-for="attribute in attributes"
@@ -10,11 +9,11 @@
             >
                 <h5>
                     {{ translateConcept(attribute.attribute.thesaurus_url) }}
-                    <small>
+                    <!-- <small>
                         <span class="badge bg-primary">
                             {{ getAttributeCount(attribute.attribute_id) }}
                         </span>
-                    </small>
+                    </small> -->
                 </h5>
                 <multiselect
                     :model-value="filters[attribute.attribute_id]"

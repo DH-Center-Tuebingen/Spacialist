@@ -19,6 +19,7 @@
         <ResultsPanel
             :data="state.pages.data || []"
             :pagination="state.pages.pagination || {}"
+            :loading="state.loadingResults"
             @goto="gotoPage"
         />
         <FilterPanel
@@ -74,12 +75,13 @@
 
             const state = reactive({
                 allAttributesData: {},
-                pages: {},
+                attributeValues: {},
                 availableAttributes: {},
                 filterpanelFilters: {},
-                attributeValues: {},
-                filters: {},
                 filterpanelFilters: {},
+                filters: {},
+                loadingResults: false,
+                pages: {},
                 selectedEntityTypeId: computed(() => getSelectedEntityTypeId()),
                 selectedEntityType: computed(() => {
                     if(!state.selectedEntityTypeId) {
@@ -141,14 +143,36 @@
                 //         state.filterpanelFilters[curr.attribute_id] = [];
                 //     }
                 // });
+                await fetch(async () => {
+                    const attributes = await fetchAttributes(entityTypeId);
+                    state.availableAttributes = attributes.filter(a => a.attribute.datatype != 'system-separator');;
+                    state.attributeValues = await fetchAttributeValuesForEntityType(entityTypeId);
 
-                const attributes = await fetchAttributes(entityTypeId);
-                state.availableAttributes = attributes.filter(a => a.attribute.datatype != 'system-separator');;
+                    const data = await getFilterResultsForType(entityTypeId)
+                    setResultData(data, true);
+                });
+            };
 
-                state.attributeValues = await fetchAttributeValuesForEntityType(entityTypeId);
+            const fetch = async (callback = async () => { }) => {
+                state.loadingResults = true;
+                try {
+                    await callback();
+                } catch(e) {
+                    console.error(e);
+                } finally {
+                    state.loadingResults = false;
+                }
+            };
 
-                const data = await getFilterResultsForType(entityTypeId)
-                setResultData(data, true);
+            const fetchTypeResults = async (page = 1) => {
+                if(!state.selectedEntityTypeId) {
+                    return;
+                }
+
+                await fetch(async () => {
+                    const data = await getFilterResultsForType(state.selectedEntityTypeId, state.filters, page);
+                    setResultData(data);
+                });
             };
 
             const setResultData = (pagData, initial = false) => {
@@ -168,7 +192,6 @@
             };
 
             const handleFilterChange = (attributeId, options) => {
-                console.log(attributeId, options);
                 state.filterpanelFilters[attributeId] = options;
                 if(options.length > 0) {
                     state.filters[attributeId] = options.map(o => o.key);
@@ -177,14 +200,11 @@
                 }
             };
 
-            const gotoPage = page => {
+            const gotoPage = async (page) => {
                 if(page == '...' || state.pages.pagination.current_page == page) {
                     return;
                 }
-
-                getFilterResultsForType(state.selectedEntityTypeId, state.filters, page).then(data => {
-                    setResultData(data);
-                });
+                await fetchTypeResults(page);
             };
 
             const goBack = () => {
@@ -199,13 +219,8 @@
                 hydrateEntityTypeData(state.selectedEntityTypeId);
             }, { immediate: true });
 
-            watch(state.filters, () => {
-                if(!state.selectedEntityTypeId) {
-                    return;
-                }
-                getFilterResultsForType(state.selectedEntityTypeId, state.filters).then(data => {
-                    setResultData(data);
-                });
+            watch(state.filters, async () => {
+                await fetchTypeResults();
             });
 
             return {

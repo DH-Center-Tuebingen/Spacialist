@@ -290,7 +290,7 @@ class OpenAccessController extends Controller {
             }
         }
 
-        $entities = $query->with('attributes')->paginate();
+        $results = $query->with('attributes')->paginate();
 
         // if($page == 1) {
         //     $attrData = $this->getAttributeValueCount($id, $query->get()->pluck('id'));
@@ -298,16 +298,16 @@ class OpenAccessController extends Controller {
         //     $attrData = [];
         // }
 
-        // foreach($results as $entity) {
-        //     foreach($entity->attributes as $attribute) {
-        //         $attribute->value = $attribute->getAttributeValueFromEntityPivot();
-        //         $name = $attribute->getEntityAttributeValueName();
-        //         if(isset($name)) {
-        //             $attribute->name = $name;
-        //         }
-        //     }
-        // }
+        foreach($results as $entity) {
+            foreach($entity->attributes as $attribute) {
+                $attribute->value = $attribute->getAttributeValueFromEntityPivot();
+                $name = $attribute->getEntityAttributeValueName();
+                if(isset($name)) {
+                    $attribute->name = $name;
+                }
+            }
+        }
 
-        return response()->json($entities);
+        return response()->json($results);
     }
 }

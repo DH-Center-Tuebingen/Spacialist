@@ -51,7 +51,7 @@
                     <div class="d-flex flex-row justify-content-center gap-3">
                         <hr class="text-muted flex-grow-1">
                         <button
-                            class="btn btn-fab btn-primary"
+                            class="btn btn-fab btn-primary p-0"
                             @click="toggleShowData()"
                         >
                             <span v-show="state.showData">

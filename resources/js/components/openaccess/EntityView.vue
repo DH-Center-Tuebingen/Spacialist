@@ -62,14 +62,12 @@
                 </a>
                 <div :ref="el => userPopoverContent = el">
                     <ul class="list-group list-group-flush popup-list-group">
-                        <template
-                            v-if="state.editors.length > 0"
-                        >
+                        <template v-if="state.editors.length > 0">
                             <li
                                 v-for="editor in state.editors"
                                 :key="`user-${editor.id}-editor`"
                                 class="list-group-item d-flex flex-row justify-content-between align-items-center gap-3"
-                                :class="{'fst-italic': editor.deleted_at}"
+                                :class="{ 'fst-italic': editor.deleted_at }"
                             >
                                 {{ editor.name }}
                                 <a
@@ -94,7 +92,7 @@
                         :key="`attribute-data-${aid}`"
                     >
                         {{ translateConcept(dataset.attribute.thesaurus_url) }}
-                        {{ dataset.value }}
+                        <b class="ms-auto">{{ getAttributeTextRepresentation(dataset) }}</b>
                         <div
                             class="progress"
                             role="progressbar"
@@ -113,7 +111,8 @@
                     </div>
                 </div>
                 <div class="col-3">
-                    <div class="aspect-ratio-1 rounded d-flex justify-content-center align-items-center bg-secondary-subtle overflow-hidden">
+                    <div
+                        class="aspect-ratio-1 rounded d-flex justify-content-center align-items-center bg-secondary-subtle overflow-hidden">
                         <template v-if="!state.map">
                             <div
                                 class="w-100 h-100"
@@ -137,11 +136,11 @@
                     Summary/Description
                 </h4>
                 <Richtext
-                    v-if="state.metadata.metadata.summary"
+                    v-if="state.summary"
                     class="bg-secondary bg-opacity-10 rounded font-serif"
                     :classes="'mt-2 px-2 py-1 rounded text-body'"
                     :disabled="true"
-                    :value="state.metadata.metadata.summary"
+                    :value="state.summary"
                 />
                 <span
                     v-else
@@ -278,7 +277,37 @@
 
                     return allEditors;
                 }),
+                summary: computed(_ => {
+                    return state.metadata?.metadata?.summary || '';
+                }),
             });
+
+
+            // TODO: This should be inside the attribute.js helper file,
+            //       but there may be already an attribute.js on another branch.
+            const getAttributeTextRepresentation = dataset => {
+                const unsetValue = '-';
+                switch(dataset.attribute.datatype) {
+                    case 'string':
+                    case 'stringf':
+                    case 'integer':
+                    case 'float':
+                        return dataset.value || unsetValue;
+                    case 'boolean':
+                        return dataset.value != null ? (dataset.value ? '✓' : '✖') : unsetValue;
+                    case 'string-sc':
+                        return dataset.value ? translateConcept(dataset.value) : unsetValue;
+                    case 'string-mc':
+                         return (Array.isArray(dataset.value) && dataset.value.length > 0) ? dataset.value.map(v => translateConcept(v)).join(', ') : "uuu";
+                    case 'entity-sc':
+                        return dataset.value?.name || unsetValue;
+                    case 'entity-mc':                        
+                        return (Array.isArray(dataset.value) && dataset.value.length > 0) ? dataset.value?.map(e => e.name ?? 'N/A').join(', ') : unsetValue;
+                    default:
+                        console.warn(`No text representation implemented for datatype ${dataset.attribute.datatype}`);
+                        return dataset.value || unsetValue;
+                }
+            };
 
             // WATCHER
 
@@ -291,6 +320,7 @@
                 translateConcept,
                 // LOCAL
                 getAnyUser,
+                getAttributeTextRepresentation,
                 copyOrcidToClipboard,
                 // PROPS
                 // STATE
