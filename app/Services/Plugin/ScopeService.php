@@ -54,7 +54,7 @@ class ScopeService extends PluginService {
         $scopes = [];
         if($info !== false) {
             if(array_key_exists('scopes', $info)) {
-                $pluginLogger = new PluginLog($plugin->getName());
+                $pluginLogger = new PluginLog($plugin);
                 foreach($info['scopes'] as $scope) {
                     if(isset($scope['@attributes'])) {
 

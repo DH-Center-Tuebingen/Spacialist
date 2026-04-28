@@ -138,10 +138,12 @@ export const usePluginStore = defineStore('plugin', {
             return this.registeredSlots[slotName] ?? [];
         },
         async publishScript(plugin) {
-            removeScripts(plugin.scripts);
-            await publishScript(plugin.id).then(data => {
-                appendScripts(data);
-            });
+            console.log('Publishing script for plugin', plugin);
+            if(plugin.scripts){
+                removeScripts(plugin.scripts);
+            }
+            const downloadUrl = await publishScript(plugin.id)
+            appendScripts([downloadUrl]);
         },
         set(plugins) {
             this.plugins = plugins;

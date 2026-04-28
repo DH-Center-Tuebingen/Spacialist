@@ -162,7 +162,7 @@ class PluginManifest {
 
     private function emitDeprecationWarning(){
         $this->warn("Uses deprecated manifest file location.");
-        PluginLog::warning("Plugin '{$this->getName()}' is using a deprecated manifest file location. This will be not supported in future versions. Please move the manifest file to the root of the plugin directory and name it 'plugin.xml'.");            
+        PluginLog::logWarning("Plugin '{$this->getName()}' is using a deprecated manifest file location. This will be not supported in future versions. Please move the manifest file to the root of the plugin directory and name it 'plugin.xml'.");            
     }
     
     private static function isFilePathDeprecated(string $filePath): bool {

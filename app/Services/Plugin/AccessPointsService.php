@@ -36,7 +36,7 @@ class AccessPointsService extends PluginService implements  ManifestContent {
         
         foreach($accesPoints as $key => $accessPoint) {
             if(empty($accessPoint['id']) || empty($accessPoint['label']) || empty($accessPoint['path'])) {
-                PluginLog::warning("Invalid access point definition in manifest for plugin {$plugin->name}: " . json_encode($accessPoint));
+                PluginLog::logWarning("Invalid access point definition in manifest for plugin {$plugin->name}: " . json_encode($accessPoint));
             } else {
                 AccessPoint::create([
                     'plugin_id' => $plugin->id,

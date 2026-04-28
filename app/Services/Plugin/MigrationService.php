@@ -8,8 +8,22 @@ use Illuminate\Support\Str;
 use App\Models\Plugin\Migration as PluginMigration;
 use App\Plugin;
 use App\Plugin\PluginDirectory;
+use App\Plugin\PluginManifest;
+use App\Support\Log\PluginLog;
 use Illuminate\Database\Migrations\Migration;
 
+
+/**
+ * Plugins can define Migrations by declaring their directory inside their manifest file.
+ * All migrations from all files are loaded and executed in the order of their creation as defined
+ * by their file name, which must follow the Laravel migration file naming convention (e.g. "2024_01_01_000000_create_users_table.php").
+ * 
+ * LEGACY: The 'MyPlugin/Migration' directory is by default evaluated for migration files. This will be removed in a future version.
+ * 
+ * ```xml
+ *     <migrations path="Migration" />
+ * ``` 
+ */
 class MigrationService extends PluginService {
 
     protected function getPath(): string {
@@ -33,7 +47,8 @@ class MigrationService extends PluginService {
             ->pluck('migration')
             ->toArray();
 
-        $allMigrations = $this->getMigrationList($plugin);
+        $directory = $this->getMigrationDirectory($plugin);
+        $allMigrations = $this->getMigrationList($directory);
         $migrations = [];
         foreach($allMigrations as $migration) {
             $migrations[] = [
@@ -56,9 +71,13 @@ class MigrationService extends PluginService {
     protected function exec(Plugin $plugin, $rollback = false) {
         //Determine the next batch number
         $nextBatch = PluginMigration::getNextBatchNumber();
+        $directory = $this->getMigrationDirectory($plugin);
         $migrations = $this->getMissingMigrations($plugin, $rollback);
+        
+        info(" MISSING MIGRATIONS: " . implode(", ", $migrations));
+        
         foreach($migrations as $migration) {
-            $migrationInstance = $this->getMigrationClassName($plugin, $migration);
+            $migrationInstance = $this->getMigrationClassName($plugin, $directory, $migration);
             try {
                 call_user_func([$migrationInstance, $rollback ? 'rollback' : 'migrate']);
                 if($rollback) {
@@ -78,8 +97,33 @@ class MigrationService extends PluginService {
                 throw $e;
             }
         }
-    } 
-    
+    }
+
+    /**
+     * 
+     * 
+     * @param Plugin $plugin
+     * @throws \Exception
+     * @return string|null
+     */
+    public function getManifestMigration(Plugin $plugin): string|null {
+        $manifest = PluginManifest::fromPlugin($plugin);
+        $content = $manifest->getContent();
+        if(array_key_exists('migrations', $content)) {
+            if(
+                array_key_exists('@attributes', $content['migrations']) &&
+                array_key_exists('path', $content['migrations']['@attributes']) &&
+                !empty($content['migrations']['@attributes']['path'])
+            ) {
+                return PluginDirectory::byPlugin($plugin)->getPluginPath($content['migrations']['@attributes']['path']);
+            } else {
+                PluginLog::logWarning("Plugin {$plugin->name} has an invalid migration path defined in its manifest. Expected format: <migrations path=\"Migrations\" />");
+            }
+        }
+
+        return null;
+    }
+
     /**
      * Adds a migration entry to the database without running it.
      * This is required for legacy plugins that were not yet using the
@@ -100,6 +144,16 @@ class MigrationService extends PluginService {
         ]);
     }
 
+    function getMigrationDirectory(Plugin $plugin): string {
+        $migrationDirectory = $this->getManifestMigration($plugin);
+
+        if(!$migrationDirectory) {
+            $migrationDirectory = $this->getLegacyMigrationPath($plugin);
+        }
+
+        return $migrationDirectory;
+    }
+
     /**
      * Get's a list of migration files in the plugin on the filesystem.
      * 
@@ -107,10 +161,10 @@ class MigrationService extends PluginService {
      * @param mixed $rollback - If true, get the list in descending order. Required for rollbacks to get the last migration first.
      * @return array - A list of migration file names, e.g. ["2024_01_01_000000_create_users_table.php", "2024_01_02_000000_create_posts_table.php"]
      */
-    function getMigrationList(Plugin $plugin, $rollback = false): array {
-        $path = $this->getMigrationPath($plugin);
-        if(file_exists($path) && is_dir($path)) {
-            $migrations = collect(File::files($path))->map(function ($f) {
+    function getMigrationList(string $migrationDirectory, $rollback = false): array {
+        if(file_exists($migrationDirectory) && is_dir($migrationDirectory)) {
+            info("FILE EXISTS");
+            $migrations = collect(File::files($migrationDirectory))->map(function ($f) {
                 return $f->getFilename();
             });
 
@@ -125,25 +179,37 @@ class MigrationService extends PluginService {
                 $migrations = $migrations->sort();
             }
 
+            info($migrations->values()->toArray());
             return $migrations->values()->toArray();
+        } else {
+            return [];
         }
+    }
 
-        return [];
+    function resolveDirectoryNamspace(Plugin $plugin, string $migrationDirectory):string {
+        $normalizedPath = str_replace('/', '\\', Str::after($migrationDirectory, PluginDirectory::getPathByName($plugin->name)));
+        // Transform the path into a namespace e.g. app/plugins/my-plugin to App\Plugins\MyPlugin
+        $namespace = collect(explode('\\', $normalizedPath))
+            ->filter()
+            ->map(fn($part) => Str::studly(str_replace('-', '_', $part)))
+            ->implode('\\');
+
+        return $namespace;
     }
 
     /**
-     * Get path to the plugin's migration directory (./Migrations)
+     * Get path to the plugin's migration directory (./Migration)
      * @param Plugin $plugin - The plugin to get the migration path for
      * @param mixed $migrationFile - optional name of specific migration file, e.g. "2024_01_01_000000_create_users_table.php"
      * @return string - The path to the plugin's migration directory or to a specific migration file if $migrationFile is provided
      */
-    function getMigrationPath(Plugin $plugin, ?string $migrationFile = null): string {
+    function getLegacyMigrationPath(Plugin $plugin, ?string $migrationFile = null): string {
         $pluginDir = new PluginDirectory($plugin);
-        $path = $pluginDir->getPluginPath("Migrations");
+        $path = $pluginDir->getPluginPath("Migration");
         if($migrationFile) {
             $path .= '/' . $migrationFile;
         }
-        return  $path;
+        return $path;
     }
 
     /**
@@ -151,18 +217,21 @@ class MigrationService extends PluginService {
      * If it's a valid migration, the migration class will be returned, otherwise an exception will be thrown.
      * 
      * @param Plugin $plugin - The plugin the migration belongs to
+     * @param mixed $pluginNamespacePath - The namespace path to the migration file, e.g. "Subdir\Database\Migration"
      * @param mixed $migrationFile - The migration file name, e.g. "2024_01_01_000000_create_users_table.php"
      * @throws \Exception throws an exeption if the migration has in incompatible name
-     * @return Migration - An instance of the migration class 
+     * @return mixed - LEGACY - This should return an instance of "Illuminate\Database\Migrations\Migration" currently plugins don't comply with that,
+     *                 this will be changed in a future version.  
      */
-    function getMigrationClassName(Plugin $plugin, $migrationFile): Migration {
+    function getMigrationClassName(Plugin $plugin, string $directory, $migrationFile) {
         preg_match('/^(\d{4}_\d{2}_\d{2}_\d{6})_(.+)\.php$/', $migrationFile, $matches);
         if(count($matches) != 3) {
             throw new \Exception("Invalid migration file name: $migrationFile");
         }
         $className = Str::studly($matches[2]);
-        require($this->getMigrationPath($plugin, $migrationFile));
-        $prefixedClassName = "App\\Plugins\\$plugin->name\\Migrations\\$className";
+        require(Str::finish($directory, '/') . '/' . $migrationFile);
+        $pluginNamespacePath = $this->resolveDirectoryNamspace($plugin, $directory);
+        $prefixedClassName = "App\\Plugins\\$plugin->name\\$pluginNamespacePath\\$className";
         return new $prefixedClassName();
     }
 
@@ -180,7 +249,8 @@ class MigrationService extends PluginService {
             ->pluck('migration')
             ->toArray();
 
-        $allMigrations = $this->getMigrationList($plugin);
+        $directory = $this->getMigrationDirectory($plugin);
+        $allMigrations = $this->getMigrationList($directory);
 
         if($rollback) {
             $missingMigrations = array_intersect($allMigrations, $ranMigrations);

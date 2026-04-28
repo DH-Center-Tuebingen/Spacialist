@@ -49,7 +49,7 @@ Route::middleware('auth:sanctum')->prefix('v1/plugin')->group(function() {
     Route::post('', 'PluginController@uploadPlugin');
     Route::post('/refresh', 'PluginController@refresh');
     Route::post('/refresh_info/{plugin}', 'PluginController@refreshInfo');
-    Route::post('/{plugin}/publish_script', 'PluginController@publishPluginScript');
+    Route::post('/{plugin}/publish_script', 'PluginController@publishScript');
     Route::post('/migrate/{plugin}', 'PluginController@migrate');
     Route::post('/migrate/{plugin}/rollback', 'PluginController@rollback');
     Route::post('/migrate/{plugin}/force_add', 'PluginController@addMigrationToDatabase');

@@ -127,15 +127,15 @@ class PluginController extends Controller {
         return response()->json($plugin);
     }
 
-    public function publishPluginScript(Plugin $plugin) {
+    public function publishScript(Plugin $plugin) {
         if(!isset($plugin->installed_at)) {
             return response()->json([
                 'error' => __('This plugin is not installed.'),
             ], 403);
         }
 
-        app(PluginManager::class)->publishScript($plugin);
-        return response()->json($plugin);
+        $scriptUrl = app(PluginManager::class)->scriptService->publish($plugin);
+        return response()->json($scriptUrl);
     }
 
     public function installPlugin(Request $request, $id) {

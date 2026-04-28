@@ -31,37 +31,44 @@ class PluginLogTest extends TestCase {
         }
     }
 
-    private function getExpectedMessage($levelString){
+    private function getExpectedMessage(string $levelString){
         return '[' . Carbon::now()->toDateTimeString() . '] testing.'. strtoupper($levelString) . ': ' . self::LOG_MESSAGE;
     }
-
-    private function getLogContent(){
-        return trim(File::get(storage_path('logs/plugin.log')));
+    
+    private function getExpectedPluginMessage(string $pluginName,string $levelString){
+        return '[' . Carbon::now()->toDateTimeString() . '] testing.'. strtoupper($levelString) . ': [' . strtoupper($pluginName) . '] ' . self::LOG_MESSAGE;
     }
 
-    public function testLog() {
-        PluginLog::log(self::LOG_MESSAGE);
-        $logContent = $this->getLogContent();
-        $this->assertEquals($this->getExpectedMessage('info'), $logContent);
+    private function getLogContent() {
+        return trim(File::get(storage_path('logs/plugin.log')));
     }
 
     #[DataProvider('logLevelDataProvider')]
     public function testLogFunctions($level, $method) {
-        PluginLog::$method(self::LOG_MESSAGE);
+        $logger = (new PluginLog('Test'));
+        $logger->$method(self::LOG_MESSAGE);
+        $logContent = $this->getLogContent();
+        $this->assertEquals($this->getExpectedPluginMessage('Test', $level), $logContent);
+    }
+
+    #[DataProvider('logLevelDataProvider')]
+    public function testStaticLogFunctions($level, $method) {
+        $staticMethod = 'log' . ucfirst($method);
+        PluginLog::$staticMethod(self::LOG_MESSAGE);
         $logContent = $this->getLogContent();
         $this->assertEquals($this->getExpectedMessage($level), $logContent);
     }
 
-    public static function logLevelDataProvider(){
+    public static function logLevelDataProvider() {
         return [
-            "emergency" =>["emergency", "emergency"],
-            "alert" =>["alert", "alert"],
-            "critical" =>["critical", "critical"],
-            "error" =>["error", "error"],
-            "warning" =>["warning", "warning"],
-            "notice" =>["notice", "notice"],
-            "info" =>["info", "info"],
-            "debug" =>["debug", "debug"],
+            "emergency" => ["emergency", "emergency"],
+            "alert" => ["alert", "alert"],
+            "critical" => ["critical", "critical"],
+            "error" => ["error", "error"],
+            "warning" => ["warning", "warning"],
+            "notice" => ["notice", "notice"],
+            "info" => ["info", "info"],
+            "debug" => ["debug", "debug"],
         ];
     }
 
