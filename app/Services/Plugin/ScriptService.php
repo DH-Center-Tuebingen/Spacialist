@@ -6,6 +6,7 @@ use App\File\Directory;
 use App\Plugin;
 use App\Plugin\PluginDirectory;
 use App\Services\PluginManager;
+use App\Support\Log\PluginLog;
 
 class ScriptService extends PluginService {
 
@@ -18,13 +19,15 @@ class ScriptService extends PluginService {
         return "api/download/plugin/{$plugin->slugName()}-{$plugin->uuid}.js";
     }
 
-    public function publish(Plugin $plugin): void {
+    public function publish(Plugin $plugin): string {
         $pluginDirectory = PluginDirectory::byPlugin($plugin);
         $scriptPath = $pluginDirectory->getPluginPath("js/script.js");
-        info("Publishing script for plugin {$plugin->name} from path: {$scriptPath}");
         
         if(is_link($scriptPath)) {
             $scriptPath = readlink($scriptPath);
+            if($scriptPath === false) {
+                throw new \Exception("Could not read symlink for script file of plugin {$plugin->name}.");
+            }
         }
         info("Publishing script for plugin {$plugin->name} from path: {$scriptPath}");
         
@@ -35,13 +38,22 @@ class ScriptService extends PluginService {
                 throw new \Exception("Could not open script file for plugin {$plugin->name}.");
             }
 
-            info("Publishing script for plugin {$plugin->name} from path: {$scriptPath}");
             $storageDirectory = new Directory("plugins", "private"); // Ensure the target directory exists
+            $scriptName = $this->getScriptName($plugin);
+            
+            $scriptPath = $storageDirectory->getDirectoryPath($scriptName);
+            // When the target is a symlink to the actual file, we just skip the publishing process.
+            if(is_link($scriptPath)) {
+                PluginLog::fromPlugin($plugin)->warning("Script for plugin {$plugin->name} is already published as a symlink. Skipping publishing process.");
+                return $this->getUrl($plugin);
+            }
+            
             $storageDirectory->store(
-                $this->getScriptName($plugin),
+                $scriptName,
                 $filehandle
-            );
+            );            
             fclose($filehandle);
+            return $this->getUrl($plugin);
         } else {
             throw new \Exception("Script file for plugin {$plugin->name} does not exist at {$scriptPath}.");
         }

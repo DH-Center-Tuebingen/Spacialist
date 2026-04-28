@@ -56,7 +56,7 @@ class CssService extends PluginService implements ManifestContent {
             foreach($cssFiles as $cssPath) {
                 $path = trim($cssPath);
                 if(!is_string($path) || empty($path)) {
-                    PluginLog::warning("Invalid CSS file path in manifest for plugin {$plugin->name}:" . json_encode($cssPath));
+                    PluginLog::logWarning("Invalid CSS file path in manifest for plugin {$plugin->name}:" . json_encode($cssPath));
                     continue;
                 }
 
@@ -89,7 +89,7 @@ class CssService extends PluginService implements ManifestContent {
             $filehandle = fopen($pluginPath, 'r');
 
             if(!$filehandle) {
-                PluginLog::warning("Could not open CSS file for plugin {$plugin->name} at path {$pluginPath}.");
+                PluginLog::logWarning("Could not open CSS file for plugin {$plugin->name} at path {$pluginPath}.");
                 return;
             }
             
@@ -100,7 +100,7 @@ class CssService extends PluginService implements ManifestContent {
             );
             fclose($filehandle);
         } else {
-            PluginLog::warning("CSS file for plugin {$plugin->name} does not exist at path {$pluginPath}.");
+            PluginLog::logWarning("CSS file for plugin {$plugin->name} does not exist at path {$pluginPath}.");
         }
     }
 
@@ -119,7 +119,7 @@ class CssService extends PluginService implements ManifestContent {
         $manifestContent = $manifest->getContent();
         $cssEntries = isset($manifestContent['css']) ? $manifestContent['css'] : [];
         if(!is_array($cssEntries)) {
-            PluginLog::warning("Invalid CSS entries in manifest for plugin {$manifest->getName()}: " . json_encode($cssEntries));
+            PluginLog::logWarning("Invalid CSS entries in manifest for plugin {$manifest->getName()}: " . json_encode($cssEntries));
             return [];
         }
         $srcValues = [];
@@ -128,7 +128,7 @@ class CssService extends PluginService implements ManifestContent {
             if($src !== null) {
                 $srcValues[] = $src;
             } else {
-                PluginLog::warning("Missing 'src' attribute for CSS file entry in manifest for plugin {$manifest->getName()}: " . json_encode($entry));
+                PluginLog::logWarning("Missing 'src' attribute for CSS file entry in manifest for plugin {$manifest->getName()}: " . json_encode($entry));
             }
         }
 

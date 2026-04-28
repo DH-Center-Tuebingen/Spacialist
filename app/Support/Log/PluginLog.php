@@ -2,6 +2,7 @@
 
 namespace App\Support\Log;
 
+use App\Plugin;
 use Illuminate\Support\Facades\Log;
 
 /*
@@ -21,41 +22,66 @@ use Illuminate\Support\Facades\Log;
  */
 class PluginLog extends Log {
     const CHANNEL_NAME = "plugin";
-    
-    public function __construct(private string $pluginName) { }
-    
+
+    public function __construct(private string $pluginName) {
+    }
+
     protected function formatMessage(string $message, array $context = []): string {
         $pluginName = strtoupper($this->pluginName);
         return "[$pluginName] " . $message;
     }
-
-    public static function log($message, array $context = []) {
-        self::info($message, $context);
+    
+    public static function fromPlugin(Plugin $plugin): PluginLog {
+        return new PluginLog($plugin->name);
     }
 
-    public static function emergency(string $message, array $context = []): void {
+    public function emergency(string $message, array $context = []): void {
+        static::logEmergency($this->formatMessage($message), $context);
+    }
+    public function alert(string $message, array $context = []): void {
+        static::logAlert($this->formatMessage($message), $context);
+    }
+    public function critical(string $message, array $context = []): void {
+        static::logCritical($this->formatMessage($message), $context);
+    }
+    public function error(string $message, array $context = []): void {
+        static::logError($this->formatMessage($message), $context);
+    }
+    public function warning(string $message, array $context = []): void {
+        static::logWarning($this->formatMessage($message), $context);
+    }
+    public function notice(string $message, array $context = []): void {
+        static::logNotice($this->formatMessage($message), $context);
+    }
+    public function info(string $message, array $context = []): void {
+        static::logInfo($this->formatMessage($message), $context);
+    }
+    public function debug(string $message, array $context = []): void {
+        static::logDebug($this->formatMessage($message), $context);
+    }
+
+    public static function logEmergency(string $message, array $context = []): void {
         Log::channel(self::CHANNEL_NAME)->emergency($message, $context);
     }
-
-    public static function alert(string $message, array $context = []): void {
+    public static function logAlert(string $message, array $context = []): void {
         Log::channel(self::CHANNEL_NAME)->alert($message, $context);
     }
-    public static function critical(string $message, array $context = []): void {
+    public static function logCritical(string $message, array $context = []): void {
         Log::channel(self::CHANNEL_NAME)->critical($message, $context);
     }
-    public static function error(string $message, array $context = []): void {
+    public static function logError(string $message, array $context = []): void {
         Log::channel(self::CHANNEL_NAME)->error($message, $context);
     }
-    public static function warning(string $message, array $context = []): void {
+    public static function logWarning(string $message, array $context = []): void {
         Log::channel(self::CHANNEL_NAME)->warning($message, $context);
     }
-    public static function notice(string $message, array $context = []): void {
+    public static function logNotice(string $message, array $context = []): void {
         Log::channel(self::CHANNEL_NAME)->notice($message, $context);
     }
-    public static function info(string $message, array $context = []): void {
+    public static function logInfo(string $message, array $context = []): void {
         Log::channel(self::CHANNEL_NAME)->info($message, $context);
     }
-    public static function debug(string $message, array $context = []): void {
+    public static function logDebug(string $message, array $context = []): void {
         Log::channel(self::CHANNEL_NAME)->debug($message, $context);
     }
 

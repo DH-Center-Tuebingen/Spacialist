@@ -15,9 +15,10 @@ export const appendScriptsAndStyles = response => {
 }
 
 export const appendStyle = location => {
+    console.log('Appending style with location', location);
     const linkTag = document.createElement('link');
     linkTag.rel = 'stylesheet';
-    linkTag.href = `api/download/plugin/${location}`;
+    linkTag.href = `${location}`;
     document.head.appendChild(linkTag);
 }
 
@@ -28,9 +29,10 @@ export const appendStyles = locations => {
 }
 
 export const appendScript = location => {
+    console.log('Appending script with location', location);
     const scriptTag = document.createElement('script');
     scriptTag.type = 'text/javascript';
-    scriptTag.src = `api/download/plugin/${location}`;
+    scriptTag.src = `${location}`;
     document.head.appendChild(scriptTag);
 };
 
