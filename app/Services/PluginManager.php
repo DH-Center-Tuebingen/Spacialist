@@ -13,6 +13,7 @@ use App\Services\Plugin\AccessPointsService;
 use App\Services\Plugin\CssService;
 use App\Services\Plugin\HookService;
 use App\Services\Plugin\MigrationService;
+use App\Services\Plugin\PermissionService;
 use App\Services\Plugin\RolePresetService;
 use App\Services\Plugin\RouteService;
 use App\Services\Plugin\ScopeService;
@@ -38,6 +39,7 @@ class PluginManager {
         public readonly CssService $cssService,
         public readonly HookService $hookService,
         public readonly MigrationService $migrationService,
+        public readonly PermissionService $permissionService,
         // public readonly RolePresetService $rolePresetService,
         public readonly RouteService $routeService,
         public readonly ScriptService $scriptService,

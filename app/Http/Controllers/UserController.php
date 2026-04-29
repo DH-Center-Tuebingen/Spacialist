@@ -39,7 +39,7 @@ class UserController extends Controller {
         $user->setPermissions();
 
         // Load notification source data into info property
-        $user->notifications->map(function($n) {
+        $user->notifications->map(function ($n) {
             if($n->type == 'App\Notifications\CommentPosted') {
                 $skip = false;
                 switch($n->data['resource']['type']) {
@@ -142,7 +142,7 @@ class UserController extends Controller {
             $groups['plugins'] = [];
             foreach($installedPlugins as $plugin) {
                 $slug = $plugin->slugName();
-                $groups['plugins'][$slug] = $plugin->getPermissionGroups();
+                $groups['plugins'][$slug] = app(PluginManager::class)->permissionService->getPermissionGroups($plugin);
             }
         }
 
@@ -381,8 +381,7 @@ class UserController extends Controller {
         return response()->json($user);
     }
 
-    public function restoreUser($id)
-    {
+    public function restoreUser($id) {
         $user = auth()->user();
         if(!$user->can('users_roles_delete')) {
             return response()->json([
