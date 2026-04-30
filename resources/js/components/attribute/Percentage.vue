@@ -84,11 +84,12 @@
             };
 
             const setActive = active => {
+                if(props.disabled) return;
                 state.active = active;
             };
 
             const onWheel = event => {
-                if(!state.active) return;
+                if(!state.active || props.disabled) return;
                 event.preventDefault();
                 let newValue = parseFloat(v.value);
                 // increase/decrease value based on wheel direction
@@ -114,6 +115,7 @@
             };
 
             const onKey = event => {
+                if(props.disabled) return;
                 const keyPressed = event.type === 'keydown';
                 if(event.key == 'Control') {
                     state.multiplier = keyPressed;
@@ -149,10 +151,12 @@
             });
 
             onMounted(_ => {
+                if(props.disabled) return;
                 window.addEventListener('keydown', onKey);
                 window.addEventListener('keyup', onKey);
             });
             onUnmounted(_ => {
+                if(props.disabled) return;
                 window.removeEventListener('keydown', onKey);
                 window.removeEventListener('keyup', onKey);
             });

@@ -34,9 +34,9 @@
             v-show="state.showDescription"
             class="mb-0 overflow-hidden"
         >
-            <MdViewer
-                :classes="'milkdown-wrapper p-3 h-100 overflow-scroll'"
-                :source="state.maintainer.description || '_No description available_'"
+            <Markdown
+                :data="markdownContent"
+                :readonly="true"
             />
         </p>
     </div>
@@ -52,7 +52,12 @@
 
     import useSystemStore from '@/bootstrap/stores/system.js';
 
+    import { Markdown } from 'dhc-components';
+
     export default {
+        components:{
+            Markdown,
+        },
         setup(props) {
             const { t } = useI18n();
             const systemStore = useSystemStore();
@@ -72,6 +77,10 @@
                 state.showDescription = !state.showDescription;
             };
 
+            const markdownContent = computed(_ => {
+                return state.maintainer?.description || '_No description available_';
+            });
+
             // WATCHER
 
             // RETURN
@@ -80,6 +89,7 @@
                 // HELPERS
                 // LOCAL
                 toggleShowDescription,
+                markdownContent,
                 // PROPS
                 // STATE
                 state,

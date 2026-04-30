@@ -5,12 +5,9 @@ import PQueue from 'p-queue';
 
 // Init plugins
 
-// Helpers/Filter
+import 'dhc-components/css'; // TODO needed?
 
-// Reusable Components
-import ResultCard from '@/components/openaccess/Card.vue';
-// dhc-components
-import { LoadingSpinner } from 'dhc-components';
+// Helpers/Filter
 
 // Init Libs
 // PQueue, httpQueue
@@ -47,9 +44,6 @@ app.use(createVfm());
 initGlobalComponents(app);
 
 SpPS.initialize(app, i18n.global.t);
-
-app.component('ResultCard', ResultCard);
-app.component('LoadingSpinner', LoadingSpinner);
 
 // Mount Vue
 app.mount('#app');

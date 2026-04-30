@@ -51,7 +51,7 @@
                     <div class="d-flex flex-row justify-content-center gap-3">
                         <hr class="text-muted flex-grow-1">
                         <button
-                            class="btn btn-fab btn-primary"
+                            class="btn btn-fab btn-outline-secondary"
                             @click="toggleShowData()"
                         >
                             <span v-show="state.showData">
@@ -64,8 +64,8 @@
                         <hr class="text-muted flex-grow-1">
                     </div>
                     <div
+                        v-if="state.showData"
                         class="bg-white rounded-2 p-3 mt-2"
-                        v-show="state.showData"
                     >
                         <h6 class="card-text fw-bold">
                             Entity Data
@@ -75,7 +75,7 @@
                             class="fade-in-fast"
                             :attributes="state.attributes"
                             :selections="{}"
-                            :options="{'hide_labels': true, 'hide_entity_link': true}"
+                            :options="{'hide_labels': false, 'hide_entity_link': true}"
                             :values="state.values"
                             :disable-drag="true"
                         />

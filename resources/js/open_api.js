@@ -14,6 +14,12 @@ export async function fetchEntityTypes() {
     );
 };
 
+export async function fetchAttributeValuesForEntityType(entityTypeId) {
+    return $httpQueue.add(
+        () => http.get(`/entity_type/${entityTypeId}/attribute_values`).then(response => response.data)
+    );
+};
+
 export async function fetchAttributes(entityTypeId = null, countData = false) {
     let url = '/attributes';
     if(entityTypeId) {

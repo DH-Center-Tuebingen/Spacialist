@@ -1,4 +1,5 @@
 <template>
+    <!-- h-100 class is a problem in OpenAcccess EntityView.vue -->
     <div class="form-check form-switch h-100 d-flex align-items-center">
         <input
             :id="name"

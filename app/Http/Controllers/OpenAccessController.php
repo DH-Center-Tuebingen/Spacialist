@@ -45,41 +45,6 @@ class OpenAccessController extends Controller {
         }
     }
 
-    private function getAttributeValueCount($entityTypeId, $filteredEntityIds = []) : array {
-        $attributes = EntityAttribute::with(['attribute'])
-            ->where('entity_type_id', $entityTypeId)
-            ->get();
-        if(empty($filteredEntityIds)) {
-            $entityIds = Entity::where('entity_type_id', $entityTypeId)
-                ->get()
-                ->pluck('id');
-        } else {
-            $entityIds = $filteredEntityIds;
-        }
-
-        $attrData = [];
-        foreach($attributes as $attr) {
-            $datatype = $attr->attribute->datatype;
-            if(!in_array($datatype, self::$supported_attributes)) {
-                continue;
-            }
-            $currData = [];
-            $attributeValues = AttributeValue::where('attribute_id', $attr->attribute_id)->whereIn('entity_id', $entityIds)->get();
-            foreach($attributeValues as $attrVal) {
-                $value = $this->getValueKey($datatype, $attrVal->getValue());
-                info($value);
-                info($currData);
-                if(!array_key_exists($value, $currData)) {
-                    $currData[$value] = 0;
-                }
-                $currData[$value]++;
-
-            }
-            $attrData[$attr->attribute_id] = $currData;
-        }
-        return $attrData;
-    }
-
     // GET
     public function getGlobals(Request $request) {
         if(!Preference::hasPublicAccess()) {
@@ -109,25 +74,48 @@ class OpenAccessController extends Controller {
         );
     }
 
+    public function getAttributeValuesForEntityType(Request $request, EntityType $entityType) {
+        if(!Preference::hasPublicAccess()) {
+            return response()->json();
+        }
+
+        $attributes = EntityAttribute::with('attribute')->where('entity_type_id', $entityType->id)->get();
+        $attributeValues = [];
+        foreach($attributes as $attr) {
+            if(in_array($attr->attribute->datatype, self::$supported_attributes)) {
+                $valueColumn = AttributeValue::getValueColumn($attr->attribute->datatype);
+                // [VR]: Adding count of attribute values makes no sense as long
+                // as we do not calculate it based on selected filters
+                // Thus I exclude it from this query, but it can easily be added again
+                // 1. add ->selectRaw('COUNT(*) as count')
+                // 2. replace ->pluck($valueColumn) with ->pluck('count', $valueColumn)
+                $values = AttributeValue::select($valueColumn)
+                    ->where('attribute_id', $attr->attribute_id)
+                    ->whereHas('entity', function (Builder $q) use ($entityType) {
+                        $q->where('entity_type_id', $entityType->id);
+                    })
+                    ->groupBy($valueColumn)
+                    ->get()
+                    ->pluck($valueColumn);
+                $attributeValues[$attr->attribute_id] = $values;
+            }
+        }
+
+        return response()->json($attributeValues);
+
+    }
+
     public function getAttributes(Request $request) {
         if(!Preference::hasPublicAccess()) {
             return response()->json();
         }
 
         $forEntityType = $request->query('entity_type', null);
-        $withData = $request->query('with_data', false);
+        $attributeQuery = EntityAttribute::with(['attribute', 'entity_type']);
         if(isset($forEntityType)) {
-            $attributes = EntityAttribute::with(['attribute', 'entity_type'])->where('entity_type_id', $forEntityType)->get();
-            if($withData) {
-                $attrData = $this->getAttributeValueCount($forEntityType);
-                $attributes = [
-                    'attributes' => $attributes,
-                    'data' => $attrData,
-                ];
-            }
-        } else {
-            $attributes = EntityAttribute::with(['attribute', 'entity_type'])->get();
+            $attributes = $attributeQuery->where('entity_type_id', $forEntityType);
         }
+        $attributes = $attributeQuery->get();
 
         return response()->json($attributes);
     }
@@ -173,26 +161,8 @@ class OpenAccessController extends Controller {
             ->withoutModerated()
             ->get();
 
-        // TODO simplify as soon as 0.10-fix-performance-table is merged!
         $data = [];
         foreach($attributes as $a) {
-            switch($a->attribute->datatype) {
-                case 'string-sc':
-                    $a->thesaurus_val = ThConcept::where('concept_url', $a->thesaurus_val)->first();
-                    break;
-                case 'entity':
-                    $a->name = Entity::find($a->entity_val)->name;
-                    break;
-                case 'entity-mc':
-                    $names = [];
-                    foreach(json_decode($a->json_val) as $dec) {
-                        $names[] = Entity::find($dec)->name;
-                    }
-                    $a->name = $names;
-                    break;
-                default:
-                    break;
-            }
             $a->value = $a->getValue();
             $data[$a->attribute_id] = $a;
         }
@@ -257,25 +227,16 @@ class OpenAccessController extends Controller {
 
         $results = $query->with('attributes')->paginate();
 
-        if($page == 1) {
-            $attrData = $this->getAttributeValueCount($id, $query->get()->pluck('id'));
-        } else {
-            $attrData = [];
-        }
-
-        foreach($results as $entity) {
+        foreach($results as $key => $entity) {
+            $attributePivots = $entity->getData();
             foreach($entity->attributes as $attribute) {
-                $attribute->value = $attribute->getAttributeValueFromEntityPivot();
-                $name = $attribute->getEntityAttributeValueName();
-                if(isset($name)) {
-                    $attribute->name = $name;
-                }
+                $data = array_find($attributePivots, function($pivot) use ($attribute) {
+                    return $pivot->attribute_id == $attribute->id;
+                });
+                $attribute->value = isset($data) ? $data->value : null;
             }
         }
 
-        return response()->json([
-            'entities' => $results,
-            'data' => $attrData,
-        ]);
+        return response()->json($results);
     }
 }

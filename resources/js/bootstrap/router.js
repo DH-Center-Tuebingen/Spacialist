@@ -5,6 +5,7 @@ import {
     onBeforeRouteLeave,
 } from 'vue-router';
 
+import Wrapper from '@/components/route/Wrapper.vue';
 // Pages
 import Login from '@/components/Login.vue';
 import AppView from '@/components/AppView.vue';
@@ -30,10 +31,10 @@ import UserNotifications from '@/components/notification/UserNotifications.vue';
 import Landing from '@/components/openaccess/Landing.vue';
 import EntryView from '@/components/openaccess/EntityView.vue';
 import Modules from '@/components/openaccess/Modules.vue';
-import SitesContainer from '@/components/openaccess/SitesContainer.vue';
 import WebGis from '@/components/openaccess/WebGis.vue';
-import FreeSearch from '@/components/openaccess/FreeSearch.vue';
-import SingleSearch from '@/components/openaccess/SingleSearch.vue';
+import FreeSearch from '@/components/openaccess/search/free/Main.vue';
+import EntityTypeSearch from '@/components/openaccess/search/entity-type/Main.vue';
+import EntityTypeView from '@/components/openaccess/search/entity-type/TypeView.vue';
 
 import DummyComponent from '@/components/DummyComponent.vue';
 import NotFound from '@/components/NotFound.vue';
@@ -343,7 +344,7 @@ export const openRouter = createRouter({
         {
             path: '/site',
             name: 'sites',
-            component: SitesContainer,
+            component: Wrapper,
             meta: {
                 auth: false,
             },
@@ -371,12 +372,30 @@ export const openRouter = createRouter({
                             },
                         },
                         {
-                            path: 'single',
-                            name: 'singlesearch',
-                            component: SingleSearch,
+                            path: 'entity-type',
+                            name: 'entity-type-search-wrapper',
+                            component: Wrapper,
                             meta: {
                                 auth: false,
                             },
+                            children: [
+                                {
+                                    path: '',
+                                    name: 'entity-type-search',
+                                    component: EntityTypeSearch,
+                                    meta: {
+                                        auth: false,
+                                    },
+                                },
+                                {
+                                    path: ':entityTypeId',
+                                    name: 'entity-type-view',
+                                    component: EntityTypeView,
+                                    meta: {
+                                        auth: false,
+                                    },
+                                },
+                            ]
                         },
                     ],
                 },

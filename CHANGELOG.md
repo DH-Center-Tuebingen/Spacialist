@@ -14,6 +14,7 @@ All notable changes to this project will be documented in this file.
 - Removed redundant calls to the entity endpoint
 - Metadata tab error on submit (unknown variable)
 - Errors in _map.js_
+- Values in disabled _Percentage_ attribute could be changed using mousewhell
 ### Changed
 - Alerts can now be dismissed
 - Now entity metadata is only loaded when accessing the metadata tab

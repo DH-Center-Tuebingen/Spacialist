@@ -62,14 +62,12 @@
                 </a>
                 <div :ref="el => userPopoverContent = el">
                     <ul class="list-group list-group-flush popup-list-group">
-                        <template
-                            v-if="state.editors.length > 0"
-                        >
+                        <template v-if="state.editors.length > 0">
                             <li
                                 v-for="editor in state.editors"
                                 :key="`user-${editor.id}-editor`"
                                 class="list-group-item d-flex flex-row justify-content-between align-items-center gap-3"
-                                :class="{'fst-italic': editor.deleted_at}"
+                                :class="{ 'fst-italic': editor.deleted_at }"
                             >
                                 {{ editor.name }}
                                 <a
@@ -86,28 +84,42 @@
                 </div>
             </div>
         </div>
-        <div class="flex-grow-1 px-3 overflow-y-scroll overflow-x-hidden">
-            <div class="row">
-                <div class="col-9 d-flex flex-column gap-3 border-end">
+        <div class="d-flex flex-column flex-grow-1 px-3 overflow-hidden">
+            <div class="row overflow-hidden">
+                <div class="col-9 d-flex flex-column h-100 gap-3 border-end overflow-y-scroll">
                     <div
                         v-for="(dataset, aid) in state.attributeData"
                         :key="`attribute-data-${aid}`"
                     >
-                        {{ translateConcept(dataset.attribute.thesaurus_url) }}
-                        {{ dataset.value }}
-                        <div
-                            class="progress"
-                            role="progressbar"
-                            :aria-valuenow="`${dataset.certainty || 100}`"
-                            aria-valuemin="0"
-                            aria-valuemax="100"
-                            style="height: 1px"
+                        <span
+                            class="fw-bold"
+                            @click="state.hiddenAttributes[aid] = !state.hiddenAttributes[aid]"
                         >
-                            <div
-                                class="progress-bar"
-                                :class="getCertaintyClass(dataset.certainty)"
-                                :style="`width: ${dataset.certainty || 100}%`"
-                                :title="`${dataset.certainty || 100}% certain`"
+                            {{ translateConcept(dataset.attribute.thesaurus_url) }}
+                            <span v-show="state.hiddenAttributes[aid]">
+                                <i class="fas fa-fw fa-eye-slash" />
+                            </span>
+                            <span v-show="!state.hiddenAttributes[aid]">
+                                <i class="fas fa-fw fa-eye" />
+                            </span>
+                        </span>
+                        <div
+                            v-if="!state.hiddenAttributes[aid]"
+                            class="d-flex flex-row align-items-center gap-3 rounded bg-secondary bg-opacity-10 p-2"
+                        >
+                            <Attribute
+                                class="flex-grow-1"
+                                :data="dataset.attribute"
+                                :value-wrapper="dataset"
+                                :disabled="true"
+                                :hide-links="true"
+                                :preview="false"
+                            />
+                            <IconStat
+                                :icon="state.certaintyData[aid].icon"
+                                :color="state.certaintyData[aid].type"
+                                :icon-only="true"
+                                :title="`Certainty: ${dataset?.certainty ? dataset.certainty : '-'}%`"
                             />
                         </div>
                     </div>
@@ -137,7 +149,7 @@
                     Summary/Description
                 </h4>
                 <Richtext
-                    v-if="state.metadata.metadata.summary"
+                    v-if="state.metadata?.metadata?.summary"
                     class="bg-secondary bg-opacity-10 rounded font-serif"
                     :classes="'mt-2 px-2 py-1 rounded text-body'"
                     :disabled="true"
@@ -181,6 +193,7 @@
     } from 'bootstrap';
 
     import {
+        getCertainty,
         getCertaintyClass,
         translateConcept,
     } from '@/helpers/helpers.js';
@@ -196,11 +209,14 @@
 
     import { useI18n } from 'vue-i18n';
 
+    import { IconStat } from 'dhc-components';
+
     import EntityTypeLabel from '@/components/entity/EntityTypeLabel.vue';
 
     export default {
         components: {
             EntityTypeLabel,
+            IconStat,
         },
         setup(props) {
             const { t } = useI18n();
@@ -216,6 +232,7 @@
 
                 const attributeData = await getEntityData(route.params.id);
                 state.attributeData = attributeData;
+                console.log(attributeData);
                 state.loaded = true;
                 nextTick(_ => {
                     const popup = new Popover(userPopoverRef.value, {
@@ -241,6 +258,10 @@
                 navigator.clipboard.writeText(orcid);
             };
 
+            const getCertaintyColor = certainty => {
+                return getCertainty(certainty).type;
+            };
+
             // FETCH
             initialize();
 
@@ -253,9 +274,17 @@
                 entity: null,
                 metadata: null,
                 attributeData: null,
+                hiddenAttributes: {},
                 entityType: computed(_ => {
                     if(!state.entity) return;
                     return entityStore.entityTypes[state.entity.entity_type_id];
+                }),
+                certaintyData: computed(_ => {
+                    const data = {};
+                    for(let aid in state.attributeData) {
+                        data[aid] = getCertainty(state.attributeData[aid].certainty);
+                    }
+                    return data;
                 }),
                 creator: computed(_ => {
                     if(state.metadata?.creator) {
@@ -292,6 +321,8 @@
                 // LOCAL
                 getAnyUser,
                 copyOrcidToClipboard,
+                getCertaintyColor,
+                // getAttributeTextRepresentation,
                 // PROPS
                 // STATE
                 state,
