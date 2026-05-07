@@ -30,7 +30,7 @@ class AccessPointsService extends PluginService implements  ManifestContent {
         return 'plugin_access_points';
     }
     
-    public function install(Plugin $plugin): void {
+    public function install(Plugin $plugin, PluginManifest $manifest): void {
         $manifest = PluginManifest::fromPlugin($plugin);
         $accesPoints = $this->retrieveManifestValues($manifest);
         
@@ -48,24 +48,24 @@ class AccessPointsService extends PluginService implements  ManifestContent {
         }
     }
     
-    public function update(Plugin $plugin): void {
-        $this->uninstall($plugin);
-        $this->install($plugin);
+    public function update(Plugin $plugin, PluginManifest $manifest): void {
+        $this->uninstall($plugin, $manifest);
+        $this->install($plugin, $manifest);
     }
     
-    public function uninstall(Plugin $plugin): void {
+    public function uninstall(Plugin $plugin, PluginManifest $manifest): void {
         AccessPoint::where('plugin_id', $plugin->id)->delete();
     }
         
-    public function onAfterInstall(Plugin $plugin): void {
+    public function onAfterInstall(Plugin $plugin, PluginManifest $manifest): void {
         $this->cache();
     }
     
-    public function onAfterUninstall(Plugin $plugin): void {
+    public function onAfterUninstall(Plugin $plugin, PluginManifest $manifest): void {
         $this->cache();
     }
     
-    public function onAfterUpdate(Plugin $plugin): void
+    public function onAfterUpdate(Plugin $plugin, PluginManifest $manifest): void
     {
         $this->cache();
     }

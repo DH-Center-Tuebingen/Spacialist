@@ -109,5 +109,8 @@
     "HTML not supported for file type": "HTML not supported for file type :mime",
     "Presentations not yet supported!": "Presentations not yet supported!",
     "Start date of a time period must not be after it's end date": "Start date of a time period must not be after it's end date",
-    "A plugin with the name ':pluginName' and the same or later version (:uploadedVersion and :existingVersion) already exists. Aborting.": "A plugin with the name ':pluginName' and the same or later version (:uploadedVersion and :existingVersion) already exists. Aborting."
+    
+    "This plugin is not installed.": "This plugin is not installed.",
+    "A plugin with the name ':pluginName' and the same or later version (:uploadedVersion and :existingVersion) already exists. Aborting.": "A plugin with the name ':pluginName' and the same or later version (:uploadedVersion and :existingVersion) already exists. Aborting.",
+    "Cannot install plugin :pluginName because the following dependencies are missing: :missingDependencies.": "Cannot install plugin :pluginName because the following dependencies are missing: :missingDependencies."
 }

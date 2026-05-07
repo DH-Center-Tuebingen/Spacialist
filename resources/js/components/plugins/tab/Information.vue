@@ -1,9 +1,12 @@
 <template>
-    <div class="card-text my-4 text-secondary">
-        <MarkdownText :value="value?.metadata?.description ?? ''" />
-        <p>
-            <strong>{{ t("main.plugins.author") }}:</strong> {{ authors }}
-        </p>
+    <div class="card-text text-secondary d-flex flex-column gap-2 h-100">
+        <MarkdownText
+            class="flex-fill"
+            :value="value?.metadata?.description ?? ''"
+        />
+        <span class="opacity-50">
+            <i class="fa-regular fa-circle-user"></i> {{ authors }}
+        </span>
     </div>
 </template>
 

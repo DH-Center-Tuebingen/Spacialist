@@ -2,28 +2,30 @@
     <div class="container-fluid d-flex flex-column h-100 overflow-y-auto">
         <h4>
             {{ t('main.plugins.title', 2) }}
-            <file-upload
-                ref="upload"
-                v-model="state.files"
-                class="btn btn-sm btn-outline-primary clickable"
-                accept="application/zip"
-                extensions="zip"
-                :custom-action="uploadZip"
-                :directory="false"
-                :disabled="!can('preferences_create')"
-                :multiple="false"
-                :drop="true"
-                @input-file="inputFile"
-            >
-                <span>
-                    <i class="fas fa-fw fa-file-import" /> {{ t('main.plugins.upload') }}
-                </span>
-            </file-upload>
-            <div
-                class="btn btn-rimary"
-                @click="pluginStore.refresh()"
-            >
-                refresh
+            <div class="float-end">
+                <file-upload
+                    ref="upload"
+                    v-model="state.files"
+                    class="btn btn-sm btn-outline-primary clickable"
+                    accept="application/zip"
+                    extensions="zip"
+                    :custom-action="uploadZip"
+                    :directory="false"
+                    :disabled="!can('preferences_create')"
+                    :multiple="false"
+                    :drop="true"
+                    @input-file="inputFile"
+                >
+                    <span>
+                        <i class="fas fa-fw fa-file-import" /> {{ t('main.plugins.upload') }}
+                    </span>
+                </file-upload>
+                <button
+                    class="btn btn-sm btn-outline-secondary ms-2"
+                    @click="pluginStore.refresh()"
+                >
+                    <i class="fas fa-fw fa-sync" /> {{ t('global.refresh') }}
+                </button>
             </div>
         </h4>
         <div class="row row-cols-3 g-3">
@@ -55,7 +57,6 @@
     import { useI18n } from 'vue-i18n';
 
     import usePluginStore from '../bootstrap/stores/plugin';
-
     import { useToast } from '@/plugins/toast.js';
 
     import {

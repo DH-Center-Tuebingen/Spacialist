@@ -268,7 +268,8 @@
     } from 'vue';
 
     import useAttributeStore from '@/bootstrap/stores/attribute.js';
-    import useSystemStore from '@/bootstrap/stores/system.js';
+    import usePluginStore from '../../bootstrap/stores/plugin';
+    
 
     import {
         getEmptyAttributeValue,
@@ -370,7 +371,7 @@
         emits: ['expanded', 'change', 'update-selection'],
         setup(props, context) {
             const attributeStore = useAttributeStore();
-            const systemStore = useSystemStore();
+            const pluginStore = usePluginStore();
             const {
                 data,
                 valueWrapper,
@@ -390,7 +391,7 @@
             const attrRef = ref({});
             const state = reactive({
                 type: computed(_ => data.value.datatype),
-                pluginAttributes: computed(_ => systemStore.registeredPluginAttributes),
+                pluginAttributes: computed(_ => pluginStore.registeredAttributes),
                 disabled: computed(_ => data.value.isDisabled || disabled.value),
                 value: _cloneDeep(getValueOrDefault()),
                 externalUpdate: false,

@@ -52,3 +52,9 @@ export async function publishScript(id) {
         () => http.post(`/plugin/${id}/publish_script`).then(response => response.data)
     );
 }
+
+export async function getChangelog(id) {
+    return $httpQueue.add(
+        () => http.get(`/plugin/${id}/changelog`).then(response => response.data)
+    );
+}

@@ -30,15 +30,15 @@ class MigrationService extends PluginService {
         return 'plugin-migrations';
     }
 
-    public function install(Plugin $plugin): void {
+    public function install(Plugin $plugin, PluginManifest $manifest): void {
         $this->run($plugin);
     }
 
-    public function update(Plugin $plugin): void {
+    public function update(Plugin $plugin, PluginManifest $manifest): void {
         $this->run($plugin);
     }
 
-    public function remove(Plugin $plugin): void {
+    public function remove(Plugin $plugin, PluginManifest $manifest): void {
         $this->rollback($plugin);
     }
 
@@ -74,8 +74,6 @@ class MigrationService extends PluginService {
         $directory = $this->getMigrationDirectory($plugin);
         $migrations = $this->getMissingMigrations($plugin, $rollback);
         
-        info(" MISSING MIGRATIONS: " . implode(", ", $migrations));
-        
         foreach($migrations as $migration) {
             $migrationInstance = $this->getMigrationClassName($plugin, $directory, $migration);
             try {
@@ -108,20 +106,20 @@ class MigrationService extends PluginService {
      */
     public function getManifestMigration(Plugin $plugin): string|null {
         $manifest = PluginManifest::fromPlugin($plugin);
-        $content = $manifest->getContent();
-        if(array_key_exists('migrations', $content)) {
-            if(
-                array_key_exists('@attributes', $content['migrations']) &&
-                array_key_exists('path', $content['migrations']['@attributes']) &&
-                !empty($content['migrations']['@attributes']['path'])
-            ) {
-                return PluginDirectory::byPlugin($plugin)->getPluginPath($content['migrations']['@attributes']['path']);
-            } else {
-                PluginLog::logWarning("Plugin {$plugin->name} has an invalid migration path defined in its manifest. Expected format: <migrations path=\"Migrations\" />");
-            }
+        $xmlNodes = $manifest->getTagNodes('migrations');
+        
+        if(!$xmlNodes || count($xmlNodes) === 0) {
+            return null;
+        }
+        
+        if(count($xmlNodes) > 1) {
+            throw new \Exception("Plugin {$plugin->name} has multiple <migrations> tags in its manifest, but only one is allowed.");
         }
 
-        return null;
+        $attributes = $xmlNodes[0]['attributes'] ?? [];
+        $path = $attributes['path'] ?? trim((string) ($xmlNodes[0]['text'] ?? ''));
+
+        return $path !== '' ? $path : null;
     }
 
     /**

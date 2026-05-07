@@ -104,7 +104,7 @@ class RolePresetService extends PluginService
         return $rolePresets;
     }
 
-    public function remove(Plugin $plugin): void {}
+    public function remove(Plugin $plugin, PluginManifest $manifest): void {}
 
 
 

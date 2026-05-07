@@ -7,6 +7,7 @@ use App\Services\PluginManager;
 use App\Support\Log\PluginLog;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
+use SimpleXMLElement;
 
 /**
  * Each plugin has a manifest file (plugin.xml) that contains metadata about the plugin, such as its name, version, author, description, 
@@ -28,19 +29,47 @@ class PluginManifest {
         'version',
     ];
 
-    public function __construct(protected array $content) {
+    public function __construct(protected SimpleXMLElement $content) {
+    }
+    
+    public function getTextContent(string ... $path): string {
+        $implodedPath = implode('/', $path);
+        $result = $this->content->xpath("{$implodedPath}");
+        if($result === false || count($result) === 0) {
+            return "";
+        }
+        return (string) $result[0];
     }
     
     public function getVersion(): string {
-        return $this->content['version'] ?? '0.0.0';
+        return $this->getTextContent('version') ?? '0.0.0';
     }
 
-    public function getContent(): array {
+    public function getContent(): SimpleXMLElement {
         return $this->content;
     }
 
     public function getName(): string {
-        return $this->content['name'] ?? 'Unknown Plugin';
+        return $this->getTextContent('name') ?? 'Unknown Plugin';
+    }
+    
+    public function getDescription(): string {
+        return $this->getTextContent('description') ?? '';
+    }
+    
+    public function getLicence(): string {
+        return $this->getTextContent('licence') ?? '';
+    }
+    
+    public function getAuthors(): array {
+        $authors = [];
+        $authorNodes = $this->content->xpath('authors/author');
+        if($authorNodes !== false) {
+            foreach($authorNodes as $authorNode) {
+                $authors[] = (string) $authorNode;
+            }
+        }
+        return $authors;
     }
 
     public function getMetadata(): array {
@@ -65,6 +94,37 @@ class PluginManifest {
         }
 
         return $metadata;
+    }
+    
+    public function getTagNodes(string $xpath): array {
+        $children = [];
+        $xmlNodeArray = $this->content->xpath($xpath);
+        if(!$xmlNodeArray || count($xmlNodeArray) === 0) {
+            return [];
+        }
+        
+        
+        foreach($xmlNodeArray as $xmlNode) {
+            
+            $tag = $xmlNode->getName();
+            
+            
+            $attributes = [];
+            foreach($xmlNode->attributes() as $attrName => $attrValue) {
+                $attributes[$attrName] = (string) $attrValue;
+            }
+            
+            $node = [
+                "tag" => $tag,
+                "text" => (string) $xmlNode,
+                "attributes" => $attributes,
+            ];
+            
+            
+            $children[] = $node;
+        }
+        
+        return $children;
     }
 
     // public function getAccessPoints(): array {
@@ -94,36 +154,6 @@ class PluginManifest {
     //     }
     //     return $accesspoints;
     // }
-
-    public function getAttributes(): array {
-        $attributes = [];
-        if(array_key_exists('attributes', $this->content)) {
-
-            // When an empty <attributes> tag is provided, it is possible that the 'attribute' key does not exist in the $this->content array.
-            // In this case, we return an empty array.
-            if(!array_key_exists('attribute', $this->content['attributes'])) {
-                return [];
-            }
-
-            $attributes = $this->content['attributes']['attribute'];
-            // If only one <attribute> exists, this <attribute> is returned
-            // instead of an array, but we always want an array
-            if(array_key_exists('@attributes', $attributes)) {
-                $attributes = [$attributes];
-            }
-        }
-        return $attributes;
-    }
-
-    public function warn($message) {
-        if(!isset($this->content['warnings'])) {
-            $this->content['warnings'] = [];
-        }
-
-        $this->content['warnings'][] = $message;
-    }
-
-
 
     // STATIC METHODS
 
@@ -161,7 +191,6 @@ class PluginManifest {
     }
 
     private function emitDeprecationWarning(){
-        $this->warn("Uses deprecated manifest file location.");
         PluginLog::logWarning("Plugin '{$this->getName()}' is using a deprecated manifest file location. This will be not supported in future versions. Please move the manifest file to the root of the plugin directory and name it 'plugin.xml'.");            
     }
     
@@ -169,10 +198,14 @@ class PluginManifest {
         return Str::startsWith($filePath, 'App/');
     }
     
-    public static function parse(string $xmlString): static {
+    public static function parse(string $xmlString): PluginManifest|false {
         $xmlObject = simplexml_load_string($xmlString);
-        $xmlObject = json_decode(json_encode($xmlObject), true);
-        return new self($xmlObject);
+        
+        if($xmlObject === false) {
+            return false;
+        }
+        
+        return new static($xmlObject);
     }
 
     public static function fromPlugin(Plugin $plugin): PluginManifest {

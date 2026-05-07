@@ -36,23 +36,23 @@ class CssService extends PluginService implements ManifestContent {
         return "plugin-css.php";
     }
 
-    public function install(Plugin $plugin): void {
-        $this->updateOrInstall($plugin);
+    public function install(Plugin $plugin, PluginManifest $manifest): void {
+        $this->updateOrInstall($plugin, $manifest);
     }
 
-    public function update(Plugin $plugin): void {
-        $this->updateOrInstall($plugin);
+    public function update(Plugin $plugin, PluginManifest $manifest): void {
+        $this->updateOrInstall($plugin, $manifest);
     }
 
-    public function uninstall(Plugin $plugin): void {
+    public function uninstall(Plugin $plugin, PluginManifest $manifest): void {
         CssFile::where('plugin_id', $plugin->id)->delete();
         // $this->unpubishFiles($plugin);
     }
 
-    private function updateOrInstall(Plugin $plugin): void {
-        DB::transaction(function () use ($plugin) {
-            $this->uninstall($plugin);
-            $cssFiles = $this->retrieveManifestValues(PluginManifest::fromPlugin($plugin));
+    private function updateOrInstall(Plugin $plugin, PluginManifest $manifest): void {
+        DB::transaction(function () use ($plugin, $manifest) {
+            $this->uninstall($plugin, $manifest);
+            $cssFiles = $this->retrieveManifestValues($manifest);
             foreach($cssFiles as $cssPath) {
                 $path = trim($cssPath);
                 if(!is_string($path) || empty($path)) {
@@ -67,11 +67,11 @@ class CssService extends PluginService implements ManifestContent {
             }
         });
 
-        $this->publish($plugin);
+        $this->publish($plugin, $manifest);
     }
 
-    public function publish(Plugin $plugin): void {
-        $cssFiles = $this->retrieveManifestValues(PluginManifest::fromPlugin($plugin));
+    public function publish(Plugin $plugin, PluginManifest $manifest): void {
+        $cssFiles = $this->retrieveManifestValues($manifest);
         foreach($cssFiles as $cssPath) {
             $this->publishFile($plugin, $cssPath);
         }

@@ -6,7 +6,7 @@
 
 <script setup>
     import { VueMarkdownIt } from '@f3ve/vue-markdown-it';
-import { computed } from 'vue';
+    import { computed } from 'vue';
 
     const props = defineProps({
         value: {

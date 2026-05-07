@@ -85,5 +85,8 @@ export const isInstalled = (plugin) => {
 }
 
 export const getPluginTitle = (plugin) => {
-    return plugin.metadata?.title || plugin.name;
+    let pluginName = plugin.metadata?.title || plugin.name;
+    // Adds a space between camelCase words, e.g. "MyPlugin" becomes "My Plugin"
+    pluginName = pluginName.replace(/([a-z])([A-Z])/g, '$1 $2');
+    return pluginName;
 }
