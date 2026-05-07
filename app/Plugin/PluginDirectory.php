@@ -61,9 +61,14 @@ class PluginDirectory {
         $path = self::getPath($pluginName);
         return PluginManifest::read($path);
     }
+    
+    public function remove() {
+        sp_remove_dir($this->getPluginPath());
+    }
 
     public function readChangelog(): string {
-        $changelog = $this->getPath('CHANGELOG.md');
+        $changelog = $this->getPluginPath('CHANGELOG.md');
+        info("Reading changelog for plugin {$this->plugin->name} from path {$changelog}.");
         if(!File::isFile($changelog)) {
             return '';
         }

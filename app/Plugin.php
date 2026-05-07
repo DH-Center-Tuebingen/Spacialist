@@ -2,6 +2,8 @@
 
 namespace App;
 
+use App\Plugin\PluginManifest;
+use App\Services\PluginManager;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 
@@ -15,6 +17,12 @@ class Plugin extends Model {
      * @var array
      */
     protected $fillable = [
+        'name',
+        'version',
+        'uuid',
+        'installed_at',
+        'update_available',
+        'metadata',
     ];
 
     /**
@@ -23,6 +31,7 @@ class Plugin extends Model {
      * @var array
      */
     protected $casts = [
+        'metadata' => 'array',
         'installed_at' => 'datetime',
     ];
 
@@ -37,7 +46,7 @@ class Plugin extends Model {
     //     }
     //     return self::pluginDirectory() . Str::start($path, '/');
     // }
-    
+
     public static function getInstalledPlugins(): Collection {
         return self::whereNotNull('installed_at')->get();
     }
@@ -126,20 +135,45 @@ class Plugin extends Model {
         return $basePath;
     }
 
-    public static function updateOrCreateFromInfo(array $info): Plugin {
-        $name = $info['name'];
+    // public function getRegisteredAttributes(): array {
+    //     $info = $this->getInfo();
+    //     $attributes = [];
+    //     if($info !== false) {
+    //         if(array_key_exists('attributes', $info)) {
+    //             $attributes = $info['attributes']['attribute'];
+    //             // If only one <attribute> exists, this <attribute> is returned
+    //             // instead of an array, but we always want an array
+    //             if(array_key_exists('@attributes', $attributes)) {
+    //                 $attributes = [$attributes];
+    //             }
+    //         }
+    //     }
+    //     return $attributes;
+    // }
+
+    public static function updateOrCreateFromManifest(PluginManifest $manifest): Plugin {
+        $name = $manifest->getName();
         $plugin = self::where('name', $name)->first();
-        // discovered new Plugin, add it to DB
-        
+
+        $isCreation = false;
         if(!isset($plugin)) {
             $plugin = new self();
-            $plugin->name = $name;
-            $plugin->version = $info['version'];
             $plugin->uuid = Str::uuid();
-            $plugin->save();
-        } else {
-            $plugin->updateUpdateState($info['version']);
+            $plugin->name = $name;
+            $isCreation = true;
         }
+
+        $plugin->version = $manifest->getVersion();
+        $plugin->metadata = [
+            'authors' => $manifest->getAuthors(),
+            'description' => $manifest->getDescription(),
+            'licence' => $manifest->getLicence(),
+        ];
+
+        if(!$isCreation) {
+            $plugin->updateUpdateAvailable($manifest->getVersion());
+        }
+        $plugin->save();
 
         return $plugin;
     }
@@ -168,7 +202,7 @@ class Plugin extends Model {
     //     foreach($list as $ap) {
     //         $info = self::getPluginInfo($ap);
     //         if($info !== FALSE) {
-    //             self::updateOrCreateFromInfo($info);
+    //             self::updateOrCreateFromManifest($info);
     //         }
     //     }
     // }
@@ -180,24 +214,24 @@ class Plugin extends Model {
     //         return NULL;
     //     }
 
-    //     $plugin = self::updateOrCreateFromInfo($info);
+    //     $plugin = self::updateOrCreateFromManifest($info);
     //     return $plugin;
     // }
 
-    public static function getWithMetadata() {
-        app(PluginManager::class)->discover();
-        $plugins = self::all();
+    // public static function getWithMetadata() {
+    //     // app(PluginManager::class)->discoveryService->discover();
+    //     $plugins = self::all();
 
-        foreach($plugins as $plugin) {
-            $plugin->metadata = $plugin->getMetadata();
-            $plugin->changelog = $plugin->getChangelog();
-        }
-        return $plugins;
-    }
+    //     foreach($plugins as $plugin) {
+    //         $plugin->metadata = $plugin->getMetadata();
+    //         $plugin->changelog = $plugin->getChangelog();
+    //     }
+    //     return $plugins;
+    // }
 
 
 
-    public function updateUpdateState($fromInfoVersion): void {
+    public function updateUpdateAvailable($fromInfoVersion): void {
         if($this->version != $fromInfoVersion) {
             // installed version splitted
             preg_match('/(\d+)\.(\d+).(\d+)(-.+)?/', $this->version, $iv);
@@ -213,7 +247,6 @@ class Plugin extends Model {
             } else {
                 $this->update_available = NULL;
             }
-            $this->save();
         }
     }
 

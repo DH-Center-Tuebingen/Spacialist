@@ -4,14 +4,13 @@ namespace App\Models\Plugin;
 use App\Plugin;
 use Illuminate\Database\Eloquent\Model;
 
-class CssFile extends Model
+class Attribute extends Model
 {
     protected $table = 'plugin_service_attributes';
 
     protected $fillable = [
         'plugin_id',
         'src',
-        'order',
     ];
 
     /**

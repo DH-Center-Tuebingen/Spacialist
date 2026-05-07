@@ -4,6 +4,7 @@ namespace App\Services\Plugin;
 
 use App\Models\Plugin\Scopes;
 use App\Plugin;
+use App\Plugin\PluginManifest;
 use App\Support\BootstrapCache;
 use App\Support\Log\PluginLog;
 
@@ -17,20 +18,11 @@ class ScopeService extends PluginService {
         return 'plugin_scopes';
     }
 
-    public function install(Plugin $plugin): void {
+    public function install(Plugin $plugin, PluginManifest $manifest): void {
         $scopes = $this->getScopesFor($plugin);
         $this->clearScopesOf($plugin);
         $this->createScopesFor($plugin, $scopes);
         $this->cache();
-    }
-
-    public function update(Plugin $plugin): void {
-    }
-
-    public function uninstall(Plugin $plugin): void {
-    }
-
-    public function remove(Plugin $plugin): void {
     }
 
     protected function clearScopesOf(Plugin $plugin): void {

@@ -5,10 +5,7 @@ namespace App\Services\Plugin;
 use App\Permission;
 use App\Plugin;
 use App\Plugin\PluginDirectory;
-use App\RolePreset;
-use App\RolePresetPlugin;
-
-use Illuminate\Support\Facades\DB;
+use App\Plugin\PluginManifest;
 use Illuminate\Support\Facades\File;
 
 /**
@@ -18,51 +15,97 @@ use Illuminate\Support\Facades\File;
  */
 class PermissionService extends PluginService {
 
-    /**
-     * Install role presets defined in a plugin's role-presets.json
-     */
-    public function install(Plugin $plugin): void {
+    private array $existingPermissions = [];
+
+    public function install(Plugin $plugin, PluginManifest $manifest): void {
         $this->addPermissions($plugin);
     }
 
-    /**
-     * Remove all role presets that belong to a plugin
-     */
-    public function uninstall(Plugin $plugin): void {
+    public function uninstall(Plugin $plugin, PluginManifest $manifest): void {
         $this->removePermissions($plugin);
     }
-    
-    public function onBeforeUpdate(Plugin $plugin): void
-    {
-        $this->uninstall($plugin);
+
+    public function onBeforeUpdate(Plugin $plugin, PluginManifest $manifest): void {
+        $this->existingPermissions = $this->getPermissions($plugin);
     }
-    
-    public function onAfterUpdate(Plugin $plugin): void
-    {
-        $this->install($plugin);
+
+    public function onAfterUpdate(Plugin $plugin, PluginManifest $manifest): void {
+        $updatePermissions = $this->getPermissions($plugin);
+        try {
+            // TODO:: IMPROVE:: For simplicity we currently just assume that the permsets are the same: read, write, delete and export.
+            for($existingIndex = count($this->existingPermissions) - 1; $existingIndex >= 0; $existingIndex--) {
+                $existingGroup = array_keys($this->existingPermissions)[$existingIndex];
+                for($updatedIndex = count($updatePermissions) - 1; $updatedIndex >= 0; $updatedIndex++) {
+                    $updateGroup = array_keys($updatePermissions)[$updatedIndex];
+                    if($existingGroup === $updateGroup) {
+                        array_slice($updatePermissions, $updatedIndex, 1);
+                        array_slice($this->existingPermissions, $existingIndex, 1);
+                        break;
+                    }
+                }
+            }
+
+            // Remove permissions that are not in the updated manifest anymore
+            $this->removePermissionGroups($this->existingPermissions);
+
+            // Add permissions that are new in the updated manifest
+            $this->addPermissions($plugin);
+
+        } catch(\Exception $e) {
+            $this->existingPermissions = [];
+            throw $e;
+        }
     }
 
     /**
+     *  Adds permissions defined in the plugin's permissions.json to the system.
      * 
      * @param Plugin $plugin
      * @return void
      */
     private function addPermissions(Plugin $plugin): void {
         $permGroups = $this->getPermissions($plugin);
+        $this->addPermissionGroups($permGroups);
+    }
+
+    /**
+     * Add all permissions defined in the given permission groups to the system.
+     * 
+     * @param array $permGroups - An associative array where keys are permission group names and values are arrays of permissions. Each permission is an associative array containing 'name', 'display_name', and 'description' keys.
+     * @return void
+     */
+    private function addPermissionGroups(array $permGroups): void {
         foreach($permGroups as $group => $permSet) {
             foreach($permSet as $perm) {
-                $permission = new Permission();
-                $permission->name = $group . "_" . $perm['name'];
-                $permission->display_name = $perm['display_name'];
-                $permission->description = $perm['description'];
-                $permission->guard_name = 'web';
+                $permission = $this->createPermission($group, $perm);
                 $permission->save();
             }
         }
     }
 
+    /**
+     * Creates an unsaved Permission model instance based on the given group and permission data.
+     * 
+     * @param string $group - The permission group name
+     * @param array $permission - An associative array containing 'name', 'display_name', and 'description' keys for the permission
+     * @param string $guardName - The guard name for the 'Spatie' permission (default is 'web')
+     * @return Permission - Returns an unsaved Permission model instance
+     */
+    private function createPermission(string $group, array $permission, string $guardName = 'web'): Permission {
+        $permission = new Permission();
+        $permission->name = $group . "_" . $permission['name'];
+        $permission->display_name = $permission['display_name'];
+        $permission->description = $permission['description'];
+        $permission->guard_name = $guardName;
+        return $permission;
+    }
+
     private function removePermissions(Plugin $plugin): void {
         $permGroups = $this->getPermissions($plugin);
+        $this->removePermissionGroups($permGroups);
+    }
+
+    private function removePermissionGroups(array $permGroups): void {
         foreach($permGroups as $group => $permSet) {
             foreach($permSet as $perm) {
                 Permission::where('name', $group . "_" . $perm['name'])->delete();
@@ -70,7 +113,7 @@ class PermissionService extends PluginService {
         }
     }
 
-    public function getPermissions(Plugin $plugin): mixed { 
+    public function getPermissions(Plugin $plugin): mixed {
         $pluginDirectory = new PluginDirectory($plugin);
         $pluginPermissionPath = $pluginDirectory->getPluginPath('App/permissions.json');
         if(!File::isFile($pluginPermissionPath)) {

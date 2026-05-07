@@ -6,6 +6,7 @@ import {
     publishScript,
     remove,
     refresh,
+    refreshInfo as refreshInfoApi,
     uninstall,
     update,
     upload,
@@ -35,7 +36,7 @@ export const usePluginStore = defineStore('plugin', {
     state: _ => ({
         plugins: [],
         stores: {},
-        retisteredAttributes: {},
+        registeredAttributes: {},
         registeredPreferences: {
             user: {},
             system: {},
@@ -114,6 +115,13 @@ export const usePluginStore = defineStore('plugin', {
                 appendScriptsAndStyles(data);
             });
         },
+        // getPluginAttributeLabel(datatype) {
+        //     const attributeType = this.registerAttribute.find(attributeType => {
+        //         return attributeType.datatype == datatype && !!attributeType.plugin;
+        //     });
+
+        //     return attributeType?.label;
+        // },
         /**
          * Helper function to compose the plugin slot name. This is used to avoid conflicts between plugins, that want to register in the same slot, 
          * e.g. "tab". The plugin slots are composed of the plugin name and the slot name, e.g. 'file-tab'.
@@ -139,7 +147,7 @@ export const usePluginStore = defineStore('plugin', {
         },
         async publishScript(plugin) {
             console.log('Publishing script for plugin', plugin);
-            if(plugin.scripts){
+            if(plugin.scripts) {
                 removeScripts(plugin.scripts);
             }
             const downloadUrl = await publishScript(plugin.id)
@@ -153,7 +161,7 @@ export const usePluginStore = defineStore('plugin', {
             this.set(plugins);
         },
         async refreshInfo(plugin) {
-            const data = await refreshInfo(plugin.id);
+            const data = await refreshInfoApi(plugin.id);
             const idx = this.plugins.find(p => p.id == data.id)
             if(idx > -1) {
                 this.plugins[idx] = data;
@@ -171,13 +179,15 @@ export const usePluginStore = defineStore('plugin', {
         },
         registerAttribute(data) {
             const { datatype } = data;
+            console.trace('Registering plugin attribute with datatype:', datatype, data);
+
 
             if(!datatype) {
                 console.error('Plugin attribute is missing datatype', data);
                 return;
             }
 
-            if(!this.registereAttributes[datatype]) {
+            if(this.registeredAttributes[datatype]) {
                 console.error('Plugin attribute already exists', datatype);
                 return;
             }

@@ -62,7 +62,7 @@ trait BootstrapCache
     /**
      * Build the cache array from the source of truth.
      */
-    protected function cache(): array {
+    public function cache(): array {
         File::ensureDirectoryExists(dirname($this->getAppPath()));
 
         $this->data = $this->fetch();

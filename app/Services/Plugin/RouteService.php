@@ -2,6 +2,7 @@
 namespace App\Services\Plugin;
 
 use App\Plugin;
+use App\Models\Plugin\Route as RouteModel;
 use App\Support\BootstrapCache;
 use Illuminate\Support\Facades\Schema;
 use App\Plugin\PluginDirectory;
@@ -17,12 +18,7 @@ class RouteService extends PluginService {
     }
 
     public function fetch(): array {
-        $routes = [];
-        $installedPlugins = app(PluginManager::class)->getInstalledPlugins();
-        foreach($installedPlugins as $plugin) {
-            $routes = array_merge($routes, $plugin->getRoutes());
-        }
-        return $routes;
+        return RouteModel::all()->toArray();
     }
 
     public function mapRoutes() {

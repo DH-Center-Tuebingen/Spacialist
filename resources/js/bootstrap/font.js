@@ -28,8 +28,10 @@ import {
 import {
     faCircle as faCircleReg,
     faCircleCheck as faCircleCheckReg,
+    faCircleUser,
     faClipboard as faClipboardReg,
     faKeyboard,
+    faFileLines,
     faLaugh,
     faQuestionCircle,
     faRectangleList,
@@ -304,6 +306,7 @@ library.add(
     faCircle,
     faCircleCheck,
     faCircleCheckReg,
+    faCircleUser,
     faCircleReg,
     faClipboard,
     faClock,

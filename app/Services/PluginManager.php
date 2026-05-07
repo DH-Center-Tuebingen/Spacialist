@@ -3,18 +3,19 @@
 namespace App\Services;
 
 use Carbon\Carbon;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
 
 use App\Plugin;
 use App\Plugin\PluginDirectory;
 use App\Plugin\PluginManifest;
 use App\Services\Plugin\AccessPointsService;
+use App\Services\Plugin\AttributeService;
 use App\Services\Plugin\CssService;
+use App\Services\Plugin\DependencyService;
 use App\Services\Plugin\HookService;
 use App\Services\Plugin\MigrationService;
 use App\Services\Plugin\PermissionService;
-use App\Services\Plugin\RolePresetService;
+use App\Services\Plugin\PluginDiscoveryService;
 use App\Services\Plugin\RouteService;
 use App\Services\Plugin\ScopeService;
 use App\Services\Plugin\ScriptService;
@@ -26,146 +27,64 @@ use App\Support\BootstrapCache;
  * 
  * It orchestrates the various features of the plugin system, 
  * such as hooks, migrations, permissions, ... .
+ * 
+ * To add a new feature to the plugin system, you can create a new PluginService
+ * that implements the corresponding methods for installation, update, and uninstallation.
  */
 
 class PluginManager {
+
     use BootstrapCache;
 
     private array $pluggableServices = [];
-    // private array $cachedServices = [];
 
     public function __construct(
         public readonly AccessPointsService $accessPoints,
+        public readonly AttributeService $attributeService,
         public readonly CssService $cssService,
+        public readonly DependencyService $dependencyService,
         public readonly HookService $hookService,
         public readonly MigrationService $migrationService,
         public readonly PermissionService $permissionService,
-        // public readonly RolePresetService $rolePresetService,
         public readonly RouteService $routeService,
         public readonly ScriptService $scriptService,
         public readonly ScopeService $scopeService,
+        public readonly PluginDiscoveryService $discoveryService,
     ) {
         $this->pluggableServices = func_get_args();
     }
 
     protected function getCacheName(): string {
-        return 'plugins';
+        return "plugins";
     }
 
     protected function fetch(): array {
-        $dirs = File::directories(base_path('app/Plugins'));
-        $cachedPlugins = [];
-        foreach($dirs as $dir) {
-            $manifest = PluginManifest::read($dir);
-            if($manifest !== false) {
-                $info = $manifest->getContent();
+        return Plugin::all()->toArray();
+        // $dirs = File::directories(base_path('app/Plugins'));
+        // $cachedPlugins = [];
+        // foreach($dirs as $dir) {
+        //     $manifest = PluginManifest::read($dir);
+        //     if($manifest !== false) {
+        //         $info = $manifest->getContent();
 
-                if(!isset($info['name']) || !isset($info['version'])) {
-                    continue;
-                }
+        //         if(!isset($info['name']) || !isset($info['version'])) {
+        //             continue;
+        //         }
 
-                $plugin = Plugin::updateOrCreateFromInfo($info);
+        //         $plugin = Plugin::updateOrCreateFromManifest($info);
 
-                $cachedPluginInfo = [
-                    'id' => $plugin->id,
-                    'name' => $plugin->name,
-                    'uuid' => $plugin->uuid,
-                    'version' => $plugin->version,
-                    'installed' => $plugin->installed_at ? $plugin->installed_at->toDateTimeString() : null,
-                    'provider' => null,
-                ];
-                $cachedPlugins[] = $cachedPluginInfo;
-            }
-        }
-        return $cachedPlugins;
-    }
-
-    public function getPlugins() {
-        $data = static::getData();
-
-        return array_map(function ($p) {
-            $plugin = new Plugin();
-            $plugin->id = $p['id'];
-            $plugin->name = $p['name'];
-            $plugin->uuid = $p['uuid'];
-            $plugin->version = $p['version'];
-            $plugin->installed_at = $p['installed'];
-            return $plugin;
-        }, $data);
-    }
-
-    /**
-     * Retrieves all installed plugins preferably from the Bootstrap Cache.
-     * If the cache is not set it will be built.
-     * 
-     * @return array
-     */
-    public function getInstalledPlugins(): array {
-        return array_filter($this->getPlugins(), function ($p) {
-            return $p['installed_at'] !== null;
-        });
-    }
-
-    public function rebuildPluginCache() {
-        // TODO::
-    }
-
-    //  public function rebuildPluginCache(){
-    //     //Iterate over Plugin directory and cache all available plugins
-    //     $dirs = File::directories(base_path('app/Plugins'));
-    //     $cachedPlugins = [];
-    //     foreach($dirs as $dir) {
-    //         $info = Plugin::getPluginInfo($dir);
-    //         if($info !== false) {
-
-    //             if(!isset($info['name']) || !isset($info['version'])) {
-    //                 continue;
-    //             }
-
-    //             $plugin = Plugin::updateOrCreateFromInfo($info);
-
-    //             $cachedPluginInfo = [
-    //                 'name' => $plugin->name,
-    //                 'uuid' => $plugin->uuid,
-    //                 'version' => $plugin->version,
-    //                 'provider' => null,
-    //             ];
-    //             $cachedPlugins[] = $cachedPluginInfo;
-    //         }
-    //     }
-    //     $cacheContent = "<?php\n\nreturn " . var_export($cachedPlugins, true) . ";\n";
-    //     File::put(base_path('bootstrap/cache/plugins.php'), $cacheContent);
-    //  }
-
-    // public  function getCachedPlugins(){
-    //     try{
-    //         $plugins = require(base_path('bootstrap/cache/plugins.php'));
-    //     }catch(\Exception $e){
-    //         $this->rebuildPluginCache();
-    //         $plugins = require(base_path('bootstrap/cache/plugins.php'));
-    //     }
-    //     return $plugins;
-    //  }
-
-    /**
-     * Discovers and returns a list of all plugins.
-     * 
-     * @param bool $metadata
-     * @return \Illuminate\Database\Eloquent\Collection<int, Plugin>
-     */
-    public function list(bool $metadata = false): Collection {
-        self::discover();
-        //TODO: Should be called from cache.
-        $plugins = Plugin::all();
-
-        if($metadata) {
-            foreach($plugins as $plugin) {
-                $plugin->metadata = $plugin->getMetadata();
-                $plugin->changelog = $plugin->getChangelog();
-            }
-        }
-
-        return $plugins;
+        //         $cachedPluginInfo = [
+        //             'id' => $plugin->id,
+        //             'name' => $plugin->name,
+        //             'uuid' => $plugin->uuid,
+        //             'version' => $plugin->version,
+        //             'installed' => $plugin->installed_at ? $plugin->installed_at->toDateTimeString() : null,
+        //             'provider' => null,
+        //         ];
+        //         $cachedPlugins[] = $cachedPluginInfo;
+        //     }
+        // }
+        // return $cachedPlugins;
     }
 
     public function cleanup(array $list): void {
@@ -182,65 +101,67 @@ class PluginManager {
         }
     }
 
+    public function getPlugins() {
+        $data = static::getData();
+
+        return array_map(function ($p) {
+            $plugin = new Plugin();
+            $plugin->id = $p['id'];
+            $plugin->name = $p['name'];
+            $plugin->uuid = $p['uuid'];
+            $plugin->version = $p['version'];
+            $plugin->installed_at = $p['installed_at'];
+            $plugin->updated_at = $p['updated_at'];
+            $plugin->created_at = $p['created_at'];
+            $plugin->metadata = $p['metadata'] ?? [];
+            return $plugin;
+        }, $data);
+    }
+
     /**
-     * Traverses the plugin directory and finds all available plugins.
+     * Retrieves all installed plugins preferably from the Bootstrap Cache.
+     * If the cache is not set it will be built.
      * 
-     * @return void
+     * @return array
      */
-    public function discover(): array {
-        $availablePlugins = File::directories(PluginDirectory::getPath());
-        self::discoverList($availablePlugins);
-        self::cleanup($availablePlugins);
-    }
-
-    public static function discoverPluginByName($name): ?Plugin {
-        $pluginPath = PluginDirectory::getPath($name);
-        $info = self::getPluginInfo($pluginPath);
-        if($info === FALSE) {
-            return NULL;
-        }
-
-        $plugin = self::updateOrCreateFromInfo($info);
-        return $plugin;
-    }
-
-    public function discoverList(array $list): void {
-        foreach($list as $ap) {
-            $info = self::getPluginInfo($ap);
-            if($info !== FALSE) {
-                self::updateOrCreateFromInfo($info);
-            }
-        }
+    public function getInstalledPlugins(): array {
+        return array_filter($this->getPlugins(), function ($p) {
+            return $p['installed_at'] !== null;
+        });
     }
 
     public function install(Plugin $plugin): void {
 
+        $manifest = PluginManifest::fromPlugin($plugin);
+
         foreach($this->pluggableServices as $service) {
-            $service->onBeforeInstall($plugin);
+            $service->onBeforeInstall($plugin, $manifest);
         }
 
         foreach($this->pluggableServices as $service) {
-            $service->install($plugin);
+            $service->install($plugin, $manifest);
         }
 
-        $this->clearCache($plugin);
+        $this->rebuildPluginCache();
         $plugin->installed_at = Carbon::now();
         $plugin->save();
 
         foreach($this->pluggableServices as $service) {
-            $service->onAfterInstall($plugin);
+            $service->onAfterInstall($plugin, $manifest);
         }
     }
 
     public function update(Plugin $plugin): string {
         $oldVersion = $plugin->version;
+        $manifest = PluginManifest::fromPlugin($plugin);
+
 
         foreach($this->pluggableServices as $service) {
-            $service->onBeforeUpdate($plugin);
+            $service->onBeforeUpdate($plugin, $manifest);
         }
 
         foreach($this->pluggableServices as $service) {
-            $service->update($plugin);
+            $service->update($plugin, $manifest);
         }
 
         $info = $plugin->getInfo();
@@ -249,66 +170,76 @@ class PluginManager {
         $plugin->save();
 
         foreach($this->pluggableServices as $service) {
-            $service->onAfterUpdate($plugin);
+            $service->onAfterUpdate($plugin, $manifest);
         }
 
         return $oldVersion;
     }
 
     public function uninstall(Plugin $plugin): void {
+        $manifest = PluginManifest::fromPlugin($plugin);
+
         foreach($this->pluggableServices as $service) {
-            $service->onBeforeUninstall($plugin);
+            $service->onBeforeUninstall($plugin, $manifest);
         }
 
         foreach($this->pluggableServices as $service) {
-            $service->uninstall($plugin);
+            $service->uninstall($plugin, $manifest);
         }
 
-        $this->clearCache($plugin);
+        $this->rebuildPluginCache();
         $plugin->installed_at = null;
         $plugin->save();
 
         foreach($this->pluggableServices as $service) {
-            $service->onAfterUninstall($plugin);
+            $service->onAfterUninstall($plugin, $manifest);
         }
     }
 
     public function remove(Plugin $plugin): void {
+        $manifest = PluginManifest::fromPlugin($plugin);
 
         foreach($this->pluggableServices as $service) {
-            $service->onBeforeRemove($plugin);
+            $service->onBeforeRemove($plugin, $manifest);
         }
 
         if(isset($plugin->installed_at)) {
-            $this->uninstall($plugin);
+            $this->uninstall($plugin, $manifest);
         }
 
         foreach($this->pluggableServices as $service) {
-            $service->remove($plugin);
+            $service->remove($plugin, $manifest);
         }
 
-        $pluginDirectory = new PluginDirectory($plugin);
-        sp_remove_dir($pluginDirectory->getPluginPath());
+        PluginDirectory::byPlugin($plugin)->remove();
         $plugin->delete();
 
         foreach($this->pluggableServices as $service) {
-            $service->onAfterRemove($plugin);
+            $service->onAfterRemove($plugin, $manifest);
         }
     }
 
-    public function clearCache(Plugin $plugin): void {
+    public function rebuildPluginCache() {
+        $this->cache();
+        foreach($this->pluggableServices as $service) {
+            // The problem with traits is, that we cannot identify them easily
+            // when they are implemented by the parent class. Therefore we use
+            // the method_exists to check if the method supports caching.
+            if(method_exists($service, 'cache')) {
+                $service->cache();
+            }
+        }
+    }
+    
+    public function clearCache(): void {
+        $this->clearCache();
         foreach($this->pluggableServices as $service) {
             // The problem with traits is, that we cannot identify them easily
             // when they are implemented by the parent class. Therefore we use
             // the method_exists to check if the method supports caching.
             if(method_exists($service, 'clearCache')) {
-                $service->clearCache($plugin);
+                $service->clearCache();
             }
         }
     }
-
-    // private function removePreferences(Plugin $plugin): void {
-    //     $id = Str::kebab($plugin->name);
-    //     Preference::where('label', 'ilike', "plugin.$id.%")->delete();
-    // }
 }

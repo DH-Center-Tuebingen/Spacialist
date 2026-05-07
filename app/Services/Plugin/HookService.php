@@ -39,15 +39,15 @@ class HookService extends PluginService{
         return 'plugin-hooks';
     }
 
-    public function install(Plugin $plugin): void {
+    public function install(Plugin $plugin, PluginManifest $manifest): void {
         $this->updateOrInstall($plugin);
     }
 
-    public function update(Plugin $plugin): void {
+    public function update(Plugin $plugin, PluginManifest $manifest): void {
         $this->updateOrInstall($plugin);
     }
 
-    public function uninstall(Plugin $plugin): void {
+    public function uninstall(Plugin $plugin, PluginManifest $manifest): void {
         Hook::where('plugin_id', $plugin->id)->delete();
     }
 

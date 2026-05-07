@@ -7,7 +7,7 @@
             class="card h-100"
             :style="computedStyle"
         >
-            <div class="card-body">
+            <div class="card-body d-flex flex-column">
                 <header class="d-flex justify-content-between gap-2 mb-1">
                     <h5 class="card-title mb-2">
                         {{ getPluginTitle(value) }}
@@ -17,8 +17,12 @@
                             <span class="badge bg-dark">
                                 v{{ value.version }}
                             </span>
-                            <span class="badge bg-primary ms-1">
-                                {{ value.metadata?.licence?.toUpperCase ? value.metadata.licence.toUpperCase() : '–' }}
+                            <span
+                                class="badge bg-primary ms-1"
+                                :title="t('global.licence')"
+                            >
+                                <i class="fa far fa-file-lines me-1" />
+                                {{ licence }}
                             </span>
                         </div>
 
@@ -57,8 +61,18 @@
                                     @click="pluiginStore.refreshInfo(value)"
                                 >
                                     <span class="ms-2">
-                                        {{ t('main.global.refresh') }}
+                                        {{ t('global.refresh') }}
                                     </span>
+                                </a>
+                                <div class="dropdown-divider"></div>
+                                <a
+                                    type="button"
+                                    class="dropdown-item text-danger"
+                                    @click="remove()"
+                                    >
+                                    <!-- :class="{disabled: isInstalled(), 'opacity-50': isInstalled()}" -->
+                                    <i class="fas fa-fw fa-trash" />
+                                    {{ t('global.remove') }}
                                 </a>
                             </div>
                         </div>
@@ -82,7 +96,7 @@
                     </li>
                 </ul>
                 <div
-                    class="overflow-auto"
+                    class="overflow-auto flex-fill mt-2"
                     style="max-height: 420px;"
                 >
                     <MigrationTab
@@ -104,15 +118,15 @@
             </div>
 
 
-            <footer class="card-footer d-flex flex-wrap gap-1">
+            <footer class="card-footer d-flex flex-wrap gap-1 justify-content-between">
                 <button
                     v-if="isInstalled()"
                     type="button"
-                    class="btn btn-sm btn-outline-warning"
+                    class="btn btn-sm btn-outline-danger"
                     @click="uninstall()"
                 >
                     <i class="fas fa-fw fa-times" />
-                    {{ t('main.plugins.deactivate') }}
+                    {{ t('global.deactivate') }}
                 </button>
                 <button
                     v-else
@@ -121,7 +135,7 @@
                     @click="install()"
                 >
                     <i class="fas fa-fw fa-plus" />
-                    {{ t('main.plugins.activate') }}
+                    {{ t('global.activate') }}
                 </button>
                 <div
                     v-if="updateAvailable()"
@@ -146,14 +160,6 @@
                         <i class="fas fa-fw fa-file-pen" />
                     </button>
                 </div>
-                <button
-                    type="button"
-                    class="btn btn-sm btn-outline-danger"
-                    @click="remove()"
-                >
-                    <i class="fas fa-fw fa-trash" />
-                    {{ t('main.plugins.remove') }}
-                </button>
             </footer>
         </div>
     </div>
@@ -162,6 +168,7 @@
 <script>
     import { computed, ref } from 'vue';
     import { useI18n } from 'vue-i18n';
+    import { useToast } from '@/plugins/toast.js';
 
     import {
         showChangelogModal,
@@ -169,11 +176,12 @@
 
     import usePluginStore from '@/bootstrap/stores/plugin.js';
     import { isInstalled as isPluginInstalled } from '@/helpers/plugins.js';
+    import { getPluginTitle } from '@/helpers/plugins';
 
     import ChangelogTab from '@/components/plugins/tab/Changelog.vue';
     import MigrationTab from '@/components/plugins/tab/Migration/Migration.vue';
-    import InformationTab from './tab/Information.vue';
-    import { getPluginTitle } from '../../helpers/plugins';
+    import InformationTab from '@/components/plugins/tab/Information.vue';
+
 
     export default {
         components: {
@@ -189,6 +197,8 @@
         },
         setup(props) {
             const { t } = useI18n();
+            const toast = useToast();
+
             const page = ref('info');
             const installing = ref(false);
 
@@ -206,7 +216,17 @@
                 showChangelogModal();
             };
             const install = async _ => {
-                await pluiginStore.install(props.value.id);
+                try {
+                    await pluiginStore.install(props.value.id);
+                } catch(e) {
+
+                    const error = e.response?.data?.error || e.message || 'Unknown error';
+
+                    toast.$toast(error, t('global.error.altoastert_title'), {
+                        channel: 'danger',
+                        duration: 10000,
+                    });
+                }
             };
             const uninstall = async _ => {
                 await pluiginStore.uninstall(props.value.id);
@@ -234,12 +254,17 @@
                 return {};
             });
 
+            const licence = computed(() => {
+                return props.value.metadata?.licence?.toUpperCase ? props.value.metadata.licence.toUpperCase() : '–';
+            });
+
             return {
                 computedStyle,
                 installing,
                 install,
                 isInstalled,
                 getPluginTitle,
+                licence,
                 page,
                 remove,
                 sections,

@@ -5,13 +5,14 @@ namespace App\Services\Plugin;
 use App\File\Directory;
 use App\Plugin;
 use App\Plugin\PluginDirectory;
+use App\Plugin\PluginManifest;
 use App\Services\PluginManager;
 use App\Support\Log\PluginLog;
 
 class ScriptService extends PluginService {
 
 
-    public function install(Plugin $plugin): void {
+    public function install(Plugin $plugin, PluginManifest $manifest): void {
         $this->publish($plugin);
     }
 
@@ -29,7 +30,6 @@ class ScriptService extends PluginService {
                 throw new \Exception("Could not read symlink for script file of plugin {$plugin->name}.");
             }
         }
-        info("Publishing script for plugin {$plugin->name} from path: {$scriptPath}");
         
         if(file_exists($scriptPath)) {
             $filehandle = fopen($scriptPath, 'r');
@@ -44,7 +44,7 @@ class ScriptService extends PluginService {
             $scriptPath = $storageDirectory->getDirectoryPath($scriptName);
             // When the target is a symlink to the actual file, we just skip the publishing process.
             if(is_link($scriptPath)) {
-                PluginLog::fromPlugin($plugin)->warning("Script for plugin {$plugin->name} is already published as a symlink. Skipping publishing process.");
+                PluginLog::for($plugin)->warning("Script for plugin {$plugin->name} is already published as a symlink. Skipping publishing process.");
                 return $this->getUrl($plugin);
             }
             
