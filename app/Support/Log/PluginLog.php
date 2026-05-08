@@ -4,6 +4,7 @@ namespace App\Support\Log;
 
 use App\Plugin;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 /*
  *  Should be overloaded inside a plugin to log with it's own name.
@@ -27,7 +28,7 @@ class PluginLog extends Log {
     }
 
     protected function formatMessage(string $message, array $context = []): string {
-        $pluginName = strtoupper($this->pluginName);
+        $pluginName = strtoupper(Str::kebab($this->pluginName));
         return "[$pluginName] " . $message;
     }
     

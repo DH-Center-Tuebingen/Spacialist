@@ -161,7 +161,6 @@ class MigrationService extends PluginService {
      */
     function getMigrationList(string $migrationDirectory, $rollback = false): array {
         if(file_exists($migrationDirectory) && is_dir($migrationDirectory)) {
-            info("FILE EXISTS");
             $migrations = collect(File::files($migrationDirectory))->map(function ($f) {
                 return $f->getFilename();
             });

@@ -15,7 +15,7 @@ class ScopeService extends PluginService {
     use BootstrapCache;
 
     protected function getCacheName(): string {
-        return 'plugin_scopes';
+        return 'plugin-scopes';
     }
 
     public function install(Plugin $plugin, PluginManifest $manifest): void {

@@ -11,6 +11,9 @@ class Route extends Model
     protected $fillable = [
         'plugin_id',
         'src',
+        'plugin_name',
+        'plugin_slug',
+        'middleware',
     ];
 
     /**

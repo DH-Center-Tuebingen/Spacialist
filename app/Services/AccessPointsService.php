@@ -5,19 +5,12 @@ namespace App\Services;
 use App\Services\PluginManager;
 
 /**
- * Adds capability to publish custom CSS files to a plugin.
  * 
- * '''xml
- * ...
- * <accesspoint>
- *     <path>/path_to_access_point</path> <!-- full path e.g. https://spacialist.example.com/path_to_access_point -->
- *     <id>ExamplePluginId</id>
- *     <label>path.to.accesspoint.label</label>
- * </accesspoint>
- * ...
- * '''
+ * Manages all acces points.
+ * 
+ * This combines the CORE_ACCESSPOINTS and the pluglin accespoints.
  */
-class AccessPointsService{
+class AccessPointsService {
 
     public const /*array*/ CORE_ACCESSPOINTS = [
         "Default" => [
