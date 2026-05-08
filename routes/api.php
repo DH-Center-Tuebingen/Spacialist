@@ -43,7 +43,8 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function() {
 // PLUGINS
 Route::middleware('auth:sanctum')->prefix('v1/plugin')->group(function() {
     Route::get('', 'PluginController@getPlugins');
-    Route::get('/{id}', 'PluginController@installPlugin')->where('id', '[0-9]+');
+    Route::get('/{plugin}', 'PluginController@installPlugin');
+    Route::get('/{plugin}/changelog', 'PluginController@getChangelog');
     Route::get('/migrate/{plugin}/check', 'PluginController@getMigrationState');
 
     Route::post('', 'PluginController@uploadPlugin');
@@ -54,11 +55,11 @@ Route::middleware('auth:sanctum')->prefix('v1/plugin')->group(function() {
     Route::post('/migrate/{plugin}/rollback', 'PluginController@rollback');
     Route::post('/migrate/{plugin}/force_add', 'PluginController@addMigrationToDatabase');
 
-    Route::patch('/{id}', 'PluginController@updatePlugin')->where('id', '[0-9]+');
+    Route::patch('/{plugin}', 'PluginController@updatePlugin');
 
     // To 'disable' a plugin is just a modification, not a deletion operation.
-    Route::delete('/{id}', 'PluginController@uninstallPlugin')->where('id', '[0-9]+');
-    Route::delete('/remove/{id}', 'PluginController@removePlugin')->where('id', '[0-9]+');
+    Route::delete('/{plugin}', 'PluginController@uninstallPlugin');
+    Route::delete('/remove/{plugin}', 'PluginController@removePlugin');
 });
 
 // ENTITY

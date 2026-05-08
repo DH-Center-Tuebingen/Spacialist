@@ -10,10 +10,13 @@ use Illuminate\Support\Str;
 use SimpleXMLElement;
 
 /**
- * Each plugin has a manifest file (plugin.xml) that contains metadata about the plugin, such as its name, version, author, description, 
- * and also requests specific permissions for the plugin, like custom components, preferences, Hooks, ... .
+ * Each plugin has a manifest file (plugin.xml) that contains metadata 
+ * about the plugin, such as its name, version, author, description, 
+ * and also requests specific permissions for the plugin, like custom 
+ * components, preferences, Hooks, ... .
  * 
- * This utility class is responsible for parsing the plugin manifest and providing access to its contents. 
+ * This utility class is responsible for parsing the plugin manifest 
+ * and providing access to its contents. 
  */
 class PluginManifest {
 
@@ -105,10 +108,7 @@ class PluginManifest {
         
         
         foreach($xmlNodeArray as $xmlNode) {
-            
             $tag = $xmlNode->getName();
-            
-            
             $attributes = [];
             foreach($xmlNode->attributes() as $attrName => $attrValue) {
                 $attributes[$attrName] = (string) $attrValue;
@@ -126,34 +126,6 @@ class PluginManifest {
         
         return $children;
     }
-
-    // public function getAccessPoints(): array {
-    //     $accesspoints = [];
-    //     $addedNames = [];
-    //     $addedPaths = [];
-    //     if(array_key_exists('accesspoints', $this->content)) {
-    //         foreach($this->content['accesspoints'] as $accesspoint) {
-    //             $name = $this->getName() . '-' . $accesspoint['id'];
-    //             $label = $accesspoint['label'];
-    //             $path = Str::finish(Str::start($accesspoint['path'], '/'), '/');
-    //             if(array_key_exists($name, $addedNames)) {
-    //                 throw new \Exception("An accesspoint with the name ($name) already exists");
-    //             }
-    //             if(array_key_exists($path, $addedPaths)) {
-    //                 throw new \Exception("An accesspoint with the path ($path) already exists");
-    //             }
-
-    //             $addedNames[$name] = true;
-    //             $addedPaths[$path] = true;
-
-    //             $accesspoints[$name] = [
-    //                 'label' => $label,
-    //                 'path' => $path,
-    //             ];
-    //         }
-    //     }
-    //     return $accesspoints;
-    // }
 
     // STATIC METHODS
 

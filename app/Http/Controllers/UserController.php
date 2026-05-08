@@ -8,8 +8,8 @@ use App\Permission;
 use App\Role;
 use App\User;
 use App\Http\Controllers\Controller;
-use App\Plugin;
 use App\RolePreset;
+use App\Services\Plugin\PermissionService;
 use App\Services\PluginManager;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
@@ -142,7 +142,7 @@ class UserController extends Controller {
             $groups['plugins'] = [];
             foreach($installedPlugins as $plugin) {
                 $slug = $plugin->slugName();
-                $groups['plugins'][$slug] = app(PluginManager::class)->permissionService->getPermissionGroups($plugin);
+                $groups['plugins'][$slug] = app(PermissionService::class)->getPermissionGroups($plugin);
             }
         }
 

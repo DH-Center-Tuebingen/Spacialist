@@ -14,6 +14,9 @@ return new class extends Migration
         Schema::create('plugin_service_routes', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('plugin_id');
+            $table->string('plugin_name');
+            $table->string('plugin_slug');
+            $table->string('middleware')->default('api');
             $table->string('src');
             $table->timestamps();
 
