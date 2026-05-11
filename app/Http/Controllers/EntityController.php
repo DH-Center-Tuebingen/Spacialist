@@ -217,7 +217,7 @@ class EntityController extends Controller {
      * Bundles the requests of data reference, metadata and parentValue
      * to achieve much better performance.
      */
-    public function getEntityDetail(int $id) {
+    public function getBundledData(int $id) {
          $user = auth()->user();
         if(!$user->can('entity_read') || !$user->can('entity_data_read')) {
             return response()->json([
@@ -232,15 +232,6 @@ class EntityController extends Controller {
             return response()->json([
                 'error' => __('This entity does not exist'),
             ], 400);
-        }
-        if(isset($aid)) {
-            try {
-                Attribute::findOrFail($aid);
-            } catch(ModelNotFoundException $e) {
-                return response()->json([
-                    'error' => __('This attribute does not exist'),
-                ], 400);
-            }
         }
 
         $data = $entity->getData();

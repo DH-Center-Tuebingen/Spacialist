@@ -7,7 +7,6 @@ All notable changes to this project will be documented in this file.
 - Plugin-System now supports custom components, e.g. attribute types
 - Plugin-System now supports PluginScopes
 - .env variable `ALLOW_FILESYSTEM_MIGRATIONS` to explcitly enable filesystem migrations
-- API endpoint for getting all entity details data in one request: GET::v1/entity/{id}/entity_detail
 - Multi move in entity tree
 - Option to set entity attributes as required fields
 ### Fixed
@@ -27,6 +26,7 @@ All notable changes to this project will be documented in this file.
 - Migrations that require filesystem changes can now be handled using the `App\Traits\FilesystemMigration` trait (call `$this->safelyMoveDirectoryBetweenDisks(...)` with `ALLOW_FILESYTEM_MIGRATIONS` set to `true`)
 - Disable Caret in disabled _Single Choice Dropdowns_ and _Multiple Choice Dropdowns_
 - _Attribute Usage Indicator_ in _Data Model Editor_ now also displays names of _Entity Types_ that use this _Attribute_
+- API endpoint for getting all entity data in one request to speed up entity loading
 
 ## 0.11.1
 ### Added
