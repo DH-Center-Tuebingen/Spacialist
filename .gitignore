@@ -44,3 +44,5 @@ yarn.lock
 
 # Playground
 /playground
+
+resources/tauri

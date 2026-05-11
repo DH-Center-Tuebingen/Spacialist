@@ -30,7 +30,17 @@ class AttributeService extends PluginService{
     
     protected function fetch(): array
     {
-        return PluginAttribute::all()->toArray();
+        $attributes = PluginAttribute::with('plugin')->get()->toArray();            
+        return array_map(function($attribute) {
+            return [
+                'id' => $attribute['id'],
+                'plugin_id' => $attribute['plugin_id'],
+                'plugin_name' => $attribute['plugin']['name'] ?? null,
+                'src' => $attribute['src'],
+                'created_at' => $attribute['created_at'],
+                'updated_at' => $attribute['updated_at'],
+            ];
+        }, $attributes);
     }
     
     public function getAttributesFromManifest(Plugin $plugin, PluginManifest $manifest): array {
