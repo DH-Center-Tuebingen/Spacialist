@@ -29,7 +29,16 @@ class AccessPointsService extends PluginService implements ManifestContent {
     }
 
     public function fetch(): array {
-        return AccessPoint::all()->toArray();
+        $accessPoints = AccessPoint::all()->toArray();
+        $mappedAccessPoints = [];
+        foreach($accessPoints as $accessPoint) {
+            $mappedAccessPoints[$accessPoint['identifier']] = [
+                'id' => $accessPoint['id'],
+                'path' => $accessPoint['path'],
+                'label' => $accessPoint['label'],
+            ];
+        }
+        return $mappedAccessPoints;
     }
 
     public function install(Plugin $plugin, PluginManifest $manifest): void {

@@ -39,7 +39,10 @@ class HomeController extends Controller {
     public function checkAccesspointAccess(Request $request) {
         $user = auth()->user();
         $accessPath = Str::finish($request->get('endpoint', '/'), '/');
-
+        // We remove the trailing slash as currently the access points are
+        // stored without trailing slashes.
+        $accessPath= substr($accessPath, 0, -1);
+                        
         if(!isset($user->accesspoints) || count($user->accesspoints) === 0) {
             // do not redirect if user has no access points defined (aka access to everything)
             return response()->json(null, 204);
