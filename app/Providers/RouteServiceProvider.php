@@ -40,8 +40,15 @@ class RouteServiceProvider extends ServiceProvider
 
         $this->mapWebRoutes();
 
-        // Load all plugin routes
-        app(RouteService::class)->mapRoutes();
+        try {
+            // This may fail when the relation is not yet created
+            // via a migration. Therefore we catch the exception to 
+            // avoid breaking the application.
+            app(RouteService::class)->mapRoutes();
+        } catch(\Exception $e) {
+            // Log the error but don't interrupt the application
+            \Log::error("Error loading plugin routes: " . $e->getMessage());
+        }
     }
 
     /**
