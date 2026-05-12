@@ -19,7 +19,7 @@ use Illuminate\Support\Facades\DB;
  * '''xml
  * ...
  *    <css>
- *        <file name="file">path/to/file.css</file>
+ *        <file src="/Path/To/style.css" />
  *    </css>
  * ...
  * '''
@@ -46,7 +46,7 @@ class CssService extends PluginService implements ManifestContent {
 
     public function uninstall(Plugin $plugin, PluginManifest $manifest): void {
         CssFile::where('plugin_id', $plugin->id)->delete();
-        // $this->unpubishFiles($plugin);
+        $this->unpublishFiles($plugin);
     }
 
     private function updateOrInstall(Plugin $plugin, PluginManifest $manifest): void {
@@ -105,14 +105,13 @@ class CssService extends PluginService implements ManifestContent {
     }
 
 
-    // public function unpublishFiles(Plugin $plugin): void {
-    //     $cssFiles = $this->retrieveManifestValues(PluginManifest::fromPlugin($plugin));
+    public function unpublishFiles(Plugin $plugin): void {
+        $cssFiles = $this->retrieveManifestValues(PluginManifest::fromPlugin($plugin));
 
-    //     foreach($cssFiles as $cssPath) {
-
-    //         Plugin::getDirectory()->delete($this->getPublishedName($cssPath));
-    //     }
-    // }
+        foreach($cssFiles as $cssPath) {
+            Plugin::getDirectory()->delete($this->getTargetName($plugin, $cssPath));
+        }
+    }
 
 
     public function retrieveManifestValues(PluginManifest $manifest): array {

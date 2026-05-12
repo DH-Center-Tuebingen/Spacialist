@@ -58,7 +58,6 @@ class RouteService extends PluginService {
     }
 
     public function onAfterInstall(Plugin $plugin, PluginManifest $manifest): void {
-        info("Plugin routes installed, caching routes...");
         $this->cache();
     }
 
