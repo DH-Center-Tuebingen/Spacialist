@@ -105,7 +105,7 @@ class PluginController extends Controller {
                 'error' => $e->getMessage()
             ], 422);
         } catch(\Exception $e) {
-            info(json_encode($e->getTraceAsString()));
+            report($e);
             PluginLog::for($plugin)->error("Unexpected error during plugin installation: " . $e->getMessage(), ['exception' => $e]);
             return response()->json([
                 'error' => __('Error while installing plugin. Please check file permissions or ask your system administrator.')
