@@ -124,7 +124,6 @@ class AccessPointsService extends PluginService implements ManifestContent {
     public function retrieveManifestValues(PluginManifest $manifest): array {
         $accesspoints = [];
         $accessPointsXml = $manifest->getTagNodes("accesspoints/accesspoint");
-        info("retrieve manifest == " . json_encode($accessPointsXml));
         foreach($accessPointsXml as $key => $accesspoint) {
             $attributes = $accesspoint['attributes'] ?? [];
             $accesspoints[$key] = [

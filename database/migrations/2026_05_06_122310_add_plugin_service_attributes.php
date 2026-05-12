@@ -16,7 +16,8 @@ return new class extends Migration
             $table->unsignedBigInteger('plugin_id');
             $table->string('src');
             $table->timestamps();
-
+            
+            $table->unique(['plugin_id', 'src']);
             $table->foreign('plugin_id')->references('id')->on('plugins')->onDelete('cascade');
         });
     }

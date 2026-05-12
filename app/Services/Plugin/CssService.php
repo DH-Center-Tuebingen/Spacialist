@@ -116,15 +116,14 @@ class CssService extends PluginService implements ManifestContent {
 
 
     public function retrieveManifestValues(PluginManifest $manifest): array {
-        $manifestContent = $manifest->getContent();
-        $cssEntries = isset($manifestContent['css']) ? $manifestContent['css'] : [];
+        $cssEntries = $manifest->getTagNodes("css/file");
         if(!is_array($cssEntries)) {
             PluginLog::logWarning("Invalid CSS entries in manifest for plugin {$manifest->getName()}: " . json_encode($cssEntries));
             return [];
         }
         $srcValues = [];
         foreach($cssEntries as $entry) {
-            $src = $cssEntries['file']['@attributes']['src'] ?? null;
+            $src = $entry['attributes']['src'] ?? null;
             if($src !== null) {
                 $srcValues[] = $src;
             } else {
