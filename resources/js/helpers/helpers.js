@@ -345,7 +345,13 @@ export function hasKey(data, key) {
 export function isEmpty(value) {
     if(!value) return true;
     if(Array.isArray(value) && value.length === 0) return true;
-    if(typeof value == 'object' && Object.keys(value).length === 0) return true;
+    // Date is a special case - it is typeof object, but has no keys
+    // even though it is not empty
+    if(
+        typeof value == 'object' &&
+        !(value instanceof Date) &&
+        Object.keys(value).length === 0
+    ) return true;
 
     return false;
 }
