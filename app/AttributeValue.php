@@ -256,7 +256,7 @@ class AttributeValue extends Model implements Searchable
     // Throws AmbiguousValueException
     public function setValueFromRaw($strValue, $type = null, $save = false) {
         if(!isset($type)) {
-            $type = Attribute::first($this->attribute_id)->datatype;
+            $type = Attribute::find($this->attribute_id)->datatype;
         }
         $col = self::getValueColumn($type);
 
