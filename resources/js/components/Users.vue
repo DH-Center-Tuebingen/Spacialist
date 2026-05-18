@@ -18,7 +18,7 @@
             <table
                 v-if="state.dataInitialized"
                 v-dcan="'users_roles_read'"
-                class="table table-striped table-hover table-light"
+                class="table table-striped table-hover table-light mb-0"
             >
                 <thead class="sticky-top">
                     <tr>
@@ -186,7 +186,7 @@
         >
             <table
                 v-dcan="'users_roles_read'"
-                class="table table-striped table-hover table-light"
+                class="table table-striped table-hover table-light mb-0"
             >
                 <thead class="sticky-top">
                     <tr>
