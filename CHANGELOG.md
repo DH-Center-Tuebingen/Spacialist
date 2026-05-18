@@ -20,6 +20,7 @@ All notable changes to this project will be documented in this file.
 - Overflow of _Richtext_ in Attributes list
 - Unsmooth editing of long _Richtext_ attributes
 - Login state in menu bar
+- Rare case of role names not shown in _User Management_ after changes
 ### Changed
 - Alerts can now be dismissed
 - Now entity metadata is only loaded when accessing the metadata tab

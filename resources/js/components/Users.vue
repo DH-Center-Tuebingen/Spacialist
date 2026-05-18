@@ -129,10 +129,19 @@
                         </td>
                         <td>
                             <div class="dropdown">
-                                <span :id="`user-options-dropdown-${user.id}`" class="clickable" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    <i class="fas fa-fw fa-ellipsis-vertical"></i>
-                                    <sup class="notification-info" v-if="userDirty(user.id)">
-                                        <i class="fas fa-fw fa-xs fa-circle text-warning"></i>
+                                <span
+                                    :id="`user-options-dropdown-${user.id}`"
+                                    class="clickable"
+                                    data-bs-toggle="dropdown"
+                                    aria-haspopup="true"
+                                    aria-expanded="false"
+                                >
+                                    <i class="fas fa-fw fa-ellipsis-vertical" />
+                                    <sup
+                                        v-if="userDirty(user.id)"
+                                        class="notification-info"
+                                    >
+                                        <i class="fas fa-fw fa-xs fa-circle text-warning" />
                                     </sup>
                                 </span>
                                 <div
@@ -261,8 +270,13 @@
                             {{ date(dUser.deleted_at) }}
                         </td>
                         <td>
-                            <button class="btn btn-outline-success btn-sm" :disabled="!can('users_roles_delete')" @click="reactivateUser(dUser.id)">
-                                <i class="fas fa-fw fa-user-check"></i> {{ t('global.reactivate') }}
+                            <button
+                                class="btn btn-outline-success btn-sm"
+                                :disabled="!can('users_roles_delete')"
+                                @click="reactivateUser(dUser.id)"
+                            >
+                                <i class="fas fa-fw fa-user-check" />
+                                {{ t('global.reactivate') }}
                             </button>
                         </td>
                     </tr>
