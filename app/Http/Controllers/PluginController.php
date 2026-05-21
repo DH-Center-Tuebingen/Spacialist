@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use App\Plugin\PluginDirectory;
 use App\Plugin\PluginUploader;
+use App\Services\Plugin\AttributeService;
 use App\Services\Plugin\CssService;
 use App\Services\Plugin\MigrationService;
 use App\Services\Plugin\PluginDiscoveryService;
@@ -45,37 +46,49 @@ class PluginController extends Controller {
     }
 
     public function getPlugins(Request $request) {
-        Plugin::updateState();
+        app(PluginDiscoveryService::class)->discover();
 
         $plugins = [];
         if($request->query('installed') == 1) {
-            $plugins = Plugin::whereNotNull('installed_at')->get();
+            $plugins = app(PluginManager::class)->getInstalledPlugins();
         } else if($request->query('uninstalled') == 1) {
+            // We only cache installed plugins. When we need 
             $plugins = Plugin::whereNull('installed_at')->get();
         } else {
-            $plugins = Plugin::all();
+            $plugins = app(PluginManager::class)->getPlugins();
         }
 
+        $attributesMap = app(AttributeService::class)->getMappedByPlugins();        
         foreach($plugins as $plugin) {
-            $plugin->registeredAttributes = $plugin->getRegisteredAttributes();
+            $plugin->regusteredAttributes = $attributesMap[$plugin->id] ?? [];
         }
 
         return response()->json($plugins);
     }
 
     public function uploadPlugin(Request $request) {
+
         $this->validate($request, [
             'file' => 'required|file'
         ]);
 
         $uploader = app(PluginUploader::class);
-        $pluginName = $uploader->upload($request->file('file'));
-        $plugin = app(PluginDiscoveryService::class)->discoverByName($pluginName);
+        $uploadResult = $uploader->upload($request->file('file'));
+        
+        $pluginName = $uploadResult->pluginName;
+        
+        if($uploadResult->isUpdate()) {
+            $plugin = $uploadResult->plugin;
+            app(PluginManager::class)->update($plugin);  
+        } else {
+            $plugin = app(PluginDiscoveryService::class)->discoverByName($pluginName);
+        }
+        
 
         if(!isset($plugin)) {
             $uploader->restoreBackup($pluginName);
             PluginLog::forName($pluginName)->error("Plugin was uploaded but could not be read. Backup has been restored.");
-            
+
             return response()->json([
                 'error' => __('Plugin could not be initialized after upload. If it was an update attempt, the previous version has been restored.')
             ], 403);
@@ -90,8 +103,7 @@ class PluginController extends Controller {
         return response()->json($scriptUrl);
     }
 
-    public function installPlugin(Request $request, Plugin $plugin) {
-
+    public function installPlugin(Request $request, Plugin $plugin) {    
         $this->requireNotInstalled($plugin);
 
         try {
@@ -120,19 +132,8 @@ class PluginController extends Controller {
     }
 
     public function getChangelog(Request $request, Plugin $plugin) {
-        $changelog = PluginDirectory::byPlugin($plugin)->readChangelog();
+        $changelog = PluginDirectory::fromPlugin($plugin)->readChangelog();
         return response()->json($changelog);
-    }
-
-    public function updatePlugin(Request $request, Plugin $plugin) {
-        try {
-            app(PluginManager::class)->update($plugin);
-        } catch(\Exception $e) {
-            return response()->json([
-                'error' => __('Error while updating plugin. Please check file permissions or ask your system administrator.')
-            ], 403);
-        }
-        return response()->json($plugin);
     }
 
     public function uninstallPlugin(Request $request, Plugin $plugin) {
@@ -157,7 +158,7 @@ class PluginController extends Controller {
      */
     public function removePlugin(Request $request, Plugin $plugin) {
         $this->requireNotInstalled($plugin);
-        
+
         app(PluginManager::class)->remove($plugin);
         $plugin->delete();
         return response()->json([

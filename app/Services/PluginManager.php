@@ -16,6 +16,7 @@ use App\Services\Plugin\HookService;
 use App\Services\Plugin\MigrationService;
 use App\Services\Plugin\PermissionService;
 use App\Services\Plugin\PluginDiscoveryService;
+use App\Services\Plugin\RolePresetService;
 use App\Services\Plugin\RouteService;
 use App\Services\Plugin\ScopeService;
 use App\Services\Plugin\ScriptService;
@@ -46,6 +47,7 @@ class PluginManager {
         public readonly HookService $hookService,
         public readonly MigrationService $migrationService,
         public readonly PermissionService $permissionService,
+        public readonly RolePresetService $rolePresetService,
         public readonly RouteService $routeService,
         public readonly ScriptService $scriptService,
         public readonly ScopeService $scopeService,
@@ -60,31 +62,6 @@ class PluginManager {
 
     protected function fetch(): array {
         return Plugin::all()->toArray();
-        // $dirs = File::directories(base_path('app/Plugins'));
-        // $cachedPlugins = [];
-        // foreach($dirs as $dir) {
-        //     $manifest = PluginManifest::read($dir);
-        //     if($manifest !== false) {
-        //         $info = $manifest->getContent();
-
-        //         if(!isset($info['name']) || !isset($info['version'])) {
-        //             continue;
-        //         }
-
-        //         $plugin = Plugin::updateOrCreateFromManifest($info);
-
-        //         $cachedPluginInfo = [
-        //             'id' => $plugin->id,
-        //             'name' => $plugin->name,
-        //             'uuid' => $plugin->uuid,
-        //             'version' => $plugin->version,
-        //             'installed' => $plugin->installed_at ? $plugin->installed_at->toDateTimeString() : null,
-        //             'provider' => null,
-        //         ];
-        //         $cachedPlugins[] = $cachedPluginInfo;
-        //     }
-        // }
-        // return $cachedPlugins;
     }
 
     public function cleanup(array $list): void {
@@ -96,7 +73,6 @@ class PluginManager {
 
         $nonExistingPlugins = Plugin::whereNotIn('name', $pluginNames)->get();
         foreach($nonExistingPlugins as $removedPlugin) {
-            info("Plugin '{$removedPlugin->name}' does not exist anymore and will be removed from database.");
             $removedPlugin->handleRemove();
         }
     }
@@ -110,6 +86,7 @@ class PluginManager {
             $plugin->name = $p['name'];
             $plugin->uuid = $p['uuid'];
             $plugin->version = $p['version'];
+            $plugin->update_available = $p['update_available'] ?? null;
             $plugin->installed_at = $p['installed_at'];
             $plugin->updated_at = $p['updated_at'];
             $plugin->created_at = $p['created_at'];
@@ -151,10 +128,15 @@ class PluginManager {
         }
     }
 
+    /**
+     * Updates a plugin.
+     * 
+     * @param Plugin $plugin
+     * @return string
+     */
     public function update(Plugin $plugin): string {
         $oldVersion = $plugin->version;
         $manifest = PluginManifest::fromPlugin($plugin);
-
 
         foreach($this->pluggableServices as $service) {
             $service->onBeforeUpdate($plugin, $manifest);
@@ -164,10 +146,11 @@ class PluginManager {
             $service->update($plugin, $manifest);
         }
 
-        $info = $plugin->getInfo();
+        $this->rebuildPluginCache();
         $plugin->update_available = null;
-        $plugin->version = $info['version'];
+        $plugin->version = $manifest->getVersion();
         $plugin->save();
+        
 
         foreach($this->pluggableServices as $service) {
             $service->onAfterUpdate($plugin, $manifest);
@@ -176,9 +159,20 @@ class PluginManager {
         return $oldVersion;
     }
 
-    public function uninstall(Plugin $plugin): void {
-        $manifest = PluginManifest::fromPlugin($plugin);
-
+    /**
+     * Uninstalls a plugin. This will not remove the plugin, but removes all 
+     * functionalities of the plugin from the database. 
+     * 
+     * @param Plugin $plugin
+     * @param mixed $manifest - Manifest can be optionally provided to avoid reading the manifest multiple times during the uninstall process. 
+     *                          If not provided, it will be read it from the plugin.
+     * @return void
+     */
+    public function uninstall(Plugin $plugin, ?PluginManifest $manifest = null): void {
+        if($manifest === null) {
+            $manifest = PluginManifest::fromPlugin($plugin);
+        }
+        
         foreach($this->pluggableServices as $service) {
             $service->onBeforeUninstall($plugin, $manifest);
         }
@@ -211,7 +205,7 @@ class PluginManager {
             $service->remove($plugin, $manifest);
         }
 
-        PluginDirectory::byPlugin($plugin)->remove();
+        PluginDirectory::fromPlugin($plugin)->remove();
         $plugin->delete();
 
         foreach($this->pluggableServices as $service) {

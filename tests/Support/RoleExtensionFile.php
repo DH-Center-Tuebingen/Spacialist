@@ -4,7 +4,7 @@ namespace Tests\Support;
 
 
 class RoleExtensionFile {
-    public function __construct(public string $src, public array $roleExtensions = []) {}
+    public function __construct(public readonly string $src, public readonly array $roleExtensions = []) {}
 
     public function toJson(): string {
         $arr = [];

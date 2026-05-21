@@ -35,8 +35,8 @@ class HooksTest extends TestCase
     public function testAddHookSuccessfully()
     {
         $hookData = [
-            'on'    => 'api/v1/pre',
-            'src'   => 'Hooks\\AddPreData@apply',
+            'on'    => 'api/v1/version',
+            'src'   => 'Hooks\\VersionData@addHookInfo',
             'order' => 1,
         ];
 
@@ -44,10 +44,10 @@ class HooksTest extends TestCase
         $hookModel->plugin_id = $this->plugin->id;
         $hookModel->save();
 
-        $this->assertDatabaseHas('plugin_hooks', [
+        $this->assertDatabaseHas('plugin_service_hooks', [
             'plugin_id' => $this->plugin->id,
-            'on'        => 'api/v1/pre',
-            'src'       => 'Hooks\\AddPreData@apply',
+            'on'        => 'api/v1/version',
+            'src'       => 'Hooks\\VersionData@addHookInfo',
             'order'     => 1,
         ]);
     }
@@ -68,17 +68,17 @@ class HooksTest extends TestCase
     public function testAddHookToServiceSuccessfully()
     {
         $hookData = [
-            'on'    => 'api/v1/pre',
-            'src'   => 'Hooks\\AddPreData@apply',
+            'on'    => 'api/v1/version',
+            'src'   => 'Hooks\\VersionData@addHookInfo',
             'order' => 1,
         ];
 
         $this->hookService->addHook($hookData, $this->plugin);
 
-        $this->assertDatabaseHas('plugin_hooks', [
+        $this->assertDatabaseHas('plugin_service_hooks', [
             'plugin_id' => $this->plugin->id,
-            'on'        => 'api/v1/pre',
-            'src'       => 'Hooks\\AddPreData@apply',
+            'on'        => 'api/v1/version',
+            'src'       => 'Hooks\\VersionData@addHookInfo',
             'order'     => 1,
         ]);
     } 
@@ -100,12 +100,12 @@ class HooksTest extends TestCase
     {
         return [
             "no fields"             => [[], "Hook is missing field(s): on, src"],
-            "on only"               => [['on' => 'api/v1/pre'], "Hook is missing field(s): src"],
-            "src only"              => [['src' => 'addPreData'], "Hook is missing field(s): on"],
-            "src in invalid format" => [['on' => 'api/v1/pre', 'src' => 'addPreData'], "Hook 'src' field must be in the format 'class@method'. Given: 'addPreData'"],
-            "on is invalid hook"    => [['on' => 'invalid/api/route', 'src' => 'Hooks\\AddPreData@apply', 'method' => 'POST'], "Hook on invalid route 'POST::invalid/api/route'."],
-            "on has invalid request method" => [['on' => 'api/v1/pre', 'src' => 'Hooks\\AddPreData@apply', 'method' => 'INVALID'], "Hook 'on' field has invalid method 'INVALID'. Allowed methods are GET, POST, PUT, DELETE, PATCH."],
-            "on is forbidden hook"  => [['on' => 'broadcasting/auth', 'src' => 'Hooks\\AddPreData@apply', 'method' => 'POST'], "Hook on 'POST::broadcasting/auth' is not allowed."],
+            "on only"               => [['on' => 'api/v1/version'], "Hook is missing field(s): src"],
+            "src only"              => [['src' => 'VersionData'], "Hook is missing field(s): on"],
+            "src in invalid format" => [['on' => 'api/v1/version', 'src' => 'VersionData'], "Hook 'src' field must be in the format 'class@method'. Given: 'VersionData'"],
+            "on is invalid hook"    => [['on' => 'invalid/api/route', 'src' => 'Hooks\\VersionData@addHookInfo', 'method' => 'POST'], "Hook on invalid route 'POST::invalid/api/route'."],
+            "on has invalid request method" => [['on' => 'api/v1/version', 'src' => 'Hooks\\VersionData@addHookInfo', 'method' => 'INVALID'], "Hook 'on' field has invalid method 'INVALID'. Allowed methods are GET, POST, PUT, DELETE, PATCH."],
+            "on is forbidden hook"  => [['on' => 'broadcasting/auth', 'src' => 'Hooks\\VersionData@addHookInfo', 'method' => 'POST'], "Hook on 'POST::broadcasting/auth' is not allowed."],
         ];
     }
 
@@ -113,8 +113,8 @@ class HooksTest extends TestCase
     {
         $hookExceptions        = static::hookExceptionProvider();
         $hookServiceExceptions = [
-            "src class does not exist"  => [['on' => 'api/v1/pre', 'src' => 'Hooks\\NonExistentClass@method'], "Hook src 'Hooks\\NonExistentClass@method' does not exist in plugin 'HookPlugin', Class was resolved to: 'App\\Plugins\\HookPlugin\\Hooks\\NonExistentClass'"],
-            "src method does not exist" => [['on' => 'api/v1/pre', 'src' => 'Hooks\\AddPreData@nonExistentMethod'], "Hook src 'Hooks\\AddPreData@nonExistentMethod' does not exist in plugin 'HookPlugin', Class was resolved to: 'App\\Plugins\\HookPlugin\\Hooks\\AddPreData'"],
+            "src class does not exist"  => [['on' => 'api/v1/version', 'src' => 'Hooks\\NonExistentClass@method'], "Hook src 'Hooks\\NonExistentClass@method' does not exist in plugin 'HookPlugin', Class was resolved to: 'App\\Plugins\\HookPlugin\\Hooks\\NonExistentClass'"],
+            "src method does not exist" => [['on' => 'api/v1/version', 'src' => 'Hooks\\VersionData@nonExistentMethod'], "Hook src 'Hooks\\VersionData@nonExistentMethod' does not exist in plugin 'HookPlugin', Class was resolved to: 'App\\Plugins\\HookPlugin\\Hooks\\VersionData'"],
         ];
         return array_merge($hookExceptions, $hookServiceExceptions);
     }

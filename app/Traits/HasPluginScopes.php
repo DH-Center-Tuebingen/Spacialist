@@ -2,7 +2,7 @@
 
 namespace App\Traits;
 
-use App\Services\ScopeService;
+use App\Services\Plugin\ScopeService;
 
 trait HasPluginScopes {
 
@@ -14,7 +14,6 @@ trait HasPluginScopes {
     protected static function bootHasPluginScopes(): void {
         // The try-catch is to prevent issues during installation/package discovery
         try {
-    
             $pluginScopes = app(ScopeService::class)->getScopesFor(static::class);
             foreach($pluginScopes as $pluginScope) {
                 static::addGlobalScope(new $pluginScope);

@@ -45,6 +45,7 @@ class Kernel extends HttpKernel
             \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
             'throttle:600,1',
             'bindings',
+            \App\Http\Middleware\PluginHooks::class,
         ],
     ];
 

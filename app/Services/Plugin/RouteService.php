@@ -12,7 +12,13 @@ use Exception;
 use Illuminate\Support\Facades\Route;
 
 /**
- * <routes src="/lib/App/routes.php" /> 
+ * Specifies routes defined by the plugin. The routes file will be loaded and registered with the application.
+ * 
+ * WARNING: When no route is specified in the manifest, the deprecated routes at 'routes/api.php' will be evaluated, this will be removed in a future version.
+ * 
+ * ```xml
+ * <routes src="/lib/App/routes.php" middleware="api" />
+ * ```
  */
 class RouteService extends PluginService {
 
@@ -27,7 +33,7 @@ class RouteService extends PluginService {
     }
 
     public function install(Plugin $plugin, PluginManifest $manifest): void {
-        $pluginDirectory = PluginDirectory::byPlugin($plugin);
+        $pluginDirectory = PluginDirectory::fromPlugin($plugin);
         $routesNode = $manifest->getTagNodes('routes');
         $middleware = 'api';
         if(empty($routes)) {
@@ -41,6 +47,11 @@ class RouteService extends PluginService {
             $srcFile = $node['attributes']["src"];
             $src = $pluginDirectory->getPluginPath($srcFile);
             $middleware = $node['attributes']["middleware"] ?? 'api';
+        }
+        
+        // Plugins does not need a routes file.
+        if($src === null) {
+            return;
         }
 
         if(!file_exists($src)) {
@@ -61,9 +72,8 @@ class RouteService extends PluginService {
         $this->cache();
     }
 
-
     public function findDeprecatedDefaultRoutes(Plugin $plugin, PluginDirectory $pluginDirectory): ?string {
-        $pluginDir = PluginDirectory::byPlugin($plugin);
+        $pluginDir = PluginDirectory::fromPlugin($plugin);
         $filePath = $pluginDir->getPluginPath('routes/api.php');
 
         if(file_exists($filePath)) {
@@ -97,11 +107,11 @@ class RouteService extends PluginService {
                 $prefix = "api/v1/{$route['plugin_slug']}";
                 $namespace = "App\\Plugins\\{$route['plugin_name']}\\Controllers";
                 $routesPath = PluginDirectory::getPath($route['plugin_name'] . "/routes/api.php");
-
+                $api = $route['middleware'] ?? 'api';
 
                 if(file_exists($routesPath)) {                
                     Route::prefix($prefix)
-                        ->middleware('api')
+                        ->middleware($api)
                         ->namespace($namespace)
                         ->group($routesPath);
                 } else {

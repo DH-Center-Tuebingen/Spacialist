@@ -52,22 +52,30 @@ class CssService extends PluginService implements ManifestContent {
     private function updateOrInstall(Plugin $plugin, PluginManifest $manifest): void {
         DB::transaction(function () use ($plugin, $manifest) {
             $this->uninstall($plugin, $manifest);
-            $cssFiles = $this->retrieveManifestValues($manifest);
-            foreach($cssFiles as $cssPath) {
-                $path = trim($cssPath);
-                if(!is_string($path) || empty($path)) {
-                    PluginLog::logWarning("Invalid CSS file path in manifest for plugin {$plugin->name}:" . json_encode($cssPath));
-                    continue;
-                }
-
-                CssFile::create([
-                    'plugin_id' => $plugin->id,
-                    'src' => $cssPath,
-                ]);
-            }
+            $this->createFromManifest($plugin, $manifest);
         });
 
         $this->publish($plugin, $manifest);
+    }
+
+    public function createFromManifest(Plugin $plugin, PluginManifest $manifest): void {
+        $cssFiles = $this->retrieveManifestValues($manifest);
+        $this->createFromArray($cssFiles, $plugin);
+    }
+
+    public function createFromArray(array $cssEntries, Plugin $plugin): void {
+        foreach($cssEntries as $cssPath) {
+            $path = trim($cssPath);
+            if(!is_string($path) || empty($path)) {
+                PluginLog::logWarning("Invalid CSS file path in manifest for plugin {$plugin->name}:" . json_encode($cssPath));
+                continue;
+            }
+            
+            CssFile::create([
+                'plugin_id' => $plugin->id,
+                'src' => $cssPath,
+            ]);
+        }
     }
 
     public function publish(Plugin $plugin, PluginManifest $manifest): void {
@@ -78,9 +86,7 @@ class CssService extends PluginService implements ManifestContent {
     }
 
     private function publishFile(Plugin $plugin, string $cssPath): void {
-        
-        $pluginPath = PluginDirectory::byPlugin($plugin)->getPluginPath($cssPath);
-    
+        $pluginPath = PluginDirectory::fromPlugin($plugin)->getPluginPath($cssPath);
         if(is_link($pluginPath)) {
             $pluginPath = readlink($pluginPath);
         }
@@ -92,9 +98,8 @@ class CssService extends PluginService implements ManifestContent {
                 PluginLog::logWarning("Could not open CSS file for plugin {$plugin->name} at path {$pluginPath}.");
                 return;
             }
-            
-            $storageDirectory = new Directory("plugin_css", "private"); // Ensure the target directory exists
-            $storageDirectory->store(
+
+            $this->getCssDirectory($plugin)->store(
                 $this->getTargetName($plugin, $pluginPath),
                 $filehandle
             );
@@ -104,12 +109,17 @@ class CssService extends PluginService implements ManifestContent {
         }
     }
 
+    public function getCssDirectory(Plugin $plugin): Directory {
+        return new Directory("plugin_css", "private");
+    }
+
 
     public function unpublishFiles(Plugin $plugin): void {
         $cssFiles = $this->retrieveManifestValues(PluginManifest::fromPlugin($plugin));
+        $cssDirectory = $this->getCssDirectory($plugin);
 
         foreach($cssFiles as $cssPath) {
-            Plugin::getDirectory()->delete($this->getTargetName($plugin, $cssPath));
+            $cssDirectory->delete($this->getTargetName($plugin, $cssPath));
         }
     }
 
@@ -144,52 +154,6 @@ class CssService extends PluginService implements ManifestContent {
         return true;
     }
 
-    public function createFromJson(Plugin $plugin, array $json): void {
-        DB::transaction(function () use ($plugin, $json) {
-            foreach($json as $nodes) {
-                if(is_array($nodes) && !array_is_list($nodes)) {
-                    $this->createSingleEntryFromJson($plugin, $nodes);
-
-                } else {
-                    foreach($nodes as $fileNode) {
-                        $this->createSingleEntryFromJson($plugin, $fileNode);
-                    }
-                }
-            }
-        });
-    }
-
-    private function createSingleEntryFromJson(Plugin $plugin, array $json): void {
-        if(!isset($json['@attributes']) || empty($json['@attributes']) || !is_array($json['@attributes'])) {
-            throw new \Exception("Invalid CSS file entry in manifest for plugin {$plugin->name} on '@attributes': " . json_encode($json));
-        }
-
-        $attributes = $json['@attributes'];
-        if(!isset($attributes['src']) || empty($attributes['src'])) {
-            throw new \Exception("Invalid CSS file entry in manifest for plugin {$plugin->name} on 'src': " . json_encode($attributes));
-        }
-
-        $cssFile = new CssFile();
-        $cssFile->plugin_id = $plugin->id;
-        $cssFile->src = $attributes['src'];
-        $cssFile->save();
-    }
-
-    // public function addFile(Plugin $plugin, string $src): CssFile{
-    //     $cssFile = new CssFile();
-    //     $cssFile->plugin_id = $plugin->id;
-    //     $cssFile->src = $src;
-    //     $cssFile->save();
-    //     return $cssFile;
-    // }
-
-    // public function addFiles(Plugin $plugin, array $srcs): array {
-    //     $cssFiles = [];
-    //     foreach($srcs as $src) {
-    //         $cssFiles[] = $this->addFile($plugin, $src);
-    //     }
-    //     return $cssFiles;
-    // }
 
     /**
      * List all file 
@@ -199,7 +163,7 @@ class CssService extends PluginService implements ManifestContent {
     protected function listFiles(Plugin $plugin): array {
         return $this->getData();
     }
-    
+
     public function getStorageDirectory(): Directory {
         return new Directory('plugin_css', 'private');
     }

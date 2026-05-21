@@ -6,7 +6,6 @@ use App\Models\Plugin\Attribute as PluginAttribute;
 use App\Plugin;
 use App\Plugin\PluginManifest;
 use App\Support\BootstrapCache;
-use Exception;
 
 /**
  * Adds the capability for plugins to register custom attributes.
@@ -85,5 +84,18 @@ class AttributeService extends PluginService{
     public function uninstall(Plugin $plugin, PluginManifest $manifest): void {
         PluginAttribute::where('plugin_id', $plugin->id)->delete();
         $this->cache();
+    }
+    
+    public function getMappedByPlugins(): array {
+        $attributes = $this->getData();
+        $mapped = [];
+        foreach($attributes as $attribute) {
+            $pluginId = $attribute['plugin_id'] ?? 0;
+            if(!isset($mapped[$pluginId])) {
+                $mapped[$pluginId] = [];
+            }
+            $mapped[$pluginId][] = $attribute['src'];
+        }
+        return $mapped;
     }
 }

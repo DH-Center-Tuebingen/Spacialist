@@ -45,7 +45,7 @@ class ApiUserTest extends TestCase
 
         // Check permission count (45 permissions in total)
         $content = json_decode($response->getContent());
-        $this->assertEquals(count(get_object_vars($content->data->permissions)), 45);
+        $this->assertEquals(count(get_object_vars($content->data->permissions)), 50);
     }
 
     /**

@@ -10,6 +10,23 @@ use App\Validators\HookValidator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
+
+/**
+ * Service that manages plugin hooks. Hooks are a way for plugins to inject functionality 
+ * into existing routes or other parts of the application without modifying core code.
+ * 
+ * A order can be specified that forces the execution of hooks a specific position compared
+ * to other hooks. Hooks with a higher value will be executed later than hooks with a lower value. 
+ * So that later modifications will overwrite previous ones. The default order value is 0 and by default they are executed in the order 
+ * of their creation.
+ * 
+ * ```xml
+ * <Hooks>
+ *     <Hook on="Route/Path/To/Hook" src="Class@method" order="1"/>
+ *     ...
+ * </Hooks>
+ * ```
+ */
 class HookService extends PluginService{
 
     use BootstrapCache;
@@ -30,6 +47,7 @@ class HookService extends PluginService{
                     "plugin-name" => $hook->plugin->name ?? null,
                     "plugin-namespace" => $hook->plugin->getNamespace() ?? null,
                     "src" => $hook->src,
+                    "order" => $hook->order
                 ]
             ];
         })->toArray();
@@ -62,13 +80,13 @@ class HookService extends PluginService{
      */
     public function updateOrInstall(Plugin $plugin): void {
         $manifest = PluginManifest::fromPlugin($plugin);
-        $hookDefinitions = $manifest->getContent()['hooks'] ?? [];
+        $hookDefinitions = $manifest->getTagNodes('hooks/hook') ?? [];
 
         DB::transaction(function () use ($hookDefinitions, $plugin) {
             Hook::where('plugin_id', $plugin->id)->delete();
             foreach($hookDefinitions as $hookXml) {
-                if(isset($hookXml['@attributes'])){
-                $this->addHook($hookXml['@attributes'], $plugin);
+                if(isset($hookXml['attributes'])){
+                    $this->addHook($hookXml['attributes'], $plugin);
                 }
             }
         });
@@ -88,8 +106,15 @@ class HookService extends PluginService{
         $hookModel->save();
     }
 
-    public function executeHooks(string $hookName, $request, $response) {
-        $hooks = $this->getHooksFor($hookName);
+    /**
+     * Executes all hooks on a specific route.
+     * 
+     * @param string $src - The source to execute hooks for(e.g. route name or other identifier)
+     * @param mixed $request - The request object to pass to the hook methods
+     * @param mixed $response - The response object to pass to the hook methods. This is passed by reference so hooks can modify it directly.
+     */
+    public function executeHooks(string $src, $request, $response) {
+        $hooks = $this->getHooksFor($src);
         foreach($hooks as $hook) {
             try {
                 $method = Method::parseFromString($hook["src"]);
@@ -106,9 +131,19 @@ class HookService extends PluginService{
         return $response;
     }
 
-    public function getHooksFor(string $hookName) {
+    /**
+     * Get's hooks for a specific source (e.g. route) and sorted by their order attribute.
+     * @param string $src - The source to get hooks for(e.g. route name or other identifier)
+     * @return array - An array of hooks matching the source, sorted by their order attribute (ascending). Hooks without an order attribute are treated as 0.
+     */
+    public function getHooksFor(string $src) {
         $hooks = $this->getData();
-        return $hooks[$hookName] ?? [];
+        $matchingHooks = $hooks[$src] ?? [];
+        usort($matchingHooks, function ($a, $b) {
+            return ($a['order'] ?? 0) <=> ($b['order'] ?? 0);
+        });
+        
+        return $matchingHooks;
     }
 
     /**
