@@ -101,7 +101,7 @@ class PluginController extends Controller
             }
         }
 
-        $extractPath = Str::finish(Plugin::getPluginPath($pluginName), '/');
+        $extractPath = Str::finish(Plugin::getPluginPath(), '/');
         $extracted = $zipFile->extractTo($extractPath);
         $zipFile->close();
 
@@ -128,7 +128,7 @@ class PluginController extends Controller
             Plugin::where('id', $id)->whereNotNull('installed_at')->firstOrFail();
             // Already installed
             return response()->json([], 204);
-        } catch(ModelNotFoundException $e) {            
+        } catch(ModelNotFoundException $e) {
             $plugin = Plugin::where('id', $id)->whereNull('installed_at')->first();
             try {
                 $plugin->handleInstallation();
@@ -208,8 +208,8 @@ class PluginController extends Controller
         }
         return Plugin::getDirectory()->downloadRelative($filepath);
     }
-    
-    //// REBASING:: Plugin Attribute 
+
+    //// REBASING:: Plugin Attribute
     // public function downloadScript(Request $request) {
     //     $file = "plugins/" . $request->query('src');
     //     return Plugin::getDirectory()->download($file);
