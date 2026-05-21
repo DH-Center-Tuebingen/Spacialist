@@ -5,7 +5,6 @@ namespace App\Services\Plugin;
 use App\Plugin;
 use App\Plugin\PluginDirectory;
 use App\Plugin\PluginManifest;
-use App\Support\BootstrapCache;
 use Illuminate\Support\Facades\File;
 
 class PluginDiscoveryService extends PluginService {
@@ -22,8 +21,8 @@ class PluginDiscoveryService extends PluginService {
         }
     }
 
-    public function discoverByName($name): ?Plugin {
-        $manifest = PluginDirectory::getManifest($name);
+    public function discoverByName(string $name): ?Plugin {
+        $manifest = PluginManifest::read($name);
         $plugin = null;
         if($manifest) {
             $plugin = Plugin::updateOrCreateFromManifest($manifest);
@@ -31,6 +30,4 @@ class PluginDiscoveryService extends PluginService {
 
         return $plugin;
     }
-
-
 }

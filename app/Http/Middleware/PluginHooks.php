@@ -16,7 +16,6 @@ class PluginHooks
         $response = $next($request);
         // execute hooks with the response as first argument so hooks can modify it
         $response = $this->hookService->executeHooks($routeName, $request, $response);
-    
         return $response;
      }
 

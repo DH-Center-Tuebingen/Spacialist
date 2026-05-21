@@ -14,6 +14,13 @@ use Exception;
  * Simple dependency requirements for the Plugin System.
  * Plugins can only be installed when the requirement is met.
  * 
+ * ```xml
+ * <dependencies>
+ *      <File />
+ *      <Map />
+ *      ...
+ * </dependencies>
+ * ```
  */
 class DependencyService extends PluginService {
 
@@ -85,7 +92,6 @@ class DependencyService extends PluginService {
         $missingDependencies = [];
         foreach($dependencies as $dependency) {
             
-        info("Checking dependency for plugin {$manifest->getName()}: " . json_encode($dependency));
             if(!$dependency['tag'] || !is_string($dependency['tag'])) {
                 PluginLog::for($plugin)->warning("Invalid dependency declaration in plugin manifest of {$manifest->getName()}. Missing or invalid 'tag' attribute.");
                 continue;

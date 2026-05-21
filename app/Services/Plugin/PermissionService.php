@@ -6,12 +6,28 @@ use App\Permission;
 use App\Plugin;
 use App\Plugin\PluginDirectory;
 use App\Plugin\PluginManifest;
+use Exception;
 use Illuminate\Support\Facades\File;
 
 /**
- * Service for managing role presets.
- * 
- * 
+ * Service for managing user permissions.
+ * Permissions are defined inside the "App/permissions.json" in the plugin directory.
+ * The permissions.json file should have the following structure:
+ * ```json
+ * {
+ *   "permission_group_1": [
+ *     {
+ *       "name": "permission_name",
+ *       "display_name": "Permission Display Name",
+ *       "description": "Description of the permission"
+ *     },
+ *     ...
+ *   ],
+ *   "permission_group_2": [
+ *     ...
+ *   ]
+ * }
+ * ```
  */
 class PermissionService extends PluginService {
 
@@ -92,12 +108,15 @@ class PermissionService extends PluginService {
      * @return Permission - Returns an unsaved Permission model instance
      */
     private function createPermission(string $group, array $permission, string $guardName = 'web'): Permission {
-        $permission = new Permission();
-        $permission->name = $group . "_" . $permission['name'];
-        $permission->display_name = $permission['display_name'];
-        $permission->description = $permission['description'];
-        $permission->guard_name = $guardName;
-        return $permission;
+        if(!isset ($permission['name'])) {
+            throw new Exception("Permission definition is missing 'name' key for group '{$group}'.");
+        }
+        $permissionModel = new Permission();
+        $permissionModel->name = $group . "_" . $permission['name'];
+        $permissionModel->display_name = $permission['display_name'];
+        $permissionModel->description = $permission['description'];
+        $permissionModel->guard_name = $guardName;
+        return $permissionModel;
     }
 
     private function removePermissions(Plugin $plugin): void {

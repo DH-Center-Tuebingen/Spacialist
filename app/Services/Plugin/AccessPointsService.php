@@ -10,7 +10,8 @@ use App\Support\BootstrapCache;
 use App\Support\Log\PluginLog;
 
 /**
- * Adds capability to publish custom CSS files to a plugin.
+ * Allows the definition of custom access_points for the application, that require special
+ * permission to visit specific routes of the webiste. 
  * 
  * '''xml
  * ...
@@ -46,7 +47,7 @@ class AccessPointsService extends PluginService implements ManifestContent {
         $accesPoints = $this->retrieveManifestValues($manifest);
         
         foreach($accesPoints as $key => $accessPoint) {
-            info("Installing access point with id '{$accessPoint['id']}' for plugin '{$plugin->name}'..." . json_encode($accessPoint));
+            PluginLog::for($plugin)->info("Installing access point with id '{$accessPoint['id']}' for plugin '{$plugin->name}'..." . json_encode($accessPoint));
             $this->installAccessPoint($accessPoint, $plugin, $manifest);
         }
     }
@@ -109,18 +110,6 @@ class AccessPointsService extends PluginService implements ManifestContent {
         AccessPoint::where('plugin_id', $plugin->id)->delete();
     }
 
-    public function onAfterInstall(Plugin $plugin, PluginManifest $manifest): void {
-        $this->cache();
-    }
-
-    public function onAfterUninstall(Plugin $plugin, PluginManifest $manifest): void {
-        $this->cache();
-    }
-
-    public function onAfterUpdate(Plugin $plugin, PluginManifest $manifest): void {
-        $this->cache();
-    }
-
     public function retrieveManifestValues(PluginManifest $manifest): array {
         $accesspoints = [];
         $accessPointsXml = $manifest->getTagNodes("accesspoints/accesspoint");
@@ -145,10 +134,5 @@ class AccessPointsService extends PluginService implements ManifestContent {
             }
         }
         return true;
-    }
-
-    public function createFromJson(Plugin $plugin, array $json): void {
-        // Access points are not stored in the database, so we don't need to create any entries here.
-        // The access points will be loaded from the plugin's manifest on each request.
     }
 }

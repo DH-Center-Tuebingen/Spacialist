@@ -6,6 +6,8 @@ All notable changes to this project will be documented in this file.
 - Access Points (Plugins can define additional access points to restrict user access to certain parts of the plugin)
 - Plugin-System now supports custom components, e.g. attribute types
 - Plugin-System now supports PluginScopes
+- Plugin-System now supports Hooks: Custom functions that are executed after API calls.
+- Plugin-System now supports CSS files
 - Plugin script can be (re-)published via interface 
 - .env variable `ALLOW_FILESYSTEM_MIGRATIONS` to explcitly enable filesystem migrations
 - API endpoint for getting all entity details data in one request: GET::v1/entity/{id}/entity_detail
@@ -21,6 +23,7 @@ All notable changes to this project will be documented in this file.
 - Migrations now have logging automatically disabled
 - Migrations that require filesystem changes can now be handled using the `App\Traits\FilesystemMigration` trait (call `$this->safelyMoveDirectoryBetweenDisks(...)` with `ALLOW_FILESYTEM_MIGRATIONS` set to `true`)
 - Moved plugin state into separate store
+- Plugins no longer require a routes file
 
 ## 0.11.1
 ### Added

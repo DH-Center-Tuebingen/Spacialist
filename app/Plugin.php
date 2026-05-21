@@ -41,7 +41,7 @@ class Plugin extends Model {
     }
 
     public function slugName(): string {
-        return Str::kebab($this->name);
+        return strtolower(str_replace(' ', '', $this->name));
     }
 
     /**

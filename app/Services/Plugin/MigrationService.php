@@ -9,8 +9,6 @@ use App\Models\Plugin\Migration as PluginMigration;
 use App\Plugin;
 use App\Plugin\PluginDirectory;
 use App\Plugin\PluginManifest;
-use App\Support\Log\PluginLog;
-use Illuminate\Database\Migrations\Migration;
 
 
 /**
@@ -176,7 +174,6 @@ class MigrationService extends PluginService {
                 $migrations = $migrations->sort();
             }
 
-            info($migrations->values()->toArray());
             return $migrations->values()->toArray();
         } else {
             return [];

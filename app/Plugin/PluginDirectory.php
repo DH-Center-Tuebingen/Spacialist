@@ -48,8 +48,8 @@ class PluginDirectory {
 
         return $path;
     }
-    
-    public static function byPlugin(Plugin $plugin): self {
+
+    public static function fromPlugin(Plugin $plugin): self {
         return new self($plugin);
     }
 
@@ -57,11 +57,6 @@ class PluginDirectory {
         return self::getPath($pluginName);
     }
 
-    public static function getManifest($pluginName): PluginManifest|false {
-        $path = self::getPath($pluginName);
-        return PluginManifest::read($path);
-    }
-    
     public function remove() {
         sp_remove_dir($this->getPluginPath());
     }
@@ -81,5 +76,21 @@ class PluginDirectory {
         }
 
         return $changes;
+    }
+
+    /**
+     * Get the namespace for a given path within the plugin. If no path is provided, 
+     * returns the base namespace for the plugin.
+     * 
+     * @param string|null $pluginName Optional path within the plugin to get the namespace for, separated 
+     * by backslashes or forward slashes. For example, "Controllers/MyController.php" or 
+     * "Controllers\MyController.php". Can start with or without a leading slash.
+     */
+    public static function getNamespace(string $pluginName, $path = NULL): string {
+        $basePath = "App\\Plugins\\$pluginName";
+        if($path) {
+            $basePath .= Str::start(str_replace('/', '\\', $path), '\\');
+        }
+        return $basePath;
     }
 }

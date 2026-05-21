@@ -1,1 +1,0 @@
-<?php   // This plugin has no routes

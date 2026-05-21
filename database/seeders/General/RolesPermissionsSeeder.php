@@ -29,6 +29,7 @@ class RolesPermissionsSeeder extends Seeder
             'users_roles_read', 'users_roles_write', 'users_roles_create', 'users_roles_delete', 'users_roles_share',
             'preferences_read', 'preferences_write', 'preferences_create', 'preferences_delete', 'preferences_share',
             'thesaurus_read', 'thesaurus_write', 'thesaurus_create', 'thesaurus_delete', 'thesaurus_share',
+            'plugin_read', 'plugin_write', 'plugin_create', 'plugin_delete', 'plugin_share',
         ];
 
         // Guest
@@ -42,6 +43,7 @@ class RolesPermissionsSeeder extends Seeder
             'users_roles_read',
             'preferences_read',
             'thesaurus_read',
+            'plugin_read',
         ];
 
         // Permissions

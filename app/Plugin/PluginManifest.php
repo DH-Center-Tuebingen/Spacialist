@@ -3,11 +3,11 @@
 namespace App\Plugin;
 
 use App\Plugin;
-use App\Services\PluginManager;
 use App\Support\Log\PluginLog;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 use SimpleXMLElement;
+use ZipArchive;
 
 /**
  * Each plugin has a manifest file (plugin.xml) that contains metadata 
@@ -34,8 +34,8 @@ class PluginManifest {
 
     public function __construct(protected SimpleXMLElement $content) {
     }
-    
-    public function getTextContent(string ... $path): string {
+
+    public function getTextContent(string ...$path): string {
         $implodedPath = implode('/', $path);
         $result = $this->content->xpath("{$implodedPath}");
         if($result === false || count($result) === 0) {
@@ -43,7 +43,7 @@ class PluginManifest {
         }
         return (string) $result[0];
     }
-    
+
     public function getVersion(): string {
         return $this->getTextContent('version') ?? '0.0.0';
     }
@@ -55,15 +55,15 @@ class PluginManifest {
     public function getName(): string {
         return $this->getTextContent('name') ?? 'Unknown Plugin';
     }
-    
+
     public function getDescription(): string {
         return $this->getTextContent('description') ?? '';
     }
-    
+
     public function getLicence(): string {
         return $this->getTextContent('licence') ?? '';
     }
-    
+
     public function getAuthors(): array {
         $authors = [];
         $authorNodes = $this->content->xpath('authors/author');
@@ -98,49 +98,61 @@ class PluginManifest {
 
         return $metadata;
     }
-    
+
     public function getTagNodes(string $xpath): array {
         $children = [];
         $xmlNodeArray = $this->content->xpath($xpath);
         if(!$xmlNodeArray || count($xmlNodeArray) === 0) {
             return [];
         }
-        
-        
+
+
         foreach($xmlNodeArray as $xmlNode) {
             $tag = $xmlNode->getName();
             $attributes = [];
             foreach($xmlNode->attributes() as $attrName => $attrValue) {
                 $attributes[$attrName] = (string) $attrValue;
             }
-            
+
             $node = [
                 "tag" => $tag,
                 "text" => (string) $xmlNode,
                 "attributes" => $attributes,
             ];
-            
-            
+
+
             $children[] = $node;
         }
-        
+
         return $children;
     }
 
     // STATIC METHODS
+    
+    /**
+     * Reads the manifest file, like the read() function
+     * but obtains the plugin path by just the pluginName.
+     * 
+     * @param string $pluginName The name of the plugin (in PascalCase), which is also the name of the plugin directory.
+     * @return bool| PluginManifest
+     */
+    public static function readFromName(string $pluginName): PluginManifest|false {
+        $path = PluginDirectory::getPathByName($pluginName);
+        return self::read($path);
+    }
 
     /**
      * Tries to read a manifest file
      * 
-     * @param mixed $pluginDirectoryName The name of the plugin directory to read the manifest from
-     * @return bool|Plugin\PluginManifest
+     * @param mixed $path The absolute path to the plugin directory.
+     * @return bool|PluginManifest
      */
-    public static function read(string $pluginDirectoryName): PluginManifest|false {
+    public static function read(string $path): PluginManifest|false {
         // TODO: Remove when releasing v1.0
         $manifest = false;
-
         foreach(self::MANIFEST_FILE_PATHS as $manifestFilePath) {
-            $fullPath = Str::finish($pluginDirectoryName, '/') . $manifestFilePath;
+            $fullPath = Str::finish($path, '/') . $manifestFilePath;
+            
             if(is_link($fullPath)) {
                 $fullPath = readlink($fullPath);
             }
@@ -162,21 +174,21 @@ class PluginManifest {
         return $manifest;
     }
 
-    private function emitDeprecationWarning(){
-        PluginLog::logWarning("Plugin '{$this->getName()}' is using a deprecated manifest file location. This will be not supported in future versions. Please move the manifest file to the root of the plugin directory and name it 'plugin.xml'.");            
+    private function emitDeprecationWarning() {
+        PluginLog::logWarning("Plugin '{$this->getName()}' is using a deprecated manifest file location. This will be not supported in future versions. Please move the manifest file to the root of the plugin directory and name it 'plugin.xml'.");
     }
-    
+
     private static function isFilePathDeprecated(string $filePath): bool {
         return Str::startsWith($filePath, 'App/');
     }
-    
+
     public static function parse(string $xmlString): PluginManifest|false {
         $xmlObject = simplexml_load_string($xmlString);
-        
+
         if($xmlObject === false) {
             return false;
         }
-        
+
         return new static($xmlObject);
     }
 
@@ -188,14 +200,18 @@ class PluginManifest {
         }
         return $manifest;
     }
-    
-    public static function fromZip(\ZipArchive $zip): PluginManifest {
+
+    public static function fromZip(ZipArchive $zip, ?string $pluginName = null): PluginManifest {
         foreach(self::MANIFEST_FILE_PATHS as $manifestFilePath) {
+            if($pluginName) {
+                $manifestFilePath = Str::finish($pluginName, '/') . $manifestFilePath;
+            }            
+            
+            $manifestFilePath = str_replace(["/", "\\"], DIRECTORY_SEPARATOR, $manifestFilePath);   
             if($zip->locateName($manifestFilePath) !== false) {
                 $xmlString = $zip->getFromName($manifestFilePath);
                 $manifest = self::parse($xmlString);
                 if($manifest !== false) {
-                    
                     // TODO: Remove when releasing v1.0
                     if(static::isFilePathDeprecated($manifestFilePath)) {
                         $manifest->emitDeprecationWarning();

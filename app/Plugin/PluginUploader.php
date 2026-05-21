@@ -3,12 +3,11 @@
 namespace App\Plugin;
 
 use App\Plugin;
+use App\Plugin\Support\PluginUploadResult;
 use Illuminate\Support\Str;
 use App\Plugin\PluginDirectory;
 use SplFileInfo;
 use ZipArchive;
-
-use function PHPUnit\Framework\directoryExists;
 
 class PluginUploader {
 
@@ -26,24 +25,28 @@ class PluginUploader {
      * it is removed before moving the existing plugin to the backup directory. 
      *  
      * @param SplFileInfo $file - The uploaded plugin zip file
-     * @return string - The name of the uploaded plugin
+     * @return PluginUploadResult - The result of the upload, containing the plugin name and whether the pluginw as updated or created.
      */
-    public function upload(SplFileInfo $file): string {
+    public function upload(SplFileInfo $file): PluginUploadResult {
         $zipFile = $this->tryOpenZipFile($file);
         $pluginName = $this->retrieveRootDirectory($zipFile);
+        $plugin = Plugin::where('name', $pluginName)->first();
+        
+        if(isset($plugin)) {
+            $this->validateExistingVersionIsOlder($zipFile, $plugin);
+        }
 
-        if($this->isPluginAlreadyInstalled($pluginName)) {
-            $this->validateInstalledVersionIsOlder($zipFile, $pluginName);
+        if($this->doesPluginDirectoryExist($pluginName)) {
             $backupPath = $this->ensureBackupDirectoryExists();
             $this->removeExistingBackup($backupPath, $pluginName);
             $this->moveExistingPluginToBackup($backupPath, $pluginName);
         }
 
         $this->extractZipFile($zipFile, $pluginName);
-        return $pluginName;
+        return new PluginUploadResult($pluginName, $plugin);
     }
-    
-    
+
+
     /**
      * Restores an existing backup to the plugin folder.
      * 
@@ -75,33 +78,80 @@ class PluginUploader {
         }
     }
 
+    /**
+     * Checks if the archive has a single root directory. 
+     * This directory dictates the name of the uploaded plugin.
+     * That's how the plugin system knows what plugin is getting
+     * updated.
+     * 
+     * Note: Retrieving the root directory is unnecessarily expensive
+     * as we cannot assume, that the first entry is the root directory.
+     * 
+     * @param ZipArchive $zipFile
+     * @return string
+     */
     private function retrieveRootDirectory(ZipArchive $zipFile): string {
-        $rootFolder = $zipFile->getNameIndex(0);
-        if(!Str::endsWith($rootFolder, '/')) {
-            abort(403, __('Format mismatch. Only a folder is allowed on root level.'));
+        $foundRoot = null;
+        $num = $zipFile->numFiles;
+
+        // We need to check all entries of the zip to ensure that there is exactly one root directory
+        // all other options are unreliable.
+        for($i = 0; $i < $num; $i++) {
+            $name = $zipFile->getNameIndex($i);
+            if($name === false) {
+                continue;
+            }
+            // Replace backslashes with forward slashes and remove leading slashes or dots
+            $name = preg_replace('#^(\./|/)+#', '', str_replace('\\', '/', $name));
+            if($name === '') {
+                continue;
+            }
+
+            // Ignore __MACOSX folder, which is sometimes added by macOS when creating zip files.
+            if(strpos($name, '__MACOSX/') === 0) {
+                continue;
+            }
+
+            $root = explode('/', $name, 2)[0];
+
+            // If root is empty after removing leading slashes and dots, skip it.
+            if(!trim($root)) {
+                continue;
+            }
+
+            if($foundRoot != null && $foundRoot != $root) {
+                abort(403, __('Format mismatch. Archive must contain exactly one root folder.'));
+            } else {
+                $foundRoot = $root;
+            }
         }
-        return $rootFolder;
+
+        if($foundRoot === null) {
+            abort(403, __('Could not find root directory in zip file. Aborting.'));
+        }
+
+        // Foundroot should always be without trailing slashes.
+        return $foundRoot;
     }
 
-    public function isPluginAlreadyInstalled(string $pluginName): bool {
+    public function doesPluginDirectoryExist(string $pluginName): bool {
         $pluginPath = PluginDirectory::getPath($pluginName);
         return file_exists($pluginPath);
     }
 
-    private function validateInstalledVersionIsOlder(ZipArchive $zipFile, string $pluginName) {
-        $installedPlugin = Plugin::where('name', $pluginName)->first();
+    private function validateExistingVersionIsOlder(ZipArchive $zipFile, Plugin $installedPlugin): void {
 
         if(!isset($installedPlugin)) {
-            return null;
+            return;
         }
 
-        $manifest = PluginManifest::fromZip($zipFile);
+        $manifest = PluginManifest::fromZip($zipFile, $installedPlugin->name);
         $existingVersion = $installedPlugin->version ?? '0.0.0';
         $uploadedVersion = $manifest->getVersion();
 
         if(version_compare($existingVersion, $uploadedVersion, ">=")) {
             abort(403, __("A plugin with the name ':pluginName' and the same or later version (:uploadedVersion and :existingVersion) already exists. Aborting.", [
-                'pluginName' => $pluginName,
+                'pluginName' => $installedPlugin->name,
                 'uploadedVersion' => $uploadedVersion,
                 'existingVersion' => $existingVersion,
             ]));
@@ -112,6 +162,8 @@ class PluginUploader {
         $existingPluginPath = PluginDirectory::getPath($pluginName);
         $backupPluginPath = $backupPath . '/' . $pluginName;
 
+
+
         if(!file_exists($existingPluginPath)) {
             return null;
         }
@@ -121,9 +173,10 @@ class PluginUploader {
 
     private function ensureBackupDirectoryExists(): string {
         $backupDirectory = PluginDirectory::getPath("_backups");
-        if(!directoryExists($backupDirectory)) {
+        if(!is_dir($backupDirectory)) {
             mkdir($backupDirectory, 0755, true);
         }
+
         return $backupDirectory;
     }
 
@@ -135,7 +188,11 @@ class PluginUploader {
     }
 
     private function extractZipFile(ZipArchive $zipFile, string $pluginName) {
-        $extractPath = Str::finish(Plugin::getDirectoryPath($pluginName), '/');
+        // As the zip file contains a single root directory with the same name as the plugin, 
+        // we can safely extract it directly to the plugin directory.
+        $pluginDirectory = PluginDirectory::getPath();
+        $extractPath = Str::finish($pluginDirectory, '/');
+
         $extracted = $zipFile->extractTo($extractPath);
         $zipFile->close();
 

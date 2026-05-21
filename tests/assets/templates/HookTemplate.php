@@ -15,24 +15,43 @@ class HookTemplate extends PluginTemplate {
         );
     }
 
-    public function getPredataFileContent(string $key, string $content): string {
+    public function getHookFileContent(string $key, string $content): string {
         return <<<ADD_PRE_DATA
 <?php
 namespace App\Plugins\\{$this->plugin->name}\Hooks;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 
-class AddPreData {
-    public static function apply(Request \$request, JsonResponse \$response): void {
+class VersionData {
+    public static function addHookInfo(Request \$request, JsonResponse \$response): void {
         \$data = \$response->getData(true);
         \$data['$key'] = '$content';
         \$response->setData(\$data);
     }
+        
+    public static function addNameHook(Request \$request, JsonResponse \$response): void {
+        \$data = \$response->getData(true);
+        \$data['plugin_name'] = '{$this->plugin->name}';
+        \$response->setData(\$data);
+    }
+        
+    public static function addFooHook(Request \$request, JsonResponse \$response): void {
+        \$data = \$response->getData(true);
+        \$data['foo'] = 'bar';
+        \$response->setData(\$data);
+    }
+        
+    public function addBooHook(Request \$request, JsonResponse \$response): void {
+        \$data = \$response->getData(true);
+        \$data['boo'] = 'far';
+        \$response->setData(\$data);
+    }
+    
 }
 ADD_PRE_DATA;
     }
 
-    public function addPreHookFile(
+    public function addHookFile(
         ?string $key = null,
         ?string $content = null
     ): static {
@@ -44,31 +63,72 @@ ADD_PRE_DATA;
         }
 
         $this->addFile(
-            "Hooks/AddPreData.php",
-            $this->getPredataFileContent($key, $content)
+            "Hooks/VersionData.php",
+            $this->getHookFileContent($key, $content)
         );
         return $this;
     }
 
-
-    public function addPreHook(): static {
-        $hookFeature = new HookTemplateFeature();
-        $hookFeature->addHook(
-            on: 'api/v1/pre',
-            src: "Hooks\\AddPreData@apply"
-        );
-        $this->addFeature($hookFeature);
+    
+    public function addHook(string $on, string $src, ?int $order = null): static {
+        $this->addXml("hooks", "hook", [
+            array_filter([
+                "on" => $on,
+                "src" => $src,
+                "order" => $order
+            ])
+        ]);
         return $this;
     }
 
-    public function addBasic(?string $key = null, ?string $content = null): static {
+    public function addVersionHook(string $on = "api/v1/version", ?int $order = null): static {
+        return $this->addHook(
+            $on,
+            "Hooks\\VersionData@addHookInfo",
+            $order
+        );
+    }
+    
+    public function addNameHook(string $on = "api/v1/version", ?int $order = null): static {
+        return $this->addHook(
+            $on,
+            "Hooks\\VersionData@addNameHook",
+            $order
+        );
+    }
+    
+    public function addFooHook(string $on = "api/v1/version", ?int $order = null): static {
+        return $this->addHook(
+            $on,
+            "Hooks\\VersionData@addFooHook",
+            $order
+        );
+    }
+    
+    public function addBooHook(string $on = "api/v1/version", ?int $order = null): static {
+        return $this->addHook(
+            $on,
+            "Hooks\\VersionData@addBooHook",
+            $order
+        );
+    }
+
+    /**
+     * Adds the basic files to the template and additionally adds the default hook file
+     * and xml configuration which targets the version endpoint and uses the addHookInfo method.
+     * 
+     * @param mixed $key
+     * @param mixed $content
+     * @param mixed $order
+     * @return HookTemplate
+     */
+    public function addBasic(?string $key = null, ?string $content = null, ?int $order = null): static {
         parent::addBasic();
-        
-        return static::addPreHookFile($key, $content)->addPreHook();
+        return static::addHookFile($key, $content)->addVersionHook(order: $order);
     }
 
-    public static function getBasic(?string $key = null, ?string $content = null): static {
-        return (new static())->addBasic($key, $content)->generate();
+    public static function getBasic(?string $key = null, ?string $content = null, ?int $order = null): static {
+        return (new static())->addBasic($key, $content, $order)->generate();
     }
 
     public static function createFrom(

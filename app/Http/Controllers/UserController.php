@@ -13,6 +13,7 @@ use App\Services\Plugin\PermissionService;
 use App\Services\PluginManager;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Str;
@@ -426,26 +427,30 @@ class UserController extends Controller {
                 'error' => __('This role does not exist')
             ], 400);
         }
+        
+        // We need this transaction, as the detach would result
+        // into the deletion of all role permissions, if any error occurs.
+        DB::transaction(function () use ($request, $role) {
+            if($request->has('permissions')) {
+                $role->permissions()->detach();
+                $perms = $request->get('permissions');
+                $role->syncPermissions($perms);
 
-        if($request->has('permissions')) {
-            $role->permissions()->detach();
-            $perms = $request->get('permissions');
-            $role->syncPermissions($perms);
-
-            // Update updated_at column
-            $role->touch();
-        }
-        if($request->has('is_moderated')) {
-            $role->is_moderated = $request->get('is_moderated');
-        }
-        if($request->has('display_name')) {
-            $role->display_name = $request->get('display_name');
-        }
-        if($request->has('description')) {
-            $role->description = $request->get('description');
-        }
-        $role->save();
-        $role->permissions;
+                // Update updated_at column
+                $role->touch();
+            }
+            if($request->has('is_moderated')) {
+                $role->is_moderated = $request->get('is_moderated');
+            }
+            if($request->has('display_name')) {
+                $role->display_name = $request->get('display_name');
+            }
+            if($request->has('description')) {
+                $role->description = $request->get('description');
+            }
+            $role->save();
+            $role->permissions;
+        });
 
         return response()->json($role);
     }

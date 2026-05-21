@@ -32,6 +32,10 @@ class PluginLog extends Log {
         return "[$pluginName] " . $message;
     }
     
+    public static function forName(string $pluginName): PluginLog {
+        return new PluginLog($pluginName);
+    }
+    
     public static function for(Plugin $plugin): PluginLog {
         return new PluginLog($plugin->name);
     }
