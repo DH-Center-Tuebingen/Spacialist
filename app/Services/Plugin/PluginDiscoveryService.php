@@ -22,7 +22,7 @@ class PluginDiscoveryService extends PluginService {
     }
 
     public function discoverByName(string $name): ?Plugin {
-        $manifest = PluginManifest::read($name);
+        $manifest = PluginManifest::readFromName($name);
         $plugin = null;
         if($manifest) {
             $plugin = Plugin::updateOrCreateFromManifest($manifest);
