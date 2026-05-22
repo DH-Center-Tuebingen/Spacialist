@@ -9,16 +9,33 @@ use Illuminate\Support\Facades\File;
 
 class PluginDiscoveryService extends PluginService {
 
-    public function discover() {
-        $availablePlugins = File::directories(PluginDirectory::getPath());
-        $pluginNames = array_map(fn($path) => basename($path), $availablePlugins);
-        self::discoverList($pluginNames);
+    /**
+     * Finds the directories of the plugins in the plugin directory. This is done by looking for subdirectories in the plugin directory.
+     * @return array<string> Full paths of the plugin directories.
+     */
+    public static function getPluginPaths(): array {
+        return File::directories(PluginDirectory::getPath());
     }
 
-    public function discoverList(array $list): void {
+    /**
+     * Finds the names of the plugins in the plugin directory. This is done by looking for subdirectories in the plugin directory. 
+     * @return array<string> Names of the plugins (which are the same as the names of the subdirectories in the plugin directory).
+     */
+    public static function getPluginNames(): array {
+        $directories = self::getPluginPaths();
+        return array_map(fn($path) => basename($path), $directories);
+    }
+
+    public function discover(): array {
+        return $this->discoverList(self::getPluginNames());
+    }
+
+    public function discoverList(array $list): array {
+        $plugins = [];
         foreach($list as $pluginDirectory) {
-            $this->discoverByName($pluginDirectory);
+             $plugins[] = $this->discoverByName($pluginDirectory);
         }
+        return $plugins;
     }
 
     public function discoverByName(string $name): ?Plugin {
