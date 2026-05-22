@@ -140,11 +140,11 @@ class MigrationService extends PluginService {
         ]);
     }
 
-    function getMigrationDirectory(Plugin $plugin): string {
+    public function getMigrationDirectory(Plugin $plugin): string {
         $migrationDirectory = $this->getManifestMigration($plugin);
 
         if(!$migrationDirectory) {
-            $migrationDirectory = $this->getLegacyMigrationPath($plugin);
+            $migrationDirectory = self::getLegacyMigrationPath($plugin->name);
         }
 
         return $migrationDirectory;
@@ -193,12 +193,12 @@ class MigrationService extends PluginService {
 
     /**
      * Get path to the plugin's migration directory (./Migration)
-     * @param Plugin $plugin - The plugin to get the migration path for
+     * @param string $pluginName - The plugin to get the migration path for
      * @param mixed $migrationFile - optional name of specific migration file, e.g. "2024_01_01_000000_create_users_table.php"
      * @return string - The path to the plugin's migration directory or to a specific migration file if $migrationFile is provided
      */
-    function getLegacyMigrationPath(Plugin $plugin, ?string $migrationFile = null): string {
-        $pluginDir = new PluginDirectory($plugin);
+    public static function getLegacyMigrationPath(string $pluginName, ?string $migrationFile = null): string {
+        $pluginDir = new PluginDirectory($pluginName);
         $path = $pluginDir->getPluginPath("Migration");
         if($migrationFile) {
             $path .= '/' . $migrationFile;
@@ -211,13 +211,13 @@ class MigrationService extends PluginService {
      * If it's a valid migration, the migration class will be returned, otherwise an exception will be thrown.
      * 
      * @param Plugin $plugin - The plugin the migration belongs to
-     * @param mixed $pluginNamespacePath - The namespace path to the migration file, e.g. "Subdir\Database\Migration"
-     * @param mixed $migrationFile - The migration file name, e.g. "2024_01_01_000000_create_users_table.php"
+     * @param string $directory - The namespace path to the migration file, e.g. "Subdir\Database\Migration"
+     * @param string $migrationFile - The migration file name, e.g. "2024_01_01_000000_create_users_table.php"
      * @throws \Exception throws an exeption if the migration has in incompatible name
      * @return mixed - LEGACY - This should return an instance of "Illuminate\Database\Migrations\Migration" currently plugins don't comply with that,
      *                 this will be changed in a future version.  
      */
-    function getMigrationClassName(Plugin $plugin, string $directory, $migrationFile) {
+    function getMigrationClassName(Plugin $plugin, string $directory, string $migrationFile) {
         preg_match('/^(\d{4}_\d{2}_\d{2}_\d{6})_(.+)\.php$/', $migrationFile, $matches);
         if(count($matches) != 3) {
             throw new \Exception("Invalid migration file name: $migrationFile");
