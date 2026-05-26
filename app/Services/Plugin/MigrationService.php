@@ -2,6 +2,8 @@
 
 namespace App\Services\Plugin;
 
+use App\Enums\LifecycleOperation;
+use App\Exceptions\PluginLifecycleException;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 
@@ -29,15 +31,15 @@ class MigrationService extends PluginService {
     }
 
     public function install(Plugin $plugin, PluginManifest $manifest): void {
-        $this->run($plugin);
+        $this->run($plugin, LifecycleOperation::INSTALLATION);
     }
 
     public function update(Plugin $plugin, PluginManifest $manifest): void {
-        $this->run($plugin);
+        $this->run($plugin, LifecycleOperation::UPDATE);
     }
 
     public function remove(Plugin $plugin, PluginManifest $manifest): void {
-        $this->rollback($plugin);
+        $this->rollback($plugin, LifecycleOperation::REMOVE);
     }
 
     public function inspect(Plugin $plugin): array {
@@ -57,24 +59,35 @@ class MigrationService extends PluginService {
 
         return $migrations;
     }
-
-    public function run(Plugin $plugin): void {
-        $this->exec($plugin);
+    
+    public function run(Plugin $plugin, ?LifecycleOperation $operation = null): void {
+        $this->exec($plugin, operation: $operation);
     }
 
-    public function rollback(Plugin $plugin): void {
-        $this->exec($plugin, true);
+    public function rollback(Plugin $plugin, ?LifecycleOperation $operation = null): void {
+        $this->exec($plugin, true, $operation);
     }
 
-    protected function exec(Plugin $plugin, $rollback = false) {
+    protected function exec(Plugin $plugin, bool $rollback = false, ?LifecycleOperation $operation = null) {
         //Determine the next batch number
         $nextBatch = PluginMigration::getNextBatchNumber();
         $directory = $this->getMigrationDirectory($plugin);
+        
+        if(!file_exists($directory) || !is_dir($directory)) {
+            
+            if($directory === self::getLegacyMigrationPath($plugin->name)) {
+                //Legacy support: If the default migration directory does not exist, we assume there are no migrations to run and return early.
+                return;
+            }
+        
+            throw new PluginLifecycleException($plugin, "Migration directory not found!", $operation);
+        }
+        
         $migrations = $this->getMissingMigrations($plugin, $rollback);
         
         foreach($migrations as $migration) {
             $migrationInstance = $this->getMigrationClassName($plugin, $directory, $migration);
-            try {
+            try{
                 call_user_func([$migrationInstance, $rollback ? 'rollback' : 'migrate']);
                 if($rollback) {
                     //Remove the record of the migration
@@ -89,7 +102,7 @@ class MigrationService extends PluginService {
                         'batch' => $nextBatch
                     ]);
                 }
-            } catch(\Exception $e) {
+            }catch(\Exception $e) {
                 throw $e;
             }
         }
@@ -223,7 +236,7 @@ class MigrationService extends PluginService {
             throw new \Exception("Invalid migration file name: $migrationFile");
         }
         $className = Str::studly($matches[2]);
-        require(Str::finish($directory, '/') . '/' . $migrationFile);
+        require_once(Str::finish($directory, '/') . '/' . $migrationFile);
         $pluginNamespacePath = $this->resolveDirectoryNamspace($plugin, $directory);
         $prefixedClassName = "App\\Plugins\\$plugin->name\\$pluginNamespacePath\\$className";
         return new $prefixedClassName();
