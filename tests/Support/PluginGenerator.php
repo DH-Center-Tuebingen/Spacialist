@@ -4,6 +4,7 @@ namespace Tests\Support;
 
 use App\Plugin;
 use App\Services\PluginManager;
+use Illuminate\Support\Facades\Log;
 
 /*
  * Generates plugin directories based on provided templates and ensures cleanup after tests.
@@ -84,20 +85,19 @@ class PluginGenerator {
     }
 
     public function logTemplates(): void {
-        info("Generated plugin contains the following templates:");
+        Log::notice("Generated plugin contains the following templates:");
         foreach($this->templates as $template) {
-            info("- " . $template->plugin->name);
-            info("  - Files:");
-            info(json_encode($template->getStructure(), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
-            info("  - XML:");
-            info(json_encode($template->getXml(), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+            Log::notice("- " . $template->plugin->name);
+            Log::notice("  - Files:");
+            Log::notice(json_encode($template->getStructure(), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+            Log::notice("  - XML:");
+            Log::notice(json_encode($template->getXml(), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
         }
-        info("End of plugin templates log.");
-        info("================================");
+        Log::notice("End of plugin templates log.");
+        Log::notice("================================");
     }
     
     public function getPlugin(string $name): ?Plugin {
-        info(json_encode($this->pluginMap, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
         return $this->pluginMap[$name] ?? null;
     }
 }

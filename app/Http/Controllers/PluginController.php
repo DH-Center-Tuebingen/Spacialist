@@ -60,7 +60,7 @@ class PluginController extends Controller {
 
         $attributesMap = app(AttributeService::class)->getMappedByPlugins();        
         foreach($plugins as $plugin) {
-            $plugin->regusteredAttributes = $attributesMap[$plugin->id] ?? [];
+            $plugin->registeredAttributes = $attributesMap[$plugin->id] ?? [];
         }
 
         return response()->json($plugins);
