@@ -61,7 +61,7 @@ class PluginManager {
     }
 
     protected function fetch(): array {
-        return Plugin::all()->toArray();
+        return Plugin::orderBy('id', 'asc')->get()->toArray();
     }
 
     public function cleanup(array $list): void {

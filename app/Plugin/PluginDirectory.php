@@ -18,7 +18,7 @@ class PluginDirectory {
     }
 
     /**
-     * Get's the path to the plugin's directory relative to the plugin directory, e.g. "MyPlugin" or "MyPlugin/Subdirectory".
+     * Get's the path relative to the plugin directory, e.g. "MyPlugin" or "MyPlugin/Subdirectory".
      * 
      * @param string $subpath - An optional subpath to a specific file or directory inside the plugin directory, e.g. "Migrations" or "Migrations/2024_01_01_000000_create_users_table.php"
      * @return string The path to the plugin's directory relative to the plugin directory, e.g. "MyPlugin" or "MyPlugin/Subdirectory"

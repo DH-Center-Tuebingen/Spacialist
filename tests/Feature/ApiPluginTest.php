@@ -76,7 +76,7 @@ class ApiPluginTest extends TestCase {
 
     protected function setUp(): void {
         parent::setUp();
-
+        
         // The refresh database trait seems not to reset the id sequence
         // therefore we do it manually here to ensure the ids of the test plugins are always the same.
         DB::statement("ALTER SEQUENCE IF EXISTS plugins_id_seq RESTART");

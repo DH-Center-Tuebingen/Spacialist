@@ -24,7 +24,6 @@ class PluginTemplate {
     public Plugin $plugin;
     protected $structure = [];
     protected array $xml = [];
-    // protected $features = [];
     public ?string $changelog = null;
     public ?string $packageJson = null;
     private bool $generateCalled = false;
@@ -189,14 +188,18 @@ class PluginTemplate {
      *    <childTag attribute1="value3" attribute2="value4" />
      *    ...
      * </rootTag>
+     * <!-- or, if childTag is null -->
+     * 
+     * <rootTag attribute1="value1" attribute2="value2" />
+     * <rootTag attribute1="value3" attribute2="value4" />
      * ```  
      * 
      * @param string $rootTag - The root tag name, e.g. "hooks"
-     * @param string $childTag - The child tag name, e.g. "hook"
+     * @param string $childTag - The child tag name, e.g. "hook", can be set to null to only add the root tag with the provided content.
      * @param array $content - An array of child tag content, where each item is an associative array of attributes, e.g.: [["src" => "Hooks/Hook1@method", "on" => "api/v1/version" ],...]
      * @return $this - Returns the PluginTemplate instance for chaining
      */
-    public function addXml(string $rootTag, string $childTag, array $content): static {
+    public function addXml(string $rootTag, string | null $childTag, array $content): static {
         $this->xml[] = [
             "rootTag" => $rootTag,
             "childTag" => $childTag,

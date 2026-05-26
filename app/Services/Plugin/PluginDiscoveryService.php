@@ -5,6 +5,7 @@ namespace App\Services\Plugin;
 use App\Plugin;
 use App\Plugin\PluginDirectory;
 use App\Plugin\PluginManifest;
+use App\Services\PluginManager;
 use Illuminate\Support\Facades\File;
 
 class PluginDiscoveryService extends PluginService {
@@ -26,8 +27,22 @@ class PluginDiscoveryService extends PluginService {
         return array_map(fn($path) => basename($path), $directories);
     }
 
+    /**
+     * Summary of discover
+     * @return array
+     */
     public function discover(): array {
-        return $this->discoverList(self::getPluginNames());
+        $pluginNames = self::getPluginNames();
+        $availablePlugins = app(PluginManager::class)->getPlugins();
+        $undiscoveredPlugins = [];
+        
+        foreach($availablePlugins as $plugin) {
+            if(!in_array($plugin->name, $pluginNames)) {
+                $undiscoveredPlugins[] = $plugin->name;
+            }
+        }
+    
+        return $this->discoverList($undiscoveredPlugins);
     }
 
     public function discoverList(array $list): array {
