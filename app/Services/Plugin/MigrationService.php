@@ -26,10 +26,6 @@ use App\Plugin\PluginManifest;
  */
 class MigrationService extends PluginService {
 
-    protected function getPath(): string {
-        return 'plugin-migrations';
-    }
-
     public function install(Plugin $plugin, PluginManifest $manifest): void {
         $this->run($plugin, LifecycleOperation::INSTALLATION);
     }
