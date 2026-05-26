@@ -2,20 +2,11 @@
 
 namespace App\Exceptions;
 
+use App\Enums\LifecycleOperation;
 use App\Plugin;
 use App\Support\Log\PluginLog;
 use Exception;
 
-enum LifecycleOperation {
-    case INSTALLATION;
-    case ACTIVATION;
-    case DEACTIVATION;
-    case UNINSTALLATION;
-    case UPLOAD;
-    case UPDATE;
-    case REMOVE;
-    case DISCOVERY;
-}
 /**
  * Throws an exception when an error occurs that is caused by an invalid plugin configuration. 
  * This can be used to catch errors during the plugin lifecycle, such as installation, activation, deactivation, and uninstallation,

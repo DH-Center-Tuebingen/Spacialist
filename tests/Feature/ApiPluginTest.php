@@ -10,6 +10,8 @@ use Carbon\Carbon;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use PHPUnit\Framework\Attributes\TestDox;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
 use Tests\Assets\Templates\ScopeTemplate;
 use Tests\Support\PluginDirectoryGenerator;
 use Tests\Support\PluginGenerator;
@@ -19,6 +21,7 @@ class ApiPluginTest extends TestCase {
 
     private PluginGenerator $generator;
     private ?string $tmpdir = null;
+
 
     private static function getFooPlugin(): array {
         return [
@@ -47,10 +50,28 @@ class ApiPluginTest extends TestCase {
     }
 
     private function removeTmpDir() {
-        if($this->tmpdir && file_exists($this->tmpdir)) {
-            rmdir($this->tmpdir);
-            $this->tmpdir = null;
+
+        if(!$this->tmpdir || !is_dir($this->tmpdir)) {
+            return;
         }
+
+        if(!str_starts_with($this->tmpdir, sys_get_temp_dir())) {
+            // Safety check to prevent accidental deletion of important files
+            throw new \Exception("Attempting to remove a directory outside of the system temp directory. Aborting for safety. Directory: " . $this->tmpdir);
+        }
+
+        $it = new RecursiveDirectoryIterator($this->tmpdir, RecursiveDirectoryIterator::SKIP_DOTS);
+        $files = new RecursiveIteratorIterator($it,
+            RecursiveIteratorIterator::CHILD_FIRST);
+        foreach($files as $file) {
+            if($file->isDir()) {
+                rmdir($file->getPathname());
+            } else {
+                unlink($file->getPathname());
+            }
+        }
+        rmdir($this->tmpdir);
+        $this->tmpdir = null;
     }
 
     protected function setUp(): void {
@@ -59,8 +80,8 @@ class ApiPluginTest extends TestCase {
         // The refresh database trait seems not to reset the id sequence
         // therefore we do it manually here to ensure the ids of the test plugins are always the same.
         DB::statement("ALTER SEQUENCE IF EXISTS plugins_id_seq RESTART");
-        $fooTemplate = PluginTemplate::fromSlugArray(static::getFooPlugin())->addBasic()->generate();
-        $barTemplate = PluginTemplate::fromSlugArray(static::getBarPlugin())->addBasic()->setUninstalled()->generate();
+        $fooTemplate = PluginTemplate::fromSlugArray(static::getFooPlugin())->addBasic()->setChangelog("Foo Plugin Changelog")->generate();
+        $barTemplate = PluginTemplate::fromSlugArray(static::getBarPlugin())->addBasic()->skipInstall()->generate();
 
         $this->generator = new PluginGenerator([
             $fooTemplate,
@@ -71,8 +92,8 @@ class ApiPluginTest extends TestCase {
 
     protected function tearDown(): void {
         parent::tearDown();
-        // $this->generator->tearDown();
-        // $this->removeTmpDir();
+        $this->generator->tearDown();
+        $this->removeTmpDir();
     }
 
     private function getTestPlugins(): array {
@@ -90,6 +111,14 @@ class ApiPluginTest extends TestCase {
         $response->assertStatus(200);
         $response->assertJsonCount(2);
         $response->assertJson($this->getTestPlugins());
+    }
+
+    #[TestDox('GET           /v1/plugin/{id}/changelog : Get Plugin Changelog')]
+    public function testGetChangelog(): void {
+        $response = $this->userRequest()
+            ->get('/api/v1/plugin/1/changelog');
+        $response->assertStatus(200);
+        $response->assertSee('Foo Plugin Changelog');
     }
 
     #[TestDox('GET           /v1/plugin/<id> : Install Plugin')]
@@ -117,7 +146,7 @@ class ApiPluginTest extends TestCase {
     #[TestDox('GET [403]     /v1/plugin/<id> : Install Plugin Fails Without Permission - "plugin_write"')]
     public function testInstallPluginFailsWithoutPermission(): void {
         Carbon::setTestNow('2020-05-15 05:25:06');
-        
+
         $this->useUserWithPermissions(['plugin_read', 'plugin_delete', 'plugin_share']);
         $response = $this->userRequest()
             ->get('/api/v1/plugin/2');
@@ -128,10 +157,10 @@ class ApiPluginTest extends TestCase {
     }
 
     /**
-    * Helper to setup the pre upload state for the upload test
-    * 1) Mocks backup plugin
-    * 2) Generates the upload file
-    */
+     * Helper to setup the pre upload state for the upload test
+     * 1) Mocks backup plugin
+     * 2) Generates the upload file
+     */
     private function uploadPluginSetup() {
         $updatedFooPlugin = $this->getFooPlugin();
         $updatedFooPlugin['version'] = '2.2.0';
@@ -176,7 +205,7 @@ class ApiPluginTest extends TestCase {
         $activePluginDirectory = PluginDirectory::getPath($plugin->name);
 
         $this->assertEquals('backup', file_get_contents($backupDirectory . '/changelog.md'));
-        $this->assertEquals('[DEFAULT CHANGELOG]', file_get_contents($activePluginDirectory . '/changelog.md'));
+        $this->assertEquals('Foo Plugin Changelog', file_get_contents($activePluginDirectory . '/changelog.md'));
 
         $file = $this->uploadPluginSetup();
 
@@ -190,7 +219,7 @@ class ApiPluginTest extends TestCase {
         $updatedFooPlugin['updated_at'] = '2020-07-20T10:15:30.000000Z';
         $response->assertJson($updatedFooPlugin);
 
-        $this->assertEquals('[DEFAULT CHANGELOG]', file_get_contents($backupDirectory . '/changelog.md'));
+        $this->assertEquals('Foo Plugin Changelog', file_get_contents($backupDirectory . '/changelog.md'));
         $this->assertEquals('updated', file_get_contents($activePluginDirectory . '/changelog.md'));
 
         // Reset time after test
@@ -202,7 +231,7 @@ class ApiPluginTest extends TestCase {
     public function testUploadPluginFailsWithoutPermission(): void {
         Carbon::setTestNow('2020-07-20 10:15:30');
         $this->useUserWithoutPermission('plugin', 'c');
-        
+
         $file = $this->uploadPluginSetup();
 
         $response = $this->userRequest()
@@ -216,9 +245,9 @@ class ApiPluginTest extends TestCase {
     #[TestDox('DELETE        /v1/plugin/<id> : Uninstall Plugin')]
     public function testUninstallPlugin(): void {
         Carbon::setTestNow('2020-07-20 10:15:30');
-        
+
         $this->useUserWithPermissions('plugin_write');
-        
+
         $response = $this->userRequest()
             ->delete('/api/v1/plugin/1');
 
@@ -244,8 +273,8 @@ class ApiPluginTest extends TestCase {
         $response = $this->userRequest()
             ->delete('/api/v1/plugin/1');
 
-        $response->assertStatus(403); 
-        
+        $response->assertStatus(403);
+
         // Reset time after test
         Carbon::setTestNow();
     }

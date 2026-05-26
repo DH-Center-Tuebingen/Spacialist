@@ -40,7 +40,7 @@ class PluginGenerator {
 
     public function use(callable $callback, bool $skipTearDown = false): static {
         $this->setUp();
-        try {
+        try{
             $callback();
         } finally {
             if(!$skipTearDown) {
@@ -59,7 +59,7 @@ class PluginGenerator {
             $template->plugin->id = $plugin->id; // Update the template's plugin ID to match the saved plugin
             $this->pluginMap[$plugin->name] = $plugin;
 
-            if($template->isInstalled()) {
+            if(!$template->isSkippingInstall()) {
                 app(PluginManager::class)->install($plugin);
                 $this->overrideTimestamps($plugin, $template);
             }

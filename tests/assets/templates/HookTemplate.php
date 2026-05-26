@@ -128,7 +128,7 @@ ADD_PRE_DATA;
     }
 
     public static function getBasic(?string $key = null, ?string $content = null, ?int $order = null): static {
-        return (new static())->addBasic($key, $content, $order)->generate();
+        return (new static())->addBasic($key, $content, $order);
     }
 
     public static function createFrom(

@@ -17,6 +17,7 @@ use App\Services\Plugin\PluginDiscoveryService;
 use App\Services\Plugin\ScriptService;
 use App\Support\Log\PluginLog;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class PluginController extends Controller {
@@ -58,7 +59,7 @@ class PluginController extends Controller {
             $plugins = app(PluginManager::class)->getPlugins();
         }
 
-        $attributesMap = app(AttributeService::class)->getMappedByPlugins();        
+        $attributesMap = app(AttributeService::class)->getMappedByPlugins();
         foreach($plugins as $plugin) {
             $plugin->registeredAttributes = $attributesMap[$plugin->id] ?? [];
         }
@@ -74,18 +75,22 @@ class PluginController extends Controller {
 
         $uploader = app(PluginUploader::class);
         $uploadResult = $uploader->upload($request->file('file'));
-        
+
         $pluginName = $uploadResult->pluginName;
-        
+
         if($uploadResult->isUpdate()) {
             $plugin = $uploadResult->plugin;
-            app(PluginManager::class)->update($plugin);  
+            $success = DB::transaction(function () use ($plugin) {
+                app(PluginManager::class)->update($plugin);
+                
+                // Return true if update was successful.
+                return true;
+            });
         } else {
             $plugin = app(PluginDiscoveryService::class)->discoverByName($pluginName);
         }
-        
 
-        if(!isset($plugin)) {
+        if(!$success || !isset($plugin) ) {
             $uploader->restoreBackup($pluginName);
             PluginLog::forName($pluginName)->error("Plugin was uploaded but could not be read. Backup has been restored.");
 
@@ -103,20 +108,20 @@ class PluginController extends Controller {
         return response()->json($scriptUrl);
     }
 
-    public function installPlugin(Request $request, Plugin $plugin) {    
+    public function installPlugin(Request $request, Plugin $plugin) {
         $this->requireNotInstalled($plugin);
 
-        try {
+        try{
             app(PluginManager::class)->install($plugin);
-        } catch(ModelNotFoundException $e) {
+        }catch (ModelNotFoundException $e) {
             return response()->json([
                 'error' => __('Error while installing plugin. Preset does not exist.')
             ], 403);
-        } catch(PluginLifecycleException $e) {
+        }catch (PluginLifecycleException $e) {
             return response()->json([
                 'error' => $e->getMessage()
             ], 422);
-        } catch(\Exception $e) {
+        }catch (\Exception $e) {
             report($e);
             PluginLog::for($plugin)->error("Unexpected error during plugin installation: " . $e->getMessage(), ['exception' => $e]);
             return response()->json([
@@ -139,7 +144,7 @@ class PluginController extends Controller {
     public function uninstallPlugin(Request $request, Plugin $plugin) {
         $this->requireInstalled($plugin);
 
-        try {
+        try{
             app(PluginManager::class)->uninstall($plugin);
 
             return response()->json([
@@ -147,7 +152,7 @@ class PluginController extends Controller {
                 'scripts' => [app(ScriptService::class)->getUrl($plugin)],
                 'styles' => app(CssService::class)->getUrls($plugin),
             ]);
-        } catch(ModelNotFoundException $e) {
+        }catch (ModelNotFoundException $e) {
             // Already uninstalled
             return response()->json([], 204);
         }

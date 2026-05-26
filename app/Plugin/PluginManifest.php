@@ -25,13 +25,6 @@ class PluginManifest {
         'App/info.xml',
     ];
 
-    protected $metadataStringFields = [
-        'description',
-        'licence',
-        'title',
-        'version',
-    ];
-
     public function __construct(protected SimpleXMLElement $content) {
     }
 
@@ -79,30 +72,6 @@ class PluginManifest {
             }
         }
         return $authors;
-    }
-
-    public function getMetadata(): array {
-        $metadata = [];
-        foreach($this->metadataStringFields as $field) {
-            if(array_key_exists($field, $this->content)) {
-                $metadata[$field] = $this->content[$field];
-            } else {
-                $metadata[$field] = "";
-            }
-        }
-
-        if(array_key_exists('authors', $this->content)) {
-            if(array_key_exists('author', $this->content[$field])) {
-                $authors = $this->content[$field]['author'];
-                $metadata[$field] = is_array($authors) ? $authors : [$authors];
-            } else {
-                $metadata[$field] = [];
-            }
-        } else {
-            $metadata['authors'] = [];
-        }
-
-        return $metadata;
     }
 
     public function getTagNodes(string $xpath): array {
