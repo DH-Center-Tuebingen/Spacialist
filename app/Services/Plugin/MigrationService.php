@@ -126,7 +126,7 @@ class MigrationService extends PluginService {
         if(count($xmlNodes) > 1) {
             throw new \Exception("Plugin {$plugin->name} has multiple <migrations> tags in its manifest, but only one is allowed.");
         }
-
+        
         $attributes = $xmlNodes[0]['attributes'] ?? [];
         $path = $attributes['path'] ?? trim((string) ($xmlNodes[0]['text'] ?? ''));
 
@@ -224,7 +224,7 @@ class MigrationService extends PluginService {
      * If it's a valid migration, the migration class will be returned, otherwise an exception will be thrown.
      * 
      * @param Plugin $plugin - The plugin the migration belongs to
-     * @param string $directory - The namespace path to the migration file, e.g. "Subdir\Database\Migration"
+     * @param string $directory - Absolute path to the migration directory.
      * @param string $migrationFile - The migration file name, e.g. "2024_01_01_000000_create_users_table.php"
      * @throws \Exception throws an exeption if the migration has in incompatible name
      * @return mixed - LEGACY - This should return an instance of "Illuminate\Database\Migrations\Migration" currently plugins don't comply with that,
