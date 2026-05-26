@@ -133,7 +133,7 @@ class PermissionService extends PluginService {
     }
 
     public function getPermissions(Plugin $plugin): mixed {
-        $pluginDirectory = new PluginDirectory($plugin);
+        $pluginDirectory = PluginDirectory::fromPlugin($plugin);
         $pluginPermissionPath = $pluginDirectory->getPluginPath('App/permissions.json');
         if(!File::isFile($pluginPermissionPath)) {
             return [];

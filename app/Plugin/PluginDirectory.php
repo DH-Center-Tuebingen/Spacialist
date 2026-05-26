@@ -14,7 +14,7 @@ use Illuminate\Support\Str;
  */
 class PluginDirectory {
 
-    public function __construct(public Plugin $plugin) {
+    public function __construct(public string $pluginName) {
     }
 
     /**
@@ -24,7 +24,7 @@ class PluginDirectory {
      * @return string The path to the plugin's directory relative to the plugin directory, e.g. "MyPlugin" or "MyPlugin/Subdirectory"
      */
     public function getPluginPath(string $subpath = ""): string {
-        $path = $this->plugin->name;
+        $path = $this->pluginName;
         if($subpath !== "") {
             $path .= Str::start($subpath, '/');
         }
@@ -50,7 +50,7 @@ class PluginDirectory {
     }
 
     public static function fromPlugin(Plugin $plugin): self {
-        return new self($plugin);
+        return new self($plugin->name);
     }
 
     public static function getPathByName(string $pluginName): string {
@@ -63,7 +63,6 @@ class PluginDirectory {
 
     public function readChangelog(): string {
         $changelog = $this->getPluginPath('CHANGELOG.md');
-        info("Reading changelog for plugin {$this->plugin->name} from path {$changelog}.");
         if(!File::isFile($changelog)) {
             return '';
         }
