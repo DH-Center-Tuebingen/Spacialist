@@ -44,6 +44,7 @@ Route::middleware('auth:sanctum')->prefix('v1/plugin')->group(function () {
 });
 
 Route::middleware('auth:sanctum')->middleware(['can:plugin_write'])->prefix('v1/plugin')->group(function () {
+    // TODO: This route modifies the server state and should be a post or patch request:
     Route::get('/{plugin}', 'PluginController@installPlugin');
     
     Route::post('/refresh', 'PluginController@refresh');
@@ -53,6 +54,7 @@ Route::middleware('auth:sanctum')->middleware(['can:plugin_write'])->prefix('v1/
     Route::post('/migrate/{plugin}/rollback', 'PluginController@rollback');
     Route::post('/migrate/{plugin}/force_add', 'PluginController@addMigrationToDatabase');
     
+    // TODO: To 'disable' a plugin is just a modification, not a deletion operation:
     Route::delete('/{plugin}', 'PluginController@uninstallPlugin');
 });
 
@@ -61,7 +63,6 @@ Route::middleware('auth:sanctum')->middleware(['can:plugin_create'])->prefix('v1
 });
 
 Route::middleware('auth:sanctum')->middleware(['can:plugin_delete'])->prefix('v1/plugin')->group(function () {
-    // To 'disable' a plugin is just a modification, not a deletion operation.
     Route::delete('/remove/{plugin}', 'PluginController@removePlugin');
 });
 

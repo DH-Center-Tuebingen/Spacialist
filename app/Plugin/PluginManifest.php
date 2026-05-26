@@ -35,12 +35,18 @@ class PluginManifest {
     public function __construct(protected SimpleXMLElement $content) {
     }
 
-    public function getTextContent(string ...$path): string {
-        $implodedPath = implode('/', $path);
-        $result = $this->content->xpath("{$implodedPath}");
+    /**
+     * Returns the text content of a leaf.
+     * 
+     * @param string $xpath - The xpath to a single leaf 
+     * @return string
+     */
+    public function getTextContent(string $xpath): string {    
+        $result = $this->content->xpath($xpath);
         if($result === false || count($result) === 0) {
             return "";
         }
+        
         return (string) $result[0];
     }
 

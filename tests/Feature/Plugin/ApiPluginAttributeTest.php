@@ -3,11 +3,10 @@
 namespace Tests\Feature;
 
 use Carbon\Carbon;
-use Tests\TestCase;
-
-use Tests\Assets\Templates\ScopeTemplate;
+use Illuminate\Support\Facades\DB;
 use Tests\Support\PluginGenerator;
 use Tests\Support\PluginTemplate;
+use Tests\TestCase;
 
 class ApiPluginAttributeTest extends TestCase {
 
@@ -15,23 +14,18 @@ class ApiPluginAttributeTest extends TestCase {
 
     private function getAttributePlugin(): array {
         return [
-            'id' => 3,
             'name' => 'AttributePlugin',
             'version' => '1.0.0',
             'uuid' => '123e4567-e89b-12d3-a456-426614174005',
-            'update_available' => null,
-            'installed_at' => null,
-            'created_at' => '2020-08-01T08:00:00.000000Z',
-            'updated_at' => '2020-08-01T08:00:00.000000Z',
         ];
     }
 
-    private function getAttributeTemplate() {    
-        
+    private function getAttributeTemplate() {
+
         $attributeTemplate = PluginTemplate::fromSlugArray($this->getAttributePlugin())->addBasic();
         $attributeTemplate->addXml("attributes", "attribute", [
-            ["src" => "Attribute/AttributeA"],
-            ["src" => "Attribute/AttributeB"],
+            ["src" => "Attributes/AttributeA"],
+            ["src" => "Attributes/AttributeB"],
         ]);
         $namespace = "namespace App\Plugins\AttributePlugin\Attributes;\n";
         $attributeTemplate->addFile("Attributes/AttributeA.php", "<?php\n$namespace\nuse App\\AttributeTypes\\AttributeBase;\nclass AttributeA {\n    // Attribute A implementation\n}\n");
@@ -48,6 +42,7 @@ class ApiPluginAttributeTest extends TestCase {
 
     protected function setUp(): void {
         parent::setUp();
+        DB::statement("ALTER SEQUENCE IF EXISTS plugins_id_seq RESTART");
         Carbon::setTestNow('2020-07-20 10:15:30');
     }
 
@@ -62,12 +57,32 @@ class ApiPluginAttributeTest extends TestCase {
         $template = $this->getAttributeTemplate();
         $this->generator = new PluginGenerator([$template]);
         $this->generator->use(function () use ($template) {
-            $response = $this->userRequest()->get('/api/v1/plugins');
-
-            $this->assertStatus($response, 200);
-
+            $response = $this->userRequest()->get('/api/v1/plugin');
+            $response->assertStatus(200);
+            $response->assertJson([
+                [
+                    "id" => 1,
+                    "name" => "AttributePlugin",
+                    'uuid' => '123e4567-e89b-12d3-a456-426614174005',
+                    'created_at' => '2020-07-20T10:15:30.000000Z',
+                    'updated_at' => '2020-07-20T10:15:30.000000Z',
+                    'registeredAttributes' => [
+                         "App\\Plugins\\AttributePlugin\\Attributes\\AttributeA",
+                         "App\\Plugins\\AttributePlugin\\Attributes\\AttributeB"
+                    ]
+                ]
+            ]);
         }, true);
     }
 
 
+    public function testInstallPluginWithAttributes(): void {
+        $template = $this->getAttributeTemplate();
+        $template->setUninstalled();
+        $this->generator = new PluginGenerator([$template]);
+        $this->generator->use(function () use ($template) {
+            $response = $this->userRequest()->get("/api/v1/plugin/1");
+            $this->assertStatus($response, 200);
+        }, true);
+    }
 }

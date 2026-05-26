@@ -63,11 +63,9 @@ class AttributeService extends PluginService{
     
     public function install(Plugin $plugin, PluginManifest $manifest): void {
         $attributes = $this->getAttributesFromManifest($plugin, $manifest);
-
         foreach($attributes as $attribute) {
-            
-            $projectedClass = "App\\Plugins\\{$plugin->name}\\{$attribute['src']}";
-        
+            $namespaceSrc = str_replace('/', '\\', $attribute['src']);
+            $projectedClass = "App\\Plugins\\{$plugin->name}\\{$namespaceSrc}";
             if(!class_exists($projectedClass)) {
                 throw new PluginLifecycleException($plugin, "Attribute class '{$attribute['src']}' not found for plugin '{$manifest->getName()}'.");
             }

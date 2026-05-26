@@ -98,7 +98,6 @@ class PluginDirectoryGenerator {
             mkdir($pluginDir, 0755, true);
         }
 
-        info($template->getStructure());
         // Process structure array
         foreach($template->getStructure() as $name => $content) {
             $path = $pluginDir . '/' . $name;
