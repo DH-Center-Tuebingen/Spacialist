@@ -29,7 +29,7 @@ class PluginUploader {
      */
     public function upload(SplFileInfo $file): PluginUploadResult {
         $zipFile = $this->tryOpenZipFile($file);
-        $pluginName = $this->retrieveRootDirectory($zipFile);
+        $pluginName = $this->getSingleRootDirectory($zipFile);
         $plugin = Plugin::where('name', $pluginName)->first();
         
         if(isset($plugin)) {
@@ -70,6 +70,7 @@ class PluginUploader {
 
     private function tryOpenZipFile(SplFileInfo $file): ZipArchive {
         $zipFile = new ZipArchive();
+        info($file->getRealPath());
         $isOpen = $zipFile->open($file->getRealPath(), ZipArchive::RDONLY);
         if($isOpen === true) {
             return $zipFile;
@@ -77,7 +78,7 @@ class PluginUploader {
             abort(403, __('Could not open provided plugin zip file. Aborting.'));
         }
     }
-
+    
     /**
      * Checks if the archive has a single root directory. 
      * This directory dictates the name of the uploaded plugin.
@@ -90,7 +91,7 @@ class PluginUploader {
      * @param ZipArchive $zipFile
      * @return string
      */
-    private function retrieveRootDirectory(ZipArchive $zipFile): string {
+    private function getSingleRootDirectory(ZipArchive $zipFile): string {
         $foundRoot = null;
         $num = $zipFile->numFiles;
 
@@ -133,7 +134,7 @@ class PluginUploader {
         // Foundroot should always be without trailing slashes.
         return $foundRoot;
     }
-
+    
     public function doesPluginDirectoryExist(string $pluginName): bool {
         $pluginPath = PluginDirectory::getPath($pluginName);
         return file_exists($pluginPath);
