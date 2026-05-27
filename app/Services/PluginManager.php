@@ -15,7 +15,7 @@ use App\Services\Plugin\DependencyService;
 use App\Services\Plugin\HookService;
 use App\Services\Plugin\MigrationService;
 use App\Services\Plugin\PermissionService;
-use App\Services\Plugin\PluginDiscoveryService;
+use App\Services\Plugin\DiscoveryService;
 use App\Services\Plugin\RolePresetService;
 use App\Services\Plugin\RouteService;
 use App\Services\Plugin\ScopeService;
@@ -51,7 +51,7 @@ class PluginManager {
         public readonly RouteService $routeService,
         public readonly ScriptService $scriptService,
         public readonly ScopeService $scopeService,
-        public readonly PluginDiscoveryService $discoveryService,
+        public readonly DiscoveryService $discoveryService,
     ) {
         $this->pluggableServices = func_get_args();
     }
