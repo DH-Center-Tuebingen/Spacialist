@@ -106,7 +106,7 @@ class RouteService extends PluginService {
             try {
                 $prefix = "api/v1/{$route['plugin_slug']}";
                 $namespace = "App\\Plugins\\{$route['plugin_name']}\\Controllers";
-                $routesPath = PluginDirectory::getPath($route['plugin_name'] . "/routes/api.php");
+                $routesPath = $route['src'];
                 $api = $route['middleware'] ?? 'api';
 
                 if(file_exists($routesPath)) {                
