@@ -700,7 +700,7 @@
                     "users_roles": "Users & Roles",
                     "preferences": "Preferences",
                     "thesaurus": "Thesaurus",
-                    "is_plugin": "Plugin"
+                    "plugin": "Plugin"
                 },
                 "moderation": {
                     "required": "Requires Moderation"
