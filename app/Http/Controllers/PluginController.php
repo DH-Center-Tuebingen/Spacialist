@@ -13,7 +13,7 @@ use App\Plugin\PluginUploader;
 use App\Services\Plugin\AttributeService;
 use App\Services\Plugin\CssService;
 use App\Services\Plugin\MigrationService;
-use App\Services\Plugin\PluginDiscoveryService;
+use App\Services\Plugin\DiscoveryService;
 use App\Services\Plugin\ScriptService;
 use App\Support\Log\PluginLog;
 use Illuminate\Http\JsonResponse;
@@ -47,7 +47,7 @@ class PluginController extends Controller {
     }
 
     public function getPlugins(Request $request) {
-        app(PluginDiscoveryService::class)->discover();
+        app(DiscoveryService::class)->discover();
 
         $plugins = [];
         if($request->query('installed') == 1) {
@@ -87,7 +87,7 @@ class PluginController extends Controller {
                 return true;
             });
         } else {
-            $plugin = app(PluginDiscoveryService::class)->discoverByName($pluginName);
+            $plugin = app(DiscoveryService::class)->discoverByName($pluginName);
         }
 
         if(!$success || !isset($plugin) ) {
@@ -268,7 +268,7 @@ class PluginController extends Controller {
      * @return \Illuminate\Http\JsonResponse - Returns all plugins with their metadata after rebuilding the cache.
      */
     public function refresh(Request $request) {
-        app(PluginDiscoveryService::class)->discover();
+        app(DiscoveryService::class)->discover();
         app(PluginManager::class)->rebuildPluginCache();
         return response()->json(Plugin::all());
     }
@@ -278,7 +278,7 @@ class PluginController extends Controller {
      * @return \Illuminate\Http\JsonResponse - Returns the plugin with its metadata.
      */
     public function refreshInfo(Request $request, Plugin $plugin) {
-        app(PluginDiscoveryService::class)->discoverByName($plugin->name);
+        app(DiscoveryService::class)->discoverByName($plugin->name);
         app(PluginManager::class)->rebuildPluginCache();
         return response()->json($plugin);
     }

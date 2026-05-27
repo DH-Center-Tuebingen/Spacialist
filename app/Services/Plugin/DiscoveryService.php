@@ -8,7 +8,7 @@ use App\Plugin\PluginManifest;
 use App\Services\PluginManager;
 use Illuminate\Support\Facades\File;
 
-class PluginDiscoveryService extends PluginService {
+class DiscoveryService extends PluginService {
 
     /**
      * Finds the directories of the plugins in the plugin directory. This is done by looking for subdirectories in the plugin directory.
