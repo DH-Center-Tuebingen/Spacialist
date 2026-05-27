@@ -273,7 +273,20 @@ class PluginTemplate {
         $this->skipInstallation = true;
         return $this;
     }
-    
+    /**
+     * Sets the skipInstall property to false to install the plugin 
+     * when generated.
+     * 
+     * Note: Normally this is the default behavior, but some implementation
+     * may want to change the default to skipped, so we need to be able to
+     * revert that in some cases. 
+     * 
+     * @return $this
+     */
+    public function install(): static {
+        $this->skipInstallation = false;
+        return $this;
+    }
     
     /**
      * Check if the installation will be skipped.

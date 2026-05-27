@@ -54,7 +54,7 @@ class MigrationTemplate extends PluginTemplate {
         $pluginName = $this->plugin->name;
         // Table name is unique per migration file so individual migrations can be
         // asserted independently. E.g. Schema::hasTable('mig_migrunplugin_createfirsttable').
-        $tableName = 'test-pmig-' . strtolower($className);
+        $tableName = 'test-pm-' . strtolower($className);
         return <<<PHP
 <?php
 

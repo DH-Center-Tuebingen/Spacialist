@@ -81,12 +81,15 @@ class ApiPluginMigrationTest extends TestCase {
             ['name' => '2024_01_01_000000_create_first_table.php', 'ran' => false],
             ['name' => '2024_01_02_000000_create_second_table.php', 'ran' => false],
         ]);
+
+        $this->assertFalse(Schema::hasTable('test-pm-createfirsttable'));
+        $this->assertFalse(Schema::hasTable('test-pm-createsecondtable'));
     }
 
     public function testGetMigrationStateShowsAlreadyRanMigrations(): void {
         $template = MigrationTemplate::createFrom(self::PLUGIN_NAME, self::PLUGIN_UUID)
             ->addDefaultMigrations();
-            
+
         $pluginId = $this->setupPlugin($template);
 
         // Simulate the first migration having already been run.
@@ -103,6 +106,10 @@ class ApiPluginMigrationTest extends TestCase {
             ['name' => '2024_01_01_000000_create_first_table.php', 'ran' => true],
             ['name' => '2024_01_02_000000_create_second_table.php', 'ran' => false],
         ]);
+        
+        // The first mmigration did not run, it was just marked as ran in the DB
+        $this->assertFalse(Schema::hasTable('test-pm-createfirsttable'));
+        $this->assertFalse(Schema::hasTable('test-pm-createsecondtable'));
     }
 
     public function testGetMigrationStateReturnsInAscendingFilenameOrder(): void {
@@ -144,8 +151,8 @@ class ApiPluginMigrationTest extends TestCase {
             'migration' => '2024_01_02_000000_create_second_table.php',
         ]);
         // Verify the migration code actually ran (not just tracked).
-        $this->assertTrue(Schema::hasTable('test-pmig-createfirsttable'));
-        $this->assertTrue(Schema::hasTable('test-pmig-createsecondtable'));
+        $this->assertTrue(Schema::hasTable('test-pm-createfirsttable'));
+        $this->assertTrue(Schema::hasTable('test-pm-createsecondtable'));
     }
 
     public function testRunMigrationsOnlyRunsPendingOnes(): void {
@@ -174,8 +181,8 @@ class ApiPluginMigrationTest extends TestCase {
         $this->assertEquals(2, $count);
 
         // First migration was skipped (table absent); only the second actually ran.
-        $this->assertFalse(Schema::hasTable('test-pmig-createfirsttable'));
-        $this->assertTrue(Schema::hasTable('test-pmig-createsecondtable'));
+        $this->assertFalse(Schema::hasTable('test-pm-createfirsttable'));
+        $this->assertTrue(Schema::hasTable('test-pm-createsecondtable'));
     }
 
     public function testRunMigrationsRequiresPluginWritePermission(): void {
@@ -186,6 +193,9 @@ class ApiPluginMigrationTest extends TestCase {
         $response = $this->userRequest()->post("/api/v1/plugin/migrate/{$pluginId}");
 
         $this->assertStatus($response, 403);
+
+        $this->assertFalse(Schema::hasTable('test-pm-createfirsttable'));
+        $this->assertFalse(Schema::hasTable('test-pm-createsecondtable'));
     }
 
     // -----------------------------------------------------------------------
@@ -194,14 +204,16 @@ class ApiPluginMigrationTest extends TestCase {
 
     public function testRollbackMigrationsMarksThemAsPending(): void {
         $template = MigrationTemplate::createFrom(self::PLUGIN_NAME, self::PLUGIN_UUID)
-            ->addDefaultMigrations();
+            ->addDefaultMigrations()
+            ->install();
+            
         $pluginId = $this->setupPlugin($template);
 
         $this->useUserWithPermissions(['plugin_write']);
         // First run all migrations so tables are created and records are tracked.
         $this->userRequest()->post("/api/v1/plugin/migrate/{$pluginId}");
-        $this->assertTrue(Schema::hasTable('test-pmig-createfirsttable'));
-        $this->assertTrue(Schema::hasTable('test-pmig-createsecondtable'));
+        $this->assertTrue(Schema::hasTable('test-pm-createfirsttable'));
+        $this->assertTrue(Schema::hasTable('test-pm-createsecondtable'));
 
         // Now roll back and verify both tables are dropped and records removed.
         $response = $this->userRequest()->post("/api/v1/plugin/migrate/{$pluginId}/rollback");
@@ -212,18 +224,26 @@ class ApiPluginMigrationTest extends TestCase {
             ['name' => '2024_01_02_000000_create_second_table.php', 'ran' => false],
         ]);
         $this->assertDatabaseMissing('plugin_service_migrations', ['plugin_id' => $pluginId]);
-        $this->assertFalse(Schema::hasTable('test-pmig-createfirsttable'));
-        $this->assertFalse(Schema::hasTable('test-pmig-createsecondtable'));
+        $this->assertFalse(Schema::hasTable('test-pm-createfirsttable'));
+        $this->assertFalse(Schema::hasTable('test-pm-createsecondtable'));
     }
 
     public function testRollbackRequiresPluginWritePermission(): void {
-        $template = MigrationTemplate::createFrom(self::PLUGIN_NAME, self::PLUGIN_UUID);
+        $template = MigrationTemplate::createFrom(self::PLUGIN_NAME, self::PLUGIN_UUID)
+            ->addDefaultMigrations()
+            ->install();
         $pluginId = $this->setupPlugin($template);
+
+        $this->assertTrue(Schema::hasTable('test-pm-createfirsttable'));
+        $this->assertTrue(Schema::hasTable('test-pm-createsecondtable'));
 
         $this->useUserWithPermissions(['plugin_read']);
         $response = $this->userRequest()->post("/api/v1/plugin/migrate/{$pluginId}/rollback");
 
         $this->assertStatus($response, 403);
+
+        $this->assertTrue(Schema::hasTable('test-pm-createfirsttable'));
+        $this->assertTrue(Schema::hasTable('test-pm-createsecondtable'));
     }
 
     // -----------------------------------------------------------------------
@@ -259,7 +279,7 @@ class ApiPluginMigrationTest extends TestCase {
             'migration' => '2024_01_02_000000_create_second_table.php',
         ]);
         // force_add must NOT execute the migration code — table must be absent.
-        $this->assertFalse(Schema::hasTable('test-pmig-createfirsttable'));
+        $this->assertFalse(Schema::hasTable('test-pm-createfirsttable'));
     }
 
     public function testForceAddRejectsUnknownMigrationName(): void {
@@ -308,6 +328,8 @@ class ApiPluginMigrationTest extends TestCase {
         ]);
 
         $this->assertStatus($response, 403);
+
+        $this->assertFalse(Schema::hasTable('test-pm-createfirsttable'));
     }
 
     public function testForceAddRequiresNameParameter(): void {
@@ -321,5 +343,8 @@ class ApiPluginMigrationTest extends TestCase {
 
         // Laravel validation returns 422 for missing required fields.
         $this->assertStatus($response, 422);
+
+        $this->assertFalse(Schema::hasTable('test-pm-createfirsttable'));
+        $this->assertFalse(Schema::hasTable('test-pm-createsecondtable'));
     }
 }
