@@ -46,7 +46,7 @@
                         colspan="7"
                         class="fw-bold text-start"
                     >
-                        {{ t(`plugin.${pluginName}.title`) }} ({{ t(`main.role.permissions.groups.is_plugin`) }})
+                        {{ t(`plugin.${pluginName}.title`) }} ({{ t(`main.role.permissions.groups.plugin`) }})
                     </td>
                 </tr>
                 <PermissionRow
