@@ -3,6 +3,7 @@ namespace App\Services\Plugin;
 
 use App\Models\Plugin\Hook;
 use App\Plugin;
+use App\Plugin\PluginDirectory;
 use App\Plugin\PluginManifest;
 use App\Support\BootstrapCache;
 use App\Support\Method;
@@ -27,7 +28,7 @@ use Illuminate\Support\Facades\Log;
  * </Hooks>
  * ```
  */
-class HookService extends PluginService{
+class HookService extends PluginService {
 
     use BootstrapCache;
 
@@ -40,12 +41,15 @@ class HookService extends PluginService{
 
     protected function fetch(): array {
         return Hook::all()->mapToGroups(function ($hook) {
+            $pluginName = $this->plugin->name ?? null;
+            $pluginNamespace = $pluginName ? PluginDirectory::namespaceOf($pluginName) : null;
+            
             return [
                 $hook->on => [
                     "id" => $hook->id,
                     "plugin_id" => $hook->plugin_id,
-                    "plugin-name" => $hook->plugin->name ?? null,
-                    "plugin-namespace" => $hook->plugin->getNamespace() ?? null,
+                    "plugin-name" => $pluginName,
+                    "plugin-namespace" => $pluginNamespace,
                     "src" => $hook->src,
                     "order" => $hook->order
                 ]
@@ -85,7 +89,7 @@ class HookService extends PluginService{
         DB::transaction(function () use ($hookDefinitions, $plugin) {
             Hook::where('plugin_id', $plugin->id)->delete();
             foreach($hookDefinitions as $hookXml) {
-                if(isset($hookXml['attributes'])){
+                if(isset($hookXml['attributes'])) {
                     $this->addHook($hookXml['attributes'], $plugin);
                 }
             }
@@ -96,10 +100,11 @@ class HookService extends PluginService{
 
     public function addHook(array $hook, Plugin $plugin) {
         $hookModel = self::createHookFromJson($hook, $plugin);
-
+        $pluginNamespace = PluginDirectory::namespaceOf($plugin->name);
+        
         $method = Method::parseFromString($hookModel->src);
-        if(!$method->exists($plugin->getNamespace())) {
-            $fullClass = $method->expandNamespace($plugin->getNamespace());
+        if(!$method->exists($pluginNamespace)) {
+            $fullClass = $method->expandNamespace($pluginNamespace);
             throw new \Exception("Hook src '" . $hookModel->src . "' does not exist in plugin '" . $plugin->name . "', Class was resolved to: '$fullClass'");
         }
 
@@ -142,7 +147,7 @@ class HookService extends PluginService{
         usort($matchingHooks, function ($a, $b) {
             return ($a['order'] ?? 0) <=> ($b['order'] ?? 0);
         });
-        
+
         return $matchingHooks;
     }
 

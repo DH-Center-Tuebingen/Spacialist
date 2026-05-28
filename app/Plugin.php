@@ -44,22 +44,6 @@ class Plugin extends Model {
         return strtolower(str_replace(' ', '', $this->name));
     }
 
-    /**
-     * Get the namespace for a given path within the plugin. If no path is provided, 
-     * returns the base namespace for the plugin.
-     * 
-     * @param string|null $path Optional path within the plugin to get the namespace for, separated 
-     * by backslashes or forward slashes. For example, "Controllers/MyController.php" or 
-     * "Controllers\MyController.php". Can start with or without a leading slash.
-     */
-    public function getNamespace(string $path = NULL): string {
-        $basePath = "App\\Plugins\\$this->name";
-        if($path) {
-            $basePath .= Str::start(str_replace('/', '\\', $path), '\\');
-        }
-        return $basePath;
-    }
-
     public static function updateOrCreateFromManifest(PluginManifest $manifest): Plugin {
         $name = $manifest->getName();
         $plugin = self::where('name', $name)->first();

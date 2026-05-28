@@ -18,7 +18,7 @@ class PluginDirectory {
     }
 
     /**
-     * Get's the path relative to the plugin directory, e.g. "MyPlugin" or "MyPlugin/Subdirectory".
+     * Get's the path absolute path to a path inside the plugin directory, e.g. "MyPlugin" or "MyPlugin/Subdirectory".
      * 
      * @param string $subpath - An optional subpath to a specific file or directory inside the plugin directory, e.g. "Migrations" or "Migrations/2024_01_01_000000_create_users_table.php"
      * @return string The path to the plugin's directory relative to the plugin directory, e.g. "MyPlugin" or "MyPlugin/Subdirectory"
@@ -85,11 +85,20 @@ class PluginDirectory {
      * by backslashes or forward slashes. For example, "Controllers/MyController.php" or 
      * "Controllers\MyController.php". Can start with or without a leading slash.
      */
-    public static function getNamespace(string $pluginName, $path = NULL): string {
-        $basePath = "App\\Plugins\\$pluginName";
+    public static function namespaceOf(string $pluginName, $path = null): string {
+        $pluginDirectory = new self($pluginName); // Validate plugin name
+        return $pluginDirectory->getNamespace($path);    
+    }
+
+    public function getNamespace($path = null): string {
+        $basePath = "App\\Plugins\\$this->pluginName";
         if($path) {
-            $basePath .= Str::start(str_replace('/', '\\', $path), '\\');
+            $fixedPath = str_replace('/', '\\', $path);
+            info("Fixed path: '$fixedPath'");
+            $basePath .= Str::start($fixedPath, '\\');
         }
+        
+        info("Resolved namespace for plugin '$this->pluginName' and path '$path' is '$basePath'");
         return $basePath;
     }
 }
