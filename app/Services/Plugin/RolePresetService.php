@@ -118,8 +118,9 @@ class RolePresetService extends PluginService {
     public function getDeprecatedRolePresets(Plugin $plugin, PluginManifest $manifest): array {
         $deprecatedFile = $this->getDeprecatedRoleFile();
         $directory = PluginDirectory::fromPlugin($plugin);
-        if(File::exists($directory->getPluginPath($deprecatedFile))) {
-            $content = File::get($directory->getPluginPath($deprecatedFile));
+        $deprecatedFilePath = $directory->getAbsolutePluginPath($deprecatedFile);
+        if(File::exists($deprecatedFilePath)) {
+            $content = File::get($deprecatedFilePath);
             $parsedjson = json_decode($content, true);
             if($parsedjson === null) {
                 PluginLog::for($plugin)->warning("Plugin '{$plugin->name}' has a 'role-presets.json' file that does not contain valid JSON. Skipping.\nJSON error: " . json_last_error_msg());
@@ -138,8 +139,7 @@ class RolePresetService extends PluginService {
             return null;
         }
         
-        $pluginSrc = PluginDirectory::fromPlugin($plugin)->getPluginPath($obj['attributes']['src']);
-
+        $pluginSrc = PluginDirectory::fromPlugin($plugin)->getAbsolutePluginPath($obj['attributes']['src']);
         if(!File::isFile($pluginSrc)) {
             PluginLog::for($plugin)->warning("Plugin '{$plugin->name}' has a role preset entry with 'src' field pointing to a non-existing file ('{$pluginSrc}'). Skipping.");
             return null;
@@ -150,7 +150,7 @@ class RolePresetService extends PluginService {
     
     private function getRolePresetfromObject(array $obj, Plugin $plugin): ?array {
         $pluginDirectory = PluginDirectory::fromPlugin($plugin);
-        $pluginSrc = $pluginDirectory->getPluginPath($obj['attributes']['src']);
+        $pluginSrc = $pluginDirectory->getAbsolutePluginPath($obj['attributes']['src']);
         $parsedjson = json_decode(File::get($pluginSrc), true);
         if($parsedjson === null) {
             PluginLog::for($plugin)->warning("Plugin '{$plugin->name}' has a role preset entry with 'src' field pointing to a file ('{$pluginSrc}') that does not contain valid JSON. Skipping.\nJSON error: " . json_last_error_msg());

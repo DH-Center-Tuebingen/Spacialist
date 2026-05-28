@@ -21,10 +21,12 @@ use App\Plugin\PluginManifest;
  * LEGACY: The 'MyPlugin/Migration' directory is by default evaluated for migration files. This will be removed in a future version.
  * 
  * ```xml
- *     <migrations path="Migration" />
+ *     <migrations src="Migration" />
  * ``` 
  */
 class MigrationService extends PluginService {
+    
+    const LEGACY_MIGRATION_DIRECTORY = 'Migration'; 
 
     public function install(Plugin $plugin, PluginManifest $manifest): void {
         $this->run($plugin, LifecycleOperation::INSTALLATION);
@@ -44,7 +46,8 @@ class MigrationService extends PluginService {
             ->toArray();
 
         $directory = $this->getMigrationDirectory($plugin);
-        $allMigrations = $this->getMigrationList($directory);
+        $absoluteDirectory = PluginDirectory::fromPlugin($plugin)->getAbsolutePluginPath($directory);
+        $allMigrations = $this->getMigrationList($absoluteDirectory);
         $migrations = [];
         foreach($allMigrations as $migration) {
             $migrations[] = [
@@ -69,22 +72,20 @@ class MigrationService extends PluginService {
         $nextBatch = PluginMigration::getNextBatchNumber();
         $directory = $this->getMigrationDirectory($plugin);
         $pluginDir = PluginDirectory::fromPlugin($plugin);
-        $absoluteDirectory = $pluginDir->getPluginPath($directory);
-        info($absoluteDirectory);
+        $absoluteDirectory = $pluginDir->getAbsolutePluginPath($directory);
         if(!file_exists($absoluteDirectory) || !is_dir($absoluteDirectory)) {
             
-            if($directory === self::getLegacyMigrationPath($plugin->name)) {
-                //Legacy support: If the default migration directory does not exist, we assume there are no migrations to run and return early.
+            //Legacy support: If the default migration directory does not exist, we assume there are no migrations to run and return early.
+            if($directory === self::LEGACY_MIGRATION_DIRECTORY) {
                 return;
             }
         
-            throw new PluginLifecycleException($plugin, "Migration directory not found!", $operation);
+            throw new PluginLifecycleException($plugin, "Migration directory not found: '$absoluteDirectory'", $operation);
         }
         
-        $migrations = $this->getMissingMigrations($plugin, $rollback);
-        
+        $migrations = $this->getMissingMigrations($plugin, $rollback);        
         foreach($migrations as $migration) {
-            $migrationInstance = $this->getMigrationClassName($plugin, $directory, $migration);
+            $migrationInstance = $this->getMigrationClassName($plugin, $absoluteDirectory, $migration);
             try{
                 call_user_func([$migrationInstance, $rollback ? 'rollback' : 'migrate']);
                 if($rollback) {
@@ -126,9 +127,9 @@ class MigrationService extends PluginService {
         }
         
         $attributes = $xmlNodes[0]['attributes'] ?? [];
-        $path = $attributes['path'] ?? trim((string) ($xmlNodes[0]['text'] ?? ''));
+        $src = $attributes['src'] ?? trim((string) ($xmlNodes[0]['text'] ?? ''));
 
-        return $path !== '' ? $path : null;
+        return $src !== '' ? $src : null;
     }
 
     /**
@@ -151,13 +152,19 @@ class MigrationService extends PluginService {
         ]);
     }
 
+    /**
+     * Gets the migration directory for the plugin. If the manifest defines a migration directory, 
+     * it will be returned, otherwise the legacy migration directory will be used.
+     * 
+     * @param Plugin $plugin
+     * @return string - The migration directory path defined in the manifest or the legacy migration directory if not defined in the manifest.
+     */
     public function getMigrationDirectory(Plugin $plugin): string {
         $migrationDirectory = $this->getManifestMigration($plugin);
 
         if(!$migrationDirectory) {
-            $migrationDirectory = self::getLegacyMigrationPath($plugin->name);
+            $migrationDirectory = self::LEGACY_MIGRATION_DIRECTORY;
         }
-
         return $migrationDirectory;
     }
 
@@ -204,13 +211,14 @@ class MigrationService extends PluginService {
 
     /**
      * Get path to the plugin's migration directory (./Migration)
+     * 
      * @param string $pluginName - The plugin to get the migration path for
      * @param mixed $migrationFile - optional name of specific migration file, e.g. "2024_01_01_000000_create_users_table.php"
      * @return string - The path to the plugin's migration directory or to a specific migration file if $migrationFile is provided
      */
     public static function getLegacyMigrationPath(string $pluginName, ?string $migrationFile = null): string {
         $pluginDir = new PluginDirectory($pluginName);
-        $path = $pluginDir->getPluginPath("Migration");
+        $path = $pluginDir->getPluginPath(self::LEGACY_MIGRATION_DIRECTORY);
         if($migrationFile) {
             $path .= '/' . $migrationFile;
         }
@@ -234,7 +242,8 @@ class MigrationService extends PluginService {
             throw new \Exception("Invalid migration file name: $migrationFile");
         }
         $className = Str::studly($matches[2]);
-        require_once(Str::finish($directory, '/') . '/' . $migrationFile);
+        $migrationPath = Str::finish($directory, '/') . $migrationFile;
+        require_once($migrationPath);
         $pluginNamespacePath = $this->resolveDirectoryNamspace($plugin, $directory);
         $prefixedClassName = "App\\Plugins\\$plugin->name\\$pluginNamespacePath\\$className";
         return new $prefixedClassName();
@@ -255,7 +264,8 @@ class MigrationService extends PluginService {
             ->toArray();
 
         $directory = $this->getMigrationDirectory($plugin);
-        $allMigrations = $this->getMigrationList($directory);
+        $absoluteDirectory = PluginDirectory::fromPlugin($plugin)->getAbsolutePluginPath($directory);
+        $allMigrations = $this->getMigrationList($absoluteDirectory);
 
         if($rollback) {
             $missingMigrations = array_intersect($allMigrations, $ranMigrations);

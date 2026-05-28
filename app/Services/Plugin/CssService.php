@@ -86,7 +86,7 @@ class CssService extends PluginService implements ManifestContent {
     }
 
     private function publishFile(Plugin $plugin, string $cssPath): void {
-        $pluginPath = PluginDirectory::fromPlugin($plugin)->getPluginPath($cssPath);
+        $pluginPath = PluginDirectory::fromPlugin($plugin)->getAbsolutePluginPath($cssPath);
         if(is_link($pluginPath)) {
             $pluginPath = readlink($pluginPath);
         }

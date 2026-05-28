@@ -17,6 +17,8 @@ use Tests\Support\PluginTemplate;
  * avoid "Cannot declare class … already in use" fatal errors across tests.
  */
 class MigrationTemplate extends PluginTemplate {
+    
+    protected $migrationDirectory = 'Migration';
 
     public function __construct(
         string $name = 'MigrationPlugin',
@@ -58,7 +60,7 @@ class MigrationTemplate extends PluginTemplate {
         return <<<PHP
 <?php
 
-namespace App\Plugins\\{$pluginName}\\Migration;
+namespace App\Plugins\\{$pluginName}\\{$this->migrationDirectory};
 
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
@@ -86,7 +88,7 @@ PHP;
      * @param string $className Studly-case class name, e.g. "CreateItemsTable"
      */
     public function addMigrationFile(string $filename, string $className): static {
-        $this->addFile("Migration/{$filename}", $this->getMigrationContent($className));
+        $this->addFile("{$this->migrationDirectory}/{$filename}", $this->getMigrationContent($className));
         return $this;
     }
 
@@ -108,5 +110,11 @@ PHP;
             '2024_06_01_000000_create_plugin_table.php',
             'CreatePluginTable'
         );
+    }
+    
+    public function setMigrationPathXml(string $src): static {
+        $this->migrationDirectory = $src;
+        $this->addXml('migrations', null, [['src' => $src]]);
+        return $this;
     }
 }

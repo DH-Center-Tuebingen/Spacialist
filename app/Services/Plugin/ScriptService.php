@@ -38,7 +38,7 @@ class ScriptService extends PluginService {
      */
     public function resolveScriptPath(Plugin $plugin, int $linkDepth = 3): ?string {
         $pluginDirectory = PluginDirectory::fromPlugin($plugin);
-        $scriptPath = $pluginDirectory->getPluginPath(self::PLUGIN_SCRIPT_LOCATION);
+        $scriptPath = $pluginDirectory->getAbsolutePluginPath(self::PLUGIN_SCRIPT_LOCATION);
 
         if(!file_exists($scriptPath)) {
             return null;
