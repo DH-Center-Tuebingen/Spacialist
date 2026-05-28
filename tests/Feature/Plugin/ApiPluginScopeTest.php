@@ -8,7 +8,7 @@ use App\Services\PluginManager;
 use Carbon\Carbon;
 use Tests\TestCase;
 
-use Tests\Assets\Templates\ScopeTemplate;
+use Tests\Support\Templates\ScopeTemplate;
 use Tests\Support\PluginGenerator;
 
 class ApiPluginScopeTest extends TestCase {

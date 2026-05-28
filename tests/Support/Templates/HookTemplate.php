@@ -1,9 +1,8 @@
 <?php
 
-namespace Tests\Assets\Templates;
+namespace Tests\Support\Templates;
 
 use Tests\Support\PluginTemplate;
-use Tests\Support\PluginTemplateFeatures\HookTemplateFeature;
 
 class HookTemplate extends PluginTemplate {
 
