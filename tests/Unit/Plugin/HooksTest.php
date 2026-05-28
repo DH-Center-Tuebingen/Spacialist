@@ -51,6 +51,26 @@ class HooksTest extends TestCase
             'order'     => 1,
         ]);
     }
+    
+    public function testAddHookWithForwardSlashes()
+    {
+        $hookData = [
+            'on'    => 'api/v1/version',
+            'src'   => 'Hooks/VersionData@addHookInfo',
+            'order' => 1,
+        ];
+
+        $hookModel            = $this->hookService->createHookFromJson($hookData, $this->plugin);
+        $hookModel->plugin_id = $this->plugin->id;
+        $hookModel->save();
+
+        $this->assertDatabaseHas('plugin_service_hooks', [
+            'plugin_id' => $this->plugin->id,
+            'on'        => 'api/v1/version',
+            'src'       => 'Hooks/VersionData@addHookInfo',
+            'order'     => 1,
+        ]);
+    }
 
     /**
      * Test parseExport method of attributebase class

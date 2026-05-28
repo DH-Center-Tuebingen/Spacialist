@@ -68,8 +68,10 @@ class MigrationService extends PluginService {
         //Determine the next batch number
         $nextBatch = PluginMigration::getNextBatchNumber();
         $directory = $this->getMigrationDirectory($plugin);
-        
-        if(!file_exists($directory) || !is_dir($directory)) {
+        $pluginDir = PluginDirectory::fromPlugin($plugin);
+        $absoluteDirectory = $pluginDir->getPluginPath($directory);
+        info($absoluteDirectory);
+        if(!file_exists($absoluteDirectory) || !is_dir($absoluteDirectory)) {
             
             if($directory === self::getLegacyMigrationPath($plugin->name)) {
                 //Legacy support: If the default migration directory does not exist, we assume there are no migrations to run and return early.

@@ -93,7 +93,7 @@ class ScopeService extends PluginService implements ManifestContent {
             
             $namespaceSrc = str_replace("/", "\\", $attributes['src']);
             $namespaceSrc = Str::start($namespaceSrc, "\\");
-            $namespacedSrc = PluginDirectory::getNamespace($manifest->getName(), $namespaceSrc);
+            $namespacedSrc = PluginDirectory::namespaceOf($manifest->getName(), $namespaceSrc);
 
             if(!array_key_exists($on, $scopes)) {
                 $scopes[$on] = [];
@@ -145,7 +145,7 @@ class ScopeService extends PluginService implements ManifestContent {
                             continue;
                         }
                         $className = Str::replaceEnd('.php', '', $src);
-                        $namespacedSrc = $plugin->getNamespace("\\Scopes\\$className");
+                        $namespacedSrc = PluginDirectory::namespaceOf($plugin->name, "\\Scopes\\$className");
 
                         if(!array_key_exists($on, $scopes)) {
                             $scopes[$on] = [];

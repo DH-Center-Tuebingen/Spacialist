@@ -8,7 +8,7 @@ class Method {
 
     public function __construct(public ?string $class, public ?string $method) {
     }
-
+    
     public function isValid(): bool {
         return !empty($this->class) && !empty($this->method);
     }
@@ -24,7 +24,8 @@ class Method {
         }
 
         $baseNamespace = Str::finish($baseNamespace, '\\');
-        $class = Str::chopStart($this->class, '\\');
+        $class = str_replace('/', '\\', $this->class);
+        $class = Str::chopStart($class, '\\');
         return $baseNamespace . $class;
     }
 
@@ -37,7 +38,7 @@ class Method {
         if(!$this->isValid()) {
             return false;
         }
-
+        
         $fullClass = $this->expandNamespace($baseNamespace);
         return class_exists($fullClass) && method_exists($fullClass, $this->method);
     }
