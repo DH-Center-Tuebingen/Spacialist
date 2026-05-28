@@ -114,7 +114,6 @@ class PluginTemplate {
     /**
      * Sets the manifest file to the legacy "App/info.xml" path.
      * 
-     * @deprecated This is only for testing legacy support and should not be used for new tests.
      * @return $this - Returns the PluginTemplate instance for chaining
      */
     public function setLegacyManifest(): static {

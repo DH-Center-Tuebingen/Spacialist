@@ -286,7 +286,9 @@ class ApiPluginTest extends TestCase {
 
         Carbon::setTestNow('2020-07-20 10:15:30');
 
-        $directoryExists = file_exists('tests/assets/Plugins/BarPlugin');
+        $pluginFirectory = config('app.plugin_directory');
+        
+        $directoryExists = file_exists("$pluginFirectory/BarPlugin");
         $this->assertTrue($directoryExists);
 
         $response = $this->userRequest()
@@ -301,7 +303,7 @@ class ApiPluginTest extends TestCase {
         ]);
 
         //File is missing
-        $directoryWasRemoved = file_exists('tests/assets/Plugins/BarPlugin');
+        $directoryWasRemoved = file_exists("$pluginFirectory/BarPlugin");
         $this->assertFalse($directoryWasRemoved);
 
         //Other plugins are still there
@@ -309,7 +311,7 @@ class ApiPluginTest extends TestCase {
             'name' => 'FooPlugin',
         ]);
 
-        $fooPluginDirectoryExists = file_exists('tests/assets/Plugins/FooPlugin');
+        $fooPluginDirectoryExists = file_exists("$pluginFirectory/FooPlugin");
         $this->assertTrue($fooPluginDirectoryExists);
 
         // Reset time after test

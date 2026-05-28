@@ -167,6 +167,18 @@ class MigrationService extends PluginService {
         }
         return $migrationDirectory;
     }
+    
+    /**
+     * Get's the absolute path to the migration directory of the plugin. 
+     * 
+     * 
+     * @param Plugin $plugin
+     * @return string
+     */
+    public function getAbsoluteMigrationDirectory(Plugin $plugin): string {
+        $migrationDirectory = $this->getMigrationDirectory($plugin);
+        return PluginDirectory::fromPlugin($plugin)->getAbsolutePluginPath($migrationDirectory);
+    }
 
     /**
      * Get's a list of migration files in the plugin on the filesystem.
@@ -263,8 +275,7 @@ class MigrationService extends PluginService {
             ->pluck('migration')
             ->toArray();
 
-        $directory = $this->getMigrationDirectory($plugin);
-        $absoluteDirectory = PluginDirectory::fromPlugin($plugin)->getAbsolutePluginPath($directory);
+        $absoluteDirectory = $this->getAbsoluteMigrationDirectory($plugin);
         $allMigrations = $this->getMigrationList($absoluteDirectory);
 
         if($rollback) {
