@@ -140,19 +140,19 @@ class PluginUploader {
         return file_exists($pluginPath);
     }
 
-    private function validateExistingVersionIsOlder(ZipArchive $zipFile, Plugin $installedPlugin): void {
+    private function validateExistingVersionIsOlder(ZipArchive $zipFile, Plugin $existingPlugin): void {
 
-        if(!isset($installedPlugin)) {
+        if(!isset($existingPlugin)) {
             return;
         }
 
-        $manifest = PluginManifest::fromZip($zipFile, $installedPlugin->name);
-        $existingVersion = $installedPlugin->version ?? '0.0.0';
+        $manifest = PluginManifest::fromZip($zipFile, $existingPlugin->name);
+        $existingVersion = $existingPlugin->version ?? '0.0.0';
         $uploadedVersion = $manifest->getVersion();
 
         if(version_compare($existingVersion, $uploadedVersion, ">=")) {
             abort(403, __("A plugin with the name ':pluginName' and the same or later version (:uploadedVersion and :existingVersion) already exists. Aborting.", [
-                'pluginName' => $installedPlugin->name,
+                'pluginName' => $existingPlugin->name,
                 'uploadedVersion' => $uploadedVersion,
                 'existingVersion' => $existingVersion,
             ]));
