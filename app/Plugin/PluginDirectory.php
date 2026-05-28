@@ -68,11 +68,11 @@ class PluginDirectory {
     }
 
     public function remove() {
-        sp_remove_dir($this->getPluginPath());
+        sp_remove_dir($this->getAbsolutePluginPath());
     }
 
     public function readChangelog(?string $since = null): string {
-        $changelog = $this->getPluginPath('CHANGELOG.md');
+        $changelog = $this->getAbsolutePluginPath('CHANGELOG.md');
         if(!File::isFile($changelog)) {
             return '';
         }

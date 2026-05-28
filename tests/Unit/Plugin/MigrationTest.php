@@ -42,8 +42,12 @@ class MigrationTest extends TestCase {
      * Generate the plugin directory on disk, save the plugin record to the DB,
      * and return the plugin's database ID for use in API URLs.
      */
-    private function setupPlugin(MigrationTemplate $template): Plugin {
-        $this->generator = new PluginGenerator([$template->addBasic()->generate()]);
+    private function setupPlugin(MigrationTemplate $template, bool $deprecatedManifest = false): Plugin {
+        $template->addBasic();
+        if($deprecatedManifest) {
+            $template->setLegacyManifest();
+        }
+        $this->generator = new PluginGenerator([$template->generate()]);
         $this->generator->setUp();
         return $this->generator->getPlugin($template->plugin->name);
     }
@@ -67,14 +71,29 @@ class MigrationTest extends TestCase {
             name: self::PLUGIN_NAME,
             uuid: self::PLUGIN_UUID
         )->addXml('migrations', null, [
-                    ['path' => 'Migration'],
+                    ['src' => 'CustomMigration'],
                 ]);
 
         $plugin = $this->setupPlugin($template);
         $migrationService = app(MigrationService::class);
         $path = $migrationService->getManifestMigration($plugin);
         $this->assertNotNull($path);
-        $this->assertStringEndsWith('Migration', $path);
+        $this->assertEquals('CustomMigration', $path);
+    }
+    
+    public function testGetLegacyManifestMigration(): void {
+        $template = MigrationTemplate::createFrom(
+            name: self::PLUGIN_NAME,
+            uuid: self::PLUGIN_UUID
+        )->addXml('migrations', null, [
+                    ['src' => 'CustomMigration'],
+                ]);
+
+        $plugin = $this->setupPlugin($template, true);
+        $migrationService = app(MigrationService::class);
+        $path = $migrationService->getManifestMigration($plugin);
+        $this->assertNotNull($path);
+        $this->assertEquals('CustomMigration', $path);
     }
 
     public function testGetManifestMigrationWithMultipleDefintions(): void {
@@ -82,8 +101,8 @@ class MigrationTest extends TestCase {
             name: self::PLUGIN_NAME,
             uuid: self::PLUGIN_UUID
         )->addXml('migrations', null, [
-                    ['path' => 'Migrations_a'],
-                    ['path' => 'Migrations_b']
+                    ['src' => 'Migrations_a'],
+                    ['src' => 'Migrations_b']
                 ]);
 
         $plugin = $this->setupPlugin($template);
@@ -102,7 +121,7 @@ class MigrationTest extends TestCase {
 
         $plugin = $this->setupPlugin($template);
         $migrationService = app(MigrationService::class);
-        $migrationDirectory = $migrationService->getMigrationDirectory($plugin);
+        $migrationDirectory = $migrationService->getAbsoluteMigrationDirectory($plugin);
         $migrations = $migrationService->getMigrationList($migrationDirectory);
 
         $this->assertCount(2, $migrations);
@@ -119,10 +138,9 @@ class MigrationTest extends TestCase {
 
         $plugin = $this->setupPlugin($template);
         $migrationService = app(MigrationService::class);
-        $migrationDirectory = $migrationService->getMigrationDirectory($plugin);
+        $migrationDirectory = $migrationService->getAbsoluteMigrationDirectory($plugin);
         $migrations = $migrationService->getMigrationList($migrationDirectory, true);
 
-        info(json_encode($migrations));
         $this->assertCount(2, $migrations);
         $this->assertEquals('2024_01_02_000000_create_second_table.php', $migrations[0]);
         $this->assertEquals('2024_01_01_000000_create_first_table.php', $migrations[1]);
