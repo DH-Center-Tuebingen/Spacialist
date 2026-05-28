@@ -2,10 +2,8 @@
 
 namespace Tests\Feature;
 
-use App\Services\Plugin\HookService;
 use Tests\TestCase;
-
-use Tests\Assets\Templates\HookTemplate;
+use Tests\Support\Templates\HookTemplate;
 use Tests\Support\PluginGenerator;
 
 class ApiPluginHookTest extends TestCase {

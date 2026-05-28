@@ -5,7 +5,7 @@ namespace Tests\Feature\Plugin;
 use App\Models\Plugin\Migration as PluginMigration;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
-use Tests\Assets\Templates\MigrationTemplate;
+use Tests\Support\Templates\MigrationTemplate;
 use Tests\Support\PluginGenerator;
 use Tests\TestCase;
 

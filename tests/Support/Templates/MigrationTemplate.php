@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Assets\Templates;
+namespace Tests\Support\Templates;
 
 use Tests\Support\PluginTemplate;
 

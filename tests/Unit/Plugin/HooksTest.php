@@ -4,7 +4,7 @@ namespace Tests\Unit\Plugin;
 use App\Services\Plugin\HookService;
 use App\Plugin;
 use PHPUnit\Framework\Attributes\DataProvider;
-use Tests\Assets\Templates\HookTemplate;
+use Tests\Support\Templates\HookTemplate;
 use Tests\Support\PluginGenerator;
 use Tests\TestCase;
 

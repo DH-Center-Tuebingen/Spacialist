@@ -5,7 +5,7 @@ use App\Plugin;
 use App\Services\Plugin\MigrationService;
 use Exception;
 use Illuminate\Support\Facades\DB;
-use Tests\Assets\Templates\MigrationTemplate;
+use Tests\Support\Templates\MigrationTemplate;
 use Tests\Support\PluginGenerator;
 use Tests\TestCase;
 

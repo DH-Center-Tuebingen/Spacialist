@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\DB;
 use PHPUnit\Framework\Attributes\TestDox;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
-use Tests\Assets\Templates\ScopeTemplate;
+use Tests\Support\Templates\ScopeTemplate;
 use Tests\Support\PluginDirectoryGenerator;
 use Tests\Support\PluginGenerator;
 use Tests\Support\PluginTemplate;
