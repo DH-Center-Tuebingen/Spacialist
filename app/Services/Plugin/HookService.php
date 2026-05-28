@@ -23,7 +23,7 @@ use Illuminate\Support\Facades\Log;
  * 
  * ```xml
  * <Hooks>
- *     <Hook on="Route/Path/To/Hook" src="Class@method" order="1"/>
+ *     <Hook on="api/vx/target/endpoint" src="Class@method" order="1"/>
  *     ...
  * </Hooks>
  * ```
