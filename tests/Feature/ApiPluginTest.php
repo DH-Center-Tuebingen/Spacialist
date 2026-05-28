@@ -204,8 +204,8 @@ class ApiPluginTest extends TestCase {
 
         $activePluginDirectory = PluginDirectory::getPath($plugin->name);
 
-        $this->assertEquals('backup', file_get_contents($backupDirectory . '/changelog.md'));
-        $this->assertEquals('Foo Plugin Changelog', file_get_contents($activePluginDirectory . '/changelog.md'));
+        $this->assertEquals('backup', file_get_contents($backupDirectory . '/CHANGELOG.md'));
+        $this->assertEquals('Foo Plugin Changelog', file_get_contents($activePluginDirectory . '/CHANGELOG.md'));
 
         $file = $this->uploadPluginSetup();
 
@@ -219,8 +219,8 @@ class ApiPluginTest extends TestCase {
         $updatedFooPlugin['updated_at'] = '2020-07-20T10:15:30.000000Z';
         $response->assertJson($updatedFooPlugin);
 
-        $this->assertEquals('Foo Plugin Changelog', file_get_contents($backupDirectory . '/changelog.md'));
-        $this->assertEquals('updated', file_get_contents($activePluginDirectory . '/changelog.md'));
+        $this->assertEquals('Foo Plugin Changelog', file_get_contents($backupDirectory . '/CHANGELOG.md'));
+        $this->assertEquals('updated', file_get_contents($activePluginDirectory . '/CHANGELOG.md'));
 
         // Reset time after test
         Carbon::setTestNow();
