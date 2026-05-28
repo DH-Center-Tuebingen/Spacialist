@@ -18,7 +18,7 @@ class Method {
      * 
      * @return string
      */
-    public function expandNamespace($baseNamespace): string {
+    public function expandNamespace(string $baseNamespace): string {
         if(empty($this->class)) {
             return Str::chopEnd($baseNamespace, '\\');
         }
