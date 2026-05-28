@@ -45,7 +45,7 @@ class RouteService extends PluginService {
                 return;
             }
             $srcFile = $node['attributes']["src"];
-            $src = $pluginDirectory->getPluginPath($srcFile);
+            $src = $pluginDirectory->getAbsolutePluginPath($srcFile);
             $middleware = $node['attributes']["middleware"] ?? 'api';
         }
         
@@ -74,7 +74,7 @@ class RouteService extends PluginService {
 
     public function findDeprecatedDefaultRoutes(Plugin $plugin, PluginDirectory $pluginDirectory): ?string {
         $pluginDir = PluginDirectory::fromPlugin($plugin);
-        $filePath = $pluginDir->getPluginPath('routes/api.php');
+        $filePath = $pluginDir->getAbsolutePluginPath('routes/api.php');
 
         if(file_exists($filePath)) {
             PluginLog::for($plugin)->warning("Deprecated default routes found. Please update your plugin to use the new route registration method.");

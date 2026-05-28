@@ -16,9 +16,20 @@ class PluginDirectory {
 
     public function __construct(public string $pluginName) {
     }
+    
+    
+    /**
+     * Get's the system path to the file relative to the provided path inside the plugin directory.
+     * 
+     * @param string $subpath - An optional subpath to a specific file or directory inside the plugin directory, e.g. "MyPlugin/Migrations" or "MyPlugin/Migrations/2024_01_01_000000_create_users_table.php"
+     * @return string The absolute system path to the file relative to the provided path inside the plugin directory.
+     */
+    public function getAbsolutePluginPath(string $subpath = ""): string {
+        return self::getPath($this->getPluginPath($subpath));
+    }
 
     /**
-     * Get's the path absolute path to a path inside the plugin directory, e.g. "MyPlugin" or "MyPlugin/Subdirectory".
+     * Get's the path relative path inside the plugin directory, e.g. "MyPlugin" or "MyPlugin/Subdirectory".
      * 
      * @param string $subpath - An optional subpath to a specific file or directory inside the plugin directory, e.g. "Migrations" or "Migrations/2024_01_01_000000_create_users_table.php"
      * @return string The path to the plugin's directory relative to the plugin directory, e.g. "MyPlugin" or "MyPlugin/Subdirectory"
@@ -28,8 +39,7 @@ class PluginDirectory {
         if($subpath !== "") {
             $path .= Str::start($subpath, '/');
         }
-
-        return self::getPath($path);
+        return $path;
     }
 
     /**
@@ -94,11 +104,8 @@ class PluginDirectory {
         $basePath = "App\\Plugins\\$this->pluginName";
         if($path) {
             $fixedPath = str_replace('/', '\\', $path);
-            info("Fixed path: '$fixedPath'");
             $basePath .= Str::start($fixedPath, '\\');
         }
-        
-        info("Resolved namespace for plugin '$this->pluginName' and path '$path' is '$basePath'");
         return $basePath;
     }
 }

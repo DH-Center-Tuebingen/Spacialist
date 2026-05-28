@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature;
+namespace Tests\Feature\Plugin;
 
 use App\Models\Plugin\Migration as PluginMigration;
 use Illuminate\Support\Facades\DB;
@@ -46,6 +46,14 @@ class ApiPluginMigrationTest extends TestCase {
             $this->generator = null;
         }
     }
+    
+    private function createDefaultTemplate(){
+        return $this->modifyDefaultTemplate(MigrationTemplate::createFrom(self::PLUGIN_NAME, self::PLUGIN_UUID));
+    }
+    
+    protected function modifyDefaultTemplate(MigrationTemplate $template): MigrationTemplate {
+        return $template->setMigrationPathXml('CustomMigrationsDirectory');
+    } 
 
     /**
      * Generate the plugin directory on disk, save the plugin record to the DB,
@@ -61,7 +69,7 @@ class ApiPluginMigrationTest extends TestCase {
     // GET /api/v1/plugin/migrate/{plugin}/check
     // -----------------------------------------------------------------------
     public function testGetMigrationStateForPluginWithNoMigrations(): void {
-        $template = MigrationTemplate::createFrom(self::PLUGIN_NAME, self::PLUGIN_UUID);
+        $template = $this->createDefaultTemplate();
         $pluginId = $this->setupPlugin($template);
         $response = $this->userRequest()->get("/api/v1/plugin/migrate/{$pluginId}/check");
 
@@ -70,7 +78,7 @@ class ApiPluginMigrationTest extends TestCase {
     }
 
     public function testGetMigrationStateShowsPendingMigrations(): void {
-        $template = MigrationTemplate::createFrom(self::PLUGIN_NAME, self::PLUGIN_UUID)
+        $template = $this->createDefaultTemplate()
             ->addDefaultMigrations();
         $pluginId = $this->setupPlugin($template);
         $response = $this->userRequest()->get("/api/v1/plugin/migrate/{$pluginId}/check");
@@ -87,7 +95,7 @@ class ApiPluginMigrationTest extends TestCase {
     }
 
     public function testGetMigrationStateShowsAlreadyRanMigrations(): void {
-        $template = MigrationTemplate::createFrom(self::PLUGIN_NAME, self::PLUGIN_UUID)
+        $template = $this->createDefaultTemplate()
             ->addDefaultMigrations();
 
         $pluginId = $this->setupPlugin($template);
@@ -113,7 +121,7 @@ class ApiPluginMigrationTest extends TestCase {
     }
 
     public function testGetMigrationStateReturnsInAscendingFilenameOrder(): void {
-        $template = MigrationTemplate::createFrom(self::PLUGIN_NAME, self::PLUGIN_UUID)
+        $template = $this->createDefaultTemplate()
             ->addDefaultMigrations();
         $pluginId = $this->setupPlugin($template);
         $response = $this->userRequest()->get("/api/v1/plugin/migrate/{$pluginId}/check");
@@ -131,9 +139,19 @@ class ApiPluginMigrationTest extends TestCase {
     // -----------------------------------------------------------------------
 
     public function testRunMigrationsMarksThemAsRan(): void {
-        $template = MigrationTemplate::createFrom(self::PLUGIN_NAME, self::PLUGIN_UUID)
+        $template = $this->createDefaultTemplate()
             ->addDefaultMigrations();
         $pluginId = $this->setupPlugin($template);
+        
+        $this->assertDatabaseMissing('plugin_service_migrations', [
+            'plugin_id' => $pluginId,
+            'migration' => '2024_01_01_000000_create_first_table.php',
+        ]);
+        $this->assertDatabaseMissing('plugin_service_migrations', [
+            'plugin_id' => $pluginId,
+            'migration' => '2024_01_02_000000_create_second_table.php',
+        ]);
+        
         $this->useUserWithPermissions(['plugin_write']);
         $response = $this->userRequest()->post("/api/v1/plugin/migrate/{$pluginId}");
 
@@ -142,6 +160,7 @@ class ApiPluginMigrationTest extends TestCase {
             ['name' => '2024_01_01_000000_create_first_table.php', 'ran' => true],
             ['name' => '2024_01_02_000000_create_second_table.php', 'ran' => true],
         ]);
+        
         $this->assertDatabaseHas('plugin_service_migrations', [
             'plugin_id' => $pluginId,
             'migration' => '2024_01_01_000000_create_first_table.php',
@@ -156,7 +175,7 @@ class ApiPluginMigrationTest extends TestCase {
     }
 
     public function testRunMigrationsOnlyRunsPendingOnes(): void {
-        $template = MigrationTemplate::createFrom(self::PLUGIN_NAME, self::PLUGIN_UUID)
+        $template = $this->createDefaultTemplate()
             ->addDefaultMigrations();
         $pluginId = $this->setupPlugin($template);
 
@@ -186,7 +205,7 @@ class ApiPluginMigrationTest extends TestCase {
     }
 
     public function testRunMigrationsRequiresPluginWritePermission(): void {
-        $template = MigrationTemplate::createFrom(self::PLUGIN_NAME, self::PLUGIN_UUID);
+        $template = $this->createDefaultTemplate();
         $pluginId = $this->setupPlugin($template);
 
         $this->useUserWithPermissions(['plugin_read']);
@@ -203,7 +222,7 @@ class ApiPluginMigrationTest extends TestCase {
     // -----------------------------------------------------------------------
 
     public function testRollbackMigrationsMarksThemAsPending(): void {
-        $template = MigrationTemplate::createFrom(self::PLUGIN_NAME, self::PLUGIN_UUID)
+        $template = $this->createDefaultTemplate()
             ->addDefaultMigrations()
             ->install();
             
@@ -229,7 +248,7 @@ class ApiPluginMigrationTest extends TestCase {
     }
 
     public function testRollbackRequiresPluginWritePermission(): void {
-        $template = MigrationTemplate::createFrom(self::PLUGIN_NAME, self::PLUGIN_UUID)
+        $template = $this->createDefaultTemplate()
             ->addDefaultMigrations()
             ->install();
         $pluginId = $this->setupPlugin($template);
@@ -255,7 +274,7 @@ class ApiPluginMigrationTest extends TestCase {
      * the PHP migrate() method.
      */
     public function testForceAddRecordsMigrationWithoutRunningIt(): void {
-        $template = MigrationTemplate::createFrom(self::PLUGIN_NAME, self::PLUGIN_UUID)
+        $template = $this->createDefaultTemplate()
             ->addDefaultMigrations();
         $pluginId = $this->setupPlugin($template);
 
@@ -283,7 +302,7 @@ class ApiPluginMigrationTest extends TestCase {
     }
 
     public function testForceAddRejectsUnknownMigrationName(): void {
-        $template = MigrationTemplate::createFrom(self::PLUGIN_NAME, self::PLUGIN_UUID)
+        $template = $this->createDefaultTemplate()
             ->addDefaultMigrations();
         $pluginId = $this->setupPlugin($template);
 
@@ -297,7 +316,7 @@ class ApiPluginMigrationTest extends TestCase {
     }
 
     public function testForceAddRejectsAlreadyRanMigration(): void {
-        $template = MigrationTemplate::createFrom(self::PLUGIN_NAME, self::PLUGIN_UUID)
+        $template = $this->createDefaultTemplate()
             ->addDefaultMigrations();
         $pluginId = $this->setupPlugin($template);
 
@@ -318,7 +337,7 @@ class ApiPluginMigrationTest extends TestCase {
     }
 
     public function testForceAddRequiresPluginWritePermission(): void {
-        $template = MigrationTemplate::createFrom(self::PLUGIN_NAME, self::PLUGIN_UUID)
+        $template = $this->createDefaultTemplate()
             ->addDefaultMigrations();
         $pluginId = $this->setupPlugin($template);
 
@@ -333,7 +352,7 @@ class ApiPluginMigrationTest extends TestCase {
     }
 
     public function testForceAddRequiresNameParameter(): void {
-        $template = MigrationTemplate::createFrom(self::PLUGIN_NAME, self::PLUGIN_UUID)
+        $template = $this->createDefaultTemplate()
             ->addDefaultMigrations();
         $pluginId = $this->setupPlugin($template);
 

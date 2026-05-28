@@ -32,15 +32,21 @@ class PluginLogTest extends TestCase {
     }
 
     private function getExpectedMessage(string $levelString){
-        return '[' . Carbon::now()->toDateTimeString() . '] testing.'. strtoupper($levelString) . ': ' . self::LOG_MESSAGE;
+        return 'testing.'. strtoupper($levelString) . ': ' . self::LOG_MESSAGE;
     }
     
     private function getExpectedPluginMessage(string $pluginName,string $levelString){
-        return '[' . Carbon::now()->toDateTimeString() . '] testing.'. strtoupper($levelString) . ': [' . strtoupper($pluginName) . '] ' . self::LOG_MESSAGE;
+        return 'testing.'. strtoupper($levelString) . ': [' . strtoupper($pluginName) . '] ' . self::LOG_MESSAGE;
     }
 
-    private function getLogContent() {
-        return trim(File::get(storage_path('logs/plugin.log')));
+    /**
+     * Returns the content of plugin.log with the timestamps removed.
+     * @return string
+     */
+    private function getLogContent(): string {
+        $content = trim(File::get(storage_path('logs/plugin.log')));
+        // As we cannot simply set the timestamp to a fixed value using Carbon::setTestNow, we just ignore it.
+        return  preg_replace('/\[\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\]\s/', '', $content);
     }
 
     #[DataProvider('logLevelDataProvider')]
