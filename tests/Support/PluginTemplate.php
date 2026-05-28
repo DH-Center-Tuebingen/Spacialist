@@ -271,7 +271,7 @@ class PluginTemplate {
 
     public function getStructure(): array {
         if($this->changelog !== null) {
-            $this->addFile("changelog.md", $this->changelog);
+            $this->addFile("CHANGELOG.md", $this->changelog);
         }
         return $this->structure;
     }
