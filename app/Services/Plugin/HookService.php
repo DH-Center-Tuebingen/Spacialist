@@ -40,21 +40,23 @@ class HookService extends PluginService {
     ];
 
     protected function fetch(): array {
-        return Hook::all()->mapToGroups(function ($hook) {
-            $pluginName = $this->plugin->name ?? null;
-            $pluginNamespace = $pluginName ? PluginDirectory::namespaceOf($pluginName) : null;
-            
-            return [
-                $hook->on => [
-                    "id" => $hook->id,
-                    "plugin_id" => $hook->plugin_id,
-                    "plugin-name" => $pluginName,
-                    "plugin-namespace" => $pluginNamespace,
-                    "src" => $hook->src,
-                    "order" => $hook->order
-                ]
-            ];
-        })->toArray();
+        return Hook::with('plugin')
+            ->get()
+            ->mapToGroups(function ($hook) {
+                $pluginName = $hook->plugin?->name ?? null;
+                $pluginNamespace = $pluginName ? PluginDirectory::namespaceOf($pluginName) : null;
+
+                return [
+                    $hook->on => [
+                        "id" => $hook->id,
+                        "plugin_id" => $hook->plugin_id,
+                        "plugin-name" => $pluginName,
+                        "plugin-namespace" => $pluginNamespace,
+                        "src" => $hook->src,
+                        "order" => $hook->order
+                    ]
+                ];
+            })->toArray();
     }
 
     protected function getCacheName(): string {

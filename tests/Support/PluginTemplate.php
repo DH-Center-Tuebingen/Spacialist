@@ -22,6 +22,7 @@ use Tests\Support\PluginXml;
 class PluginTemplate {
 
     public Plugin $plugin;
+    private $manifest = "plugin.xml";
     protected $structure = [];
     protected array $xml = [];
     public ?string $changelog = null;
@@ -96,6 +97,28 @@ class PluginTemplate {
      */
     public function setChangelog(mixed $value): static {
         $this->changelog = $value;
+        return $this;
+    }
+    
+    /**
+     * Sets the manifest file name, by default it's "plugin.xml".
+     * 
+     * @param string $manifest - The manifest file name, e.g. "custom_manifest.xml"
+     * @return $this - Returns the PluginTemplate instance for chaining
+     */
+    public function setManifest(string $manifest): static {
+        $this->manifest = $manifest;
+        return $this;
+    }
+    
+    /**
+     * Sets the manifest file to the legacy "App/info.xml" path.
+     * 
+     * @deprecated This is only for testing legacy support and should not be used for new tests.
+     * @return $this - Returns the PluginTemplate instance for chaining
+     */
+    public function setLegacyManifest(): static {
+        $this->manifest = "App/info.xml";
         return $this;
     }
 
@@ -221,7 +244,7 @@ class PluginTemplate {
         $this->generateCalled = true;
 
         if($path === null) {
-            $path = "App/info.xml";
+            $path = $this->manifest;
         } else {
             $path = str_replace('\\', '/', $path);
         }
