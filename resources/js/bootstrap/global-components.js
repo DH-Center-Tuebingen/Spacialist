@@ -1,5 +1,6 @@
 import AttributeList from '@/components/AttributeList.vue';
 import Attribute from '@/components/attribute/Attribute.vue';
+import EntityDetail from '@/components/EntityDetail.vue';
 import EntityTypeList from '@/components/EntityTypeList.vue';
 import EntityTree from '@/components/tree/Entity.vue';
 import EntityBreadcrumbs from '@/components/EntityBreadcrumbs.vue';
@@ -30,6 +31,7 @@ export default function initGlobalComponents(app) {
     // Components
     app.component('AttributeList', AttributeList);
     app.component('Attribute', Attribute);
+    app.component('EntityDetail', EntityDetail);
     app.component('EntityTypeList', EntityTypeList);
     app.component('EntityTree', EntityTree);
     app.component('EntityBreadcrumbs', EntityBreadcrumbs);

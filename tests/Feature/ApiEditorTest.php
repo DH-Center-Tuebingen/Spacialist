@@ -14,14 +14,14 @@ use App\ThConcept;
 use Illuminate\Testing\Fluent\AssertableJson;
 use Tests\ResponseTester;
 use Tests\Permission;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\TestDox;
 
 class ApiEditorTest extends TestCase
 {
     // Testing GET requests
 
-    /**
-     * @testdox GET /api/v1/editor/dm/entity_type/occurrence_count/{id}  -  Get number of occurrences of an entity type (id=5)
-     */
+    #[TestDox('GET /api/v1/editor/dm/entity_type/occurrence_count/{id}  -  Get number of occurrences of an entity type (id=5)')]
     public function testEntityOccurCountEndpoint()
     {
         $response = $this->userRequest()
@@ -31,9 +31,7 @@ class ApiEditorTest extends TestCase
         $response->assertSimilarJson([3]);
     }
 
-    /**
-     * @testdox GET /api/v1/editor/dm/attribute/occurrence_count/{id}  -  Get number of occurrences of an attribute (id=9)
-     */
+    #[TestDox('GET /api/v1/editor/dm/attribute/occurrence_count/{id}  -  Get number of occurrences of an attribute (id=9)')]
     public function testAttributeOccurCountEndpoint()
     {
         $response = $this->userRequest()
@@ -43,9 +41,7 @@ class ApiEditorTest extends TestCase
         $response->assertSimilarJson([4]);
     }
 
-    /**
-     * @testdox GET /api/v1/editor/dm/attribute/occurrence_count/{attribute_id}/{entity_id}  -  Get number of occurrences of an attribute (id=9) on an entity (id=5)
-     */
+    #[TestDox('GET /api/v1/editor/dm/attribute/occurrence_count/{attribute_id}/{entity_id}  -  Get number of occurrences of an attribute (id=9) on an entity (id=5)')]
     public function testAttributeOfEntityTypeOccurCountEndpoint()
     {
         $response = $this->userRequest()
@@ -55,9 +51,7 @@ class ApiEditorTest extends TestCase
         $response->assertSimilarJson([3]);
     }
 
-    /**
-     * @testdox GET /api/v1/editor/dm/entity_type/top  -  Get top-level entities
-     */
+    #[TestDox('GET /api/v1/editor/dm/entity_type/top  -  Get top-level entities')]
     public function testTopEntityTypeCountEndpoint()
     {
         $response = $this->userRequest()
@@ -204,9 +198,7 @@ class ApiEditorTest extends TestCase
         );
     }
 
-    /**
-     * @testdox GET /api/v1/editor/dm/attribute_types - Get all attribute types
-     */
+    #[TestDox('GET /api/v1/editor/dm/attribute_types - Get all attribute types')]
     public function testGetAttributeTypesEndpoint()
     {
         $response = $this->userRequest()
@@ -256,9 +248,7 @@ class ApiEditorTest extends TestCase
         $response->assertSimilarJson($resultArray);
     }
 
-    /**
-     * @testdox GET /api/v1/editor/entity_type/{id} - Get enety type (id=3) including sub entity types
-     */
+    #[TestDox('GET /api/v1/editor/entity_type/{id} - Get enety type (id=3) including sub entity types')]
     public function testGetEntityTypeEndpoint()
     {
         $response = $this->userRequest()
@@ -378,9 +368,7 @@ class ApiEditorTest extends TestCase
 
     // Testing POST requests
 
-    /**
-     * @testdox POST /api/v1/editor/dm/entity_type  -  Add a new entity type
-     */
+    #[TestDox('POST /api/v1/editor/dm/entity_type  -  Add a new entity type')]
     public function testAddEntityTypeEndpoint()
     {
         $concept = ThConcept::first();
@@ -467,9 +455,7 @@ class ApiEditorTest extends TestCase
     //     ], $entityType->sub_entity_types->toArray());
     // }
 
-    /**
-     *  @testdox POST /api/v1/editor/dm/attribute  -  Test adding a new entity type and modifying it's relations afterwards.
-     */
+    #[TestDox('POST /api/v1/editor/dm/attribute  -  Test adding a new entity type and modifying it\'s relations afterwards.')]
     public function testAddAttributeEndpoint()
     {
         $concept = ThConcept::first();
@@ -562,9 +548,7 @@ class ApiEditorTest extends TestCase
         );
     }
 
-    /**
-     *  @testdox POST /api/v1/editor/dm/entity_type/{id}/attribute  -  Adding attributes to an entity type (id=3).
-     */
+    #[TestDox('POST /api/v1/editor/dm/entity_type/{id}/attribute  -  Adding attributes to an entity type (id=3).')]
     public function testAddAttributeToEntityTypeEndpoint()
     {
         $response = $this->userRequest()
@@ -656,9 +640,7 @@ class ApiEditorTest extends TestCase
         ]);
     }
 
-    /**
-     *  @testdox POST /api/v1/editor/dm/entity_type/{id}/duplicate  -  Duplicating an entity type (id=3).
-     */
+    #[TestDox('POST /api/v1/editor/dm/entity_type/{id}/duplicate  -  Duplicating an entity type (id=3).')]
     public function testDuplicateEntityTypeEndpoint()
     {
         $entityType = EntityType::find(3)->load('sub_entity_types');
@@ -690,9 +672,7 @@ class ApiEditorTest extends TestCase
         $this->assertEquals(count($etSubTypeIds), count($content->sub_entity_types));
     }
 
-    /**
-     *  @testdox PATCH /api/v1/editor/dm/entity_type/{id}  -  Editing an entity type (id=3).
-     */
+    #[TestDox('PATCH /api/v1/editor/dm/entity_type/{id}  -  Editing an entity type (id=3).')]
     public function testEditEntityTypeEndpoint()
     {
         $entityType = EntityType::find(3);
@@ -711,9 +691,7 @@ class ApiEditorTest extends TestCase
         $this->assertEquals('https://spacialist.escience.uni-tuebingen.de/<user-project>/erhaltung#20171220100437', $entityType->thesaurus_url);
     }
 
-    /**
-     *  @testdox PATCH /api/v1/editor/dm/entity_type/{id}/attribute/{aid}/position  -   Test reordering attributes of an entity type (id=4).
-     */
+    #[TestDox('PATCH /api/v1/editor/dm/entity_type/{id}/attribute/{aid}/position  -   Test reordering attributes of an entity type (id=4).')]
     public function testRoorderEntityTypeAttributesEndpoint()
     {
         $entityType = EntityType::find(3)->load('attributes');
@@ -800,9 +778,7 @@ class ApiEditorTest extends TestCase
         }
     }
 
-    /**
-     *  @testdox PATCH /api/v1/editor/dm/entity_type/{id}/attribute/{aid}/dependency  -   Test adding dependency to an attribute of an entity type (id=4).
-     */
+    #[TestDox('PATCH /api/v1/editor/dm/entity_type/{id}/attribute/{aid}/dependency  -   Test adding dependency to an attribute of an entity type (id=4).')]
     public function testAddDependencyToEntiyTypeAttributeEndpoint()
     {
         $response = $this->userRequest()
@@ -845,9 +821,7 @@ class ApiEditorTest extends TestCase
         ], $entityAttribute->depends_on);
     }
 
-    /**
-     *  @testdox PATCH /api/v1/editor/dm/entity_type/{id}/attribute/{aid}/dependency  -   Test adding dependency without data to an attribute of an entity type (id=4).
-     */
+    #[TestDox('PATCH /api/v1/editor/dm/entity_type/{id}/attribute/{aid}/dependency  -   Test adding dependency without data to an attribute of an entity type (id=4).')]
     public function testAddEmptyDependencyToEntiyTypeAttributeEndpoint()
     {
         $response = $this->userRequest()
@@ -864,9 +838,7 @@ class ApiEditorTest extends TestCase
         $this->assertNull($entityAttribute->depends_on);
     }
 
-    /**
-     *  @testdox DELETE /api/v1/editor/dm/entity_type/{id}  -   Test deleting an entity type (id=4).
-     */
+    #[TestDox('DELETE /api/v1/editor/dm/entity_type/{id}  -   Test deleting an entity type (id=4).')]
     public function testDeleteEntityTypeEndpoint()
     {
         $etCnt = EntityType::count();
@@ -893,9 +865,7 @@ class ApiEditorTest extends TestCase
         $this->assertEquals(11, $avCnt);
     }
 
-     /**
-      * @testdox DELETE /api/v1/editor/dm/attribute/{id}  -  Test deleting an attribute (id=12).
-      */
+     #[TestDox('DELETE /api/v1/editor/dm/attribute/{id}  -  Test deleting an attribute (id=12).')]
     public function testDeleteAttributeEndpoint()
     {
         $eaCnt = EntityAttribute::count();
@@ -918,9 +888,7 @@ class ApiEditorTest extends TestCase
         $this->assertEquals(23, $aCnt);
     }
 
-     /**
-      * @testdox DELETE /api/v1/editor/dm/entity_type/{id}/attribute/{aid}  -  Test deleting an attribute (id=11) from an entity type (id=5).
-      */
+     #[TestDox('DELETE /api/v1/editor/dm/entity_type/{id}/attribute/{aid}  -  Test deleting an attribute (id=11) from an entity type (id=5).')]
     public function testDeleteAttributeFromEntityTypeEndpoint()
     {
         $eaCnt = EntityAttribute::count();
@@ -961,16 +929,12 @@ class ApiEditorTest extends TestCase
         }
     }
 
-    /**
-     * @dataProvider permissionsProvider
-     */
+    #[DataProvider('permissionsProvider')]
     public function testWithoutPermission($permission) {
         (new ResponseTester($this))->testMissingPermission($permission);
     }
 
-    /**
-     * @dataProvider exceptionsProvider
-     */
+    #[DataProvider('exceptionsProvider')]
     public function testExceptions($permission) {
         (new ResponseTester($this))->testExceptions($permission);
     }

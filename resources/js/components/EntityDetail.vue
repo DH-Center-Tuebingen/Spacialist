@@ -137,7 +137,7 @@
                 <LoadingButton
                     type="submit"
                     form="entity-attribute-form"
-                    class="btn-outline-success btn-sm"
+                    class="btn-outline-success btn-sm d-flex flex-row gap-1 align-items-center"
                     :loading="state.saving"
                     @click.prevent="saveEntity()"
                 >
@@ -183,7 +183,7 @@
                     </span>
                     -
                     <a
-                        v-if="state.entity.user"
+                        v-if="state.entityUser"
                         href="#"
                         class="fw-medium"
                         @click.prevent="showUserInfo(state.entityUser)"
@@ -317,7 +317,7 @@
                         v-if="state.attributesFetched && !group.hidden"
                         :ref="el => setAttrRefs(el, group.id)"
                         v-dcan="'entity_data_read'"
-                        class="h-100 overflow-y-auto row"
+                        class="h-100 overflow-y-auto row pt-3"
                         :attributes="group.data"
                         :hidden-attributes="state.hiddenAttributeList"
                         :show-hidden="state.hiddenAttributeState"
@@ -337,7 +337,11 @@
                 class="tab-pane fade h-100 active-entity-detail-panel overflow-hidden"
                 role="tabpanel"
             >
-                <MetadataTab class="mb-auto scroll-y-auto h-100 pe-2" />
+                <!-- Only show the metadata tab when in the correct tab to avoid loading metadata. -->
+                <MetadataTab
+                    v-if="state.view === 'metadata'"
+                    class="mb-auto scroll-y-auto h-100 pe-2"
+                />
             </div>
 
             <div
@@ -419,6 +423,7 @@
 
     import useAttributeStore from '@/bootstrap/stores/attribute.js';
     import useEntityStore from '@/bootstrap/stores/entity.js';
+    import useUserStore from '@/bootstrap/stores/user.js';
     import router from '%router';
 
     import { useToast } from '@/plugins/toast.js';
@@ -435,8 +440,6 @@
     import {
         can,
         userId,
-        getEntityTypeDependencies,
-        getEntityTypeDependencyTriggers,
         translateConcept,
         _cloneDeep,
     } from '@/helpers/helpers.js';
@@ -464,7 +467,6 @@
         handleEntityCommentDeleted,
     } from '@/handlers/entity.js';
 
-    import { evaluateRule } from '@/helpers/dependencies.js';
     import { usePreventNavigation } from '@/helpers/form.js';
 
     import MetadataTab from '@/components/entity/MetadataTab.vue';
@@ -499,12 +501,16 @@
             const toast = useToast();
             const attributeStore = useAttributeStore();
             const entityStore = useEntityStore();
+            const userStore = useUserStore();
 
             // FETCH
-            entityStore.setById(route.params.id).then(_ => {
-                entityStore.getEntityTypeAttributeSelections(state.entity.entity_type_id);
-                state.initFinished = true;
-                updateAllDependencies();
+
+            onMounted(() => {
+                entityStore.setById(route.params.id).then(_ => {
+                    entityStore.getEntityTypeAttributeSelections(state.entity.entity_type_id);
+                    state.initFinished = true;
+                    updateAllDependencies();
+                }).catch(console.error);
             });
 
             // DATA
@@ -519,12 +525,11 @@
                 entityMetadata: {},
                 initFinished: false,
                 commentLoadingState: 'not',
-                metadataTabLoaded: false,
                 hiddenAttributeState: false,
                 attributesInTabs: true,
                 routeQuery: computed(_ => route.query),
                 entity: computed(_ => entityStore.selectedEntity),
-                entityUser: computed(_ => state.entity.user),
+                entityUser: computed(_ => userStore.getUserBy(state.entity?.user_id)),
                 entityChanges: computed(_ => {
                     if(!state.entity?.id) return {};
                     return entityStore.receivedEntityData[state.entity.id];
@@ -603,8 +608,6 @@
                     }
                 }),
                 entityTypeSelections: computed(_ => entityStore.getEntityTypeAttributeSelections(state.entity.entity_type_id)),
-                entityTypeDependencies: computed(_ => getEntityTypeDependencies(state.entity.entity_type_id)),
-                entityTypeTriggers: computed(_ => getEntityTypeDependencyTriggers(state.entity.entity_type_id)),
                 hasAttributeLinks: computed(_ => state.entity.attributeLinks && state.entity.attributeLinks.length > 0),
                 groupedAttributeLinks: computed(_ => {
                     if(!state.hasAttributeLinks) return {};
@@ -685,6 +688,7 @@
                     return state.commentLoadingState === 'failed';
                 }),
                 activeUsers: computed(_ => entityStore.getActiveEntityUsers),
+                view: computed(_ => route.query.view || 'attributes-default')
             });
             const channels = {};
 
@@ -745,9 +749,6 @@
                 state.editedEntityName = '';
             };
             const updateDependencyState = (aid, value) => {
-                const attributeTriggers = state.entityTypeTriggers[aid];
-                if(!attributeTriggers) return;
-
                 // This is a bit of a temporary hack, as the dirty value
                 // used to overwrite the attribute value with just the value.
                 // Which leads to inconsitencies in the data.
@@ -762,58 +763,12 @@
                     }
                 }
 
-                for(const dependantId of attributeTriggers) {
-                    const attributeDependencies = state.entityTypeDependencies[dependantId];
-                    const matchAllGroups = !attributeDependencies.or;
-                    let dependencyMatch = matchAllGroups;
+                const dependencyStates = entityStore.getDependencyStates(liveData, state.entity.entity_type_id, aid, value);
 
-                    for(const group of attributeDependencies.groups) {
-                        const matchAllRules = !group.or;
-                        let ruleMatch = matchAllRules;
-                        for(const rule of group.rules) {
-                            const type = attributeStore.getAttribute(rule.on).datatype;
-                            const attributeValue = liveData[rule.on];
-
-                            // When the rule is invalid we ignore the rule by returning true!
-                            if(attributeValue === undefined) {
-                                ruleMatch = true;
-                                console.error('Invalid target value for rule', rule);
-                                break;
-                            }
-
-                            //// I assume the reference value is an exception from the rule!
-                            ////
-                            // if(!refValue.value) {
-                            //     ruleMatch = true;
-                            //     console.error('Rule target is not a ref value!', refValue);
-                            //     break;
-                            // }
-
-                            const tmpMatch = evaluateRule(type, attributeValue.value, rule);
-
-                            if(matchAllRules && !tmpMatch) {
-                                ruleMatch = false;
-                                break;
-                            }
-                            if(!matchAllRules && tmpMatch) {
-                                ruleMatch = true;
-                                break;
-                            }
-                        }
-
-                        if(matchAllGroups && !ruleMatch) {
-                            dependencyMatch = false;
-                            break;
-                        }
-                        if(!matchAllGroups && ruleMatch) {
-                            dependencyMatch = true;
-                            break;
-                        }
-                    }
-
-                    state.hiddenAttributes[dependantId] = {
-                        hide: !dependencyMatch,
-                        by: aid, // TODO might be more than one
+                for(let k in dependencyStates) {
+                    state.hiddenAttributes[k] = {
+                        hide: dependencyStates[k].hide,
+                        by: dependencyStates[k].by,
                     };
                 }
             };
@@ -1188,7 +1143,6 @@
                             handleEntityCommentUpdated,
                             handleEntityCommentDeleted,
                         ]);
-                        await entityStore.setById(to.params.id);
                         return true;
                     }
                 } else {

@@ -3,6 +3,7 @@
         "save": "Speichern",
         "delete": "Löschen",
         "restore": "Wiederherstellen",
+        "activate": "Aktivieren",
         "deactivate": "Deaktivieren",
         "reactivate": "Reaktivieren",
         "remove": "Entfernen",
@@ -14,10 +15,12 @@
         "edit": "Bearbeiten",
         "edited": "bearbeitet",
         "duplicate": "Duplizieren",
+        "export": "Exportieren",
         "sort": "Sortieren",
         "resort": "Umsortieren",
         "update": "Aktualisieren",
         "replace": "Ersetzen",
+        "refresh": "Aktualisieren",
         "clear": "Leeren",
         "confirm": "Ok",
         "apply": "Anwenden",
@@ -339,6 +342,7 @@
         "description": "Beschreibung",
         "roles": "Rollen",
         "permissions": "Berechtigungen",
+        "accesspoints": "Einstiegspunkte",
         "added_at": "Hinzugefügt",
         "created_at": "Erstellt",
         "updated_at": "Aktualisert",
@@ -645,6 +649,9 @@
             "active_users": "Aktive Benutzer",
             "deactivated_users": "Deaktivierte Benutzer",
             "empty_list": "Benutzerliste ist leer",
+            "accesspoints": {
+                "default": "Spacialist (Standard)"
+            },
             "toasts": {
                 "updated": {
                     "title": "Benutzer aktualisiert",
@@ -693,7 +700,7 @@
                     "users_roles": "Benutzer & Rollen",
                     "preferences": "Einstellungen",
                     "thesaurus": "Thesaurus",
-                    "is_plugin": "Erweiterung"
+                    "plugin": "Erweiterung"
                 },
                 "moderation": {
                     "required": "Moderation notwendig"
@@ -847,15 +854,20 @@
             }
         },
         "plugins": {
-            "title": "Erweiterungen",
+            "title": "Erweiterung | Erweiterungen",
             "upload": "Plugin hochladen",
-            "authors": "Ersteller",
-            "deactivate": "Deaktivieren",
-            "activate": "Aktivieren",
-            "remove": "Löschen",
+            "author": "Ersteller | Ersteller",
             "update_to": "Auf <span class=\"fw-bold\">{ version }</span> aktualisieren",
             "changelog_info": "Änderungen anzeigen",
             "not_found": "Keine Erweiterungen gefunden.",
+            "migrate": "Migrieren",
+            "refresh-script": "Skriptdatei erneuern",
+            "rollback": "Zurücksetzen",
+            "section": {
+                "info": "Informationen",
+                "migrations": "Migrationen",
+                "changelog": "Änderungsprotokoll"
+            },
             "modal": {
                 "changelog_title": "Erweiterung"
             },
@@ -864,6 +876,14 @@
                     "title": "Erweiterung aktualisiert",
                     "message": "Die Erweiterung {name} wurde erfolgreich auf Version {v} aktualisiert (von Version {vo})."
                 }
+            },
+            "info": {
+                "add_migration_to_db": "Füge die Migration manuell der Datenbank hinzu, ohne die Migration auszuführen. Dies ist nur für ältere Anwendungen vor Version 0.12 notwendig. Dies kann zu Datenverlust führen, fahren Sie nur fort, wenn Sie wissen, was Sie tun!",
+                "no_migrations": "Plugin hat keine Migrationen.",
+                "migration_notice": "Bitte beachten Sie, dass das Migrationssystem erst seit Version 0.12 verfügbar ist. Wenn Ihre Anwendung vor dieser Version installiert wurde, werden die Migrationen nicht korrekt wiedergegeben. Die Migrationen müssen manuell gesetzt werden, um den korrekten Anwendungsstatus widerzuspiegeln.",
+                "migration-confirm": "Sind Sie sicher, dass Sie die Migrationen ausführen möchten? Dies kann zu Datenverlust führen, fahren Sie nur fort, wenn Sie wissen, was Sie tun!",
+                "rollback-confirm": "Sind Sie sicher, dass Sie die Migrationen zurücksetzen möchten? Dies kann zu Datenverlust führen, fahren Sie nur fort, wenn Sie wissen, was Sie tun!",
+                "no_changelog": "Kein Änderungsprotokoll verfügbar."
             }
         },
         "about": {

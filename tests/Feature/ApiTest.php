@@ -2,19 +2,18 @@
 
 namespace Tests\Feature;
 
-use App\User;
 use Tests\TestCase;
 use Illuminate\Support\Str;
+use PHPUnit\Framework\Attributes\TestDox;
 
 use App\VersionInfo;
 
 class ApiTest extends TestCase
 {
     /**
-     * @testdox GET    / : Get Base App Endpoint
-     *
-     * @return void
-     */
+	 * @return void
+	 */
+	#[TestDox('GET    / : Get Base App Endpoint')]
     public function testApiRoot()
     {
         $response = $this->get('/');
@@ -23,10 +22,9 @@ class ApiTest extends TestCase
     }
 
     /**
-     * @testdox GET    /welcome : Get Welcome Page Endpoint
-     *
-     * @return void
-     */
+	 * @return void
+	 */
+	#[TestDox('GET    /welcome : Get Welcome Page Endpoint')]
     public function testWelcomePage()
     {
         $response = $this->get('/welcome');
@@ -35,10 +33,9 @@ class ApiTest extends TestCase
     }
 
     /**
-     * @testdox GET    /api/v1/pre : Get Pre Endpoint Failed Unauth
-     *
-     * @return void
-     */
+	 * @return void
+	 */
+	#[TestDox('GET    /api/v1/pre : Get Pre Endpoint Failed Unauth')]
     public function testUnauthPreRequest()
     {
         $this->unsetTestUser();
@@ -50,17 +47,16 @@ class ApiTest extends TestCase
     }
 
     /**
-     * @testdox GET    /api/v1/pre : Get Pre Endpoint
-     *
-     * @return void
-     */
+	 * @return void
+	 */
+	#[TestDox('GET    /api/v1/pre : Get Pre Endpoint')]
     public function testAuthPreRequest()
     {
         $response = $this->userRequest()
             ->get('/api/v1/pre');
 
         $response->assertStatus(200);
-        $response->assertJsonCount(21);
+        $response->assertJsonCount(22);
         $response->assertJsonStructure([
             'system_preferences',
             'preferences',
@@ -83,14 +79,14 @@ class ApiTest extends TestCase
             'plugins',
             'geometryTypes',
             'attributeTypes',
+            'accesspoints',
         ]);
     }
 
     /**
-     * @testdox GET    /api/v1/version : Get Version Endpoint
-     *
-     * @return void
-     */
+	 * @return void
+	 */
+	#[TestDox('GET    /api/v1/version : Get Version Endpoint')]
     public function testVersionRequest()
     {
         $vi = new VersionInfo();

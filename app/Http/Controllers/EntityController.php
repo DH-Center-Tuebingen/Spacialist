@@ -213,6 +213,48 @@ class EntityController extends Controller {
         return response()->json($data);
     }
 
+    /**
+     * Bundles the requests of data reference, metadata and parentValue
+     * to achieve much better performance.
+     */
+    public function getEntityDetail(int $id) {
+         $user = auth()->user();
+        if(!$user->can('entity_read') || !$user->can('entity_data_read')) {
+            return response()->json([
+                'error' => __('You do not have the permission to get an entity\'s data'),
+            ], 403);
+        }
+
+        $entity = null;
+        try {
+            $entity = Entity::findOrFail($id);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => __('This entity does not exist'),
+            ], 400);
+        }
+        if(isset($aid)) {
+            try {
+                Attribute::findOrFail($aid);
+            } catch(ModelNotFoundException $e) {
+                return response()->json([
+                    'error' => __('This attribute does not exist'),
+                ], 400);
+            }
+        }
+
+        $data = $entity->getData();
+
+        return response()->json([
+            'data' => $data,
+            'metadata' => $entity->getAllMetadata(),
+            'references' => Reference::getByEntity($id),
+            'parentIds' => $entity->parentIds,
+            'parentNames' => $entity->parentNames,
+            'attributeLinks' => $entity->attributeLinks,
+        ]);
+    }
+
     public function getMetadata($id) {
         $user = auth()->user();
         if(!$user->can('entity_read') || !$user->can('entity_data_read')) {
@@ -789,7 +831,7 @@ class EntityController extends Controller {
             ], 403);
         }
 
-        try{
+        try {
             $entity = Entity::findOrFail($id);
         } catch(ModelNotFoundException $e) {
             return response()->json([
@@ -797,7 +839,6 @@ class EntityController extends Controller {
             ], 400);
         }
 
-        DB::beginTransaction();
         $addedAttributes = [];
         $removedAttributes = [];
 
@@ -809,95 +850,19 @@ class EntityController extends Controller {
             ], 204);
         }
 
+        DB::beginTransaction();
+
         foreach($request->request as $patch) {
             $op = $patch['op'];
             $aid = $patch['params']['aid'];
-            $error = null;
-            switch($op) {
-                case 'remove':
-                    $attrval = AttributeValue::where([
-                        ['entity_id', '=', $id],
-                        ['attribute_id', '=', $aid],
-                    ])->first();
-                    if(!isset($attrval)) {
-                        $error = __('This attribute value does either not exist or is in moderation state.');
-                        break;
-                    }
-                    if($user->isModerated()) {
-                        $attrval->moderate('pending-delete', true);
-                    } else {
-                        $removedAttributes[$aid] = $attrval;
-                        $attrval->delete();
-                    }
-                    break;
-
-                /**
-                 * In the case when a user created the attribute, while another was visiting the
-                 * page and sends an 'add' operation, and the other user also sends his changes,
-                 * the application would have thrown an error, that the attribute was already created.
-                 *
-                 * That's why we combined the add and replace operations into one case.
-                 * [SO] 29.01.2025
-                 */
-                case 'add':
-                case 'replace':
-                    $alreadyModerated = AttributeValue::where('entity_id', $id)
-                        ->where('attribute_id', $aid)
-                        ->onlyModerated()
-                        ->exists();
-
-                    // Currently the logic is that a moderated state cannot be changed
-                    // by a moderated user.
-                    if($alreadyModerated && $user->isModerated()) {
-                        $error = __('This attribute value is in moderation state. A user with appropriate permissions has to accept or deny it first.');
-                        break;
-                    }
-                    $value = $patch['value'];
-                    $attrval = AttributeValue::firstOrNew([
-                        'entity_id' => $id,
-                        'attribute_id' => $aid,
-                    ], [
-                        'certainty' => null
-                    ]);
-                    if($user->isModerated()) {
-                        $attrval = $attrval->moderate('pending', false, true);
-                        unset($attrval->comments_count);
-                    }
-                    break;
-                default:
-                    $error = __('Unknown operation');
-            }
-
-            if($error !== null) {
-                DB::rollBack();
+            // FIXME [VR]: `?? null` is only necessary, because of temporary AttributeValue::handlePatch() implementation
+            $value = $patch['value'] ?? null;
+            $error = AttributeValue::handlePatch($id, $aid, $value, $op, $user, $addedAttributes, $removedAttributes);
+            if($error !== false) {
+                DB::rollback();
                 return response()->json([
-                    'error' => $error,
-                ], 400);
-            }
-
-            // no further action required for deleted attribute values, continue with next patch
-            if($op == 'remove') {
-                continue;
-            }
-
-            try {
-                $attr = Attribute::findOrFail($aid);
-                $formKeyValue = AttributeValue::getFormattedKeyValue($attr->datatype, $value);
-            } catch(InvalidDataException $ide) {
-                return response()->json([
-                    'error' => $ide->getMessage(),
-                ], 422);
-            }
-
-            $attrval->{$formKeyValue->key} = $formKeyValue->val;
-            $attrval->user_id = $user->id;
-            $attrval->save();
-
-            // As we cannot ensure that the 'add' is correct,
-            // we use this laravel option to ensure the attribute
-            // was created and not replaced.
-            if($attrval->wasRecentlyCreated) {
-                $addedAttributes[$aid] = $attrval;
+                    'error' => $error['message'],
+            ], $error['code']);
             }
         }
 
@@ -906,7 +871,7 @@ class EntityController extends Controller {
         $entity->user_id = $user->id;
         if($entity->isDirty()) {
             $entity->save();
-        }else{
+        } else {
             $entity->touch();
         }
 
@@ -929,14 +894,14 @@ class EntityController extends Controller {
         }
         $this->validate($request, AttributeValue::patchRules);
 
-        try{
+        try {
             Entity::findOrFail($id);
         } catch(ModelNotFoundException $e) {
             return response()->json([
                 'error' => __('This entity does not exist'),
             ], 400);
         }
-        try{
+        try {
             Attribute::findOrFail($aid);
         } catch(ModelNotFoundException $e) {
             return response()->json([
@@ -1142,13 +1107,13 @@ class EntityController extends Controller {
                 'error' => __('You do not have the permission to modify an entity'),
             ], 403);
         }
-        
+
        $request->validate([
             'rank' => 'required_without:to_end|integer',
             'parent_id' => 'nullable|integer|exists:entities,id',
             'to_end' => 'nullable|boolean',
         ]);
-        
+
         $entity;
         try{
             $entity = Entity::findOrFail($id);
@@ -1157,10 +1122,10 @@ class EntityController extends Controller {
             'error' => __('This entity does not exist'),
             ], 400);
         }
-        
+
         $rank = $request->get('rank') ?? null;
         $parent_id = $request->get('parent_id') ?? null;
-    
+
         try{
             $entity->move($parent_id, $rank, $user);
         } catch(Exception $e) {

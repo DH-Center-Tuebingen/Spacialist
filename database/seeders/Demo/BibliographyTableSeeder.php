@@ -19,7 +19,7 @@ class BibliographyTableSeeder extends Seeder
             0 =>
             array (
                 'id' => 1318,
-                'type' => 'article',
+                'entry_type' => 'article',
                 'citekey' => 'Sh:1',
                 'title' => '{Stable theories}',
                 'author' => 'Shelah, Saharon',
@@ -52,7 +52,7 @@ class BibliographyTableSeeder extends Seeder
             1 =>
             array (
                 'id' => 1319,
-                'type' => 'article',
+                'entry_type' => 'article',
                 'citekey' => 'Sh:2',
                 'title' => '{Note on a min-max problem of Leo Moser}',
                 'author' => 'Shelah, Saharon',
@@ -85,7 +85,7 @@ class BibliographyTableSeeder extends Seeder
             2 =>
             array (
                 'id' => 1320,
-                'type' => 'article',
+                'entry_type' => 'article',
                 'citekey' => 'Sh:3',
                 'title' => '{Finite diagrams stable in power}',
                 'author' => 'Shelah, Saharon',
@@ -118,7 +118,7 @@ class BibliographyTableSeeder extends Seeder
             3 =>
             array (
                 'id' => 1321,
-                'type' => 'article',
+                'entry_type' => 'article',
                 'citekey' => 'Sh:4',
                 'title' => '{On theories $T$ categorical in $|T|$}',
                 'author' => 'Shelah, Saharon',
@@ -151,7 +151,7 @@ class BibliographyTableSeeder extends Seeder
             4 =>
             array (
                 'id' => 1322,
-                'type' => 'article',
+                'entry_type' => 'article',
                 'citekey' => 'Sh:5',
                 'title' => '{On languages with non-homogeneous strings of quantifiers}',
                 'author' => 'Shelah, Saharon',
@@ -184,7 +184,7 @@ class BibliographyTableSeeder extends Seeder
             5 =>
             array (
                 'id' => 1323,
-                'type' => 'article',
+                'entry_type' => 'article',
                 'citekey' => 'Sh:6',
                 'title' => '{A note on Hanf numbers}',
                 'author' => 'Shelah, Saharon',
@@ -217,7 +217,7 @@ class BibliographyTableSeeder extends Seeder
             6 =>
             array (
                 'id' => 1324,
-                'type' => 'article',
+                'entry_type' => 'article',
                 'citekey' => 'Sh:7',
                 'title' => '{On the cardinality of ultraproduct of finite sets}',
                 'author' => 'Shelah, Saharon',
@@ -250,7 +250,7 @@ class BibliographyTableSeeder extends Seeder
             7 =>
             array (
                 'id' => 1325,
-                'type' => 'article',
+                'entry_type' => 'article',
                 'citekey' => 'Sh:8',
                 'title' => '{Two cardinal compactness}',
                 'author' => 'Shelah, Saharon',
@@ -283,7 +283,7 @@ class BibliographyTableSeeder extends Seeder
             8 =>
             array (
                 'id' => 1326,
-                'type' => 'article',
+                'entry_type' => 'article',
                 'citekey' => 'Sh:9',
                 'title' => '{Remark to ``local definability theory\'\' of Reyes}',
                 'author' => 'Shelah, Saharon',
@@ -316,7 +316,7 @@ class BibliographyTableSeeder extends Seeder
             9 =>
             array (
                 'id' => 1327,
-                'type' => 'article',
+                'entry_type' => 'article',
                 'citekey' => 'Sh:10',
                 'title' => '{Stability, the f.c.p., and superstability; model theoretic
 properties of formulas in first order theory}',
@@ -350,7 +350,7 @@ properties of formulas in first order theory}',
             10 =>
             array (
                 'id' => 1328,
-                'type' => 'article',
+                'entry_type' => 'article',
                 'citekey' => 'Sh:11',
                 'title' => '{On the number of non-almost isomorphic models of $T$ in a
 power}',
@@ -384,7 +384,7 @@ power}',
             11 =>
             array (
                 'id' => 1329,
-                'type' => 'article',
+                'entry_type' => 'article',
                 'citekey' => 'Sh:12',
                 'title' => '{The number of non-isomorphic models of an unstable first-order
 theory}',
@@ -418,7 +418,7 @@ theory}',
             12 =>
             array (
                 'id' => 1330,
-                'type' => 'article',
+                'entry_type' => 'article',
                 'citekey' => 'Sh:13',
                 'title' => '{Every two elementarily equivalent models have isomorphic
 ultrapowers}',
@@ -452,7 +452,7 @@ ultrapowers}',
             13 =>
             array (
                 'id' => 1331,
-                'type' => 'article',
+                'entry_type' => 'article',
                 'citekey' => 'Sh:14',
                 'title' => '{Saturation of ultrapowers and Keisler\'s order}',
                 'author' => 'Shelah, Saharon',
@@ -485,7 +485,7 @@ ultrapowers}',
             14 =>
             array (
                 'id' => 1332,
-                'type' => 'article',
+                'entry_type' => 'article',
                 'citekey' => 'Sh:15',
                 'title' => '{Uniqueness and characterization of prime models over sets for
 totally transcendental first-order theories}',
@@ -519,7 +519,7 @@ totally transcendental first-order theories}',
             15 =>
             array (
                 'id' => 1333,
-                'type' => 'article',
+                'entry_type' => 'article',
                 'citekey' => 'Sh:16',
                 'title' => '{A combinatorial problem; stability and order for models 	and
 theories in infinitary languages}',
@@ -553,7 +553,7 @@ theories in infinitary languages}',
             16 =>
             array (
                 'id' => 1334,
-                'type' => 'article',
+                'entry_type' => 'article',
                 'citekey' => 'Sh:17',
                 'title' => '{For what filters is every reduced product saturated?}',
                 'author' => 'Shelah, Saharon',
@@ -586,7 +586,7 @@ theories in infinitary languages}',
             17 =>
             array (
                 'id' => 1335,
-                'type' => 'article',
+                'entry_type' => 'article',
                 'citekey' => 'Sh:18',
                 'title' => '{On models with power-like orderings}',
                 'author' => 'Shelah, Saharon',
@@ -619,7 +619,7 @@ theories in infinitary languages}',
             18 =>
             array (
                 'id' => 1336,
-                'type' => 'article',
+                'entry_type' => 'article',
                 'citekey' => 'ErSh:19',
                 'title' => '{Separability properties of almost-disjoint families of sets}',
                 'author' => 'Erdos, Paul and Shelah, Saharon',
@@ -652,7 +652,7 @@ theories in infinitary languages}',
             19 =>
             array (
                 'id' => 1337,
-                'type' => 'article',
+                'entry_type' => 'article',
                 'citekey' => 'ScSh:20',
                 'title' => '{On power-like models for hyperinaccessible cardinals}',
                 'author' => 'Schmerl, James H. and Shelah, Saharon',
@@ -685,7 +685,7 @@ theories in infinitary languages}',
             20 =>
             array (
                 'id' => 1338,
-                'type' => 'incollection',
+                'entry_type' => 'incollection',
                 'citekey' => 'ErSh:21',
                 'title' => '{On problems of Moser and Hanson}',
                 'author' => 'Erdos, Paul and Shelah, Saharon',
@@ -720,7 +720,7 @@ W. T. Youngs)',
             21 =>
             array (
                 'id' => 1339,
-                'type' => 'article',
+                'entry_type' => 'article',
                 'citekey' => 'Sh:22',
                 'title' => '{A note on model complete models and generic models}',
                 'author' => 'Shelah, Saharon',
@@ -753,7 +753,7 @@ W. T. Youngs)',
             22 =>
             array (
                 'id' => 1340,
-                'type' => 'article',
+                'entry_type' => 'article',
                 'citekey' => 'GlSh:23',
                 'title' => '{Some Counterexamples in the Partition Calculus}',
                 'author' => 'Galvin, Fred and Shelah, Saharon',
@@ -786,7 +786,7 @@ W. T. Youngs)',
             23 =>
             array (
                 'id' => 1341,
-                'type' => 'article',
+                'entry_type' => 'article',
                 'citekey' => 'Sh:24',
                 'title' => '{First order theory of permutation groups}',
                 'author' => 'Shelah, Saharon',
@@ -819,7 +819,7 @@ W. T. Youngs)',
             24 =>
             array (
                 'id' => 1342,
-                'type' => 'article',
+                'entry_type' => 'article',
                 'citekey' => 'Sh:25',
                 'title' => '{Errata to: First order theory of permutation groups}',
                 'author' => 'Shelah, Saharon',
@@ -852,7 +852,7 @@ W. T. Youngs)',
             25 =>
             array (
                 'id' => 1343,
-                'type' => 'article',
+                'entry_type' => 'article',
                 'citekey' => 'Sh:26',
                 'title' => '{Notes on combinatorial set theory}',
                 'author' => 'Shelah, Saharon',
@@ -885,7 +885,7 @@ W. T. Youngs)',
             26 =>
             array (
                 'id' => 1344,
-                'type' => 'article',
+                'entry_type' => 'article',
                 'citekey' => 'MoSh:27',
                 'title' => '{Size direction games over the real line. III}',
                 'author' => 'Moran, Gadi and Shelah, Saharon',
@@ -918,7 +918,7 @@ W. T. Youngs)',
             27 =>
             array (
                 'id' => 1345,
-                'type' => 'article',
+                'entry_type' => 'article',
                 'citekey' => 'Sh:28',
                 'title' => '{There are just four second-order quantifiers}',
                 'author' => 'Shelah, Saharon',
@@ -951,7 +951,7 @@ W. T. Youngs)',
             28 =>
             array (
                 'id' => 1346,
-                'type' => 'article',
+                'entry_type' => 'article',
                 'citekey' => 'Sh:29',
                 'title' => '{A substitute for Hall\'s theorem for families with infinite
 sets}',
@@ -985,7 +985,7 @@ sets}',
             29 =>
             array (
                 'id' => 1347,
-                'type' => 'incollection',
+                'entry_type' => 'incollection',
                 'citekey' => 'MzSh:30',
                 'title' => '{The cardinals of simple models for universal theories}',
                 'author' => 'McKenzie, Ralph and Shelah, Saharon',
@@ -1019,7 +1019,7 @@ Berkeley, Calif., 1971)',
             30 =>
             array (
                 'id' => 1348,
-                'type' => 'incollection',
+                'entry_type' => 'incollection',
                 'citekey' => 'Sh:31',
                 'title' => '{Categoricity of uncountable theories}',
                 'author' => 'Shelah, Saharon',
@@ -1053,7 +1053,7 @@ Berkeley, Calif., 1971)',
             31 =>
             array (
                 'id' => 1349,
-                'type' => 'incollection',
+                'entry_type' => 'incollection',
                 'citekey' => 'EHSh:32',
                 'title' => '{On some general properties of chromatic numbers}',
                 'author' => 'Erdos, Paul and Hajnal, Andras and Shelah, Saharon',
@@ -1086,7 +1086,7 @@ Berkeley, Calif., 1971)',
             32 =>
             array (
                 'id' => 1350,
-                'type' => 'article',
+                'entry_type' => 'article',
                 'citekey' => 'Sh:33',
                 'title' => '{The Hanf number of omitting complete types}',
                 'author' => 'Shelah, Saharon',
@@ -1119,7 +1119,7 @@ Berkeley, Calif., 1971)',
             33 =>
             array (
                 'id' => 1351,
-                'type' => 'article',
+                'entry_type' => 'article',
                 'citekey' => 'Sh:34',
                 'title' => '{Weak definability in infinitary languages}',
                 'author' => 'Shelah, Saharon',
@@ -1152,7 +1152,7 @@ Berkeley, Calif., 1971)',
             34 =>
             array (
                 'id' => 1352,
-                'type' => 'article',
+                'entry_type' => 'article',
                 'citekey' => 'MlSh:35',
                 'title' => '{Sufficiency conditions for the existence of transversals}',
                 'author' => 'Milner, Eric C. and Shelah, Saharon',
@@ -1186,7 +1186,7 @@ Mathematiques',
             35 =>
             array (
                 'id' => 1353,
-                'type' => 'article',
+                'entry_type' => 'article',
                 'citekey' => 'Sh:36',
                 'title' => '{Remarks on cardinal invariants in topology}',
                 'author' => 'Shelah, Saharon',
@@ -1219,7 +1219,7 @@ Mathematiques',
             36 =>
             array (
                 'id' => 1354,
-                'type' => 'article',
+                'entry_type' => 'article',
                 'citekey' => 'Sh:37',
                 'title' => '{A two-cardinal theorem}',
                 'author' => 'Shelah, Saharon',
@@ -1252,7 +1252,7 @@ Mathematiques',
             37 =>
             array (
                 'id' => 1355,
-                'type' => 'incollection',
+                'entry_type' => 'incollection',
                 'citekey' => 'Sh:38',
                 'title' => '{Graphs with prescribed asymmetry and minimal number of
 edges}',
@@ -1287,7 +1287,7 @@ dedicated to P. Erd\\H{o}s on his 60th birthday)',
             38 =>
             array (
                 'id' => 1356,
-                'type' => 'article',
+                'entry_type' => 'article',
                 'citekey' => 'Sh:39',
                 'title' => '{Differentially closed fields}',
                 'author' => 'Shelah, Saharon',
@@ -1320,7 +1320,7 @@ dedicated to P. Erd\\H{o}s on his 60th birthday)',
             39 =>
             array (
                 'id' => 1357,
-                'type' => 'incollection',
+                'entry_type' => 'incollection',
                 'citekey' => 'Sh:40',
                 'title' => '{Notes on partition calculus}',
                 'author' => 'Shelah, Saharon',
@@ -1354,7 +1354,7 @@ dedicated to P. Erd\\H{o}s on his 60th birthday)',
             40 =>
             array (
                 'id' => 1358,
-                'type' => 'incollection',
+                'entry_type' => 'incollection',
                 'citekey' => 'MlSh:41',
                 'title' => '{Some theorems on transversals}',
                 'author' => 'Milner, Eric C. and Shelah, Saharon',
@@ -1388,7 +1388,7 @@ dedicated to P. Erd\\H{o}s on his 60th birthday)',
             41 =>
             array (
                 'id' => 1359,
-                'type' => 'article',
+                'entry_type' => 'article',
                 'citekey' => 'Sh:42',
                 'title' => '{The monadic theory of order}',
                 'author' => 'Shelah, Saharon',
@@ -1421,7 +1421,7 @@ dedicated to P. Erd\\H{o}s on his 60th birthday)',
             42 =>
             array (
                 'id' => 1360,
-                'type' => 'article',
+                'entry_type' => 'article',
                 'citekey' => 'Sh:43',
                 'title' => '{Generalized quantifiers and compact logic}',
                 'author' => 'Shelah, Saharon',
@@ -1454,7 +1454,7 @@ dedicated to P. Erd\\H{o}s on his 60th birthday)',
             43 =>
             array (
                 'id' => 1361,
-                'type' => 'article',
+                'entry_type' => 'article',
                 'citekey' => 'Sh:44',
                 'title' => '{Infinite abelian groups, Whitehead problem and some
 constructions}',
@@ -1488,7 +1488,7 @@ constructions}',
             44 =>
             array (
                 'id' => 1362,
-                'type' => 'incollection',
+                'entry_type' => 'incollection',
                 'citekey' => 'Sh:45',
                 'title' => '{Existence of rigid-like families of abelian $p$-groups}',
                 'author' => 'Shelah, Saharon',
@@ -1522,7 +1522,7 @@ Robinson)',
             45 =>
             array (
                 'id' => 1363,
-                'type' => 'article',
+                'entry_type' => 'article',
                 'citekey' => 'Sh:46',
                 'title' => '{Colouring without triangles and partition relation}',
                 'author' => 'Shelah, Saharon',
@@ -1555,7 +1555,7 @@ Robinson)',
             46 =>
             array (
                 'id' => 1364,
-                'type' => 'article',
+                'entry_type' => 'article',
                 'citekey' => 'MShS:47',
                 'title' => '{$\\Delta$-logics and generalized quantifiers}',
                 'author' => 'Makowsky, Johann A. and Shelah, Saharon and Stavi, Jonathan',
@@ -1588,7 +1588,7 @@ Robinson)',
             47 =>
             array (
                 'id' => 1365,
-                'type' => 'article',
+                'entry_type' => 'article',
                 'citekey' => 'Sh:48',
                 'title' => '{Categoricity in $\\aleph _{1}$ of sentences in 	$L_{\\omega
 _{1},\\omega}(Q)$}',
@@ -1622,7 +1622,7 @@ _{1},\\omega}(Q)$}',
             48 =>
             array (
                 'id' => 1366,
-                'type' => 'article',
+                'entry_type' => 'article',
                 'citekey' => 'Sh:49',
                 'title' => '{A two-cardinal theorem and a combinatorial theorem}',
                 'author' => 'Shelah, Saharon',
@@ -1655,7 +1655,7 @@ _{1},\\omega}(Q)$}',
             49 =>
             array (
                 'id' => 1367,
-                'type' => 'article',
+                'entry_type' => 'article',
                 'citekey' => 'Sh:50',
                 'title' => '{Decomposing uncountable squares to countably many chains}',
                 'author' => 'Shelah, Saharon',
@@ -1688,7 +1688,7 @@ _{1},\\omega}(Q)$}',
             50 =>
             array (
                 'id' => 1368,
-                'type' => 'incollection',
+                'entry_type' => 'incollection',
                 'citekey' => 'Sh:51',
                 'title' => '{Why there are many nonisomorphic models for 	unsuperstable
 theories}',
@@ -1723,7 +1723,7 @@ Mathematicians (Vancouver, B. C., 1974)',
             51 =>
             array (
                 'id' => 1369,
-                'type' => 'article',
+                'entry_type' => 'article',
                 'citekey' => 'Sh:52',
                 'title' => '{A compactness theorem for singular cardinals, free algebras,
 Whitehead problem and transversals}',
@@ -1757,7 +1757,7 @@ Whitehead problem and transversals}',
             52 =>
             array (
                 'id' => 1370,
-                'type' => 'article',
+                'entry_type' => 'article',
                 'citekey' => 'LtSh:53',
                 'title' => '{Models with few isomorphic expansions}',
                 'author' => 'Litman, A. and Shelah, Saharon',
@@ -1790,7 +1790,7 @@ Whitehead problem and transversals}',
             53 =>
             array (
                 'id' => 1371,
-                'type' => 'article',
+                'entry_type' => 'article',
                 'citekey' => 'Sh:54',
                 'title' => '{The lazy model-theoretician\'s guide to stability}',
                 'author' => 'Shelah, Saharon',
@@ -1823,7 +1823,7 @@ Whitehead problem and transversals}',
             54 =>
             array (
                 'id' => 1372,
-                'type' => 'incollection',
+                'entry_type' => 'incollection',
                 'citekey' => 'Sh:54a',
                 'title' => '{The lazy model theorist\'s guide to stability}',
                 'author' => 'Shelah, Saharon',
@@ -1856,7 +1856,7 @@ Whitehead problem and transversals}',
             55 =>
             array (
                 'id' => 1373,
-                'type' => 'article',
+                'entry_type' => 'article',
                 'citekey' => 'McSh:55',
                 'title' => '{Uncountable universal locally finite groups}',
                 'author' => 'Macintyre, Angus and Shelah, Saharon',
@@ -1889,7 +1889,7 @@ Whitehead problem and transversals}',
             56 =>
             array (
                 'id' => 1374,
-                'type' => 'article',
+                'entry_type' => 'article',
                 'citekey' => 'Sh:56',
                 'title' => '{Refuting Ehrenfeucht conjecture on rigid models}',
                 'author' => 'Shelah, Saharon',
@@ -1923,7 +1923,7 @@ Robinson, Yale, 1975',
             57 =>
             array (
                 'id' => 1375,
-                'type' => 'article',
+                'entry_type' => 'article',
                 'citekey' => 'AmSh:57',
                 'title' => '{The complete finitely axiomatized theories of order are
 dense}',
@@ -1957,7 +1957,7 @@ dense}',
             58 =>
             array (
                 'id' => 1376,
-                'type' => 'article',
+                'entry_type' => 'article',
                 'citekey' => 'Sh:58',
                 'title' => '{Decidability of a portion of the predicate calculus}',
                 'author' => 'Shelah, Saharon',
@@ -1990,7 +1990,7 @@ dense}',
             59 =>
             array (
                 'id' => 1377,
-                'type' => 'article',
+                'entry_type' => 'article',
                 'citekey' => 'HiSh:59',
                 'title' => '{Singular cohomology in $L$}',
                 'author' => 'Hiller, Howard L. and Shelah, Saharon',
@@ -2023,7 +2023,7 @@ dense}',
             60 =>
             array (
                 'id' => 1378,
-                'type' => 'article',
+                'entry_type' => 'article',
                 'citekey' => 'HLSh:60',
                 'title' => '{Possible orderings of an indiscernible sequence}',
                 'author' => 'Hodges, Wilfrid and Lachlan, Alistair H. and Shelah, Saharon',

@@ -22,7 +22,10 @@
                 >
                     {{ attr._name }}
                     <span class="ms-2 opacity-50 small">
-                        {{ t(`global.attributes.${attr.datatype}`) }}
+                        {{ getLabel(attr.datatype) }}
+                        <span v-show="isPluginDatatype(attr.datatype)">
+                            <i class="fas fa-fw fa-puzzle-piece" />
+                        </span>
                     </span>
                 </label>
             </div>
@@ -46,6 +49,8 @@
 <script>
     import { computed } from 'vue';
     import { useI18n } from 'vue-i18n';
+
+    import useAttributeStore from '@/bootstrap/stores/attribute.js';
 
     import {
         multiselectResetClasslist,
@@ -86,6 +91,7 @@
         ],
         setup(props, context) {
             const { t } = useI18n();
+            const attributeStore = useAttributeStore();
 
             const updateAttributeMapping = (id, option) => {
                 const newMapping = Object.assign({}, props.attributeMapping);
@@ -125,6 +131,16 @@
                 return val;
             };
 
+            const isPluginDatatype = datatype => attributeStore.isFromPlugin(datatype);
+
+            const getLabel = datatype => {
+                if(attributeStore.isFromPlugin(datatype)) {
+                    return t(attributeStore.getPluginAttributeLabel(datatype));
+                } else {
+                    return t(`global.attributes.${datatype}`)
+                }
+            };
+
             const availableAttributesSortedByName = computed(_ => {
                 let arr = [];
                 for(const attr of props.availableAttributes) {
@@ -150,8 +166,10 @@
                 // Local
                 availableAttributesSortedByName,
                 deselectWorkAround,
+                getLabel,
                 getMissing,
                 getTotal,
+                isPluginDatatype,
                 multiselectResetClasslist,
                 sortedOptions,
                 updateAttributeMapping,

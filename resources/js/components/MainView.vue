@@ -59,7 +59,9 @@
             </ul>
             <div class="mt-2 col px-0 overflow-hidden">
                 <keep-alive>
-                    <component :is="state.tabComponent" />
+                    <component
+                        :is="state.tabComponent"
+                    />
                 </keep-alive>
             </div>
         </div>
@@ -85,6 +87,7 @@
     } from 'vue-router';
 
     import useEntityStore from '@/bootstrap/stores/entity.js';
+    import usePluginStore from '@/bootstrap/stores/plugin.js';
     import useSystemStore from '@/bootstrap/stores/system.js';
     import router from '%router';
 
@@ -117,6 +120,7 @@
             const { t } = useI18n();
             const currentRoute = useRoute();
             const entityStore = useEntityStore();
+            const pluginStore = usePluginStore();
             const systemStore = useSystemStore();
             useWebSocketConnectionToast();
 
@@ -130,18 +134,21 @@
                     append: true,
                 });
             };
-           
+
             // DATA
             const state = reactive({
                 tab: computed(_ => systemStore.mainView.tab),
+                activePlugin: computed(() => {
+                    const plugin = state.tabPlugins.find(p => p.key == state.tab);
+                    return plugin ? plugin : null;
+                }),
                 tabComponent: computed(_ => {
                     if(state.tab === 'references') {
                         return ReferenceTab;
                     }
 
-                    const plugin = state.tabPlugins.find(p => p.key == state.tab);
-                    if(!!plugin) {
-                        return plugin.componentTag;
+                    if(state.activePlugin) {
+                        return state.activePlugin.component ?? state.activePlugin.componentTag;
                     } else {
                         return '';
                     }
@@ -151,7 +158,7 @@
                 entityTypes: computed(_ => entityStore.entityTypes),
                 columnPref: computed(_ => systemStore.getPreference('prefs.columns')),
                 isDetailLoaded: computed(_ => state.entity?.id > 0),
-                tabPlugins: computed(_ => systemStore.getSlotPlugins('tab')),
+                tabPlugins: computed(_ => pluginStore.getSlotItems('tab')),
             });
             const channels = {};
 

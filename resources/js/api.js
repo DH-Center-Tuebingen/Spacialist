@@ -22,37 +22,10 @@ export async function getCsrfCookie() {
     }));
 }
 
-export async function uploadPlugin(file) {
-    const formData = new FormData();
-    formData.append('file', file);
-
-    return $httpQueue.add(
-        () => http.post(`/plugin`, formData).then(response => response.data)
-    );
-}
-
-export async function installPlugin(id) {
-    return $httpQueue.add(
-        () => http.get(`/plugin/${id}`).then(response => response.data)
-    );
-}
-
-export async function updatePlugin(id) {
-    return $httpQueue.add(
-        () => http.patch(`/plugin/${id}`).then(response => response.data)
-    );
-}
-
-export async function uninstallPlugin(id) {
-    return $httpQueue.add(
-        () => http.delete(`/plugin/${id}`).then(response => response.data)
-    );
-}
-
-export async function removePlugin(id) {
-    return $httpQueue.add(
-        () => http.delete(`/plugin/remove/${id}`).then(response => response.data)
-    );
+// Might be used in Core or Plugins to refresh a session with a short TTL
+// e.g. for timer-based logout
+export async function refreshSession() {
+    return $httpQueue.add(() => http.get('/refresh'));
 }
 
 export async function fetchEntityMetadata(id) {
@@ -60,7 +33,7 @@ export async function fetchEntityMetadata(id) {
 }
 
 export async function fetchUser() {
-    return await $httpQueue.add(() => http.get('/auth/user').then(response => response.data));
+    return await $httpQueue.add(() => http.get('/auth/user').then(response => response?.data?.data));
 }
 
 export async function fetchAttributes() {
@@ -104,6 +77,9 @@ export async function getEntityParentMetadata(id, fields = ['ids', 'names', 'lin
     );
 }
 
+// TODO: Currently not used anymore as getEntityDetailsData is
+//       bundling multiple requests. Decide if we want to remove the api
+//       or keep it for future use.
 export async function getEntityData(id) {
     return await $httpQueue.add(
         () => http.get(`/entity/${id}/data`)
@@ -117,6 +93,22 @@ export async function getEntityData(id) {
     );
 }
 
+export async function getEntityDetailsData(id) {
+    return await $httpQueue.add(
+        () => http.get(`/entity/${id}/entity_detail`)
+            .then(response => {
+                // PHP returns Array if it is empty
+                if(response.data instanceof Array) {
+                    response.data = {};
+                }
+                return response.data;
+            })
+    );
+}
+
+// TODO: Currently not used anymore as getEntityDetailsData is
+//       bundling multiple requests. Decide if we want to remove the api
+//       or keep it for future use.
 export async function getEntityReferences(id) {
     return await $httpQueue.add(
         () => http.get(`/entity/${id}/reference`)
@@ -221,6 +213,13 @@ export async function getMapProjection(srid) {
 }
 
 // POST
+export async function checkAccess(endpoint = '/') {
+    const data = {
+        endpoint: endpoint,
+    };
+    return $httpQueue.add(() => http.post('/access/check', data));
+}
+
 export async function login(credentials) {
     return await $httpQueue.add(() => http.post('/auth/login', credentials).then(response => {
         return response.data;
@@ -228,7 +227,7 @@ export async function login(credentials) {
 }
 
 export async function addUser(user) {
-    const data = only(user, ['name', 'nickname', 'email', 'password']);
+    const data = only(user, ['name', 'nickname', 'email', 'password', 'password_confirm', 'accesspoints']);
     return $httpQueue.add(
         () => http.post('user', data).then(response => response.data)
     );
@@ -357,13 +356,13 @@ export async function duplicateEntity(entity) {
     );
 }
 
-export async function exportEntityTree(root){
+export async function exportEntityTree(root) {
     return $httpQueue.add(
-        () => http.get(`/entity/${root}/export`,{
+        () => http.get(`/entity/${root}/export`, {
             responseType: 'blob'
         })
-        .then(File.saveFileWithFallback('export_no_name'))
-        .catch(e => { throw e; })
+            .then(File.saveFileWithFallback('export_no_name'))
+            .catch(e => { throw e; })
     );
 }
 

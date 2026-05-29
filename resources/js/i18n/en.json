@@ -3,6 +3,7 @@
         "save": "Save",
         "delete": "Delete",
         "restore": "Restore",
+        "activate": "Activate",
         "deactivate": "Deactivate",
         "reactivate": "Reactivate",
         "remove": "Remove",
@@ -12,13 +13,14 @@
         "close": "Close",
         "add": "Add",
         "edit": "Edit",
-        "export":"Export",
         "edited": "edited",
         "duplicate": "Duplicate",
+        "export": "Export",
         "sort": "Sort",
         "resort": "Re-sort",
         "update": "Update",
         "replace": "Replace",
+        "refresh": "Refresh",
         "clear": "Clear",
         "confirm": "OK",
         "create": "Create",
@@ -71,7 +73,7 @@
             "confirm_and_save": "No, save and continue"
         },
         "error": {
-            "alert_title": "Error Message",
+            "altoastert_title": "Error Message",
             "info_issue": "If you think this is a bug, please have a look at our <a href=\"https://github.com/DH-Center-Tuebingen/Spacialist/issues\" target=\"_blank\">issue tracker</a> on github to see if this has been already reported or <a href=\"https://github.com/DH-Center-Tuebingen/Spacialist/issues?q=is:issue+is:closed\" target=\"_blank\">closed</a> in a later version (Your current version can be found in Settings > <i class=\"fas fa-fw fa-info-circle\"></i> About Dialog). If it is neither reported nor closed, feel free to <a href=\"https://github.com/DH-Center-Tuebingen/Spacialist/issues/new\" target=\"_blank\">open a new issue</a>.",
             "occur": "Error occured",
             "headers": "Headers",
@@ -340,6 +342,7 @@
         "description": "Description",
         "roles": "Roles",
         "permissions": "Permissions",
+        "accesspoints": "Access Points",
         "added_at": "Added",
         "created_at": "Created",
         "updated_at": "Updated",
@@ -646,6 +649,9 @@
             "active_users": "Active Users",
             "deactivated_users": "Deactivated Users",
             "empty_list": "User-list is empty",
+            "accesspoints": {
+                "default": "Spacialist (default)"
+            },
             "toasts": {
                 "updated": {
                     "title": "User updated",
@@ -694,7 +700,7 @@
                     "users_roles": "Users & Roles",
                     "preferences": "Preferences",
                     "thesaurus": "Thesaurus",
-                    "is_plugin": "Plugin"
+                    "plugin": "Plugin"
                 },
                 "moderation": {
                     "required": "Requires Moderation"
@@ -848,15 +854,20 @@
             }
         },
         "plugins": {
-            "title": "Plugins",
+            "title": "Plugin | Plugins",
             "upload": "Upload Plugin",
-            "authors": "Authors",
-            "deactivate": "Deactivate",
-            "activate": "Activate",
-            "remove": "Remove",
+            "author": "Author | Authors",
             "update_to": "Update to <span class=\"fw-bold\">{ version }</span>",
             "changelog_info": "Show Changelog",
             "not_found": "No plugins found.",
+            "migrate": "Run",
+            "refresh-script": "Renew script file",
+            "rollback": "Rollback",
+            "section": {
+                "info": "Information",
+                "migrations": "Migrationen",
+                "changelog": "Changelog"
+            },
             "modal": {
                 "changelog_title": "Plugin"
             },
@@ -865,6 +876,14 @@
                     "title": "Plugin updated",
                     "message": "Plugin {name} successfully updated to version {v} (from version {vo})."
                 }
+            },
+            "info": {
+                "add_migration_to_db": "Adds this migration manually to the database without running the migration. This is only necessary for older applications prior to version 0.12. Only continue if you know what you are doing!",
+                "no_migrations": "Plugin has no migrations.",
+                "migration_notice": "Please note, that the migration system is only available since version 0.12. If your application was installed before that, the migrations are not reflected correctly. The migrations must be set manually to reflect the correct application state.",
+                "migration-confirm": "Are you sure you want to run migrations? This may result in data loss, only continue if you know what you are doing!",
+                "rollback-confirm": "Are you sure you want to rollback the migrations? This may result in data loss, only continue if you know what you are doing!",
+                "no_changelog": "No changelog available."
             }
         },
         "about": {

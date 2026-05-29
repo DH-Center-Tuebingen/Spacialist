@@ -185,7 +185,13 @@
                                         :aria-controls="`dme-attribute-list-${type}-grp-container`"
                                     >
                                         <span class="flex-fill">
-                                            {{ t(`global.attributes.${type}`) }}
+                                            <span v-if="isFromPlugin(type)">
+                                                {{ t(getPluginLabel(type)) }}
+                                                <i class="fas fa-fw fa-puzzle-piece" />
+                                            </span>
+                                            <span v-else>
+                                                {{ t(`global.attributes.${type}`) }}
+                                            </span>
                                         </span>
                                         <span
                                             class="badge bg-primary mx-2 d-flex flex-row"
@@ -213,7 +219,7 @@
                                     :id="`dme-attribute-list-${type}-grp-container`"
                                     class="accordion-collapse collapse"
                                 >
-                                    <div class="accordion-body px-2 pb-3 pt-0">
+                                    <div class="accordion-body px-2 py-3">
                                         <attribute-list
                                             :group="{ name: `attribute-selection-${type}`, pull: true, put: false }"
                                             :attributes="attrGrp"
@@ -386,6 +392,9 @@
                 return attributeGroupItemCount(items) > 0;
             };
 
+            const isFromPlugin = datatype => attributeStore.isFromPlugin(datatype);
+            const getPluginLabel = datatype => attributeStore.getPluginAttributeLabel(datatype);
+
             // DATA
             const accordionRef = ref(null);
             const state = reactive({
@@ -434,8 +443,12 @@
                     const groupList = Object.entries(state.attributeListGroups);
 
                     return groupList.sort((a, b) => {
-                        const labelA = t(`global.attributes.${a[0]}`);
-                        const labelB = t(`global.attributes.${b[0]}`);
+                        const labelA = isFromPlugin(a[0]) ?
+                            t(getPluginLabel(a[0])) :
+                            t(`global.attributes.${a[0]}`);
+                        const labelB = isFromPlugin(b[0]) ?
+                            t(getPluginLabel(b[0])) :
+                            t(`global.attributes.${b[0]}`);
                         return labelA.localeCompare(labelB);
                     });
                 }),
@@ -463,6 +476,8 @@
                 setAttributeGroupExpand,
                 attributeGroupItemCount,
                 attributeGroupHasItems,
+                isFromPlugin,
+                getPluginLabel,
                 // STATE
                 accordionRef,
                 state,

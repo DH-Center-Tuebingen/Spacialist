@@ -34,6 +34,13 @@
         <!-- eslint-disable-next-line vue/no-v-html -->
         <div v-html="message" />
         <slot name="addon" />
+        <button
+            v-if="dismissible"
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="alert"
+            aria-label="Close"
+        />
     </div>
 </template>
 
@@ -63,7 +70,12 @@
             icontext: {
                 required: false,
                 type: String,
-                default: null
+                default: null,
+            },
+            dismissible: {
+                required: false,
+                type: Boolean,
+                default: false,
             }
         },
         setup(props, context) {
@@ -98,7 +110,7 @@
                     }
                 }),
                 classes: computed(_ => {
-                    let classes = [];
+                    const classes = [];
                     switch(type.value) {
                         case 'success':
                             classes.push('alert-success');
@@ -120,7 +132,10 @@
                             classes.push('alert-primary');
                             break;
                     }
-                    
+
+                    if(props.dismissible) {
+                        classes.push('alert-dismissible');
+                    }
                     if(state.hasIcon) {
                         classes.push('d-flex');
                         if(state.hasIconText) {
@@ -133,7 +148,7 @@
                     return classes;
                 }),
                 iconWrapperClasses: computed(_ => {
-                    let classes = [];
+                    const classes = [];
                     if(!state.hasIcon) return classes;
                     if(!state.hasIconText) {
                         classes.push('me-2');

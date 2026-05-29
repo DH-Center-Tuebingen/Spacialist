@@ -1,12 +1,33 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## 0.12 - (Luxor)
+### Added
+- Access Points (Plugins can define additional access points to restrict user access to certain parts of the plugin)
+- Plugin-System now supports custom components, e.g. attribute types
+- Plugin-System now supports PluginScopes
+- Plugin-System now supports Hooks: Custom functions that are executed after API calls.
+- Plugin-System now supports CSS files
+- Plugin script can be (re-)published via interface 
+- .env variable `ALLOW_FILESYSTEM_MIGRATIONS` to explcitly enable filesystem migrations
+- API endpoint for getting all entity details data in one request: GET::v1/entity/{id}/entity_detail
+- Added specific log file for plugins
+### Fixed
+- Removed redundant calls to the entity endpoint
+- Metadata tab error on submit (unknown variable)
+- Errors in _map.js_
+- Login was not routed properly
+### Changed
+- Alerts can now be dismissed
+- Now entity metadata is only loaded when accessing the metadata tab
+- Migrations now have logging automatically disabled
+- Migrations that require filesystem changes can now be handled using the `App\Traits\FilesystemMigration` trait (call `$this->safelyMoveDirectoryBetweenDisks(...)` with `ALLOW_FILESYTEM_MIGRATIONS` set to `true`)
+- Moved plugin state into separate store
+- Plugins no longer require a routes file
+
 ## 0.11.1
 ### Added
 - Unit Tests for Directory.php
-### Changed
-- Added path value to XSRF cookie to prevent overwriting by another instance at the same domain
-- _Show x replies_ button in comment list moved to header
 ### Fixed
 - Login not possible on instances in subfolder
 - Last editor not visible in _Entity Detail_ tab
@@ -22,6 +43,9 @@ All notable changes to this project will be documented in this file.
 - Fixed add/remove of plugin correctly setup in store and SpPS
 - Fixed error when generating cite key where bibliography title contained a space separated part of non-alphanumerical characters
 - Reply to comment from notification
+### Changed
+- Added path value to XSRF cookie to prevent overwriting by another instance at the same domain
+- _Show x replies_ button in comment list moved to header
 
 ## 0.11 - Kilcrea
 ### Added

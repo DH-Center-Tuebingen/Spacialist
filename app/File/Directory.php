@@ -2,6 +2,7 @@
 
 namespace App\File;
 
+use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -37,6 +38,11 @@ class Directory {
     public function getDirectory(): string {
         return $this->directory;
     }
+    
+    public function getDirectoryPath(string $subpath = ""): string {
+        $path = Str::finish($this->directory, DIRECTORY_SEPARATOR) . $subpath;
+        return Storage::disk($this->disk)->path($path);
+    }
 
     /**
      * Validates if a file is inside the directory.
@@ -69,7 +75,7 @@ class Directory {
         return false;
     }
 
-    // TODO: resource is not (php 8.3) allowed as type, thus $file only typehinted in docblock
+    // TODO: resource is not allowed as type (php 8.3), thus $file only typehinted in docblock
     /**
      * Stores a file inside the directory.
      *

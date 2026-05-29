@@ -133,7 +133,6 @@ class DirectoryTest extends TestCase
         // Store a file inside the directory
         $filePath = $directory->store('stored_test_file.txt', UploadedFile::fake()->create($uniqueFile, 100));
         $this->assertTrue(Storage::disk('test')->exists($filePath));
-        info("Stored file at: " . $filePath);
     }
 
     public function testPut(){

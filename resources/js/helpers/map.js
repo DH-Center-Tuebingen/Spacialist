@@ -23,7 +23,7 @@ import GeoJSON from 'ol/format/GeoJSON';
 
 import BingMaps from 'ol/source/BingMaps';
 import OSM from 'ol/source/OSM';
-import TileImage from 'ol/source/TileImage';
+import ImageTile from 'ol/source/ImageTile';
 import TileWMS from 'ol/source/TileWMS';
 import Vector from 'ol/source/Vector';
 
@@ -281,14 +281,14 @@ export function createNewLayer(layerData) {
 
     switch(layerData.type) {
         case 'xyz':
-            source = new TileImage(commonSourceOptions);
+            source = new ImageTile(commonSourceOptions);
             break;
         case 'wms':
             source = new TileWMS({
                 ...commonSourceOptions,
                 serverType: 'geoserver',
                 params: {
-                    layers: layers,
+                    layers: layerData.layers,
                     tiled: true,
                 },
             });

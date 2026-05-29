@@ -7,6 +7,7 @@ import {
 
 // Pages
 import Login from '@/components/Login.vue';
+import AppView from '@/components/AppView.vue';
 import MainView from '@/components/MainView.vue';
 import EntityDetail from '@/components/EntityDetail.vue';
 import EntityReferenceModal from '@/components/modals/entity/Reference.vue';
@@ -32,6 +33,7 @@ import SingleSearch from '@/components/openaccess/SingleSearch.vue';
 
 import DummyComponent from '@/components/DummyComponent.vue';
 import NotFound from '@/components/NotFound.vue';
+import useUserStore from './stores/user';
 
 export {
     onBeforeRouteUpdate,
@@ -126,64 +128,159 @@ export const router = createRouter({
         // },
         {
             path: '/',
-            name: 'home',
-            component: MainView,
+            name: 'app',
+            component: AppView,
             children: [
                 {
-                    path: 'e/:id',
-                    name: 'entitydetail',
-                    component: EntityDetail,
+                    path: '',
+                    name: 'home',
+                    component: MainView,
                     children: [
                         {
-                            path: 'refs/:aid',
-                            name: 'entityrefs',
-                            component: EntityReferenceModal,
+                            path: 'e/:id',
+                            name: 'entitydetail',
+                            component: EntityDetail,
+                            children: [
+                                {
+                                    path: 'refs/:aid',
+                                    name: 'entityrefs',
+                                    component: EntityReferenceModal,
+                                }
+                            ]
                         }
-                    ]
-                }
-            ],
-            meta: {
-                auth: true
-            }
-        },
-        // Tools
-        {
-            path: '/bibliography',
-            name: 'bibliography',
-            component: Bibliography,
-            children: [
+                    ],
+                    meta: {
+                        auth: true
+                    }
+                },
+                // Tools
                 {
-                    path: 'edit/:id',
-                    name: 'bibedit',
-                    component: DummyComponent
-                    // component: BibliographyItemModal
+                    path: '/bibliography',
+                    name: 'bibliography',
+                    component: Bibliography,
+                    children: [
+                        {
+                            path: 'edit/:id',
+                            name: 'bibedit',
+                            component: DummyComponent
+                            // component: BibliographyItemModal
+                        },
+                        {
+                            path: 'new',
+                            name: 'bibnew',
+                            component: DummyComponent
+                            // component: BibliographyItemModal
+                        }
+                    ],
+                    meta: {
+                        auth: true
+                    }
                 },
                 {
-                    path: 'new',
-                    name: 'bibnew',
-                    component: DummyComponent
-                    // component: BibliographyItemModal
-                }
-            ],
-            meta: {
-                auth: true
-            }
-        },
-        {
-            path: '/activity/g',
-            name: 'globalactivity',
-            component: GlobalActivity,
-            meta: {
-                auth: true
-            }
-        },
-        {
-            path: '/import',
-            name: 'dataimporter',
-            component: DataImporter,
-            meta: {
-                auth: true
-            }
+                    path: '/activity/g',
+                    name: 'globalactivity',
+                    component: GlobalActivity,
+                    meta: {
+                        auth: true
+                    }
+                },
+                {
+                    path: '/import',
+                    name: 'dataimporter',
+                    component: DataImporter,
+                    meta: {
+                        auth: true
+                    }
+                },
+                // Settings
+                {
+                    path: '/mg/users',
+                    name: 'users',
+                    component: Users,
+                    meta: {
+                        auth: true
+                    }
+                },
+                {
+                    path: '/mg/roles',
+                    name: 'roles',
+                    component: Roles,
+                    meta: {
+                        auth: true
+                    }
+                },
+                {
+                    path: '/mg/plugins',
+                    name: 'plugins',
+                    component: Plugins,
+                    meta: {
+                        auth: true
+                    }
+                },
+                {
+                    path: '/editor/dm',
+                    name: 'dme',
+                    component: DataModel,
+                    children: [
+                        {
+                            path: 'et/:id',
+                            name: 'dmdetail',
+                            component: DataModelDetailView
+                        }
+                    ],
+                    meta: {
+                        auth: true
+                    }
+                },
+                {
+                    path: '/preferences',
+                    redirect: _ => {
+                        return {
+                            name: 'preferences',
+                        };
+                    },
+                },
+                {
+                    path: '/preferences/system',
+                    name: 'preferences',
+                    component: Preferences,
+                    meta: {
+                        auth: true
+                    }
+                },
+                {
+                    path: '/preferences/user',
+                    name: 'userpreferences',
+                    component: Preferences,
+                    meta: {
+                        auth: true
+                    }
+                },
+                {
+                    path: '/notifications/:id',
+                    name: 'notifications',
+                    component: UserNotifications,
+                    meta: {
+                        auth: true
+                    }
+                },
+                {
+                    path: '/activity/u',
+                    name: 'useractivity',
+                    component: UserActivity,
+                    meta: {
+                        auth: true
+                    }
+                },
+                {
+                    path: '/profile',
+                    name: 'userprofile',
+                    component: UserProfile,
+                    meta: {
+                        auth: true
+                    }
+                },
+            ]
         },
         {
             path: '/login',
@@ -191,94 +288,14 @@ export const router = createRouter({
             component: Login,
             meta: {
                 auth: false
-            }
-        },
-        // Settings
-        {
-            path: '/mg/users',
-            name: 'users',
-            component: Users,
-            meta: {
-                auth: true
-            }
-        },
-        {
-            path: '/mg/roles',
-            name: 'roles',
-            component: Roles,
-            meta: {
-                auth: true
-            }
-        },
-        {
-            path: '/mg/plugins',
-            name: 'plugins',
-            component: Plugins,
-            meta: {
-                auth: true
-            }
-        },
-        {
-            path: '/editor/dm',
-            name: 'dme',
-            component: DataModel,
-            children: [
-                {
-                    path: 'et/:id',
-                    name: 'dmdetail',
-                    component: DataModelDetailView
-                }
-            ],
-            meta: {
-                auth: true
-            }
-        },
-        {
-            path: '/preferences',
-            redirect: _ => {
-                return {
-                    name: 'preferences',
-                };
             },
-        },
-        {
-            path: '/preferences/system',
-            name: 'preferences',
-            component: Preferences,
-            meta: {
-                auth: true
-            }
-        },
-        {
-            path: '/preferences/user',
-            name: 'userpreferences',
-            component: Preferences,
-            meta: {
-                auth: true
-            }
-        },
-        {
-            path: '/notifications/:id',
-            name: 'notifications',
-            component: UserNotifications,
-            meta: {
-                auth: true
-            }
-        },
-        {
-            path: '/activity/u',
-            name: 'useractivity',
-            component: UserActivity,
-            meta: {
-                auth: true
-            }
-        },
-        {
-            path: '/profile',
-            name: 'userprofile',
-            component: UserProfile,
-            meta: {
-                auth: true
+            beforeEnter: (to, from, next) => {
+                const userStore = useUserStore();
+                if(userStore.userLoggedIn) {
+                    next({ name: 'home' });
+                } else {
+                    next();
+                }
             }
         },
         {

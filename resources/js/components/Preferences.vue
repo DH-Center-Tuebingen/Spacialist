@@ -374,7 +374,7 @@
                         return state.userPreferences;
                     }
                 }),
-                pluginPreferences: computed(_ => systemStore.registeredPluginPreferences),
+                pluginPreferences: computed(_ => systemStore.registeredPluginPreferences ?? {}),
                 categories: computed(_ => {
                     const categories = {
                         user: {},

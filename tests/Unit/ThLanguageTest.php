@@ -19,7 +19,7 @@ class ThLanguageTest extends TestCase
         $l = ThLanguage::with(['labels'])->find(2);
 
         $this->assertEquals(5, $l->labels->count());
-        $this->assertArraySubset([
+        $this->assertArrayIsEqualToArrayOnlyConsideringListOfKeys([
             [
                 'concept_id' => 1,
                 'label' => 'Site',
@@ -40,7 +40,8 @@ class ThLanguageTest extends TestCase
                 'concept_id' => 10,
                 'label' => 'Stone',
             ],
-        ], $l->labels->toArray());
+        ], $l->labels->toArray(),
+        ['concept_id', 'label']);
     }
 
     /**

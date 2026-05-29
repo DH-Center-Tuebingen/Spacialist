@@ -4,27 +4,22 @@ namespace Tests\Unit\Attributes;
 use App\AttributeTypes\UrlAttribute;
 use App\Exceptions\InvalidDataException;
 use Tests\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 // !!!! Currently this test is only testing the fromImport function!!!
 class UrlAttributeTest extends TestCase {
-    /**
-     * @dataProvider truthyProvider
-    */
+    #[DataProvider('truthyProvider')]
     public function testFromImportTruthy($input) {
         $this->expectNotToPerformAssertions(UrlAttribute::class);
         UrlAttribute::fromImport($input);
     }
 
-    /**
-    * @dataProvider truthyProvider
-    */
+    #[DataProvider('truthyProvider')]
     public function testFromImportReturnValues($input, $expected) {
         $this->assertEquals($expected, UrlAttribute::fromImport($input));
     }
 
-    /**
-     * @dataProvider falsyProvider
-    */
+    #[DataProvider('falsyProvider')]
     public function testFromImportFalsy($input) {
         $this->expectException(InvalidDataException::class);
         UrlAttribute::fromImport($input);

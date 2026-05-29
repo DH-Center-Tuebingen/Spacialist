@@ -7,45 +7,17 @@ use App\AttributeValue;
 use App\Entity;
 use App\EntityType;
 use App\Exceptions\InvalidDataException;
+use App\Registries\AttributeRegistry;
 use App\User;
 use App\Utils\StringUtils;
-use Illuminate\Support\Arr;
 
 abstract class AttributeBase
 {
     protected static string $type;
     protected static ?string $field;
+    protected static ?string $label;
     protected static bool $inTable;
     protected static bool $hasSelection;
-
-    private static array $types = [
-        "boolean" => BooleanAttribute::class,
-        "date" => DateAttribute::class,
-        "daterange" => DaterangeAttribute::class,
-        "dimension" => DimensionAttribute::class,
-        "double" => DoubleAttribute::class,
-        "string-mc" => DropdownMultipleAttribute::class,
-        "string-sc" => DropdownSingleAttribute::class,
-        "entity" => EntityAttribute::class,
-        "entity-mc" => EntityMultipleAttribute::class,
-        "epoch" => EpochAttribute::class,
-        "geography" => GeographyAttribute::class,
-        "iconclass" => IconclassAttribute::class,
-        "integer" => IntegerAttribute::class,
-        "list" => ListAttribute::class,
-        "percentage" => PercentageAttribute::class,
-        "richtext" => RichtextAttribute::class,
-        "rism" => RismAttribute::class,
-        "serial" => SerialAttribute::class,
-        "sql" => SqlAttribute::class,
-        "string" => StringAttribute::class,
-        "stringf" => StringfieldAttribute::class,
-        "table" => TableAttribute::class,
-        "timeperiod" => TimeperiodAttribute::class,
-        "userlist" => UserlistAttribute::class,
-        "url" => UrlAttribute::class,
-        "si-unit" => SiUnitAttribute::class,
-    ];
 
     public static function serialized() : array {
         return [
@@ -54,38 +26,10 @@ abstract class AttributeBase
         ];
     }
 
-    public static function getTypes(bool $serialized = false, array $filters = []) : array {
-        if(count($filters) > 0) {
-            $types = Arr::where(self::$types, function(string $attr, string $key) use($filters) {
-                foreach($filters as $on => $value) {
-                    if($on == "datatype") {
-                        if($attr::getType() != $value) return false;
-                    } else if($on == "in_table") {
-                        if($attr::getInTable() != $value) return false;
-                    } else if($on == "field") {
-                        if($attr::getField() != $value) return false;
-                    } else if($on == "has_selection") {
-                        if($attr::getHasSelection() != $value) return false;
-                    }
-                }
-                return true;
-            });
-        } else {
-            $types = self::$types;
-        }
-
-        if($serialized) {
-            return array_values(array_map(function(string $class) {
-                return $class::serialized();
-            }, $types));
-        } else {
-            return $types;
-        }
-    }
-
     public static function getMatchingClass(string $datatype) : bool|AttributeBase {
-        if(array_key_exists($datatype, self::$types)) {
-            return new self::$types[$datatype]();
+        $types = AttributeRegistry::getTypes();
+        if(array_key_exists($datatype, $types)) {
+            return new $types[$datatype]['class']();
         }
 
         return false;
@@ -100,6 +44,10 @@ abstract class AttributeBase
         return static::$type;
     }
 
+    public static function getLabel() : ?string {
+        return isset(static::$label) ? static::$label : null;
+    }
+
     public static function getInTable() : bool {
         return static::$inTable;
     }
@@ -108,7 +56,7 @@ abstract class AttributeBase
         return static::$field;
     }
 
-    public static function getHasSelection() : string {
+    public static function getHasSelection() : bool {
         return isset(static::$hasSelection) && static::$hasSelection;
     }
 

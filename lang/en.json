@@ -108,5 +108,14 @@
     "This tag does not exist": "This tag does not exist",
     "HTML not supported for file type": "HTML not supported for file type :mime",
     "Presentations not yet supported!": "Presentations not yet supported!",
-    "Start date of a time period must not be after it's end date": "Start date of a time period must not be after it's end date"
+    "Start date of a time period must not be after it's end date": "Start date of a time period must not be after it's end date",
+    
+    "This plugin is not installed.": "This plugin is not installed.",
+    "A plugin with the name ':pluginName' and the same or later version (:uploadedVersion and :existingVersion) already exists. Aborting.": "A plugin with the name ':pluginName' and the same or later version (:uploadedVersion and :existingVersion) already exists. Aborting.",
+    "Cannot install plugin :pluginName because the following dependencies are missing: :missingDependencies.": "Cannot install plugin :pluginName because the following dependencies are missing: :missingDependencies.",
+    "Could not open provided plugin zip file. Aborting.": "Could not open provided plugin zip file. Aborting.",
+    "Format mismatch. Only a folder is allowed on root level.": "Format mismatch. Only a folder is allowed on root level.",
+    "Error while extracting zip file. Please check file permissions or ask your system adminstrator.": "Error while extracting zip file. Please check file permissions or ask your system adminstrator.",
+    "Plugin could not be initialized after upload. If it was an update attempt, the previous version has been restored. Please check the corectness of the plugin. If the problem persists, contact your system adminstrator.": "Plugin could not be initialized after upload. If it was an update attempt, the previous version has been restored. Please check the corectness of the plugin. If the problem persists, contact your system adminstrator.",
+    "This migration does not exist or has already been run.": "This migration does not exist or has already been run."
 }

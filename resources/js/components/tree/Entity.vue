@@ -217,7 +217,6 @@
     import useEntityStore from '@/bootstrap/stores/entity.js';
 
     import {
-        fetchChildren,
         openPath,
     } from '@/helpers/tree.js';
 
@@ -347,7 +346,7 @@
                 // Preventing itemClick to trigger would result in not checked checkboxes in node component
                 if(!item.data) return;
 
-                if(state.entity.id == item.data.id) {
+                if(state?.entity?.id == item.data.id) {
                     router.push({
                         append: true,
                         name: 'home',
@@ -363,15 +362,13 @@
                     });
                 }
             };
-            const itemToggle = eventData => {
+            const itemToggle = async eventData => {
                 const item = eventData.data;
                 if(item.children.length < item.children_count) {
                     item.state.loading = true;
-                    fetchChildren(item.id, state.sort).then(response => {
-                        item.children =  response;
-                        item.state.loading = false;
-                        item.childrenLoaded = true;
-                    });
+                   const resp =  await entityStore.fetchChildren(item.id, state.sort)
+                    item.state.loading = false;
+                    item.childrenLoaded = true;
                 }
                 item.state.opened = !item.state.opened;
             };

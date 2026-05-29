@@ -2,9 +2,8 @@
 
 namespace App\Providers;
 
-use App\Plugin;
+use App\Services\Plugin\RouteService;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
 
 class RouteServiceProvider extends ServiceProvider
@@ -41,9 +40,15 @@ class RouteServiceProvider extends ServiceProvider
 
         $this->mapWebRoutes();
 
-        $this->mapPluginRoutes();
-
-        //
+        try {
+            // This may fail when the relation is not yet created
+            // via a migration. Therefore we catch the exception to 
+            // avoid breaking the application.
+            app(RouteService::class)->mapRoutes();
+        } catch(\Exception $e) {
+            // Log the error but don't interrupt the application
+            \Log::error("Error loading plugin routes: " . $e->getMessage());
+        }
     }
 
     /**
@@ -73,31 +78,5 @@ class RouteServiceProvider extends ServiceProvider
              ->middleware('api')
              ->namespace($this->namespace)
              ->group(base_path('routes/api.php'));
-    }
-
-    /**
-     * Define the "api" routes for the application.
-     *
-     * These routes are typically stateless.
-     *
-     * @return void
-     */
-    protected function mapPluginRoutes()
-    {
-        if(!Schema::hasTable('plugins')) return;
-
-        $installedPlugins = Plugin::whereNotNull('installed_at')->get();
-
-        foreach($installedPlugins as $plugin) {
-            $slug = $plugin->slugName();
-            $prefix = "api/v1/$slug";
-            $namespace = "App\\Plugins\\$plugin->name\\Controllers";
-            $routesPath = "app/Plugins/$plugin->name/routes/api.php";
-
-            Route::prefix($prefix)
-                 ->middleware('api')
-                 ->namespace($namespace)
-                 ->group(base_path($routesPath));
-        }
     }
 }

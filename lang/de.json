@@ -107,5 +107,13 @@
     "This tag does not exist": "Dieses Schlagwort existiert nicht",
     "HTML not supported for file type": "HTML wird für den Dateityp :mime nicht unterstützt",
     "Presentations not yet supported!": "Präsentationen werden noch nicht unterstützt!",
-    "Start date of a time period must not be after it's end date": "Das Startdatum einer Zeitspanne darf nicht nach ihrem Enddatum liegen"
+    "Start date of a time period must not be after it's end date": "Das Startdatum einer Zeitspanne darf nicht nach ihrem Enddatum liegen",
+    
+    "A plugin with the name ':pluginName' and the same or later version (:uploadedVersion and :existingVersion) already exists. Aborting.": "Ein Plugin mit dem Namen ':pluginName', hat aber die gleiche oder eine niedrigere Version (:uploadedVersion and :existingVersion). Abbruch.",
+    "Cannot install plugin :pluginName because the following dependencies are missing: :missingDependencies.": "Plugin :pluginName kann nicht installiert werden, da die folgenden Abhängigkeiten fehlen: :missingDependencies.",
+    "Could not open provided plugin zip file. Aborting.": "Das bereitgestellte Plugin-ZIP-Archiv konnte nicht geöffnet werden. Abbruch.",
+    "Format mismatch. Only a folder is allowed on root level.": "Inkorrekte ZIP-Struktur: Die oberste Ebene muss genau ein Ordner sein.",
+    "Error while extracting zip file. Please check file permissions or ask your system adminstrator.": "Fehler beim Entpacken der ZIP-Datei. Bitte überprüfen Sie die Dateiberechtigungen oder wenden Sie sich an einen Systemadministrator.",
+    "Plugin could not be initialized after upload. If it was an update attempt, the previous version has been restored. Please check the corectness of the plugin. If the problem persists, contact your system adminstrator.": "Das Plugin konnte nach dem Upload nicht initialisiert werden. Wenn es sich um einen Update-Versuch handelte, wurde die vorherige Version wiederhergestellt. Bitte überprüfen Sie das Plugin auf dessen Richtigkeit. Falls das Problem weiterhin besteht, wenden Sie sich an einen Systemadministrator.",
+    "This migration does not exist or has already been run.": "Diese Migration existiert nicht oder wurde bereits ausgeführt."
 }
