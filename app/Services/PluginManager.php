@@ -225,7 +225,7 @@ class PluginManager {
         }
     }
     
-    public function clearCache(): void {
+    public function clearPluginCache(): void {
         $this->clearCache();
         foreach($this->pluggableServices as $service) {
             // The problem with traits is, that we cannot identify them easily
