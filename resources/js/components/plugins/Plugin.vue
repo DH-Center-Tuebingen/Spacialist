@@ -7,18 +7,26 @@
             class="card h-100"
             :style="computedStyle"
         >
-            <div class="card-body d-flex flex-column">
-                <header class="d-flex justify-content-between gap-2 mb-1">
-                    <h5 class="card-title mb-2">
+            <div class="card-body d-flex flex-column pb-1">
+                <header class="d-flex justify-content-between gap-2 mb-2">
+                    <h5 class="card-title mb-0">
                         {{ getPluginTitle(value) }}
                     </h5>
                     <div class="toolbar d-flex align-items-center gap-1">
-                        <div>
-                            <span class="badge bg-dark">
+                        <div class="d-flex align-items-center gap-1">
+                            <button
+                                type="button"
+                                class="badge btn btn-sm btn-secondary border-0"
+                                :title="t('main.plugins.changelog_info')"
+                                @click="showChangelog()"
+                            >
+                                <i class="fas fa-fw fa-file-pen" />
+                            </button>
+                            <span class="badge bg-secondary">
                                 v{{ value.version }}
                             </span>
                             <span
-                                class="badge bg-primary ms-1"
+                                class="badge bg-primary"
                                 :title="t('global.licence')"
                             >
                                 <i class="fa far fa-file-lines me-1" />
@@ -69,7 +77,7 @@
                                     type="button"
                                     class="dropdown-item text-danger"
                                     @click="remove()"
-                                    >
+                                >
                                     <!-- :class="{disabled: isInstalled(), 'opacity-50': isInstalled()}" -->
                                     <i class="fas fa-fw fa-trash" />
                                     {{ t('global.remove') }}
@@ -78,89 +86,34 @@
                         </div>
                     </div>
                 </header>
-
-                <ul class="nav nav-pills">
-                    <li
-                        v-for="section in sections"
-                        :key="section"
-                        class="nav-item user-select-none mb-1"
-                    >
-                        <a
-                            aria-current="page"
-                            class="nav-link px-3 py-1"
-                            :class="{
-                                'active': page === section
-                            }"
-                            @click="() => page = section"
-                        >{{ t(`main.plugins.section.${section}`) }}</a>
-                    </li>
-                </ul>
                 <div
-                    class="overflow-auto flex-fill mt-2"
+                    class="overflow-auto flex-fill"
                     style="max-height: 420px;"
                 >
-                    <MigrationTab
-                        v-if="page === 'migrations'"
-                        :value="value"
-                    />
-                    <InformationTab
-                        v-else-if="page === 'info'"
-                        :value="value"
-                    />
-                    <ChangelogTab
-                        v-else-if="page === 'changelog'"
-                        :value="value"
-                    />
-                    <div v-else>
-                        404
+                    <div class="card-text text-secondary d-flex flex-column gap-2 h-100">
+                        <MarkdownText
+                            class="flex-fill"
+                            :value="description"
+                        />
+                        <footer class="d-flex justify-content-between align-items-center">
+                            <div class="form-check form-switch">
+                                <input
+                                    class="form-check-input"
+                                    type="checkbox"
+                                    role="switch"
+                                    id="switchCheckChecked"
+                                    :checked="isInstalled()"
+                                    @click="toggleActiveState"
+                                >
+                            </div>
+
+                            <span class="opacity-50">
+                                <i class="fa-regular fa-circle-user"></i> {{ authors }}
+                            </span>
+                        </footer>
                     </div>
                 </div>
             </div>
-
-
-            <footer class="card-footer d-flex flex-wrap gap-1 justify-content-between">
-                <button
-                    v-if="isInstalled()"
-                    type="button"
-                    class="btn btn-sm btn-outline-danger"
-                    @click="uninstall()"
-                >
-                    <i class="fas fa-fw fa-times" />
-                    {{ t('global.deactivate') }}
-                </button>
-                <button
-                    v-else
-                    type="button"
-                    class="btn btn-sm btn-outline-success"
-                    @click="install()"
-                >
-                    <i class="fas fa-fw fa-plus" />
-                    {{ t('global.activate') }}
-                </button>
-                <div
-                    v-if="updateAvailable()"
-                    class="btn-group"
-                    role="group"
-                >
-                    <button
-                        type="button"
-                        class="btn btn-sm btn-outline-primary"
-                        @click="pluiginStore.update(value.id)"
-                    >
-                        <i class="fas fa-fw fa-download" />
-                        <!-- eslint-disable-next-line vue/no-v-html -->
-                        <span v-html="t('main.plugins.update_to', { version: value.update_available })" />
-                    </button>
-                    <button
-                        type="button"
-                        class="btn btn-sm btn-outline-primary"
-                        :title="t('main.plugins.changelog_info')"
-                        @click="showChangelog()"
-                    >
-                        <i class="fas fa-fw fa-file-pen" />
-                    </button>
-                </div>
-            </footer>
         </div>
     </div>
 </template>
@@ -178,16 +131,13 @@
     import { isInstalled as isPluginInstalled } from '@/helpers/plugins.js';
     import { getPluginTitle } from '@/helpers/plugins';
 
-    import ChangelogTab from '@/components/plugins/tab/Changelog.vue';
-    import MigrationTab from '@/components/plugins/tab/Migration/Migration.vue';
-    import InformationTab from '@/components/plugins/tab/Information.vue';
+    import MarkdownText from '@/components/mde/MarkdownText.vue';
+
 
 
     export default {
         components: {
-            ChangelogTab,
-            InformationTab,
-            MigrationTab,
+            MarkdownText,
         },
         props: {
             value: {
@@ -202,18 +152,14 @@
             const page = ref('info');
             const installing = ref(false);
 
-            const sections = ['info', 'changelog', 'migrations'];
-
             const pluiginStore = usePluginStore();
             // FUNCTIONS
             const isInstalled = _ => {
                 return isPluginInstalled(props.value);
             };
-            const updateAvailable = _ => {
-                return !!props.value.update_available;
-            };
+
             const showChangelog = _ => {
-                showChangelogModal();
+                showChangelogModal(props.value);
             };
             const install = async _ => {
                 try {
@@ -235,9 +181,9 @@
                 pluiginStore.remove(props.value.id);
             };
 
-            const toggleActiveState = async (active) => {
+            const toggleActiveState = async () => {
                 installing.value = true;
-                if(isInstalled() !== active) {
+                if(!isInstalled()) {
                     await install();
                 } else {
                     await uninstall();
@@ -255,11 +201,29 @@
             });
 
             const licence = computed(() => {
-                return props.value.metadata?.licence?.toUpperCase ? props.value.metadata.licence.toUpperCase() : '–';
+                let licence = props.value.metadata?.licence || "";
+                console.log('Raw licence', licence, licence.length);
+                licence = licence.trim();
+                licence = licence.toUpperCase();
+                return licence || '–';
+            });
+
+            const description = computed(() => {
+                return props.value?.metadata?.description || '–';
+            });
+
+            const authors = computed(() => {
+                const authors = props.value?.metadata?.authors ?? [];
+                if(authors.length === 0) {
+                    return '–';
+                }
+                return authors.join(', ');
             });
 
             return {
+                authors,
                 computedStyle,
+                description,
                 installing,
                 install,
                 isInstalled,
@@ -267,12 +231,10 @@
                 licence,
                 page,
                 remove,
-                sections,
                 showChangelog,
                 t,
                 toggleActiveState,
                 uninstall,
-                updateAvailable,
                 pluiginStore,
             };
         }
