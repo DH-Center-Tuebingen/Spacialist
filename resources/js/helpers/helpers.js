@@ -240,7 +240,7 @@ export function getInitialAttributeValue(attribute, typeAttr = 'type') {
         case 'boolean':
             return 0;
         case 'percentage':
-            return 50;
+            return null;
         case 'serial':
             let str = attribute.textContent;
             let toRepl = '%d';
