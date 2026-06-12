@@ -2,14 +2,10 @@ import dayjs from '@/bootstrap/time.js';
 
 import useUserStore from '@/bootstrap/stores/user.js';
 
-export function date(value, format = 'DD.MM.YYYY HH:mm') {
+export function date(value, format = 'DD.MM.YYYY HH:mm', utc = true) {
     if(value) {
-        let d;
-        if(isNaN(value)) {
-            d = dayjs.utc(value);
-        } else {
-            d = dayjs.utc(value*1000);
-        }
+        const valueToFormat = isNaN(value) ? value : (value * 1000);
+        const d = utc ? dayjs.utc(valueToFormat) : dayjs(valueToFormat);
         return d.format(format);
     }
 }
