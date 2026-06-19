@@ -25,8 +25,8 @@ use App\Plugin\PluginManifest;
  * ``` 
  */
 class MigrationService extends PluginService {
-    
-    const LEGACY_MIGRATION_DIRECTORY = 'Migration'; 
+
+    const LEGACY_MIGRATION_DIRECTORY = 'Migration';
 
     public function install(Plugin $plugin, PluginManifest $manifest): void {
         $this->run($plugin, LifecycleOperation::INSTALLATION);
@@ -58,7 +58,7 @@ class MigrationService extends PluginService {
 
         return $migrations;
     }
-    
+
     public function run(Plugin $plugin, ?LifecycleOperation $operation = null): void {
         $this->exec($plugin, operation: $operation);
     }
@@ -74,16 +74,16 @@ class MigrationService extends PluginService {
         $pluginDir = PluginDirectory::fromPlugin($plugin);
         $absoluteDirectory = $pluginDir->getAbsolutePluginPath($directory);
         if(!file_exists($absoluteDirectory) || !is_dir($absoluteDirectory)) {
-            
+
             //Legacy support: If the default migration directory does not exist, we assume there are no migrations to run and return early.
             if($directory === self::LEGACY_MIGRATION_DIRECTORY) {
                 return;
             }
-        
+
             throw new PluginLifecycleException($plugin, "Migration directory not found: '$absoluteDirectory'", $operation);
         }
-        
-        $migrations = $this->getMissingMigrations($plugin, $rollback);        
+
+        $migrations = $this->getMissingMigrations($plugin, $rollback);
         foreach($migrations as $migration) {
             $migrationInstance = $this->getMigrationClassName($plugin, $absoluteDirectory, $migration);
             try{
@@ -117,15 +117,15 @@ class MigrationService extends PluginService {
     public function getManifestMigration(Plugin $plugin): string|null {
         $manifest = PluginManifest::fromPlugin($plugin);
         $xmlNodes = $manifest->getTagNodes('migrations');
-        
+
         if(!$xmlNodes || count($xmlNodes) === 0) {
             return null;
         }
-        
+
         if(count($xmlNodes) > 1) {
             throw new \Exception("Plugin {$plugin->name} has multiple <migrations> tags in its manifest, but only one is allowed.");
         }
-        
+
         $attributes = $xmlNodes[0]['attributes'] ?? [];
         $src = $attributes['src'] ?? trim((string) ($xmlNodes[0]['text'] ?? ''));
 
@@ -167,7 +167,7 @@ class MigrationService extends PluginService {
         }
         return $migrationDirectory;
     }
-    
+
     /**
      * Get's the absolute path to the migration directory of the plugin. 
      * 
@@ -253,12 +253,17 @@ class MigrationService extends PluginService {
         if(count($matches) != 3) {
             throw new \Exception("Invalid migration file name: $migrationFile");
         }
-        $className = Str::studly($matches[2]);
         $migrationPath = Str::finish($directory, '/') . $migrationFile;
-        require_once($migrationPath);
-        $pluginNamespacePath = $this->resolveDirectoryNamspace($plugin, $directory);
-        $prefixedClassName = "App\\Plugins\\$plugin->name\\$pluginNamespacePath\\$className";
-        return new $prefixedClassName();
+        $instantiatedMigration = require($migrationPath);
+
+        if(is_object($instantiatedMigration)) {
+            return $instantiatedMigration;
+        } else {
+            $className = Str::studly($matches[2]);
+            $pluginNamespacePath = $this->resolveDirectoryNamspace($plugin, $directory);
+            $prefixedClassName = "App\\Plugins\\$plugin->name\\$pluginNamespacePath\\$className";
+            return new $prefixedClassName();
+        }
     }
 
 
