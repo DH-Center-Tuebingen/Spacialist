@@ -35,20 +35,20 @@ class DiscoveryService extends PluginService {
         $pluginNames = self::getPluginNames();
         $availablePlugins = app(PluginManager::class)->getPlugins();
         $undiscoveredPlugins = [];
-        
-        foreach($availablePlugins as $plugin) {
-            if(!in_array($plugin->name, $pluginNames)) {
-                $undiscoveredPlugins[] = $plugin->name;
+
+        $availablePluginNames = array_map(fn($plugin) => $plugin->name, $availablePlugins);
+        foreach($pluginNames as $pluginName) {
+            if(!in_array($pluginName, $availablePluginNames)) {
+                $undiscoveredPlugins[] = $pluginName;
             }
         }
-    
         return $this->discoverList($undiscoveredPlugins);
     }
 
     public function discoverList(array $list): array {
         $plugins = [];
         foreach($list as $pluginDirectory) {
-             $plugins[] = $this->discoverByName($pluginDirectory);
+            $plugins[] = $this->discoverByName($pluginDirectory);
         }
         return $plugins;
     }
