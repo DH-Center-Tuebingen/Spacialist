@@ -25,6 +25,7 @@ All notable changes to this project will be documented in this file.
 - Migrations that require filesystem changes can now be handled using the `App\Traits\FilesystemMigration` trait (call `$this->safelyMoveDirectoryBetweenDisks(...)` with `ALLOW_FILESYTEM_MIGRATIONS` set to `true`)
 - Moved plugin state into separate store
 - Plugins no longer require a routes file
+- Exposed bootstrap on window object
 
 ## 0.11.1
 ### Added
