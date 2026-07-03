@@ -108,6 +108,7 @@
     } from 'vue';
 
     import { useI18n } from 'vue-i18n';
+    import usePluginStore from '../bootstrap/stores/plugin';    
     import useSystemStore from '@/bootstrap/stores/system.js';
     import useUserStore from '@/bootstrap/stores/user.js';
     import { useToast } from '@/plugins/toast.js';
@@ -145,6 +146,7 @@
         },
         setup(props, context) {
             const { t, locale } = useI18n();
+            const pluginStore = usePluginStore();
             const systemStore = useSystemStore();
             const userStore = useUserStore();
             const toast = useToast();
@@ -374,7 +376,7 @@
                         return state.userPreferences;
                     }
                 }),
-                pluginPreferences: computed(_ => systemStore.registeredPluginPreferences ?? {}),
+                pluginPreferences: computed(_ => pluginStore.registeredPreferences ?? {}),
                 categories: computed(_ => {
                     const categories = {
                         user: {},
