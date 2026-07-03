@@ -37,7 +37,17 @@ class PermissionService extends PluginService {
         $this->addPermissions($plugin);
     }
 
-    public function uninstall(Plugin $plugin, PluginManifest $manifest): void {
+    /**
+     * For Future Referencec:: We should not remove the permissions on uninstall, as it will
+     * also remove the permissions from all roles (which it should), but we should be able to 
+     * toggle the plugins off and on without having to reassign the permissions to the roles again. 
+     * So we will just keep the permissions in the system, even if the plugin is uninstalled.
+     */
+    // public function uninstall(Plugin $plugin, PluginManifest $manifest): void {
+    //     // $this->removePermissions($plugin);
+    // }
+    
+    public function onRemove(Plugin $plugin, PluginManifest $manifest): void {
         $this->removePermissions($plugin);
     }
 
