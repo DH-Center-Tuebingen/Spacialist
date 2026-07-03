@@ -98,12 +98,13 @@
                         <footer class="d-flex justify-content-between align-items-center">
                             <div class="form-check form-switch">
                                 <input
+                                    ref="installationSwitch"
                                     class="form-check-input"
                                     type="checkbox"
                                     role="switch"
                                     id="switchCheckChecked"
                                     :checked="isInstalled()"
-                                    @click="toggleActiveState"
+                                    @change="toggleActiveState"
                                 >
                             </div>
 
@@ -119,7 +120,7 @@
 </template>
 
 <script>
-    import { computed, ref } from 'vue';
+    import { computed, ref, useTemplateRef } from 'vue';
     import { useI18n } from 'vue-i18n';
     import { useToast } from '@/plugins/toast.js';
 
@@ -151,6 +152,7 @@
 
             const page = ref('info');
             const installing = ref(false);
+            const installationSwitch = useTemplateRef('installationSwitch');
 
             const pluiginStore = usePluginStore();
             // FUNCTIONS
@@ -162,17 +164,7 @@
                 showChangelogModal(props.value);
             };
             const install = async _ => {
-                try {
-                    await pluiginStore.install(props.value.id);
-                } catch(e) {
-
-                    const error = e.response?.data?.error || e.message || 'Unknown error';
-
-                    toast.$toast(error, t('global.error.altoastert_title'), {
-                        channel: 'danger',
-                        duration: 10000,
-                    });
-                }
+                await pluiginStore.install(props.value.id);
             };
             const uninstall = async _ => {
                 await pluiginStore.uninstall(props.value.id);
@@ -183,10 +175,22 @@
 
             const toggleActiveState = async () => {
                 installing.value = true;
-                if(!isInstalled()) {
-                    await install();
-                } else {
-                    await uninstall();
+                try {
+                    if(!isInstalled()) {
+                        await install();
+                    } else {
+                        await uninstall();
+                    }
+                } catch(e) {
+                    const error = e.response?.data?.error || e.message || 'Unknown error';
+                    
+                    // Somehow Vue will not reset th
+                    installationSwitch.value.checked = isInstalled();
+
+                    toast.$toast(error, t('global.error.altoastert_title'), {
+                        channel: 'danger',
+                        duration: 10000,
+                    });
                 }
                 installing.value = false;
             };

@@ -17,6 +17,7 @@ All notable changes to this project will be documented in this file.
 - Metadata tab error on submit (unknown variable)
 - Errors in _map.js_
 - Login was not routed properly
+- Plugin-Switch not resetting on failed installation
 ### Changed
 - Alerts can now be dismissed
 - Now entity metadata is only loaded when accessing the metadata tab
