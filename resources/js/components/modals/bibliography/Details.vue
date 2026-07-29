@@ -101,7 +101,7 @@
                 </a>
                 <bibtex-code
                     :code="state.toBibtexify"
-                    :type="state.data.type"
+                    :type="state.data.entry_type"
                 />
             </div>
             <div class="modal-footer">
@@ -221,6 +221,8 @@
                 state.data.author = author;
                 state.data.entry_type = entry_type;
                 state.data.data = data;
+
+                state.file = item?.file;
             }
 
             // RETURN
