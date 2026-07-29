@@ -978,10 +978,14 @@
                 "institution": "Einrichtung",
                 "organization": "Organisation",
                 "school": "Schule",
+                "abstract": "Zusammenfassung",
+                "language": "Sprache",
                 "doi": "DOI",
+                "isbn": "ISBN",
+                "issn": "ISSN",
                 "url": "URL",
                 "email": "@:global.email",
-                "subtype": "Typ (Spezifisch)"
+                "type": "Typ (Spezifisch)"
             },
             "types": {
                 "article": "Artikel",

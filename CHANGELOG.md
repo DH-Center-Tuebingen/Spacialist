@@ -23,6 +23,8 @@ All notable changes to this project will be documented in this file.
 - Rare case of role names not shown in _User Management_ after changes
 - Empty _Percentage_ attribute had a value of `50` instead of none
 - Break long words/links in Markdown Editor/Viewer
+- Citation key for entry types without required fields
+- Available fields in BibTex entries
 ### Changed
 - Alerts can now be dismissed
 - Now entity metadata is only loaded when accessing the metadata tab

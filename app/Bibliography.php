@@ -33,6 +33,7 @@ class Bibliography extends Model implements Searchable
         'booktitle',
         'publisher',
         'address',
+        'email',
         'misc',
         'howpublished',
         'entry_type',
@@ -45,6 +46,7 @@ class Bibliography extends Model implements Searchable
         'month',
         'note',
         'organization',
+        'url',
         'school',
         'series',
         'type',
@@ -197,7 +199,6 @@ class Bibliography extends Model implements Searchable
                 'publisher',
                 'series',
                 'title',
-                'type',
                 'url',
                 'volume',
                 'year',
@@ -292,7 +293,6 @@ class Bibliography extends Model implements Searchable
                 'publisher',
                 'series',
                 'title',
-                'type',
                 'url',
                 'volume',
                 'year',
@@ -391,7 +391,7 @@ class Bibliography extends Model implements Searchable
                 'note',
                 'school',
                 'title',
-                'type'   ,
+                'type',
                 'url',
                 'year',
             ],
@@ -439,7 +439,6 @@ class Bibliography extends Model implements Searchable
                 'note',
                 'number',
                 'title',
-                'type',
                 'url',
                 'year',
             ],
@@ -651,6 +650,10 @@ class Bibliography extends Model implements Searchable
             $key .= "_" . $fields['year'];
         }
 
+        // if none of the above fields exist, use entry type and a random 4 chars
+        if($key == '') {
+            $key = $fields['entry_type'] . '_' . Str::random(4);
+        }
         $initalKey = $key;
         $suffixes = array_merge(range('a', 'z'), range('A', 'Z'));
         $suffixesCount = count($suffixes);
