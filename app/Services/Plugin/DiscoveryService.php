@@ -54,6 +54,7 @@ class DiscoveryService extends PluginService {
     }
 
     public function discoverByName(string $name): ?Plugin {
+        
         $manifest = PluginManifest::readFromName($name);
         $plugin = null;
         if($manifest) {

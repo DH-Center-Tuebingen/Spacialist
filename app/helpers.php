@@ -15,6 +15,7 @@ if(!function_exists('sp_remove_dir')) {
                 if(is_dir($file)) {
                     sp_remove_dir($file);
                 } else if(!is_link($file)) {
+                    info("unlink('$file')");
                     unlink($file);
                 }
             }

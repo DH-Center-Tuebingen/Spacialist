@@ -77,20 +77,28 @@ class PluginManager {
         }
     }
 
-    public function getPlugins() {
+    /**
+     * Get's all plugins, optionally in a slim version without all the metadata.
+     * @param bool $slim
+     * @return Plugin[]
+     */
+    public function getPlugins(bool $slim = false) {
         $data = static::getData();
 
-        return array_map(function ($p) {
+        return array_map(function ($p) use ($slim) {
             $plugin = new Plugin();
             $plugin->id = $p['id'];
             $plugin->name = $p['name'];
             $plugin->uuid = $p['uuid'];
-            $plugin->version = $p['version'];
-            $plugin->update_available = $p['update_available'] ?? null;
             $plugin->installed_at = $p['installed_at'];
-            $plugin->updated_at = $p['updated_at'];
-            $plugin->created_at = $p['created_at'];
-            $plugin->metadata = $p['metadata'] ?? [];
+            
+            if(!$slim){
+                $plugin->version = $p['version'];
+                $plugin->update_available = $p['update_available'] ?? null;
+                $plugin->updated_at = $p['updated_at'];
+                $plugin->created_at = $p['created_at'];
+                $plugin->metadata = $p['metadata'] ?? [];
+            }
             return $plugin;
         }, $data);
     }

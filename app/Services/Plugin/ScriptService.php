@@ -24,7 +24,10 @@ class ScriptService extends PluginService {
     }
 
     public function getUrl(Plugin $plugin): string {
-        return "api/download/plugin/{$plugin->slugName()}-{$plugin->uuid}.js";
+        // We append the version as search param to allow the browser to cache the 
+        // file but only when it remains the same version, which should always ensure that
+        // an update has effect without requiring the users to clear their cache.
+        return "api/download/plugin/{$plugin->slugName()}-{$plugin->uuid}.js?version=$plugin->version";
     }
 
     /**

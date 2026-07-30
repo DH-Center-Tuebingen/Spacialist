@@ -31,6 +31,7 @@
         "file": "File",
         "remove_file": "Remove file",
         "no_file": "No file",
+        "file_drop_here": "Drop file here ...",
         "list": {
             "and_more": "and more | and {cnt} more",
             "nr_of_entries": "No Entries | 1 Entry | {cnt} Entries",
@@ -78,7 +79,8 @@
             "occur": "Error occured",
             "headers": "Headers",
             "request_failed": "<code class=\"fw-normal\">{method}</code>-Request to endpoint <code class=\"bg-light-dark rounded px-2 normal text-dark\">{url}</code> failed with status code <span class=\"fw-medium\">{status}</span>.",
-            "value_invalid": "This value is invalid"
+            "value_invalid": "This value is invalid",
+            "loading_data": "Could not load data from server. Please check your internet connection and try again."
         },
         "search": "Search…",
         "search_no_results": "No results",

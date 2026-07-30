@@ -565,7 +565,7 @@
                     await systemStore.initialize(locale);
                     systemStore.setAppState(true);
                 } catch(e) {
-                    if(e.response.status == 401) {
+                    if(e?.response?.status == 401) {
                         systemStore.setAppState(true);
                     } else {
                         throwError(e);

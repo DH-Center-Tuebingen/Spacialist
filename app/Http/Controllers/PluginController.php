@@ -78,11 +78,12 @@ class PluginController extends Controller {
 
         $pluginName = $uploadResult->pluginName;
 
+        $fromVersion = null;
         if($uploadResult->isUpdate()) {
             $plugin = $uploadResult->plugin;
+            $fromVersion = $plugin->version;
             $success = DB::transaction(function () use ($plugin) {
                 app(PluginManager::class)->update($plugin);
-                
                 // Return true if update was successful.
                 return true;
             });
@@ -97,9 +98,15 @@ class PluginController extends Controller {
             return response()->json([
                 'error' => __('Plugin could not be initialized after upload. If it was an update attempt, the previous version has been restored.')
             ], 403);
+        } else {
+            app(PluginManager::class)->scriptService->publish($plugin);
         }
 
-        return response()->json($plugin);
+        return response()->json([
+            "plugin" => $plugin,
+            "updated" => $uploadResult->isUpdate(),
+            "fromVersion" => $fromVersion,
+        ]);
     }
 
     public function publishScript(Plugin $plugin) {
@@ -167,6 +174,7 @@ class PluginController extends Controller {
         app(PluginManager::class)->remove($plugin);
         $plugin->delete();
         return response()->json([
+            'plugin' => $plugin,
             'scripts' => [app(ScriptService::class)->getUrl($plugin)],
             'styles' => app(CssService::class)->getUrls($plugin),
         ]);

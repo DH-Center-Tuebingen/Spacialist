@@ -74,6 +74,13 @@ class PluginManifest {
         return $authors;
     }
 
+    /**
+     * Returns an array of nodes matching the given xpath, where each node is represented as an associative array containing the tag name, text content, and attributes.
+     * If none was found, an empty array is returned.
+     * 
+     * @param string $xpath
+     * @return array<array{attributes: array, tag: mixed, text: string>}>
+     */
     public function getTagNodes(string $xpath): array {
         $children = [];
         $xmlNodeArray = $this->content->xpath($xpath);
@@ -127,7 +134,6 @@ class PluginManifest {
         $manifest = false;
         foreach(self::MANIFEST_FILE_PATHS as $manifestFilePath) {
             $fullPath = Str::finish($path, '/') . $manifestFilePath;
-            
             if(is_link($fullPath)) {
                 $fullPath = readlink($fullPath);
             }
