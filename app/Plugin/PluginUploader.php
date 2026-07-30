@@ -150,7 +150,15 @@ class PluginUploader {
         $existingVersion = $existingPlugin->version ?? '0.0.0';
         $uploadedVersion = $manifest->getVersion();
 
-        if(version_compare($existingVersion, $uploadedVersion, ">=")) {
+        // I think it's a good idea to only restrict the upload to older versions
+        // as I had some troubles with it requiring always a newer version.
+        // a)   Plugin Development: When you develop a plugin and you test a plugin still
+        //      in development, it is combersome to always update the version number for
+        //      every upload.
+        // b)   It doesn't hurt and is slightly beneficial to allow an upload of the same
+        //      version, for example, if the active version is corrupted, you can just 
+        //      'repair' that version by performing an upload of the same version.
+        if(version_compare($existingVersion, $uploadedVersion, ">")) {
             abort(403, __("A plugin with the name ':pluginName' and the same or later version (:uploadedVersion and :existingVersion) already exists. Aborting.", [
                 'pluginName' => $existingPlugin->name,
                 'uploadedVersion' => $uploadedVersion,
