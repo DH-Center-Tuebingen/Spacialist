@@ -83,7 +83,7 @@ class HomeController extends Controller {
         $concepts = ThConcept::getMap($locale);
         $tags = Globals::getTags();
         $version = Globals::getVersion();
-        $plugins = app(PluginManager::class)->getPlugins();
+        $plugins = app(PluginManager::class)->getPlugins(true);
         $bibliography = Bibliography::orderBy('id')->get();
 
         $attributes = Attribute::whereNull('parent_id')->withCount('entity_types')->orderBy('id')->get();

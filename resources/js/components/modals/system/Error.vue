@@ -115,7 +115,7 @@
             // DATA
             const state = reactive({
                 showHeaders: false,
-                hasRequest: computed(_ => Object.keys(data.value.request).length > 0),
+                hasRequest: computed(_ => data.value?.request  && Object.keys(data.value.request).length > 0),
             });
 
             // RETURN

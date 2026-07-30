@@ -31,6 +31,7 @@
         "file": "Datei",
         "remove_file": "Datei entfernen",
         "no_file": "Keine Datei vorhanden",
+        "file_drop_here": "Datei hier fallen lassen ...",
         "list": {
             "and_more": "und weitere | und {cnt} weitere",
             "nr_of_entries": "Keine Einträge | 1 Eintrag | {cnt} Einträge",
@@ -78,7 +79,8 @@
             "occur": "Fehler aufgetreten",
             "headers": "Kopfzeilen",
             "request_failed": "<code class=\"fw-normal\">{method}</code>-Anfrage an den Endpunkt <code class=\"bg-light-dark rounded px-2 normal text-dark\">{url}</code> ist mit Statuscode <span class=\"fw-medium\">{status}</span> fehlgeschlagen.",
-            "value_invalid": "Dieser Wert ist ungültig."
+            "value_invalid": "Dieser Wert ist ungültig.",
+            "loading_data": "Daten konnten nicht vom Server geladen werden. Bitte überprüfe deine Internetverbindung und versuche es erneut."
         },
         "search": "Suche…",
         "search_no_results": "Keine Suchergebnisse",

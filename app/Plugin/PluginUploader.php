@@ -4,6 +4,7 @@ namespace App\Plugin;
 
 use App\Plugin;
 use App\Plugin\Support\PluginUploadResult;
+use App\Services\PluginManager;
 use Illuminate\Support\Str;
 use App\Plugin\PluginDirectory;
 use SplFileInfo;
@@ -25,15 +26,15 @@ class PluginUploader {
      * it is removed before moving the existing plugin to the backup directory. 
      *  
      * @param SplFileInfo $file - The uploaded plugin zip file
-     * @return PluginUploadResult - The result of the upload, containing the plugin name and whether the pluginw as updated or created.
+     * @return PluginUploadResult - The result of the upload, containing the plugin name and whether the plugin was updated or created.
      */
     public function upload(SplFileInfo $file): PluginUploadResult {
         $zipFile = $this->tryOpenZipFile($file);
         $pluginName = $this->getSingleRootDirectory($zipFile);
-        $plugin = Plugin::where('name', $pluginName)->first();
+        $existingPlugin = Plugin::where('name', $pluginName)->first();
         
-        if(isset($plugin)) {
-            $this->validateExistingVersionIsOlder($zipFile, $plugin);
+        if(isset($existingPlugin)) {
+            $this->validateExistingVersionIsOlder($zipFile, $existingPlugin);
         }
 
         if($this->doesPluginDirectoryExist($pluginName)) {
@@ -43,7 +44,7 @@ class PluginUploader {
         }
 
         $this->extractZipFile($zipFile, $pluginName);
-        return new PluginUploadResult($pluginName, $plugin);
+        return new PluginUploadResult($pluginName, $existingPlugin);
     }
 
 
@@ -70,7 +71,6 @@ class PluginUploader {
 
     private function tryOpenZipFile(SplFileInfo $file): ZipArchive {
         $zipFile = new ZipArchive();
-        info($file->getRealPath());
         $isOpen = $zipFile->open($file->getRealPath(), ZipArchive::RDONLY);
         if($isOpen === true) {
             return $zipFile;
@@ -175,8 +175,7 @@ class PluginUploader {
 
         if(!file_exists($existingPluginPath)) {
             return null;
-        }
-
+        }        
         rename($existingPluginPath, $backupPluginPath);
     }
 

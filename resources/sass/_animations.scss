@@ -7,8 +7,13 @@
 }
 
 @keyframes fadeIn {
-    0% {opacity: 0;}
-    100% {opacity: 1;}
+    0% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
+    }
 }
 
 .roll-in {
@@ -20,8 +25,39 @@
         opacity: 0.5;
         transform: rotate(-90deg);
     }
+
     100% {
         opacity: 1;
         transform: rotate(0deg);
+    }
+}
+
+
+/**
+* [VUE TRANSITION] Zoom
+*/
+.zoom-enter-active {
+    animation: zoom 0.2s cubic-bezier(1, 0.5, 0.8, 1);
+}
+
+.zoom-leave-active {
+    animation: zoom 0.2s cubic-bezier(1, 0.5, 0.8, 1) reverse;
+}
+
+.zoom-enter-from,
+.zoom-leave-to {
+    opacity: 0;
+}
+
+
+@keyframes zoom {
+    0% {
+        transform: scale(50%) Rotate(3deg);
+        opacity: 0;
+    }
+
+    100% {
+        transform: scale(100%) Rotate(0deg);
+        opacity: 1;
     }
 }

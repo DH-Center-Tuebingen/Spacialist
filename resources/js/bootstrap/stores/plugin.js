@@ -8,19 +8,8 @@ import {
     refresh,
     refreshInfo as refreshInfoApi,
     uninstall,
-    update,
     upload,
 } from '@/api/plugin.js';
-
-import {
-    appendScript,
-    removeScript,
-} from '@/helpers/plugins.js';
-
-import {
-    only,
-    slugify,
-} from '@/helpers/helpers.js';
 
 import { isInstalled } from '@/helpers/plugins.js';
 import { filterAllChildArrays } from "@/helpers/object";
@@ -64,56 +53,48 @@ export const usePluginStore = defineStore('plugin', {
 
             this.stores[id] = defineStore(`plugin_${id}`, store);
         },
-        apply(data) {
-            const idx = this.plugins.findIndex(p => p.id == data.plugin_id);
-            if(idx == -1) return;
+        // apply(id, data, method = null) {
+        //     const idx = this.plugins.findIndex(p => p.id == id);
+        //     if(idx == -1) return;
 
-            let plugin = null;
-            let remove = false;
+        //     let plugin = null;
+        //     let remove = false;
 
-            if(data.deleted) {
-                const delPlugins = this.plugins.splice(idx, 1);
-                plugin = delPlugins[0];
-                remove = true;
-            } else {
-                const props = only(data.properties, ['installed_at', 'updated_at', 'update_available', 'version']);
-                const updPlugin = this.plugins[idx];
-                for(let k in props) {
-                    updPlugin[k] = props[k];
-                }
+        //     if(method === 'delete') {
+        //         const plugin = this.plugins.splice(idx, 1)?.[0];
+        //         remove = true;
+        //     } else {
+        //         const props = only(data, ['installed_at', 'updated_at', 'update_available', 'version']);
+        //         const updatedPlugin = this.plugins[idx];
+        //         for(let k in props) {
+        //             updatedPlugin[k] = props[k];
+        //         }
 
-                if(data.uninstalled) {
-                    plugin = updPlugin;
-                    remove = true;
-                }
-            }
+        //         if(method === "uninstall") {
+        //             plugin = updatedPlugin;
+        //             remove = true;
+        //         }
+        //     }
 
-            if(plugin && remove) {
-                const slots = this.registeredSlots;
-                const pluginId = slugify(plugin.name);
-                for(let k in slots) {
-                    const slot = slots[k];
-                    slot.forEach(slotPlugin => {
-                        if(slotPlugin.of == pluginId) {
-                            const spIdx = slot.findIndex(sp => sp.of == pluginId);
-                            slot.splice(spIdx, 1);
-                        }
-                    });
-                }
-            }
-        },
+        //     if(remove) {
+        //         this.removeSlotsOf(plugin);
+        //     }
+        // },
         async install(id) {
-            return install(id).then(data => {
-                this.apply({
-                    plugin_id: id,
-                    properties: {
-                        installed_at: data.plugin.installed_at,
-                        updated_at: data.plugin.updated_at,
-                    },
-                });
-
-                appendScriptsAndStyles(data);
-            });
+            const data = await install(id)
+            this.overridePlugin(data.plugin)
+            appendScriptsAndStyles(data);
+        },
+        getPluginById(id) {
+            return this.plugins.find(plugin => plugin.id === id)
+        },
+        overridePlugin(plugin) {
+            const pluginIndex = this.plugins.findIndex(cachedPlugin => cachedPlugin.id === plugin.id)
+            if(pluginIndex != -1) {
+                this.plugins.splice(pluginIndex, 1, plugin)
+            } else {
+                this.plugins.push(plugin)
+            }
         },
         // getPluginAttributeLabel(datatype) {
         //     const attributeType = this.registerAttribute.find(attributeType => {
@@ -145,6 +126,7 @@ export const usePluginStore = defineStore('plugin', {
 
             return this.registeredSlots[slotName] ?? [];
         },
+
         async publishScript(plugin) {
             console.log('Publishing script for plugin', plugin);
             if(plugin.scripts) {
@@ -249,73 +231,65 @@ export const usePluginStore = defineStore('plugin', {
             this.plugins = [];
             this.stores = {};
         },
-        async remove() {
-            return remove(id).then(data => {
-                this.apply({
-                    plugin_id: id,
-                    deleted: true,
-                });
-                removeScriptsAndStyles(data);
-            });
+        async remove(id) {
+            const data = await remove(id);
+            removeScriptsAndStyles(data);
+            this.removePlugin(id);
         },
         async uninstall(id) {
-            return uninstall(id).then(data => {
-                const plugin = data.plugin;
-                const kebabedName = kebabCase(plugin.name);
+            const data = await uninstall(id)
+            const plugin = data.plugin;
+            const kebabedName = kebabCase(plugin.name);
+            this.overridePlugin(plugin)
 
-                // We use the window element here, as it resulted in an error, when
-                // trying to import the SpPS variable diretly:
-                // `Cannot access "router" before initialization`
-                // [TODO] This should be fixed in the plugin system rework.
-                if(window?.SpPS?.data?.plugins && window.SpPS.data.plugins[kebabedName]) {
-                    delete window?.SpPS.data.plugins[kebabedName];
-                }
 
-                this.unregisterSlots(kebabedName);
-                this.unregisterPreferences(kebabedName);
-                this.apply({
-                    plugin_id: id,
-                    uninstalled: true,
-                    properties: {
-                        installed_at: null,
-                        updated_at: plugin.updated_at,
-                    },
-                });
+            // We use the window element here, as it resulted in an error, when
+            // trying to import the SpPS variable diretly:
+            // `Cannot access "router" before initialization`
+            // [TODO] This should be fixed in the plugin system rework.
+            if(window?.SpPS?.data?.plugins && window.SpPS.data.plugins[kebabedName]) {
+                delete window?.SpPS.data.plugins[kebabedName];
+            }
 
-                removeScriptsAndStyles(data);
-            });
-        },
-        async update(id) {
-            return update(id).then(data => {
-                this.apply({
-                    plugin_id: id,
-                    properties: {
-                        installed_at: data.installed_at,
-                        updated_at: data.updated_at,
-                        version: data.version,
-                        changelog: data.changelog,
-                        update_available: false,
-                    },
-                });
-                return data;
-            });
+            this.unregisterSlots(kebabedName);
+            this.unregisterPreferences(kebabedName);
+            removeScriptsAndStyles(data);
         },
         async upload(file) {
-            return upload(file).then(data => {
-                this.add(data);
-                return data;
-            });
+            const response = await upload(file)
+            const plugin = response.plugin
+            this.apply(plugin.id, data)
+            return response;
         },
         unregisterSlots(id) {
             filterAllChildArrays(this.registeredSlots, (plugin) => plugin.of != id);
         },
+        // removeSlotsOf(plugin) {
+        //     const slots = this.registeredSlots;
+        //     const pluginId = slugify(plugin.name);
+        //     for(let k in slots) {
+        //         const slot = slots[k];
+        //         slot.forEach(slotPlugin => {
+        //             if(slotPlugin.of == pluginId) {
+        //                 const spIdx = slot.findIndex(sp => sp.of == pluginId);
+        //                 slot.splice(spIdx, 1);
+        //             }
+        //         });
+        //     }
+        // },
         unregisterPreferences(id) {
             filterAllChildArrays(this.registeredPluginPreferences, (plugin) => plugin.of != id);
         },
+        removePlugin(id) {
+            const pluginIndex = this.plugins.findIndex(cachedPlugin => cachedPlugin.id === id)
+            if(pluginIndex != -1) {
+                this.plugins.splice(pluginIndex, 1, this.plugins[pluginIndex])
+            }
+        }
     },
     getters: {
         pluginsSortedByTitle() {
-            return Object.values(this.plugins).sort((a, b) => {
+            return this.plugins.sort((a, b) => {
 
                 if(isInstalled(a) && !isInstalled(b)) return -1;
                 if(!isInstalled(a) && isInstalled(b)) return 1;

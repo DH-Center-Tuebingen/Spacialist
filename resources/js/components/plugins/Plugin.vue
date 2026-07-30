@@ -95,7 +95,7 @@
                             class="flex-fill"
                             :value="description"
                         />
-                        <footer class="d-flex justify-content-between align-items-center">
+                        <footer class="d-flex justify-content-between align-items-end gap-2">
                             <div class="form-check form-switch">
                                 <input
                                     ref="installationSwitch"
@@ -206,7 +206,6 @@
 
             const licence = computed(() => {
                 let licence = props.value.metadata?.licence || "";
-                console.log('Raw licence', licence, licence.length);
                 licence = licence.trim();
                 licence = licence.toUpperCase();
                 return licence || '–';

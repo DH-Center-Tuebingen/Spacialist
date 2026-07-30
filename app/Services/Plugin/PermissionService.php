@@ -34,7 +34,7 @@ class PermissionService extends PluginService {
     private array $existingPermissions = [];
 
     public function install(Plugin $plugin, PluginManifest $manifest): void {
-        $this->addPermissions($plugin);
+        $this->addPermissions($plugin, $manifest);
     }
 
     /**
@@ -52,11 +52,11 @@ class PermissionService extends PluginService {
     }
 
     public function onBeforeUpdate(Plugin $plugin, PluginManifest $manifest): void {
-        $this->existingPermissions = $this->getPermissions($plugin);
+        $this->existingPermissions = $this->getPermissions($plugin, $manifest);
     }
 
     public function onAfterUpdate(Plugin $plugin, PluginManifest $manifest): void {
-        $updatePermissions = $this->getPermissions($plugin);
+        $updatePermissions = $this->getPermissions($plugin, $manifest);
         try {
             // TODO:: IMPROVE:: For simplicity we currently just assume that the permsets are the same: read, write, delete and export.
             for($existingIndex = count($this->existingPermissions) - 1; $existingIndex >= 0; $existingIndex--) {
@@ -75,7 +75,7 @@ class PermissionService extends PluginService {
             $this->removePermissionGroups($this->existingPermissions);
 
             // Add permissions that are new in the updated manifest
-            $this->addPermissions($plugin);
+            $this->addPermissions($plugin, $manifest);
 
         } catch(\Exception $e) {
             $this->existingPermissions = [];
@@ -89,8 +89,8 @@ class PermissionService extends PluginService {
      * @param Plugin $plugin
      * @return void
      */
-    private function addPermissions(Plugin $plugin): void {
-        $permGroups = $this->getPermissions($plugin);
+    private function addPermissions(Plugin $plugin, PluginManifest $manifest): void {
+        $permGroups = $this->getPermissions($plugin, $manifest);
         $this->addPermissionGroups($permGroups);
     }
 
@@ -129,8 +129,8 @@ class PermissionService extends PluginService {
         return $permissionModel;
     }
 
-    private function removePermissions(Plugin $plugin): void {
-        $permGroups = $this->getPermissions($plugin);
+    private function removePermissions(Plugin $plugin, PluginManifest $manifest): void {
+        $permGroups = $this->getPermissions($plugin, $manifest);
         $this->removePermissionGroups($permGroups);
     }
 
@@ -142,18 +142,31 @@ class PermissionService extends PluginService {
         }
     }
 
-    public function getPermissions(Plugin $plugin): mixed {
-        $pluginDirectory = PluginDirectory::fromPlugin($plugin);
-        $pluginPermissionPath = $pluginDirectory->getAbsolutePluginPath('App/permissions.json');
+    public function getPermissions(Plugin $plugin, PluginManifest $manifest): mixed {
+        $pluginPermissionPath = null;
+        $nodes = $manifest->getTagNodes("permissions");
+        if(count($nodes) > 0) {
+            $relativePath = $nodes[0]["attributes"]["src"] ?? null;
+            if($relativePath != null) {
+                $pluginDirectory = PluginDirectory::fromPlugin($plugin);
+                $pluginPermissionPath = $pluginDirectory->getAbsolutePluginPath($relativePath);
+            }
+        }else{
+            $pluginDirectory = PluginDirectory::fromPlugin($plugin);
+            $pluginPermissionPath = $pluginDirectory->getAbsolutePluginPath('App/permissions.json');
+        }
+        
         if(!File::isFile($pluginPermissionPath)) {
             return [];
         }
-
-        return json_decode(file_get_contents($pluginPermissionPath), true);
+        $permissions = json_decode(file_get_contents($pluginPermissionPath), true);
+        info(json_encode($permissions, JSON_PRETTY_PRINT));
+        return $permissions;
     }
 
     public function getPermissionGroups(Plugin $plugin): array {
-        return array_keys($this->getPermissions($plugin));
+        $manifest = PluginManifest::fromPlugin($plugin);
+        return array_keys($this->getPermissions($plugin, $manifest));
     }
 
 
