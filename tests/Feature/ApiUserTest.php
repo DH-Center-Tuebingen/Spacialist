@@ -161,6 +161,7 @@ class ApiUserTest extends TestCase
      */
     public function testLoginWrongCredentialsEndpoint()
     {
+        $this->unsetTestUser();
         $response = $this->userRequest()
             ->post('/api/v1/auth/login', [
                 'email' => 'admin@localhost',
