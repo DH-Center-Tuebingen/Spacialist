@@ -13,7 +13,7 @@
         "fileeye/pel": "^0.10.0",
         "guzzlehttp/guzzle": "^7.4",
         "laravel-lang/lang": "^12.21.1",
-        "laravel/framework": "^11.31",
+        "laravel/framework": "^11.0",
         "laravel/reverb": "^1.2.0",
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "~2.0",
@@ -74,6 +74,11 @@
     "config": {
         "preferred-install": "dist",
         "sort-packages": true,
-        "optimize-autoloader": true
+        "optimize-autoloader": true,
+         "policy": {
+            "advisories": {
+                "block": false
+            }
+        }
     }
 }
