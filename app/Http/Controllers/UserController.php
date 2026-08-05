@@ -482,11 +482,11 @@ class UserController extends Controller {
             ], 400);
         }
 
-        if($foreignChange)
+        if($foreignChange) {
             $targetUser->externalPasswordReset($request->get('password'));
-        else
+        } else {
             $targetUser->resetPassword($request->get('password'));
-
+        }
 
         return response()->json(null, 204);
     }
