@@ -121,6 +121,8 @@ Route::middleware('auth:sanctum')->prefix('v1/editor')->group(function() {
 
 // USER
 Route::middleware('web')->prefix('v1')->group(function() {
+    Route::get('/auth/check', 'UserController@checkAuth');
+    
     Route::post('/auth/login', 'UserController@login');
     Route::post('/auth/logout', 'UserController@logout');
 });

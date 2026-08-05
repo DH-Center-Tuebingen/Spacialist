@@ -24,4 +24,13 @@ class DoubleAttribute extends AttributeBase
     public static function serialize(mixed $data) : mixed {
         return $data;
     }
+
+    public static function hasHigherPrecision(float $value, int $maxPrecision = 2): bool {
+        if($maxPrecision < 0) {
+            return false;
+        }
+
+        $precision = pow(10, $maxPrecision);
+        return (string)($value * $precision) !== (string)(int)($value * $precision);
+    }
 }

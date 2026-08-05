@@ -155,12 +155,80 @@ class ApiUserTest extends TestCase
     }
 
     /**
+        * @testdox GET    /api/v1/user : Login after logout
+        *
+        * @return void
+        */
+    public function testLoginWithLoggedOutUser()
+    {
+        $this->unsetTestUser();
+        $response = $this->userRequest()
+            ->post('/api/v1/auth/login', [
+                'email' => 'admin@localhost',
+                'password' => 'admin'
+            ]);
+
+        $response->assertStatus(200);
+    }
+
+    /**
+        * @testdox GET    /api/v1/user : Login and remaining login attempts
+        *
+        * @return void
+        */
+    public function testLoginLoginAttempts()
+    {
+        $this->unsetTestUser();
+        $testUser = User::find(1);
+        $this->assertNull($testUser->login_attempts);
+
+        $testUser->login_attempts = 3;
+        $testUser->save();
+
+        $response = $this->userRequest()
+            ->post('/api/v1/auth/login', [
+                'email' => 'admin@localhost',
+                'password' => 'admin'
+            ]);
+
+        $response->assertStatus(200);
+
+        $testUser = User::find(1);
+        $this->assertEquals(2, $testUser->login_attempts);
+    }
+
+    /**
+     * @testdox GET    /api/v1/user : Failed Login with missing login attempts
+     *
+     * @return void
+     */
+    public function testLoginWithMissingLoginAttempts()
+    {
+        $user = User::where('email', 'admin@localhost')->first();
+        $user->login_attempts = 0;
+        $user->save();
+
+        $this->unsetTestUser();
+        $response = $this->userRequest()
+            ->post('/api/v1/auth/login', [
+                'email' => 'admin@localhost',
+                'password' => 'admin'
+            ]);
+
+        $response->assertStatus(400);
+        $response->assertSimilarJson([
+            'error' => 'Password confirmation expired'
+        ]);
+    }
+
+    /**
      * @testdox GET    /api/v1/user : Failed Login
      *
      * @return void
      */
     public function testLoginWrongCredentialsEndpoint()
     {
+        $this->unsetTestUser();
         $response = $this->userRequest()
             ->post('/api/v1/auth/login', [
                 'email' => 'admin@localhost',
@@ -472,6 +540,58 @@ class ApiUserTest extends TestCase
             ->patch('/api/v1/user/1', []);
 
         $response->assertStatus(204);
+    }
+
+    /**
+        * @testdox PATCH  /api/v1/user/{id}/password/reset : Patch User Reset Password
+        *
+        * @return void
+        */
+    public function testPatchUserResetPassword()
+    {
+        $patchUser = User::find(2);
+        $this->assertEquals('John Doe', $patchUser->name);
+
+        $response = $this->userRequest()
+            ->patch('/api/v1/user/2/password/reset', [
+                'password' => 'new_password',
+            ]);
+
+        $response->assertStatus(204);
+
+        $patchUser = User::find(2);
+
+        $this->assertEquals('John Doe', $patchUser->name);
+        $this->assertEquals(3, $patchUser->login_attempts);
+    }
+
+    /**
+        * @testdox PATCH  /api/v1/user/{id}/password/confirm : Patch User Confirm Password
+        *
+        * @return void
+        */
+    public function testPatchUserConfirmPassword()
+    {
+        $patchUser = User::find(1);
+        $this->assertEquals('Admin', $patchUser->name);
+        $this->assertNull($patchUser->login_attempts);
+
+        $patchUser->login_attempts = 2;
+        $patchUser->save();
+        $patchUser = User::find(1);
+        $this->assertEquals(2, $patchUser->login_attempts);
+
+        $response = $this->userRequest()
+            ->patch('/api/v1/user/1/password/confirm', [
+                'password' => 'new_password',
+            ]);
+
+        $response->assertStatus(204);
+
+        $patchUser = User::find(1);
+
+        $this->assertEquals('Admin', $patchUser->name);
+        $this->assertNull($patchUser->login_attempts);
     }
 
     /**

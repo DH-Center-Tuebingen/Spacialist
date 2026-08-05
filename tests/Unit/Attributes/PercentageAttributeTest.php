@@ -39,20 +39,20 @@ class PercentageAttributeTest extends TestCase {
                 "integer zero" => [0, 0],
                 "integer fifty" => [50, 50],
                 "integer hundred" => [100, 100],
+                "float" => ["1.1", 1.1],
         ];
     }
 
     public static function falsyProvider() {
         return [
                 "boolean" => [true],
-                "float" => [1.1],
                 "negative integer" => [-1],
                 "negative float" => [-1.1],
                 "integer over hundred" => [101],
-                "string is float" => ["1.1"],
                 "string is negative integer" => ["-1"],
                 "string is negative float" => ["-1.1"],
                 "string is over hundred" => ["101"],
+                "high-precision float" => ["1.234"],
         ];
     }
 }

@@ -11,7 +11,7 @@
         </td>
         <td
             v-for="(column, i) in columns"
-            :key="`tabular-row-${number}-column-${i}`"
+            :key="`tabular-row-${index}-${number}-column-${i}`"
             :class="state.rowStateClasses"
         >
             <Attribute
@@ -112,6 +112,10 @@
                 type: Number,
                 required: false,
                 default: 0,
+            },
+            index: {
+                type: String,
+                required: true,
             },
             hideLinks: {
                 type: Boolean,

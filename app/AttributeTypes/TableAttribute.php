@@ -66,6 +66,7 @@ class TableAttribute extends AttributeBase
             ->get();
         $decodedData = json_decode($data);
         foreach($decodedData as $rowId => $row) {
+            $decodedData[$rowId]->index = time() . "-" . ($rowId + 1);
             foreach($row as $aid => $colValue) {
                 foreach($attributeTypes as $type) {
                     if($aid == $type["id"]) {

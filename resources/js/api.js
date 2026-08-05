@@ -220,6 +220,10 @@ export async function getMapProjection(srid) {
     );
 }
 
+export async function checkAuth() {
+    return $httpQueue.add(() => http.get('/auth/check').then(response => response.data));
+}
+
 // POST
 export async function login(credentials) {
     return await $httpQueue.add(() => http.post('/auth/login', credentials).then(response => {
@@ -357,13 +361,13 @@ export async function duplicateEntity(entity) {
     );
 }
 
-export async function exportEntityTree(root){
+export async function exportEntityTree(root) {
     return $httpQueue.add(
-        () => http.get(`/entity/${root}/export`,{
+        () => http.get(`/entity/${root}/export`, {
             responseType: 'blob'
         })
-        .then(File.saveFileWithFallback('export_no_name'))
-        .catch(e => { throw e; })
+            .then(File.saveFileWithFallback('export_no_name'))
+            .catch(e => { throw e; })
     );
 }
 

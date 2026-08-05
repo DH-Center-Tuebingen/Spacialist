@@ -342,3 +342,26 @@ export const openRouter = createRouter({
 export function useOpenRouter() {
     return openRouter;
 }
+
+export function toLogin() {
+    const isLogin = router.currentRoute.value.name === 'login';
+    // Only append redirect query if from another route than login
+    // to prevent recursivly appending current route's full path
+    // on reloading login page
+    const redirectPath = isLogin ? '' : router.currentRoute.value.fullPath;
+
+    router.push({
+        name: 'login',
+        query: redirectPath,
+    });
+}
+
+export function toApp() {
+    if(router.currentRoute.value.query.redirectTo) {
+        router.push(route.query.redirectTo);
+    } else {
+        router.push({
+            name: 'home',
+        });
+    }
+}

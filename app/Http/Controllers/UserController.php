@@ -22,7 +22,7 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class UserController extends Controller {
     public function __construct() {
-        $this->middleware('auth:sanctum', ['except' => ['login']]);
+        $this->middleware('auth:sanctum', ['except' => ['checkAuth', 'login']]);
     }
 
     // GET
@@ -147,6 +147,19 @@ class UserController extends Controller {
         return User::getDirectory()->download($filepath);
     }
 
+    public function checkAuth(Request $request) {
+        if(Auth::guard('web')->check()) {
+            return response()->json([
+                'auth' => true,
+                'user' => auth()->user()
+            ]);
+        } else {
+            return response()->json([
+                'auth' => false
+            ]);
+        }
+    }
+
     // POST
 
     public function login(Request $request) {
@@ -156,37 +169,43 @@ class UserController extends Controller {
             'password' => 'required'
         ]);
 
-        $creds = ['password'];
         if($request->has('nickname')) {
-            $creds[] = 'nickname';
+            $nicknameOrEmail = 'nickname';
             $user = User::where('nickname', $request->get('nickname'))->withoutTrashed()->first();
         } else {
-            $creds[] = 'email';
+            $nicknameOrEmail = 'email';
             $user = User::where('email', $request->get('email'))->withoutTrashed()->first();
         }
+
+        // When the active user tries to login again we just return the active session.
+        $activeUser = auth()->user();
+        if(isset($activeUser) && $activeUser->{$nicknameOrEmail} === $request->get($nicknameOrEmail)) {
+            return response()->json($activeUser, 200);
+        }
+
+        $invalidCredentialsError = __('Invalid Credentials');
         if(!isset($user)) {
             Sleep::for(2)->seconds();
             return response()->json([
-                'error' => __('Invalid Credentials')
+                'error' => $invalidCredentialsError
             ], 400);
         }
-        if($user->login_attempts === 0) {
+
+        if(!$user->hasLoginAttemptsLeft()) {
             return response()->json([
                 'error' => __('Password confirmation expired')
             ], 400);
         }
-        $credentials = request($creds);
 
-        if(!Auth::guard('web')->attempt($credentials, true)) {
-            return response()->json(['error' => __('Invalid Credentials')], 400);
+        $credentials = request(['password', $nicknameOrEmail]);
+        if(!Auth::guard('web')->attempt($credentials)) {
+            return response()->json([
+                'error' => $invalidCredentialsError
+            ], 400);
         }
 
         $request->session()->regenerate();
-
-        if($user->login_attempts > 0) {
-            $user->login_attempts--;
-            $user->save();
-        }
+        $user->login();
 
         return response()
             ->json($user, 200);
@@ -273,11 +292,18 @@ class UserController extends Controller {
     }
 
     public function logout(Request $request) {
-        Auth::guard('web')->logout(true);
-        // auth()->invalidate(true);
+        $user = auth()->user();
 
+        // Broadcast logout event before actually logging out
+        if($user) {
+            $user->logout();
+        }
+
+        Auth::guard('web')->logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
+
+        return response()->json(['message' => 'Successfully logged out'], 200);
     }
 
     // PATCH
@@ -436,7 +462,9 @@ class UserController extends Controller {
 
     public function resetPassword(Request $request, $id) {
         $user = auth()->user();
-        if($user->id != $id && !$user->can('users_roles_write')) {
+        $foreignChange = $user->id != $id;
+
+        if($foreignChange && !$user->can('users_roles_write')) {
             return response()->json([
                 'error' => __('You do not have the permission to reset user password')
             ], 403);
@@ -447,22 +475,18 @@ class UserController extends Controller {
         ]);
 
         try {
-            $pUser = User::withoutTrashed()->findOrFail($id);
+            $targetUser = User::withoutTrashed()->findOrFail($id);
         } catch(ModelNotFoundException $e) {
             return response()->json([
                 'error' => __('This user does not exist')
             ], 400);
         }
 
-        $password = Hash::make($request->get('password'));
-
-        $pUser->password = $password;
-
-        if($user->id != $id) {
-            $pUser->login_attempts = 3;
+        if($foreignChange) {
+            $targetUser->externalPasswordReset($request->get('password'));
+        } else {
+            $targetUser->resetPassword($request->get('password'));
         }
-
-        $pUser->save();
 
         return response()->json(null, 204);
     }
@@ -480,21 +504,14 @@ class UserController extends Controller {
         ]);
 
         try {
-            $pUser = User::withoutTrashed()->findOrFail($id);
+            $targetUser = User::withoutTrashed()->findOrFail($id);
         } catch(ModelNotFoundException $e) {
             return response()->json([
                 'error' => __('This user does not exist')
             ], 400);
         }
 
-        if($request->has('password')) {
-            $password = Hash::make($request->get('password'));
-            $pUser->password = $password;
-        }
-
-        $pUser->login_attempts = null;
-        $pUser->save();
-
+        $targetUser->confirmPassword($request->input('password'));
         return response()->json(null, 204);
     }
 

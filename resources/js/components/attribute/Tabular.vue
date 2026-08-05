@@ -38,7 +38,7 @@
             <tbody>
                 <template
                     v-for="(row, $index) in state.actualShow"
-                    :key="`tabular-row-${uniqueRowIndex(row, $index)}`"
+                    :key="`tabular-row-${row.index}`"
                 >
                     <td
                         v-if="row.hidden_info"
@@ -53,6 +53,7 @@
                         :ref="el => setRef(el, $index)"
                         :data="row"
                         :columns="state.columns"
+                        :index="row.index"
                         :number="getActualRowIndex($index)"
                         :disabled="disabled"
                         :hide-links="hideLinks"
@@ -286,10 +287,15 @@
             const CUT_SIZE = 10;
             const CUT_THRES = (CUT_SIZE * 2) + Math.floor(CUT_SIZE / 2);
             // FUNCTIONS
+            const generateUniqueRowIndex = _ => {
+                return `${Date.now()}-${Math.floor(Math.random() * 1000000)}-${fixIndex.value++}`;
+            };
             const uniqueRowIndex = (row, index) => {
-                const idx = getActualRowIndex(index);
-                return idx;
-                // return hash(JSON.stringify(row)) + idx;
+                if(!row.index) {
+                    row.index = generateUniqueRowIndex();
+                }
+
+                return row.index;
             };
             const resetFieldState = _ => {
                 v.resetField({
@@ -421,12 +427,15 @@
                         // If less columns selected than exist, stop adding new/non-existing column data
                         if(colIdx == columns.length) break;
                     }
+                    rowValue.index = generateUniqueRowIndex();
                     rows.push(rowValue);
                 }
                 v.handleChange(v.value.concat(rows));
             };
             const addTableRow = _ => {
-                v.handleChange(v.value.concat([{}]));
+                v.handleChange(v.value.concat([{
+                    index: generateUniqueRowIndex(),
+                }]));
             };
             const restoreTableRow = rowIdx => {
                 const actualRow = getActualRowIndex(rowIdx);
@@ -475,6 +484,7 @@
             };
 
             // DATA
+            const fixIndex = ref(1);
             const rowRefs = ref({});
             const {
                 handleChange,
