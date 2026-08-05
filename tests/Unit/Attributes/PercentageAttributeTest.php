@@ -52,6 +52,7 @@ class PercentageAttributeTest extends TestCase {
                 "string is negative integer" => ["-1"],
                 "string is negative float" => ["-1.1"],
                 "string is over hundred" => ["101"],
+                "high-precision float" => ["1.234"],
         ];
     }
 }

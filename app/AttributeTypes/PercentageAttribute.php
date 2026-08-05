@@ -12,6 +12,9 @@ class PercentageAttribute extends AttributeBase
 
     public static function parseImport(int|float|bool|string $data) : mixed {
         $data = DoubleAttribute::fromImport($data);
+        if(DoubleAttribute::hasHigherPrecision($data, 2)) {
+            throw InvalidDataException::requirePrecision($data);
+        }
         if($data < 0 || $data > 100) {
             throw InvalidDataException::requireRange($data, 0, 100);
         }
