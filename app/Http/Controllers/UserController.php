@@ -146,7 +146,7 @@ class UserController extends Controller {
         $filepath = $request->query('path');
         return User::getDirectory()->download($filepath);
     }
-    
+
     public function checkAuth(Request $request) {
         if(Auth::guard('web')->check()) {
             return response()->json([
@@ -162,8 +162,7 @@ class UserController extends Controller {
 
     // POST
 
-    public function login(Request $request) {        
-        
+    public function login(Request $request) {
         $this->validate($request, [
             'email' => 'required_without:nickname|email|max:255',
             'nickname' => 'required_without:email|alpha_dash|max:255',
@@ -177,13 +176,13 @@ class UserController extends Controller {
             $nicknameOrEmail = 'email';
             $user = User::where('email', $request->get('email'))->withoutTrashed()->first();
         }
-        
+
         // When the active user tries to login again we just return the active session.
         $activeUser = auth()->user();
         if(isset($activeUser) && $activeUser->{$nicknameOrEmail} === $request->get($nicknameOrEmail)) {
             return response()->json($activeUser, 200);
         }
-        
+
         $invalidCredentialsError = __('Invalid Credentials');
         if(!isset($user)) {
             Sleep::for(2)->seconds();
@@ -294,12 +293,12 @@ class UserController extends Controller {
 
     public function logout(Request $request) {
         $user = auth()->user();
-        
+
         // Broadcast logout event before actually logging out
         if($user) {
             $user->logout();
         }
-        
+
         Auth::guard('web')->logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
@@ -486,8 +485,8 @@ class UserController extends Controller {
         if($foreignChange)
             $targetUser->externalPasswordReset($request->get('password'));
         else
-            $targetUser->resetPassword($request->get('password'));    
-        
+            $targetUser->resetPassword($request->get('password'));
+
 
         return response()->json(null, 204);
     }
@@ -511,7 +510,7 @@ class UserController extends Controller {
                 'error' => __('This user does not exist')
             ], 400);
         }
-        
+
         $targetUser->confirmPassword($request->input('password'));
         return response()->json(null, 204);
     }

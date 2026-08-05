@@ -155,6 +155,47 @@ class ApiUserTest extends TestCase
     }
 
     /**
+        * @testdox GET    /api/v1/user : Login after logout
+        *
+        * @return void
+        */
+    public function testLoginWithLoggedOutUser()
+    {
+        $this->unsetTestUser();
+        $response = $this->userRequest()
+            ->post('/api/v1/auth/login', [
+                'email' => 'admin@localhost',
+                'password' => 'admin'
+            ]);
+
+        $response->assertStatus(200);
+    }
+
+    /**
+     * @testdox GET    /api/v1/user : Failed Login with missing login attempts
+     *
+     * @return void
+     */
+    public function testLoginWithMissingLoginAttempts()
+    {
+        $user = User::where('email', 'admin@localhost')->first();
+        $user->login_attempts = 0;
+        $user->save();
+
+        $this->unsetTestUser();
+        $response = $this->userRequest()
+            ->post('/api/v1/auth/login', [
+                'email' => 'admin@localhost',
+                'password' => 'admin'
+            ]);
+
+        $response->assertStatus(400);
+        $response->assertSimilarJson([
+            'error' => 'Password confirmation expired'
+        ]);
+    }
+
+    /**
      * @testdox GET    /api/v1/user : Failed Login
      *
      * @return void

@@ -29,9 +29,9 @@ class User extends Authenticatable
     // use Authenticatable;
 
     protected $guard_name = 'web';
-    
+
     // Disables the remember_web token, as we don't need it using Sanctum authentication
-    // and it would disrupt the session_cookies, as the token is managed in the User table, 
+    // and it would disrupt the session_cookies, as the token is managed in the User table,
     // which conflicts when accessed from multiple websites.
     protected $rememberTokenName = null;
 
@@ -56,13 +56,12 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
     ];
-    
-    
+
     /**
      * Handles the login attempts logic and broadcasts the login event.
      * @return void
      */
-    public function login(){
+    public function login() {
         if($this->login_attempts > 0) {
             $this->login_attempts--;
             $this->save();
@@ -80,7 +79,7 @@ class User extends Authenticatable
      * Handles the logout logic and broadcasts the logout event.
      * @return void
      */
-    public function logout(){
+    public function logout() {
         try {
             UserLogout::dispatch($this);
         } catch(BroadcastException $e) {
@@ -89,26 +88,26 @@ class User extends Authenticatable
             }
         }
     }
-    
+
    /**
      * Checks if the user has login attempts left.
      * @return bool
      */
     public function hasLoginAttemptsLeft(): bool {
-        return $this->login_attempts == null || $this->login_attempts > 0;
+        return $this->login_attempts === null || $this->login_attempts > 0;
     }
-    
+
     /**
      * When password is resetted externally (e.g. by an admin)
      * This will reset the login attempts counter as well (to 3).
      * @param string $newPassword The new password to set.
      * @return void
      */
-    public function externalPasswordReset($newPassword){        
+    public function externalPasswordReset($newPassword) {
         $this->login_attempts = 3;
         $this->resetPassword($newPassword);
     }
-    
+
     /**
      * Resets the user's password.
      * @param string $newPassword The new password to set.
@@ -119,7 +118,7 @@ class User extends Authenticatable
         $this->password = $password;
         $this->save();
     }
-    
+
     /**
      * Confirms the user's password and resets login attempts.
      * @param string $newPassword The new password to set.
@@ -128,8 +127,8 @@ class User extends Authenticatable
     public function confirmPassword($newPassword){
         $this->login_attempts = null;
         $this->resetPassword($newPassword);
-    }   
-    
+    }
+
 
     public function getActivitylogOptions() : LogOptions
     {
