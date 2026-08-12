@@ -46,27 +46,6 @@ class PluginController extends Controller {
         }
     }
 
-    public function getPlugins(Request $request) {
-        app(DiscoveryService::class)->discover();
-
-        $plugins = [];
-        if($request->query('installed') == 1) {
-            $plugins = app(PluginManager::class)->getInstalledPlugins();
-        } else if($request->query('uninstalled') == 1) {
-            // We only cache installed plugins. When we need 
-            $plugins = Plugin::whereNull('installed_at')->get();
-        } else {
-            $plugins = app(PluginManager::class)->getPlugins();
-        }
-
-        $attributesMap = app(AttributeService::class)->getMappedByPlugins();
-        foreach($plugins as $plugin) {
-            $plugin->registeredAttributes = $attributesMap[$plugin->id] ?? [];
-        }
-
-        return response()->json($plugins);
-    }
-
     public function uploadPlugin(Request $request) {
 
         $this->validate($request, [
@@ -79,6 +58,7 @@ class PluginController extends Controller {
         $pluginName = $uploadResult->pluginName;
 
         $fromVersion = null;
+        $success = true;
         if($uploadResult->isUpdate()) {
             $plugin = $uploadResult->plugin;
             $fromVersion = $plugin->version;
@@ -88,34 +68,51 @@ class PluginController extends Controller {
                 return true;
             });
         } else {
+            info("Plugin {$pluginName} was uploaded and installed successfully.");
             $plugin = app(DiscoveryService::class)->discoverByName($pluginName);
+            if(!isset($plugin)) {
+                $success = false;
+            }
         }
-
-        if(!$success || !isset($plugin) ) {
-            $uploader->restoreBackup($pluginName);
-            PluginLog::forName($pluginName)->error("Plugin was uploaded but could not be read. Backup has been restored.");
+        
+        if(!$success) {
+            $message = "";
+            if($uploadResult->isUpdate()) {
+                $uploader->restoreBackup($pluginName);
+                $message = "Plugin was uploaded but could not be updated. Backup has been restored.";
+                PluginLog::forName($pluginName)->error($message);
+            } else {
+                (new PluginDirectory($pluginName))->remove();
+                $message = "Plugin upload was unsuccessful. Plugin directory has been removed.";
+                PluginLog::forName($pluginName)->error($message);
+            }
 
             return response()->json([
-                'error' => __('Plugin could not be initialized after upload. If it was an update attempt, the previous version has been restored.')
+                'error' => __($message)
             ], 403);
-        } else {
-            app(PluginManager::class)->scriptService->publish($plugin);
         }
 
         return response()->json([
             "plugin" => $plugin,
+            "scripts" => [app(ScriptService::class)->getUrl($plugin)],
+            "styles" => app(CssService::class)->getUrls($plugin),
             "updated" => $uploadResult->isUpdate(),
             "fromVersion" => $fromVersion,
         ]);
     }
 
-    public function publishScript(Plugin $plugin) {
-        $this->requireInstalled($plugin);
-        $scriptUrl = app(ScriptService::class)->publish($plugin);
-        return response()->json($scriptUrl);
-    }
-
-    public function installPlugin(Request $request, Plugin $plugin) {
+    /**
+     * Installs the plugin.
+     * 
+     * @param Request $request
+     * @param Plugin $plugin
+     * @return JsonResponse<array{
+     *     plugin: Plugin,
+     *     scripts: string[],
+     *     styles: string[]
+     * }>
+     */
+    public function installPlugin(Request $request, Plugin $plugin): JsonResponse {
         $this->requireNotInstalled($plugin);
 
         try{
@@ -143,12 +140,18 @@ class PluginController extends Controller {
         ]);
     }
 
-    public function getChangelog(Request $request, Plugin $plugin) {
-        $changelog = PluginDirectory::fromPlugin($plugin)->readChangelog();
-        return response()->json($changelog);
-    }
-
-    public function uninstallPlugin(Request $request, Plugin $plugin) {
+    /**
+     * Uninstall the plugin. 
+     * 
+     * @param Request $request
+     * @param Plugin $plugin
+     * @return JsonResponse<array{
+     *     plugin: Plugin,
+     *     scripts: string[],
+     *     styles: string[]
+     * }> | JsonResponse<array>[] - Returns the plugin with its scripts and styles. If the plugin was already uninstalled, a 204 No Content response will be returned.
+     */
+    public function uninstallPlugin(Request $request, Plugin $plugin): JsonResponse {
         $this->requireInstalled($plugin);
 
         try{
@@ -167,8 +170,16 @@ class PluginController extends Controller {
 
     /**
      * Removes the plugin from the system 
+     * 
+     * @param Request $request
+     * @param Plugin $plugin
+     * @return JsonResponse<array{
+     *     plugin: Plugin,
+     *     scripts: string[],
+     *     styles: string[]
+     * }>
      */
-    public function removePlugin(Request $request, Plugin $plugin) {
+    public function removePlugin(Request $request, Plugin $plugin): JsonResponse {
         $this->requireNotInstalled($plugin);
 
         app(PluginManager::class)->remove($plugin);
@@ -179,14 +190,65 @@ class PluginController extends Controller {
             'styles' => app(CssService::class)->getUrls($plugin),
         ]);
     }
+    
+    /**
+     * Gets all plugins. 
+     * Can be limited to 'installed' and 'uninstalled' plugins by setting the respective query parameter to 1.
+     * @param Request $request
+     * @return JsonResponse<Plugin[]> - Returns the list of all plugins.
+     */
+    public function getPlugins(Request $request) {
+        app(DiscoveryService::class)->discover();
 
+        $plugins = [];
+        if($request->query('installed') == 1) {
+            $plugins = app(PluginManager::class)->getInstalledPlugins();
+        } else if($request->query('uninstalled') == 1) {
+            // We only cache installed plugins. When we need 
+            $plugins = Plugin::whereNull('installed_at')->get();
+        } else {
+            $plugins = app(PluginManager::class)->getPlugins();
+        }
+
+        $attributesMap = app(AttributeService::class)->getMappedByPlugins();
+        foreach($plugins as $plugin) {
+            $plugin->registeredAttributes = $attributesMap[$plugin->id] ?? [];
+        }
+
+        return response()->json($plugins);
+    }
+    
+    /**
+     * Publishes the JavaScript file to the storage. 
+     * 
+     * @param Plugin $plugin
+     * @return JsonResponse<string> - Returns the URL of the published script.
+     */
+    public function publishScript(Plugin $plugin) {
+        $this->requireInstalled($plugin);
+        $scriptUrl = app(ScriptService::class)->publish($plugin);
+        return response()->json($scriptUrl);
+    }
+
+    /**
+     * Get's the changelog of the plugin as md string.
+     * If no changelog was found, an empty string will be returned 
+     * 
+     * @param Request $request
+     * @param Plugin $plugin
+     * @return JsonResponse<string> - Returns the plugin's changelog, or an empty string if no changelog was found.
+     */
+    public function getChangelog(Request $request, Plugin $plugin): JsonResponse {
+        $changelog = PluginDirectory::fromPlugin($plugin)->readChangelog();
+        return response()->json($changelog);
+    }
 
     /**
      * Downloads the plugin script from the server.
      * 
      * @param Request $request
      * @param string $filepath
-     * @return BinaryFileResponse|JsonResponse
+     * @return BinaryFileResponse|JsonResponse<string>
      */
     public function downloadScript(Request $request, string $filepath): JsonResponse|BinaryFileResponse {
         if($filepath === '') {
@@ -205,7 +267,7 @@ class PluginController extends Controller {
      * 
      * @param Request $request
      * @param string $filepath
-     * @return BinaryFileResponse|JsonResponse
+     * @return BinaryFileResponse|JsonResponse<string>
      */
     public function downloadCss(Request $request, string $filepath): JsonResponse|BinaryFileResponse {
         if($filepath === '') {
@@ -286,8 +348,8 @@ class PluginController extends Controller {
      * @return \Illuminate\Http\JsonResponse - Returns the plugin with its metadata.
      */
     public function refreshInfo(Request $request, Plugin $plugin) {
-        app(DiscoveryService::class)->discoverByName($plugin->name);
+        $refreshedPlugin = app(DiscoveryService::class)->discoverByName($plugin->name);
         app(PluginManager::class)->rebuildPluginCache();
-        return response()->json($plugin);
+        return response()->json($refreshedPlugin);
     }
 }

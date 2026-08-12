@@ -14,6 +14,10 @@ use Illuminate\Support\Str;
  */
 class PluginDirectory {
 
+    /**
+     * Create's a plugin directory instance for the provided plugin name.
+     * @param string $pluginName Name of plugin and it's directory.
+     */
     public function __construct(public string $pluginName) {
     }
     
@@ -22,7 +26,7 @@ class PluginDirectory {
      * Get's the system path to the file relative to the provided path inside the plugin directory.
      * 
      * @param string $subpath - An optional subpath to a specific file or directory inside the plugin directory, e.g. "MyPlugin/Migrations" or "MyPlugin/Migrations/2024_01_01_000000_create_users_table.php"
-     * @return string The absolute system path to the file relative to the provided path inside the plugin directory.
+     * @return string The absolute system path to the file.
      */
     public function getAbsolutePluginPath(string $subpath = ""): string {
         return self::getPath($this->getPluginPath($subpath));
@@ -59,10 +63,21 @@ class PluginDirectory {
         return $path;
     }
 
+    /**
+     * Creates a new instance of PluginDirectory from a given Plugin model.
+     * @param Plugin $plugin
+     * @return PluginDirectory
+     */
     public static function fromPlugin(Plugin $plugin): self {
         return new self($plugin->name);
     }
 
+    /**
+     * Get's the plugin path using the plugin's name.
+     * 
+     * @param string $pluginName The name of the plugin to get the path for.
+     * @return string The absolute system path to the plugin's directory.
+     */
     public static function getPathByName(string $pluginName): string {
         return self::getPath($pluginName);
     }
@@ -71,6 +86,13 @@ class PluginDirectory {
         sp_remove_dir($this->getAbsolutePluginPath());
     }
 
+    /**
+     * Reads the plugin from the plugin folder. if there is no changelog, an empty string will be returned.
+     * You can limit the changelog content by setting a version limit 
+     * 
+     * @param mixed $since
+     * @return bool|string
+     */
     public function readChangelog(?string $since = null): string {
         $changelog = $this->getAbsolutePluginPath('CHANGELOG.md');
         if(!File::isFile($changelog)) {
@@ -78,7 +100,8 @@ class PluginDirectory {
         }
 
         $changes = file_get_contents($changelog);
-        if(isset($since) && preg_match("/\\n#+\s(v\s?)?$since(\s-\s.+)?\\n/i", $changes, $matches, PREG_OFFSET_CAPTURE) !== FALSE) {
+        $sincePattern = "/\\n#+\s(v\s?)?" . preg_quote($since, '/') . "(\s-\s.+)?\\n/i";
+        if(isset($since) && preg_match($sincePattern, $changes, $matches, PREG_OFFSET_CAPTURE) === 1) {
             if(count($matches) > 0) {
                 $changes = substr($changes, 0, $matches[0][1]);
             }

@@ -3,6 +3,7 @@ namespace App\Models\Plugin;
 
 use App\Plugin;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class CssFile extends Model
 {
@@ -17,7 +18,7 @@ class CssFile extends Model
     /**
      * The plugin this hook belongs to.
      */
-    public function plugin()
+    public function plugin(): BelongsTo
     {
         return $this->belongsTo(Plugin::class, 'plugin_id');
     }

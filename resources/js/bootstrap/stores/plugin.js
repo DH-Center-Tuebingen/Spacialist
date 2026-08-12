@@ -6,7 +6,7 @@ import {
     publishScript,
     remove,
     refresh,
-    refreshInfo as refreshInfoApi,
+    refreshInfo,
     uninstall,
     upload,
 } from '@/api/plugin.js';
@@ -37,14 +37,6 @@ export const usePluginStore = defineStore('plugin', {
         },
     }),
     actions: {
-        add(plugin) {
-            const idx = this.plugins.findIndex(p => p.id == plugin.id);
-            if(idx > -1) {
-                this.plugins[idx] = plugin;
-            } else {
-                this.plugins.push(plugin);
-            }
-        },
         addStore(id, store) {
             if(this.stores[id]) {
                 console.error(`A Plugin with id="${id}" already registered a store!`);
@@ -53,56 +45,15 @@ export const usePluginStore = defineStore('plugin', {
 
             this.stores[id] = defineStore(`plugin_${id}`, store);
         },
-        // apply(id, data, method = null) {
-        //     const idx = this.plugins.findIndex(p => p.id == id);
-        //     if(idx == -1) return;
-
-        //     let plugin = null;
-        //     let remove = false;
-
-        //     if(method === 'delete') {
-        //         const plugin = this.plugins.splice(idx, 1)?.[0];
-        //         remove = true;
-        //     } else {
-        //         const props = only(data, ['installed_at', 'updated_at', 'update_available', 'version']);
-        //         const updatedPlugin = this.plugins[idx];
-        //         for(let k in props) {
-        //             updatedPlugin[k] = props[k];
-        //         }
-
-        //         if(method === "uninstall") {
-        //             plugin = updatedPlugin;
-        //             remove = true;
-        //         }
-        //     }
-
-        //     if(remove) {
-        //         this.removeSlotsOf(plugin);
-        //     }
-        // },
         async install(id) {
             const data = await install(id)
-            this.overridePlugin(data.plugin)
+            this.updateOrAdd(data.plugin)
             appendScriptsAndStyles(data);
         },
         getPluginById(id) {
             return this.plugins.find(plugin => plugin.id === id)
         },
-        overridePlugin(plugin) {
-            const pluginIndex = this.plugins.findIndex(cachedPlugin => cachedPlugin.id === plugin.id)
-            if(pluginIndex != -1) {
-                this.plugins.splice(pluginIndex, 1, plugin)
-            } else {
-                this.plugins.push(plugin)
-            }
-        },
-        // getPluginAttributeLabel(datatype) {
-        //     const attributeType = this.registerAttribute.find(attributeType => {
-        //         return attributeType.datatype == datatype && !!attributeType.plugin;
-        //     });
 
-        //     return attributeType?.label;
-        // },
         /**
          * Helper function to compose the plugin slot name. This is used to avoid conflicts between plugins, that want to register in the same slot, 
          * e.g. "tab". The plugin slots are composed of the plugin name and the slot name, e.g. 'file-tab'.
@@ -135,15 +86,12 @@ export const usePluginStore = defineStore('plugin', {
             const downloadUrl = await publishScript(plugin.id)
             appendScripts([downloadUrl]);
         },
-        set(plugins) {
-            this.plugins = plugins;
-        },
         async refresh() {
             const plugins = await refresh()
             this.set(plugins);
         },
         async refreshInfo(plugin) {
-            const data = await refreshInfoApi(plugin.id);
+            const data = await refreshInfo(plugin.id);
             const idx = this.plugins.find(p => p.id == data.id)
             if(idx > -1) {
                 this.plugins[idx] = data;
@@ -175,6 +123,14 @@ export const usePluginStore = defineStore('plugin', {
             }
 
             this.registeredAttributes[datatype] = data;
+        },
+        unregisterAttribute(datatype) {
+            if(!this.registeredAttributes[datatype]) {
+                console.error('Plugin attribute does not exist', datatype);
+                return;
+            }
+
+            delete this.registeredAttributes[datatype];
         },
         registerPreference(data) {
             const category = data.category;
@@ -236,11 +192,14 @@ export const usePluginStore = defineStore('plugin', {
             removeScriptsAndStyles(data);
             this.removePlugin(id);
         },
+        set(plugins) {
+            this.plugins = plugins;
+        },
         async uninstall(id) {
             const data = await uninstall(id)
             const plugin = data.plugin;
             const kebabedName = kebabCase(plugin.name);
-            this.overridePlugin(plugin)
+            this.updateOrAdd(plugin)
 
 
             // We use the window element here, as it resulted in an error, when
@@ -253,32 +212,32 @@ export const usePluginStore = defineStore('plugin', {
 
             this.unregisterSlots(kebabedName);
             this.unregisterPreferences(kebabedName);
+            this.unregisterAttributes(kebabedName);
             removeScriptsAndStyles(data);
         },
         async upload(file) {
             const response = await upload(file)
             const plugin = response.plugin
-            this.apply(plugin.id, data)
+            this.updateOrAdd(plugin)
+            console.log('Plugin uploaded', plugin)
+            if(plugin.installed_at != null) {
+                appendScriptsAndStyles(response);
+            }
             return response;
         },
         unregisterSlots(id) {
             filterAllChildArrays(this.registeredSlots, (plugin) => plugin.of != id);
         },
-        // removeSlotsOf(plugin) {
-        //     const slots = this.registeredSlots;
-        //     const pluginId = slugify(plugin.name);
-        //     for(let k in slots) {
-        //         const slot = slots[k];
-        //         slot.forEach(slotPlugin => {
-        //             if(slotPlugin.of == pluginId) {
-        //                 const spIdx = slot.findIndex(sp => sp.of == pluginId);
-        //                 slot.splice(spIdx, 1);
-        //             }
-        //         });
-        //     }
-        // },
         unregisterPreferences(id) {
             filterAllChildArrays(this.registeredPluginPreferences, (plugin) => plugin.of != id);
+        },
+        updateOrAdd(plugin) {
+            const idx = this.plugins.findIndex(p => p.id === plugin.id);
+            if(idx > -1) {
+                this.plugins.splice(idx, 1, plugin)
+            } else {
+                this.plugins.push(plugin);
+            }
         },
         removePlugin(id) {
             const pluginIndex = this.plugins.findIndex(cachedPlugin => cachedPlugin.id === id)

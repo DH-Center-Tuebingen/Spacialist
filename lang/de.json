@@ -114,6 +114,7 @@
     "Could not open provided plugin zip file. Aborting.": "Das bereitgestellte Plugin-ZIP-Archiv konnte nicht geöffnet werden. Abbruch.",
     "Format mismatch. Only a folder is allowed on root level.": "Inkorrekte ZIP-Struktur: Die oberste Ebene muss genau ein Ordner sein.",
     "Error while extracting zip file. Please check file permissions or ask your system adminstrator.": "Fehler beim Entpacken der ZIP-Datei. Bitte überprüfen Sie die Dateiberechtigungen oder wenden Sie sich an einen Systemadministrator.",
-    "Plugin could not be initialized after upload. If it was an update attempt, the previous version has been restored. Please check the corectness of the plugin. If the problem persists, contact your system adminstrator.": "Das Plugin konnte nach dem Upload nicht initialisiert werden. Wenn es sich um einen Update-Versuch handelte, wurde die vorherige Version wiederhergestellt. Bitte überprüfen Sie das Plugin auf dessen Richtigkeit. Falls das Problem weiterhin besteht, wenden Sie sich an einen Systemadministrator.",
+    "Plugin upload was unsuccessful. Plugin directory has been removed.": "Plugin-Upload war nicht erfolgreich. Das Plugin-Verzeichnis wurde entfernt.",
+    "Plugin was uploaded but could not be updated. Backup has been restored.": "Plugin wurde hochgeladen, konnte aber nicht aktualisiert werden. Das Backup wurde wiederhergestellt.",
     "This migration does not exist or has already been run.": "Diese Migration existiert nicht oder wurde bereits ausgeführt."
 }

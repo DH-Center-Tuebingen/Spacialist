@@ -48,41 +48,46 @@
                             >
                                 <i class="fas fa-fw fa-ellipsis-vertical" />
                             </span>
-                            <div
+                            <ul
                                 :id="`plugin-settings-${value.id}-contextmenu`"
                                 class="dropdown-menu dropdown-menu-end"
-                                @click.stop.prevent
                                 :aria-labelledby="`plugin-${value.id}-dropdown`"
                             >
-                                <a
-                                    href="#"
-                                    class="dropdown-item"
-                                    @click="pluiginStore.publishScript(value)"
-                                >
-                                    <span class="ms-2">
-                                        {{ t('main.plugins.refresh-script') }}
-                                    </span>
-                                </a>
-                                <a
-                                    href="#"
-                                    class="dropdown-item"
-                                    @click="pluiginStore.refreshInfo(value)"
-                                >
-                                    <span class="ms-2">
-                                        {{ t('global.refresh') }}
-                                    </span>
-                                </a>
+                                <li>
+                                    <button
+                                        type="button"
+                                        class="dropdown-item"
+                                        @click="pluiginStore.publishScript(value)"
+                                    >
+                                        <span class="ms-2">
+                                            {{ t('main.plugins.refresh-script') }}
+                                        </span>
+                                    </button>
+                                </li>
+                                <li>
+                                    <button
+                                        type="button"
+                                        class="dropdown-item"
+                                        @click="pluiginStore.refreshInfo(value)"
+                                    >
+                                        <span class="ms-2">
+                                            {{ t('global.refresh') }}
+                                        </span>
+                                    </button>
+                                </li>
                                 <div class="dropdown-divider"></div>
-                                <a
-                                    type="button"
-                                    class="dropdown-item text-danger"
-                                    @click="remove()"
-                                >
-                                    <!-- :class="{disabled: isInstalled(), 'opacity-50': isInstalled()}" -->
-                                    <i class="fas fa-fw fa-trash" />
-                                    {{ t('global.remove') }}
-                                </a>
-                            </div>
+                                <li>
+                                    <button
+                                        type="button"
+                                        class="dropdown-item text-danger"
+                                        @click="remove()"
+                                    >
+                                        <!-- :class="{disabled: isInstalled(), 'opacity-50': isInstalled()}" -->
+                                        <i class="fas fa-fw fa-trash" />
+                                        {{ t('global.remove') }}
+                                    </button>
+                                </li>
+                            </ul>
                         </div>
                     </div>
                 </header>
@@ -183,7 +188,7 @@
                     }
                 } catch(e) {
                     const error = e.response?.data?.error || e.message || 'Unknown error';
-                    
+
                     // Somehow Vue will not reset th
                     installationSwitch.value.checked = isInstalled();
 
