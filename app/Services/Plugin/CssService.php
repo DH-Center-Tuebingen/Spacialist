@@ -78,6 +78,12 @@ class CssService extends PluginService implements ManifestContent {
         }
     }
 
+    /**
+     * Publish the css files to the storage directory.
+     * @param Plugin $plugin
+     * @param Plugin\PluginManifest $manifest
+     * @return void
+     */
     public function publish(Plugin $plugin, PluginManifest $manifest): void {
         $cssFiles = $this->retrieveManifestValues($manifest);
         foreach($cssFiles as $cssPath) {
@@ -85,6 +91,13 @@ class CssService extends PluginService implements ManifestContent {
         }
     }
 
+    /**
+     * Publish a single file to the storage directory.
+     * 
+     * @param Plugin $plugin
+     * @param string $cssPath Path of the css file relative to the plugin root. If the file is not found a warning will be issued in the `plugin.log`.
+     * @return void
+     */
     private function publishFile(Plugin $plugin, string $cssPath): void {
         $pluginPath = PluginDirectory::fromPlugin($plugin)->getAbsolutePluginPath($cssPath);
         if(is_link($pluginPath)) {
@@ -109,11 +122,21 @@ class CssService extends PluginService implements ManifestContent {
         }
     }
 
+    /**
+     * Returns the directory object of the published CSS files. 
+     * @param Plugin $plugin
+     * @return Directory
+     */
     public function getCssDirectory(Plugin $plugin): Directory {
         return new Directory("plugin_css", "private");
     }
 
 
+    /**
+     * Unpublish all CSS files specified inside the manifest.
+     * @param Plugin $plugin
+     * @return void
+     */
     public function unpublishFiles(Plugin $plugin): void {
         $cssFiles = $this->retrieveManifestValues(PluginManifest::fromPlugin($plugin));
         $cssDirectory = $this->getCssDirectory($plugin);
@@ -164,17 +187,31 @@ class CssService extends PluginService implements ManifestContent {
         return $this->getData();
     }
 
+    /**
+     * Retrieves the storage directory for the published CSS files.
+     * @return Directory
+     */
     public function getStorageDirectory(): Directory {
         return new Directory('plugin_css', 'private');
     }
 
-    protected function getTargetName(Plugin $plugin, mixed $file): string {
-        $name = basename(str_replace('\\', '/', (string) $file));
+    /**
+     * Get's the name of the CSS
+     * @param Plugin $plugin
+     * @param mixed $file
+     * @return string
+     */
+    protected function getTargetName(Plugin $plugin, string $fileName): string {
+        $name = basename(str_replace('\\', '/', (string) $fileName));
         $name = explode('.', $name)[0];
         $name = preg_replace('/[^a-zA-Z0-9-_]/', '', $name);
         return $plugin->slugName() . '-' . $plugin->uuid . '-' . $name . '.css';
     }
 
+    /**
+     * Get's all CSS files as HTML tags.
+     * @return string All CSS files in HTML link tags separated by newline.
+     */
     public function getHtmlTags() {
         $tags = "";
         $installed = app(PluginManager::class)->getInstalledPlugins();
@@ -188,6 +225,11 @@ class CssService extends PluginService implements ManifestContent {
     }
 
 
+    /**
+     * Returns all CSS download URLs.
+     * @param Plugin $plugin
+     * @return string[]
+     */
     public function getUrls(Plugin $plugin): array {
         $files = CssFile::where('plugin_id', $plugin->id)->get();
         $urls = [];

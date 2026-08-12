@@ -5,7 +5,7 @@ namespace App\Services\Plugin;
 use App\Plugin;
 use App\Plugin\PluginDirectory;
 use App\Plugin\PluginManifest;
-use App\Services\PluginManager;
+use App\Support\Log\PluginLog;
 use Illuminate\Support\Facades\File;
 
 class DiscoveryService extends PluginService {
@@ -26,23 +26,14 @@ class DiscoveryService extends PluginService {
         $directories = self::getPluginPaths();
         return array_map(fn($path) => basename($path), $directories);
     }
-
+    
     /**
      * Summary of discover
      * @return array
      */
     public function discover(): array {
         $pluginNames = self::getPluginNames();
-        $availablePlugins = app(PluginManager::class)->getPlugins();
-        $undiscoveredPlugins = [];
-
-        $availablePluginNames = array_map(fn($plugin) => $plugin->name, $availablePlugins);
-        foreach($pluginNames as $pluginName) {
-            if(!in_array($pluginName, $availablePluginNames)) {
-                $undiscoveredPlugins[] = $pluginName;
-            }
-        }
-        return $this->discoverList($undiscoveredPlugins);
+        return $this->discoverList($pluginNames);
     }
 
     public function discoverList(array $list): array {
@@ -54,11 +45,12 @@ class DiscoveryService extends PluginService {
     }
 
     public function discoverByName(string $name): ?Plugin {
-        
         $manifest = PluginManifest::readFromName($name);
         $plugin = null;
         if($manifest) {
             $plugin = Plugin::updateOrCreateFromManifest($manifest);
+        } else {
+            PluginLog::forName($name)->error("Plugin could not be discovered. Manifest file is missing or invalid.");
         }
 
         return $plugin;

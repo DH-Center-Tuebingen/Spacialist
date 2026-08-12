@@ -22,14 +22,15 @@ class ScriptService extends PluginService {
     public function install(Plugin $plugin, PluginManifest $manifest): void {
         $this->publish($plugin);
     }
-
-    public function getUrl(Plugin $plugin): string {
-        // We append the version as search param to allow the browser to cache the 
-        // file but only when it remains the same version, which should always ensure that
-        // an update has effect without requiring the users to clear their cache.
-        return "api/download/plugin/{$plugin->slugName()}-{$plugin->uuid}.js?version=$plugin->version";
+    
+    public function update(Plugin $plugin, PluginManifest $manifest): void {
+        $this->publish($plugin);
     }
-
+    
+    public function uninstall(Plugin $plugin, PluginManifest $manifest): void{
+        $this->unpublish($plugin);
+    }
+    
     /**
      * The script path may be a symbolic link, esp. when used in production.
      * Therefore we need to check of the file exists or if the file is a symbolic
@@ -81,12 +82,12 @@ class ScriptService extends PluginService {
 
         // We start detecting the target file first, to return early, when the target file
         // is using a symlink.
-        $storageDirectory = new Directory("plugins", "private");
+        $storageDirectory = $this->getStorageDirectory();
         $scriptName = $this->getScriptName($plugin);
         $targetPath = $storageDirectory->getDirectoryPath($scriptName);
 
-        if(is_link($targetPath)) { // we assume that the symlink is valid and skip the publishing process
-            PluginLog::for($plugin)->warning("Script for plugin {$plugin->name} is already published as a symlink. Skipping publishing process.");
+        if(is_link($targetPath)) { // we assume that the symlink is valid and skip the publishing step
+            PluginLog::for($plugin)->warning("Script is already published as a symlink. Skipping publishing step.");
         } else { // when the target file is no symlink, we need to resolve the source file and copy it to the target location.
             $srcPath = $this->resolveScriptPath($plugin, 3);
 
@@ -108,11 +109,57 @@ class ScriptService extends PluginService {
 
         return $this->getUrl($plugin);
     }
+    
+    
+    /**
+     * Removes the script file from the storage.
+     * If the script file is a symlink it will not be removed.
+     * 
+     * @param Plugin $plugin
+     * @return bool Returns true if the script was removed successfully, otherwise false.
+     */
+    public function unpublish(Plugin $plugin): bool {
+        $storageDirectory = $this->getStorageDirectory();
+        $scriptName = $this->getScriptName($plugin);
+        $targetPath = $storageDirectory->getDirectoryPath($scriptName);
+
+         if(is_link($targetPath)) { // we assume that the symlink is valid and skip the unpublishing step
+            PluginLog::for($plugin)->warning("Script is published as a symlink. Skipping unpublishing step.");
+        } else {
+            $success = $storageDirectory->delete($scriptName);
+            if(!$success){
+                PluginLog::for($plugin)->warning("Script could not be deleted from the server.");
+            }
+        }
+        return $success;
+    }
 
     public function getScriptName(Plugin $plugin): string {
         return "{$plugin->slugName()}-{$plugin->uuid}.js";
     }
+    
+    
+    /**
+     * Get's the URL to the published script file. The URL receives the current version of the plugin as a search parameter
+     * to prevent caching issues when the plugin is updated. 
+     * The URL is of the form: 
+     * 
+     * api/download/plugin/{plugin-slug}-{plugin-uuid}.js?version={plugin-version}
+     * 
+     * @param Plugin $plugin
+     * @return string
+     */
+    public function getUrl(Plugin $plugin): string {
+        return "api/download/plugin/{$plugin->slugName()}-{$plugin->uuid}.js?version=$plugin->version";
+    }
 
+
+    /**
+     * Retrieves the HTML <script> tags of all installed plugins.
+     * This can be used to append the scripts directly in a blade template.
+     * 
+     * @return string All script tags of the installed plugins, separated by newline.
+     */
     public function getHtmlTags(): ?string {
         $scripts = "";
         $installedPlugins = app(PluginManager::class)->getInstalledPlugins();
@@ -123,6 +170,10 @@ class ScriptService extends PluginService {
         return $scripts;
     }
 
+    /**
+     * Retrieves the storage directory for the published script files.
+     * @return Directory
+     */
     public function getStorageDirectory(): Directory {
         return new Directory('plugins', 'private');
     }

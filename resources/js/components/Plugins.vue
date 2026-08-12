@@ -1,5 +1,8 @@
 <template>
-    <div class="d-flex flex-column h-100">
+    <div
+        class="d-flex flex-column h-100"
+        ref="root"
+    >
         <header class="mb-3">
             <h4>
                 {{ t('main.plugins.title', 2) }}
@@ -78,25 +81,24 @@
     import {
         computed,
         onMounted,
-        reactive,
-        nextTick,
         ref,
+        useTemplateRef,
     } from 'vue';
 
 
     import { useI18n } from 'vue-i18n';
 
     import usePluginStore from '../bootstrap/stores/plugin';
-    import { useToast } from '@/plugins/toast.js';
 
     import {
         can,
     } from '@/helpers/helpers.js';
 
     import Plugin from './plugins/Plugin.vue';
-    import { getPluginTitle } from '../helpers/plugins';
     import LoadingContainer from './structure/LoadingContainer.vue';
     import { useLoad } from '../composables/load';
+    import { useBootstrapDropdownZAdjust } from '@/composables/bootstrap-dropdown-z-adjust';
+
 
     export default {
         components: {
@@ -107,6 +109,13 @@
             const { t } = useI18n();
             const pluginStore = usePluginStore();
             const { execAsync, error, loading } = useLoad()
+            const root = useTemplateRef('root')
+
+            // When the Plugins are shown in more than 1 column, the dropdown
+            // is obscured by the next row, so we need to adjust the zIndex of 
+            // the dropdown card when the dropdpwn opens.
+            const { updateAllDropdowns } = useBootstrapDropdownZAdjust(root)
+
 
             onMounted(() => {
                 // Ensure plugins are loaded

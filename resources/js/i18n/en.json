@@ -74,7 +74,7 @@
             "confirm_and_save": "No, save and continue"
         },
         "error": {
-            "altoastert_title": "Error Message",
+            "alert_title": "Error Message",
             "info_issue": "If you think this is a bug, please have a look at our <a href=\"https://github.com/DH-Center-Tuebingen/Spacialist/issues\" target=\"_blank\">issue tracker</a> on github to see if this has been already reported or <a href=\"https://github.com/DH-Center-Tuebingen/Spacialist/issues?q=is:issue+is:closed\" target=\"_blank\">closed</a> in a later version (Your current version can be found in Settings > <i class=\"fas fa-fw fa-info-circle\"></i> About Dialog). If it is neither reported nor closed, feel free to <a href=\"https://github.com/DH-Center-Tuebingen/Spacialist/issues/new\" target=\"_blank\">open a new issue</a>.",
             "occur": "Error occured",
             "headers": "Headers",
@@ -495,7 +495,7 @@
             "top_level": "Top-Level-Entity",
             "count": "No Top-Level-Entities | One Top-Level-Entity | {cnt} Top-Level-Entities",
             "detail_tab_none_selected": "No Entity selected. Select an Entity from the tree to see the details in this tab.",
-            "toasts": {
+            "s": {
                 "updated": {
                     "title": "Entity updated",
                     "msg": "Data of ‚{name}‘ successfully updated."
@@ -536,7 +536,7 @@
                 "multiedit": {
                     "title": "Toggle Multiedit",
                     "open": "Open Multiedit Tool",
-                    "toast": {
+                    "": {
                         "saved": {
                             "title": "Multiedit successful",
                             "msg": "Successfully edited content of {attr_cnt} attributes for {ent_cnt} entities."
@@ -580,7 +580,7 @@
                     "comment": "Comment",
                     "add_button": "Add Reference"
                 },
-                "toasts": {
+                "s": {
                     "cannot_edit_metadata": {
                         "msg": "You have to enter data first, before you can edit metadata."
                     }
@@ -654,7 +654,7 @@
             "accesspoints": {
                 "default": "Spacialist (default)"
             },
-            "toasts": {
+            "s": {
                 "updated": {
                     "title": "User updated",
                     "msg": "{name} successfully updated."
@@ -718,7 +718,7 @@
                 "administrator": "Administrator",
                 "guest": "Guest"
             },
-            "toasts": {
+            "s": {
                 "updated": {
                     "title": "Role updated",
                     "msg": "{name} successfully updated."
@@ -749,7 +749,7 @@
             "collapse_groups": "Collapse all groups",
             "sort_by_name": "Sort by name",
             "sort_by_creation_date": "Sort by creation date",
-            "toasts": {
+            "s": {
                 "updated_type": {
                     "title": "Entity-Type updated",
                     "msg": "{name} successfully updated."
@@ -805,7 +805,7 @@
             }
         },
         "preference": {
-            "toasts": {
+            "s": {
                 "updated": {
                     "msg": "Preferences successfully updated."
                 }
@@ -873,7 +873,7 @@
             "modal": {
                 "changelog_title": "Plugin"
             },
-            "toasts": {
+            "s": {
                 "update": {
                     "title": "Plugin updated",
                     "message": "Plugin {name} successfully updated to version {v} (from version {vo})."
@@ -946,7 +946,7 @@
                     "alert": "If you delete <span class=\"fw-bold\">{name}</span>, one reference is deleted, too. | If you delete <span class=\"fw-bold\">{name}</span>, {cnt} references are deleted, too."
                 }
             },
-            "toast": {
+            "": {
                 "delete": {
                     "title": "Entry deleted successfully",
                     "msg": "Entry {name} is deleted"
