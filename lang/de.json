@@ -110,7 +110,11 @@
     "Start date of a time period must not be after it's end date": "Das Startdatum einer Zeitspanne darf nicht nach ihrem Enddatum liegen",
     
     "A plugin with the name ':pluginName' and the same or later version (:uploadedVersion and :existingVersion) already exists. Aborting.": "Ein Plugin mit dem Namen ':pluginName', hat aber die gleiche oder eine niedrigere Version (:uploadedVersion and :existingVersion). Abbruch.",
-    "Cannot install plugin :pluginName because the following dependencies are missing: :missingDependencies.": "Plugin :pluginName kann nicht installiert werden, da die folgenden Abhängigkeiten fehlen: :missingDependencies.",
+    "Installation requirements are not met:\n:dependencyError": "Voraussetzungen für die Installation sind nicht erfüllt:\n:dependencyError",
+    "Required Plugin is missing ':pluginName'": "Benötigtes Plugin existiert nicht ':pluginName'",
+    "Required Plugin is not installed ':pluginName'": "Benötigtes Plugin ist nicht installiert ':pluginName'",
+    "Plugin is not compatible with the current Spacialist version.": "Plugin ist inkompatibel mit der aktuellen Spacialist Version.",
+    
     "Could not open provided plugin zip file. Aborting.": "Das bereitgestellte Plugin-ZIP-Archiv konnte nicht geöffnet werden. Abbruch.",
     "Format mismatch. Only a folder is allowed on root level.": "Inkorrekte ZIP-Struktur: Die oberste Ebene muss genau ein Ordner sein.",
     "Error while extracting zip file. Please check file permissions or ask your system adminstrator.": "Fehler beim Entpacken der ZIP-Datei. Bitte überprüfen Sie die Dateiberechtigungen oder wenden Sie sich an einen Systemadministrator.",

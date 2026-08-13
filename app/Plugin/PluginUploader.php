@@ -4,7 +4,6 @@ namespace App\Plugin;
 
 use App\Plugin;
 use App\Plugin\Support\PluginUploadResult;
-use App\Services\PluginManager;
 use Illuminate\Support\Str;
 use App\Plugin\PluginDirectory;
 use SplFileInfo;
@@ -33,10 +32,7 @@ class PluginUploader {
         $pluginName = $this->getSingleRootDirectory($zipFile);
         $existingPlugin = Plugin::where('name', $pluginName)->first();
         
-        if(isset($existingPlugin)) {
-            $this->validateExistingVersionIsOlder($zipFile, $existingPlugin);
-        }
-
+        $this->validateExistingVersionIsOlder($zipFile, $existingPlugin);
         if($this->doesPluginDirectoryExist($pluginName)) {
             $backupPath = $this->ensureBackupDirectoryExists();
             $this->removeExistingBackup($backupPath, $pluginName);
@@ -140,9 +136,9 @@ class PluginUploader {
         return file_exists($pluginPath);
     }
 
-    private function validateExistingVersionIsOlder(ZipArchive $zipFile, Plugin $existingPlugin): void {
+    private function validateExistingVersionIsOlder(ZipArchive $zipFile, ?Plugin $existingPlugin): void {
 
-        if(!isset($existingPlugin)) {
+        if($existingPlugin == null) {
             return;
         }
 

@@ -210,9 +210,9 @@ export const usePluginStore = defineStore('plugin', {
                 delete window?.SpPS.data.plugins[kebabedName];
             }
 
-            this.unregisterSlots(kebabedName);
-            this.unregisterPreferences(kebabedName);
             this.unregisterAttributes(kebabedName);
+            this.unregisterPreferences(kebabedName);
+            this.unregisterSlots(kebabedName);
             removeScriptsAndStyles(data);
         },
         async upload(file) {
@@ -225,11 +225,14 @@ export const usePluginStore = defineStore('plugin', {
             }
             return response;
         },
-        unregisterSlots(id) {
-            filterAllChildArrays(this.registeredSlots, (plugin) => plugin.of != id);
+        unregisterAttributes(pluginName){
+            filterAllChildArrays(this.registeredAttributes, (plugin) => plugin.of != pluginName);
         },
-        unregisterPreferences(id) {
-            filterAllChildArrays(this.registeredPluginPreferences, (plugin) => plugin.of != id);
+        unregisterSlots(pluginName) {
+            filterAllChildArrays(this.registeredSlots, (plugin) => plugin.of != pluginName);
+        },
+        unregisterPreferences(pluginName) {
+            filterAllChildArrays(this.registeredPluginPreferences, (plugin) => plugin.of != pluginName);
         },
         updateOrAdd(plugin) {
             const idx = this.plugins.findIndex(p => p.id === plugin.id);
