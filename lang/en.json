@@ -112,7 +112,11 @@
     
     "This plugin is not installed.": "This plugin is not installed.",
     "A plugin with the name ':pluginName' and the same or later version (:uploadedVersion and :existingVersion) already exists. Aborting.": "A plugin with the name ':pluginName' and the same or later version (:uploadedVersion and :existingVersion) already exists. Aborting.",
-    "Cannot install plugin :pluginName because the following dependencies are missing: :missingDependencies.": "Cannot install plugin :pluginName because the following dependencies are missing: :missingDependencies.",
+    "Installation requirements are not met:\n:dependencyError": "Installation requirements are not met:\n:dependencyError",
+    "Required Plugin is missing ':pluginName'": "Required Plugin is missing ':pluginName'",
+    "Required Plugin is not installed ':pluginName'": "Required Plugin is not installed ':pluginName'",
+    "Plugin is not compatible with the current Spacialist version.": "Plugin is not compatible with the current Spacialist version.",
+    
     "Could not open provided plugin zip file. Aborting.": "Could not open provided plugin zip file. Aborting.",
     "Format mismatch. Only a folder is allowed on root level.": "Format mismatch. Only a folder is allowed on root level.",
     "Error while extracting zip file. Please check file permissions or ask your system adminstrator.": "Error while extracting zip file. Please check file permissions or ask your system adminstrator.",
