@@ -19,9 +19,9 @@ export function ago(value) {
     if(value) {
         let d;
         if(isNaN(value)) {
-            d = dayjs.utc(value);
+            d = dayjs(value);
         } else {
-            d = dayjs.utc(value*1000);
+            d = dayjs(value*1000);
         }
         return d.fromNow();
     }

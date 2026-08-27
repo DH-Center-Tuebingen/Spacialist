@@ -141,6 +141,11 @@ class UserController extends Controller {
             $groups['plugins'] = [];
             foreach($installedPlugins as $plugin) {
                 $slug = $plugin->slugName();
+                // TODO set custom permission matrix based on keys in permissions.json
+                // $groups['plugins'][$slug] = [
+                //     'keys' => $plugin->getPermissionGroups(),
+                //     'rows' => $plugin->getPermissions(),
+                // ];
                 $groups['plugins'][$slug] = $plugin->getPermissionGroups();
             }
         }
@@ -224,7 +229,7 @@ class UserController extends Controller {
         );
 
         $user = User::find($user->id);
-        
+
         return response()->json($user);
     }
 

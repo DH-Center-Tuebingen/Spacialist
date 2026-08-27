@@ -97,7 +97,7 @@ class Plugin extends Model
         return json_decode(json_encode($xmlObject), true);
     }
 
-    public function getInfo(){
+    public function getInfo() {
         return self::getPluginInfo($this->getPath());
     }
 
@@ -354,9 +354,9 @@ class Plugin extends Model
 
     public function clearCache(): void {
         Cache::forget($this->getScopeCacheKey());
-        
-        // TODO: Models are meant for the data layer only, 
-        // we should restructure the code into service classes (e.g. PluginMigrationService) 
+
+        // TODO: Models are meant for the data layer only,
+        // we should restructure the code into service classes (e.g. PluginMigrationService)
         app(AccessPointsService::class)->clearCache();
     }
 
@@ -415,7 +415,11 @@ class Plugin extends Model
     }
 
     public function getPermissionGroups(): array {
-        return array_keys($this->getPermissions());
+        $permissions = $this->getPermissions();
+        if(!isset($permissions) || !is_array($permissions)) {
+            return [];
+        }
+        return array_keys($permissions);
     }
 
     public function getRolePresets(): mixed {

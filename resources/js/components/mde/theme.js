@@ -150,6 +150,7 @@ const iconMapping = {
 const view = ({ css }) => css`
     /* copy from https://github.com/ProseMirror/@milkdown/prose/blob/master/style/prosemirror.css */
     .ProseMirror {
+        word-break: break-word;
         word-wrap: break-word;
         white-space: pre-wrap;
         white-space: break-spaces;
