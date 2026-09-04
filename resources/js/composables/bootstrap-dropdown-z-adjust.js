@@ -59,8 +59,8 @@ export const useBootstrapDropdownZAdjust = (rootElementRef, closest = '.col', zI
     });
 
     onBeforeUnmount(() => {
-        showBsDropdownHandler.forEach((value, key) => value.removeEventListener(key))
-        hideBsDropdownHandler.forEach((value, key) => value.removeEventListener(key))
+        showBsDropdownMap.forEach((callback, dropdown) => dropdown.removeEventListener('show.bs.dropdown', callback))
+        hideBsDropdownMap.forEach((callback, dropdown) => dropdown.removeEventListener('hide.bs.dropdown',callback))
     });
 
     return {
