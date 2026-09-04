@@ -47,6 +47,7 @@ import {
 
 import RouteRootDummy from '@/components/plugins/RouteRootDummy.vue';
 import * as buffer from 'buffer';
+import { ensureNotToStartWith, ensureStartsWith } from '@/helpers/string.js';
 
 const defaultPluginOptions = {
     id: null,
@@ -94,6 +95,18 @@ const {
 
 window.Vue = Vue;
 window.Buffer = buffer.Buffer;
+
+function requireOptions(options, requiredOptions) {
+    requiredOptions.forEach(opt => {
+        const missingOptions = []
+        if(!options[opt]) {
+            missingOptions.push(opt)
+        }
+        if(missingOptions.length > 0) {
+            throw new Error(`Missing required options: ${missingOptions.join(', ')}`);
+        }
+    });
+}
 
 export const SpPS = {
     api: {
@@ -225,25 +238,31 @@ export const SpPS = {
         if(!SpPS.data.plugins[options.id]) {
             throw new Error('No plugin with that ID is installed! Register it first, before registering an access point.');
         }
+
+        requireOptions(options, ['id', 'path', 'component']);
+
         const defaultOptions = {
             id: null,
             path: null,
             component: null,
             routes: [],
         };
+
         const mergedOptions = {
             ...defaultOptions,
             ...only(options, Object.keys(defaultOptions)),
         };
+
         const pluginRoute = {
-            path: `/${mergedOptions.path}`,
-            name: `${mergedOptions.id}_${mergedOptions.path}`,
+            path: ensureStartsWith(mergedOptions.path, '/'),
+            name: `${mergedOptions.id}_${ensureNotToStartWith(mergedOptions.path, '/')}`,
             component: mergedOptions.component,
             children: mergedOptions.routes,
             meta: {
                 auth: true
             }
         };
+
         router.addRoute(pluginRoute);
     },
     intoSlot: (options) => {
@@ -282,7 +301,7 @@ export const SpPS = {
         if(!options.name) {
             throw new Error('No slot for plugin provided!');
         }
-        
+
         usePluginStore().registerSlot(options.of, options.name);
     },
     registerComponent: (options) => {
