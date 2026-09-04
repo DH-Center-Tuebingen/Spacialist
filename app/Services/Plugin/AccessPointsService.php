@@ -65,7 +65,7 @@ class AccessPointsService extends PluginService implements ManifestContent {
             AccessPoint::create([
                 'plugin_id' => $plugin->id,
                 'identifier' => $accessPoint['id'],
-                'label' => $accessPoint['label'],
+                'label' => "plugin.{$plugin->slugName()}.{$accessPoint['label']}",
                 'path' => $accessPoint['path'],
             ]);
             
@@ -130,6 +130,7 @@ class AccessPointsService extends PluginService implements ManifestContent {
 
         foreach($accesspoints as $key => $accesspoint) {
             if(empty($accesspoint['id']) || empty($accesspoint['label']) || empty($accesspoint['path'])) {
+                PluginLog::warning("Access point in manifest is missing required fields: " . json_encode($accesspoint));
                 return false;
             }
         }
