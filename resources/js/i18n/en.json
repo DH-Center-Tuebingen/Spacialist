@@ -23,8 +23,8 @@
         "refresh": "Refresh",
         "clear": "Clear",
         "confirm": "OK",
-        "create": "Create",
         "apply": "Apply",
+        "create": "Create",
         "move": "Move",
         "parse": "Parse",
         "conflict": "Conflict",
@@ -495,7 +495,7 @@
             "top_level": "Top-Level-Entity",
             "count": "No Top-Level-Entities | One Top-Level-Entity | {cnt} Top-Level-Entities",
             "detail_tab_none_selected": "No Entity selected. Select an Entity from the tree to see the details in this tab.",
-            "s": {
+            "toasts": {
                 "updated": {
                     "title": "Entity updated",
                     "msg": "Data of ‚{name}‘ successfully updated."
@@ -536,7 +536,7 @@
                 "multiedit": {
                     "title": "Toggle Multiedit",
                     "open": "Open Multiedit Tool",
-                    "": {
+                    "toast": {
                         "saved": {
                             "title": "Multiedit successful",
                             "msg": "Successfully edited content of {attr_cnt} attributes for {ent_cnt} entities."
@@ -580,7 +580,7 @@
                     "comment": "Comment",
                     "add_button": "Add Reference"
                 },
-                "s": {
+                "toasts": {
                     "cannot_edit_metadata": {
                         "msg": "You have to enter data first, before you can edit metadata."
                     }
@@ -654,7 +654,7 @@
             "accesspoints": {
                 "default": "Spacialist (default)"
             },
-            "s": {
+            "toasts": {
                 "updated": {
                     "title": "User updated",
                     "msg": "{name} successfully updated."
@@ -718,7 +718,7 @@
                 "administrator": "Administrator",
                 "guest": "Guest"
             },
-            "s": {
+            "toasts": {
                 "updated": {
                     "title": "Role updated",
                     "msg": "{name} successfully updated."
@@ -749,7 +749,7 @@
             "collapse_groups": "Collapse all groups",
             "sort_by_name": "Sort by name",
             "sort_by_creation_date": "Sort by creation date",
-            "s": {
+            "toasts": {
                 "updated_type": {
                     "title": "Entity-Type updated",
                     "msg": "{name} successfully updated."
@@ -805,7 +805,7 @@
             }
         },
         "preference": {
-            "s": {
+            "toasts": {
                 "updated": {
                     "msg": "Preferences successfully updated."
                 }
@@ -873,7 +873,7 @@
             "modal": {
                 "changelog_title": "Plugin"
             },
-            "s": {
+            "toasts": {
                 "update": {
                     "title": "Plugin updated",
                     "message": "Plugin {name} successfully updated to version {v} (from version {vo})."
@@ -946,7 +946,7 @@
                     "alert": "If you delete <span class=\"fw-bold\">{name}</span>, one reference is deleted, too. | If you delete <span class=\"fw-bold\">{name}</span>, {cnt} references are deleted, too."
                 }
             },
-            "": {
+            "toast": {
                 "delete": {
                     "title": "Entry deleted successfully",
                     "msg": "Entry {name} is deleted"
@@ -1021,7 +1021,6 @@
             "import_settings": "Import-Settings",
             "upload_csv_info": "Select a CSV file to import data.",
             "drop_csv_file": "Drop CSV file here",
-            "csv_file_error": "CSV file could not be read.",
             "selected_entity_type": "Entity-Type",
             "column_entity_name": "Entity Name-Column",
             "column_entity_parent": "Entity Parent-Column",

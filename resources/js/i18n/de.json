@@ -98,6 +98,11 @@
         "preview_not_available": "Keine Vorschau verfügbar",
         "note": "Hinweis",
         "information": "Information",
+        "paginator": {
+            "count": "Anzahl",
+            "of": "von",
+            "skip": "Ab"
+        },
         "tools": {
             "title": "Werkzeuge",
             "bibliography": "Literatur",
@@ -109,11 +114,6 @@
                 "start": "Aufnahme starten",
                 "stop": "Aufnahme beenden"
             }
-        },
-        "paginator": {
-            "count": "Anzahl",
-            "of": "von",
-            "skip": "Ab"
         },
         "settings": {
             "title": "Einstellungen",
