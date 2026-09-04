@@ -150,23 +150,18 @@ export const useUserStore = defineStore('user', {
                 return null;
             }
         },
-        // setLoginState(value) {
-        //     this.userLoggedIn = value;
-        // },
         setPreferences(preferences) {
             this.preferences = preferences;
         },
         async login(credentials) {
             await getCsrfCookie();
             const user = await login(credentials);
-            // this.userLoggedIn = true;
             this.setActiveUser(user);
             await useSystemStore().initialize();
         },
         async logout() {
             await logout();
-            // this.setLoginState(false);
-            this.setActiveUser({});
+            this.setActiveUser(null);
         },
         setActiveUser(user, merge = false) {
             if(merge) {
