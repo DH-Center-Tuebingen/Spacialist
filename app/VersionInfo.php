@@ -46,8 +46,20 @@ class VersionInfo {
         }
     }
 
+    /**
+     * Get's the release version with the version prefix.
+     * @return string - The release version with the version prefix, e.g. v1.3.10
+     */
     public function getRelease() {
         return $this->release;
+    }
+    
+    /**
+     * Get's the release version as string without prefix.
+     * @return string - The release version as a string without the 'v' prefix, e.g. 1.3.10
+     */
+    public function getReleaseRaw() {
+        return $this->major . '.' . $this->minor . '.' . $this->patch;
     }
 
     public function getReleaseName() {
