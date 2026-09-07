@@ -110,7 +110,7 @@
     "Start date of a time period must not be after it's end date": "Das Startdatum einer Zeitspanne darf nicht nach ihrem Enddatum liegen",
     
     "A plugin with the name ':pluginName' and the same or later version (:uploadedVersion and :existingVersion) already exists. Aborting.": "Ein Plugin mit dem Namen ':pluginName', hat aber die gleiche oder eine niedrigere Version (:uploadedVersion and :existingVersion). Abbruch.",
-    "Installation requirements are not met:\n:dependencyError": "Voraussetzungen für die Installation sind nicht erfüllt:\n:dependencyError",
+    "Installation requirements are not met: :dependencyError": "Voraussetzungen für die Installation sind nicht erfüllt: :dependencyError",
     "Required Plugin is missing ':pluginName'": "Benötigtes Plugin existiert nicht ':pluginName'",
     "Required Plugin is not installed ':pluginName'": "Benötigtes Plugin ist nicht installiert ':pluginName'",
     "Plugin is not compatible with the current Spacialist version.": "Plugin ist inkompatibel mit der aktuellen Spacialist Version.",
