@@ -254,7 +254,9 @@ class MigrationService extends PluginService {
             throw new \Exception("Invalid migration file name: $migrationFile");
         }
         $migrationPath = Str::finish($directory, '/') . $migrationFile;
-        $instantiatedMigration = require($migrationPath);
+        // require_once: migration files may be called multiple times within the same process,
+        // which would otherwise fatal with "Cannot redeclare class" (e.g. in tests).
+        $instantiatedMigration = require_once($migrationPath);
 
         if(is_object($instantiatedMigration)) {
             return $instantiatedMigration;

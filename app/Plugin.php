@@ -46,47 +46,58 @@ class Plugin extends Model {
 
     public static function updateOrCreateFromManifest(PluginManifest $manifest): Plugin {
         $name = $manifest->getName();
-        $plugin = self::where('name', $name)->first();
+        $existingPlugin = self::where('name', $name)->first();
+        $newPlugin = null;
 
         $isCreation = false;
-        if(!isset($plugin)) {
-            $plugin = new self();
-            $plugin->uuid = Str::uuid();
-            $plugin->name = $name;
+        if(!isset($existingPlugin)) {
+            $newPlugin = new self();
+            $newPlugin->uuid = Str::uuid();
+            $newPlugin->name = $name;
             $isCreation = true;
+        } else {
+            $newPlugin = clone($existingPlugin);
         }
 
-        $plugin->version = $manifest->getVersion();
-        $plugin->metadata = [
-            'authors' => $manifest->getAuthors(),
-            'description' => $manifest->getDescription(),
-            'licence' => $manifest->getLicence(),
-        ];
-
-        if(!$isCreation) {
-            $plugin->updateUpdateAvailable($manifest->getVersion());
+        if(version_compare($newPlugin->version, $manifest->getVersion(), '==') !== 0) {
+            $newPlugin->version = $manifest->getVersion();
         }
-        $plugin->save();
+        
+        static::updateMetadataFromManifest($newPlugin, $manifest);
 
-        return $plugin;
+        // Avoid bumping updated_at when nothing actually changed.
+        if($isCreation || $newPlugin->isDirty()) {
+            $newPlugin->save();
+        }
+
+        return $newPlugin;
     }
+    
+    
+    public static function updateMetadataFromManifest(Plugin $plugin, PluginManifest $manifest): void {
+        $manifestAuthors = $manifest->getAuthors() ?? [];
+        $manifestDescription = $manifest->getDescription() ?? "";
+        $manifestLicence = $manifest->getLicence() ?? "";
 
-    public function updateUpdateAvailable($fromInfoVersion): void {
-        if($this->version != $fromInfoVersion) {
-            // installed version splitted
-            preg_match('/(\d+)\.(\d+).(\d+)(-.+)?/', $this->version, $iv);
-            // available/latest version splitted
-            preg_match('/(\d+)\.(\d+).(\d+)(-.+)?/', $fromInfoVersion, $lv);
+        $metadata = $plugin->metadata ?? [];
+        
+        // Either the array key does not exist at all or when it's null, we provide a default value.
+        $authors = (isset($metadata['authors']) ? $metadata['authors'] : []) ?? [];
+        $description = (isset($metadata['description']) ? $metadata['description'] : "") ?? "";
+        $licence = (isset($metadata['licence']) ? $metadata['licence'] : "") ?? "";
 
-            if(
-                ($lv[1] > $iv[1] || $lv[2] > $iv[2] || $lv[3] > $iv[3]) ||
-                (!isset($lv[4]) && isset($iv[4])) ||
-                (isset($lv[4]) && isset($iv[4]) && $lv[4] > $iv[4])
-            ) {
-                $this->update_available = $fromInfoVersion;
-            } else {
-                $this->update_available = NULL;
-            }
+        
+        // We only want to update the metadata if it has actually changed.
+        if(
+            $manifestAuthors !== $authors ||
+            $manifestDescription !== $description ||
+            $manifestLicence !== $licence
+        ) {
+            $plugin->metadata = [
+                'authors' => $authors,
+                'description' => $description,
+                'licence' => $licence,
+            ];
         }
     }
 }
