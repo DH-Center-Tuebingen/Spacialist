@@ -110,6 +110,20 @@ class PluginUploaderTest extends TestCase {
         $this->assertTrue($this->uploader->doesPluginDirectoryExist(self::PLUGIN_NAME));
         $this->assertTrue(is_dir(PluginDirectory::getPath('_backups/' . self::PLUGIN_NAME)));
     }
+    
+    public function testUpdateAllowsSameVersion(): void {
+        $this->trackPluginDirs();
+        $this->createPluginInDb('1.0.0');
+
+        $template = $this->makeTemplate('1.0.0')->addBasic()->generate();
+        $zipPath = $this->makeZipFromTemplate($template);
+
+        $result = $this->uploader->upload(new SplFileInfo($zipPath));
+        
+        $this->assertEquals(self::PLUGIN_NAME, $result->pluginName);
+        $this->assertTrue($result->isUpdate());
+        $this->assertTrue($this->uploader->doesPluginDirectoryExist(self::PLUGIN_NAME));
+    }
 
     public function testUploadMovesOldPluginToBackupOnUpdate(): void {
         $this->trackPluginDirs();
@@ -149,17 +163,6 @@ class PluginUploaderTest extends TestCase {
         $zip->addFromString('PluginA/plugin.xml', '<plugin><name>PluginA</name><version>1.0.0</version></plugin>');
         $zip->addFromString('PluginB/plugin.xml', '<plugin><name>PluginB</name><version>1.0.0</version></plugin>');
         $zip->close();
-
-        $this->expectException(HttpException::class);
-        $this->uploader->upload(new SplFileInfo($zipPath));
-    }
-
-    public function testUploadRejectsSameVersion(): void {
-        $this->trackPluginDirs();
-        $this->createPluginInDb('1.0.0');
-
-        $template = $this->makeTemplate('1.0.0')->addBasic()->generate();
-        $zipPath = $this->makeZipFromTemplate($template);
 
         $this->expectException(HttpException::class);
         $this->uploader->upload(new SplFileInfo($zipPath));
