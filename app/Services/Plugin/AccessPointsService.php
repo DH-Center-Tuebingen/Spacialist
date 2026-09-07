@@ -8,6 +8,7 @@ use App\Plugin;
 use App\Plugin\PluginManifest;
 use App\Support\BootstrapCache;
 use App\Support\Log\PluginLog;
+use App\User;
 
 /**
  * Allows the definition of custom access_points for the application, that require special
@@ -108,6 +109,27 @@ class AccessPointsService extends PluginService implements ManifestContent {
 
     public function uninstall(Plugin $plugin, PluginManifest $manifest): void {
         AccessPoint::where('plugin_id', $plugin->id)->delete();
+    }
+
+    /**
+     * Users' access points are only removed when the plugin is fully removed.
+     * Uninstalling/reinstalling a plugin does NOT remove user assignments,
+     * as it would be tedious to reapply all the access points after disabling
+     * the plugin.
+     */
+    public function remove(Plugin $plugin, PluginManifest $manifest): void {
+        $identifiers = array_column($this->retrieveManifestValues($manifest), 'id');
+        if(empty($identifiers)) {
+            return;
+        }
+
+        foreach(User::whereNotNull('accesspoints')->get() as $user) {
+            $remaining = array_values(array_diff($user->accesspoints ?? [], $identifiers));
+            if($remaining !== $user->accesspoints) {
+                $user->accesspoints = $remaining;
+                $user->save();
+            }
+        }
     }
 
     public function retrieveManifestValues(PluginManifest $manifest): array {
