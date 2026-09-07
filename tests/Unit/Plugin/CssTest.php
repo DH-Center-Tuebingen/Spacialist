@@ -50,7 +50,7 @@ class CssTest extends TestCase {
             $manifest = PluginManifest::fromPlugin($template->plugin);
             app(CssService::class)->verifyManifest($manifest);
             $this->assertEquals([], CssFile::all()->toArray());
-        }, true);
+        });
     }
 
     public function testSingleCssEntryInManifest() {
@@ -64,7 +64,7 @@ class CssTest extends TestCase {
                 "src" => "path/to/file.css"
             ]);
 
-        }, true);
+        });
     }
 
     public function testMultipleCssEntriesInManifest() {
@@ -83,6 +83,6 @@ class CssTest extends TestCase {
                 "src" => "path/to/file_2.css"
             ]);
 
-        }, true);
+        });
     }
 }

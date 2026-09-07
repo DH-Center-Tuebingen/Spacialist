@@ -72,7 +72,7 @@ class ApiPluginAttributeTest extends TestCase {
                     ]
                 ]
             ]);
-        }, true);
+        });
     }
 
 
@@ -83,6 +83,6 @@ class ApiPluginAttributeTest extends TestCase {
         $this->generator->use(function () use ($template) {
             $response = $this->userRequest()->get("/api/v1/plugin/1");
             $this->assertStatus($response, 200);
-        }, true);
+        });
     }
 }

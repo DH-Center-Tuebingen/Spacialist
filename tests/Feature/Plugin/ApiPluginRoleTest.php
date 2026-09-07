@@ -129,7 +129,7 @@ class ApiPluginRoleTest extends TestCase {
                     ])
                     ->etc()
             );
-        }, true);
+        });
     }
 
     function testMultipleFiles() {
@@ -163,6 +163,6 @@ class ApiPluginRoleTest extends TestCase {
                     ])
                     ->etc()
             );
-        }, true);
+        });
     }
 }
