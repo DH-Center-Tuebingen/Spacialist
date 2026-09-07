@@ -3,13 +3,13 @@
 namespace App\Services\Plugin;
 
 use App\Exceptions\PluginLifecycleException;
-use App\Globals;
 use App\Models\Plugin\Dependencies;
 use App\Plugin;
 use App\Plugin\PluginManifest;
 use App\Support\BootstrapCache;
 use App\Support\Log\PluginLog;
 use App\Support\Plugin\Dependency;
+use App\VersionInfo;
 
 
 /**
@@ -19,8 +19,8 @@ use App\Support\Plugin\Dependency;
  * ```xml
  * <dependencies>
  *      <core min='0.12.0'>
- *      <plugin>File</plugin>
- *      <plugin>Map</plugin>
+ *      <plugin name='File' min='1.0.0' max='2.0.0'/>
+ *      <plugin name='Map' />
  *      ...
  * </dependencies>
  * ```
@@ -28,9 +28,6 @@ use App\Support\Plugin\Dependency;
 class DependencyService extends PluginService {
 
     use BootstrapCache;
-    
-    private array $dependencyErrors = [];
-    private array $dependencies = [];
     
     public function getCacheName(): string
     {
@@ -44,41 +41,12 @@ class DependencyService extends PluginService {
     
     public function onBeforeInstall(Plugin $plugin, PluginManifest $manifest): void
     {
-        [$error] = $this->evaluateDependencies($plugin, $manifest);
-        if($this->dependencyErrors != ''){
+        ['errors' => $errors] = $this->evaluateDependencies($plugin, $manifest);
+        if(count($errors) > 0){
             throw new PluginLifecycleException(
                 $plugin, 
-                __('Voraussetzungen für die Installation sind nicht erfüllt:\n:dependencyError', $dependencyErrors)
+                __('Installation requirements are not met: :dependencyError', ['dependencyError' => implode(" ;; ", $errors)])
             );
-        }
-    }
-
-    public function install(Plugin $plugin, PluginManifest $manifest): void
-    {
-        $dependencies = $this->getDependenciesFromManifest($manifest);
-        if(empty($dependencies)) {
-            return;
-        }
-        
-        foreach($dependencies as $dependency) {
-            $dependsOn = $dependency['tag'] ?? null;
-            if(!$dependsOn) {
-                PluginLog::for($plugin)->warning('Invalid dependency declaration in plugin manifest of {$manifest->getName()}. Missing "tag" attribute.');
-                continue;
-            }
-            
-            // Allows users to type the plugin in lowercase, or
-           
-                   
-            // $dependsOnPlugin = Plugin::where('name', $dependsOn)->first() ?? null;
-            // if(!$dependsOnPlugin) {
-            //     throw new Exception('Plugin dependency '$dependsOn' not found for plugin '{$manifest->getName()}'. This should have been caught in the onBeforeInstall check.');
-            // }
-        
-            // Dependencies::create([
-            //     'plugin_id' => $plugin->id,
-            //     'depends_on' => $dependsOnPlugin->id,
-            // ]);
         }
     }
     
@@ -91,7 +59,6 @@ class DependencyService extends PluginService {
         return $manifest->getTagNodes('dependencies/*');
     }
     
-    
     /**
      * Checks if all dependencies are met.
      * 
@@ -102,19 +69,22 @@ class DependencyService extends PluginService {
         $errors = [];
         $dependencies = $this->getDependenciesFromManifest($manifest);
         if(empty($dependencies)) {
-            return [];
+            return [
+                'dependencies' => [],
+                'errors' => [],
+            ];
         }
     
         [
             'core' => $coreDependencies,
-            'plugin' => $pluginDependencies,
+            'plugins' => $pluginDependencies,
             'unsupported' => $unsupportedDependencies,
         ] = $this->decomposeDependencies($dependencies);
         
         $this->logWarningOfUnsupportedDependencies($plugin, $unsupportedDependencies);
-        $errors[] = $this->evaluatePluginDependencies($pluginDependencies);
-        $errors[] = $this->evaluateCoreDependencies($coreDependencies);
-
+        $errors = array_merge($errors, $this->evaluatePluginDependencies($pluginDependencies));   
+        $errors = array_merge($errors, $this->evaluateCoreDependencies($coreDependencies));
+        
         return [
             'dependencies' => $dependencies,
             'errors' => $errors,
@@ -123,6 +93,8 @@ class DependencyService extends PluginService {
     
     /**
      * Sorts the dependencies into three differnt buckets: core, plugins and unsupported.
+     * 
+     * @param array<array<string, mixed>> $dependencies - The raw dependencies extracted from the manifest.
      */
     private function decomposeDependencies(array $dependencies) : array{
         $data = [
@@ -176,7 +148,10 @@ class DependencyService extends PluginService {
             } else if(!$requiredPlugin->installed_at) {
                 $errors[] = __("Required Plugin is not installed ':pluginName'");
             } else {
-                $dependency->supportsVersion($requiredPlugin->version);
+                $supported = $dependency->supportsVersion($requiredPlugin->version);
+                if(!$supported){
+                    $errors[] = __("Required Plugin ':pluginName' does not meet the version requirements.", ['pluginName' => $dependency->name]);
+                }
             }
         }
         return $errors;
@@ -184,20 +159,22 @@ class DependencyService extends PluginService {
     
     /**
      * Evaluates if the core dependencies are met:
-     * + Is there only a single core dependency
+     * + Is there only a single core dependency (or none at all)
      * + Is the core dependency in the version range.
      * 
-     * @param Dependency[] $dependencies List of core dependencies.
+     * @param Dependency[] $coreDependencies List of core dependencies.
      * @return string[] - Returns an array of errors messages encountered during evaliation.
      */
-    private function evaluateCoreDependencies(array $dependencies): array {
+    private function evaluateCoreDependencies(array $coreDependencies): array {
         $errors = [];
-        if(count($dependencies) > 0){
+        if(count($coreDependencies) > 1){
             $errors[] = __("Multiple core dependencies are present.");
-        } else {
-            $dependency = $dependencies[0];
-            if(!$dependency->supportsVersion(Globals::getVersion()['release'])){
-                $errors[] = __("Plugin is not compatible with the current Spacialist version.")
+        } else if(count($coreDependencies) === 1) {
+            $dependency = $coreDependencies[0];
+            $version = new VersionInfo();
+            
+            if(!$dependency->supportsVersion($version->getReleaseRaw())){
+                $errors[] = __("Plugin is not compatible with the current Spacialist version.");
             }
         }
         return $errors;

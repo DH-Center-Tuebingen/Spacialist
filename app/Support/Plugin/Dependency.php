@@ -19,11 +19,15 @@ class Dependency {
      * @param array $dependencyNode
      * 
      */
-    public __constructor(array $dependencyNode){
+    public function __construct(array $dependencyNode){
         $this->tag = $dependencyNode['tag'];
-        $this->name = $this->tag === CORE ? CORE : ($dependencyNode['text'] ?? 'unknown')
-        $this->minVersion = $dependencyNode['min']
-        $this->maxVersion = $dependencyNode['max']
+        
+        if($dependencyNode['attributes']){
+            $attributes = $dependencyNode['attributes'];
+            $this->name = $this->tag === self::CORE ? self::CORE : ($attributes['name'] ?? 'INVALID_DEPENDENCY');
+            $this->minVersion = isset($attributes['min']) ? (string)$attributes['min'] : null;
+            $this->maxVersion = isset($attributes['max']) ? (string)$attributes['max'] : null;
+        }
     }
     
     
@@ -37,14 +41,14 @@ class Dependency {
         $isBiggerOrEqualMin = true;
         $isSmallerOrEqualMax = true;
     
+        
         if($this->minVersion){
-            $isBiggerOrEqualMin = version_compare(version, $this->minVersion) <= 0;
+            $isBiggerOrEqualMin = version_compare($this->minVersion, $version) <= 0;
         }
         
         if($this->maxVersion){
-            $isSmallerOrEqualMax = version_compare(version, $this->maxVersion) >= 0;
+            $isSmallerOrEqualMax = version_compare($version, $this->maxVersion) <= 0;
         }
-        
-        return $isBiggerOrEqualMin && $isBiggerOrEqualMax
+        return $isSmallerOrEqualMax && $isBiggerOrEqualMin;
     }
 }
