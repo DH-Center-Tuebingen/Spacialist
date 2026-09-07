@@ -40,7 +40,8 @@ class ApiPluginHookTest extends TestCase {
                     'foo' => 'bar',
                     'boo' => 'far'
                 ]);
-            }, true);
+            }
+        );
     }
 
     function testHooksOnDifferentEndpoints() {
