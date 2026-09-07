@@ -68,7 +68,7 @@ class PluginController extends Controller {
                 return true;
             });
         } else {
-            info("Plugin {$pluginName} was uploaded and installed successfully.");
+            PluginLog::forName($pluginName)->info("Plugin {$pluginName} was uploaded and installed successfully.");
             $plugin = app(DiscoveryService::class)->discoverByName($pluginName);
             if(!isset($plugin)) {
                 $success = false;

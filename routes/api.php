@@ -12,7 +12,6 @@ use Illuminate\Support\Facades\Route;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
-
 Route::middleware('auth:sanctum')->prefix('download')->group(function () {
     Route::get('/avatar', 'UserController@downloadAvatar');
     Route::get('/bibliography', 'BibliographyController@downloadFile');
@@ -44,9 +43,11 @@ Route::middleware('auth:sanctum')->prefix('v1/plugin')->group(function () {
 });
 
 Route::middleware('auth:sanctum')->middleware(['can:plugin_write'])->prefix('v1/plugin')->group(function () {
-    // TODO: This route modifies the server state and should be a post or patch request:
+    // LEGACY: This route is kept for backward compatibility, the install post request should be used instead.
     Route::get('/{plugin}', 'PluginController@installPlugin');
     
+    Route::post('/install/{plugin}', 'PluginController@installPlugin');
+    Route::post('/uninstall/{plugin}', 'PluginController@uninstallPlugin');
     Route::post('/refresh', 'PluginController@refresh');
     Route::post('/refresh_info/{plugin}', 'PluginController@refreshInfo');
     Route::post('/{plugin}/publish_script', 'PluginController@publishScript');
@@ -54,7 +55,7 @@ Route::middleware('auth:sanctum')->middleware(['can:plugin_write'])->prefix('v1/
     Route::post('/migrate/{plugin}/rollback', 'PluginController@rollback');
     Route::post('/migrate/{plugin}/force_add', 'PluginController@addMigrationToDatabase');
     
-    // TODO: To 'disable' a plugin is just a modification, not a deletion operation:
+    // LEGACY: This route is kept for backward compatibility, the uninstall post request should be used instead.
     Route::delete('/{plugin}', 'PluginController@uninstallPlugin');
 });
 
