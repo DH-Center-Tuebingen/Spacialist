@@ -137,7 +137,7 @@ class ApiPluginTest extends TestCase {
         $installedBarPlugin['updated_at'] = '2020-05-15T05:25:06.000000Z';
         $response->assertJson([
             'plugin' => $installedBarPlugin,
-            'scripts' => ['api/download/plugin/barplugin-123e4567-e89b-12d3-a456-426614174002.js'],
+            'scripts' => ['api/download/plugin/barplugin-123e4567-e89b-12d3-a456-426614174002.js?version=2.1.0'],
         ]);
         // Reset time after test
         Carbon::setTestNow();
@@ -216,8 +216,11 @@ class ApiPluginTest extends TestCase {
 
         $response->assertStatus(200);
 
-        $updatedFooPlugin['updated_at'] = '2020-07-20T10:15:30.000000Z';
-        $response->assertJson($updatedFooPlugin);
+        $response->assertJson([
+            'plugin' => [
+                'updated_at' => '2020-07-20T10:15:30.000000Z',
+            ],
+        ]);
 
         $this->assertEquals('Foo Plugin Changelog', file_get_contents($backupDirectory . '/CHANGELOG.md'));
         $this->assertEquals('updated', file_get_contents($activePluginDirectory . '/CHANGELOG.md'));
@@ -258,7 +261,7 @@ class ApiPluginTest extends TestCase {
         $uninstalledFooPlugin['updated_at'] = '2020-07-20T10:15:30.000000Z';
         $response->assertJson([
             'plugin' => $uninstalledFooPlugin,
-            'scripts' => ['api/download/plugin/fooplugin-123e4567-e89b-12d3-a456-426614174000.js'],
+            'scripts' => ['api/download/plugin/fooplugin-123e4567-e89b-12d3-a456-426614174000.js?version=1.0.0'],
         ]);
 
         // Reset time after test
@@ -296,7 +299,7 @@ class ApiPluginTest extends TestCase {
 
         $response->assertStatus(200);
         $response->assertJson([
-            'scripts' => ['api/download/plugin/barplugin-123e4567-e89b-12d3-a456-426614174002.js'],
+            'scripts' => ['api/download/plugin/barplugin-123e4567-e89b-12d3-a456-426614174002.js?version=2.1.0'],
         ]);
         $this->assertDatabaseMissing('plugins', [
             'name' => 'BarPlugin',
