@@ -112,7 +112,7 @@
     
     "This plugin is not installed.": "This plugin is not installed.",
     "A plugin with the name ':pluginName' and the same or later version (:uploadedVersion and :existingVersion) already exists. Aborting.": "A plugin with the name ':pluginName' and the same or later version (:uploadedVersion and :existingVersion) already exists. Aborting.",
-    "Installation requirements are not met:\n:dependencyError": "Installation requirements are not met:\n:dependencyError",
+    "Installation requirements are not met: :dependencyError": "Installation requirements are not met: :dependencyError",
     "Required Plugin is missing ':pluginName'": "Required Plugin is missing ':pluginName'",
     "Required Plugin is not installed ':pluginName'": "Required Plugin is not installed ':pluginName'",
     "Plugin is not compatible with the current Spacialist version.": "Plugin is not compatible with the current Spacialist version.",
