@@ -64,6 +64,12 @@ class PluginGenerator {
                 $this->overrideTimestamps($plugin, $template);
             }
         }
+        
+        // When we set up plugins but some are not installed,
+        // we need to trigger a cache rebuild. 
+        // In a real world scenario the cache should be rebuild
+        // when the plugin is uploaded.
+        app(PluginManager::class)->rebuildPluginCache();
     }
 
     public function tearDown(): void {

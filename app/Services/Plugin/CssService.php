@@ -11,6 +11,7 @@ use App\Plugin\PluginManifest;
 use App\Services\PluginManager;
 use App\Support\BootstrapCache;
 use App\Support\Log\PluginLog;
+use App\Traits\HasDynamicDisk;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -27,7 +28,7 @@ use Illuminate\Support\Facades\DB;
 class CssService extends PluginService implements ManifestContent {
 
     use BootstrapCache;
-
+    use HasDynamicDisk;
     protected function fetch(): array {
         return CssFile::all()->toArray();
     }
@@ -37,16 +38,19 @@ class CssService extends PluginService implements ManifestContent {
     }
 
     public function install(Plugin $plugin, PluginManifest $manifest): void {
+        $this->markDirty();
         $this->updateOrInstall($plugin, $manifest);
     }
 
     public function update(Plugin $plugin, PluginManifest $manifest): void {
+        $this->markDirty();
         $this->updateOrInstall($plugin, $manifest);
     }
 
     public function uninstall(Plugin $plugin, PluginManifest $manifest): void {
         CssFile::where('plugin_id', $plugin->id)->delete();
         $this->unpublishFiles($plugin);
+        $this->markDirty();
     }
 
     private function updateOrInstall(Plugin $plugin, PluginManifest $manifest): void {
@@ -55,7 +59,7 @@ class CssService extends PluginService implements ManifestContent {
             $this->createFromManifest($plugin, $manifest);
         });
 
-        $this->publish($plugin, $manifest);
+        $this->publish($plugin);
     }
 
     public function createFromManifest(Plugin $plugin, PluginManifest $manifest): void {
@@ -81,13 +85,13 @@ class CssService extends PluginService implements ManifestContent {
     /**
      * Publish the css files to the storage directory.
      * @param Plugin $plugin
-     * @param Plugin\PluginManifest $manifest
      * @return void
      */
-    public function publish(Plugin $plugin, PluginManifest $manifest): void {
-        $cssFiles = $this->retrieveManifestValues($manifest);
+    public function publish(Plugin $plugin): void {
+        // We must take the installed files as it already skipped invalid entries in the manifest.
+        $cssFiles = $this->getData();
         foreach($cssFiles as $cssPath) {
-            $this->publishFile($plugin, $cssPath);
+            $this->publishFile($plugin, $cssPath['src']);
         }
     }
 
@@ -110,9 +114,8 @@ class CssService extends PluginService implements ManifestContent {
             if(!$filehandle) {
                 PluginLog::logWarning("Could not open CSS file for plugin {$plugin->name} at path {$pluginPath}.");
                 return;
-            }
-
-            $this->getCssDirectory($plugin)->store(
+            }            
+            $this->getStorageDirectory()->store(
                 $this->getTargetName($plugin, $pluginPath),
                 $filehandle
             );
@@ -121,17 +124,7 @@ class CssService extends PluginService implements ManifestContent {
             PluginLog::logWarning("CSS file for plugin {$plugin->name} does not exist at path {$pluginPath}.");
         }
     }
-
-    /**
-     * Returns the directory object of the published CSS files. 
-     * @param Plugin $plugin
-     * @return Directory
-     */
-    public function getCssDirectory(Plugin $plugin): Directory {
-        return new Directory("plugin_css", "private");
-    }
-
-
+    
     /**
      * Unpublish all CSS files specified inside the manifest.
      * @param Plugin $plugin
@@ -139,10 +132,14 @@ class CssService extends PluginService implements ManifestContent {
      */
     public function unpublishFiles(Plugin $plugin): void {
         $cssFiles = $this->retrieveManifestValues(PluginManifest::fromPlugin($plugin));
-        $cssDirectory = $this->getCssDirectory($plugin);
-
-        foreach($cssFiles as $cssPath) {
-            $cssDirectory->delete($this->getTargetName($plugin, $cssPath));
+        $cssDirectory = $this->getStorageDirectory();
+        foreach($cssFiles as $cssFilePath) {
+            $cssFileName = $this->getTargetName($plugin, $cssFilePath);
+            $result = $cssDirectory->deleteFile($cssFileName);
+            
+            if(!$result) {
+                PluginLog::logWarning("Failed to delete CSS file for plugin {$plugin->name} at path {$cssFileName}.");
+            }
         }
     }
 
@@ -192,7 +189,7 @@ class CssService extends PluginService implements ManifestContent {
      * @return Directory
      */
     public function getStorageDirectory(): Directory {
-        return new Directory('plugin_css', 'private');
+        return new Directory("plugin_css", $this->disk);
     }
 
     /**

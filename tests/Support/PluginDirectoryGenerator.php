@@ -92,6 +92,11 @@ class PluginDirectoryGenerator {
         if(count($missing_fields) > 0) {
             throw new \Exception("Plugin is missing required fields: " . implode(", ", $missing_fields));
         }
+        
+        if(file_exists($pluginDir)){
+            // If the plugin directory already exists, clean it up first
+            self::cleanup($pluginDir);
+        }
 
         // Create plugin directory structure
         if(!file_exists($pluginDir)) {

@@ -11,7 +11,7 @@ use Tests\TestCase;
 use Tests\Support\PluginGenerator;
 use Tests\Support\RoleExtensionFile;
 
-class ApiPluginRoleTest extends TestCase {
+class ApiPluginRolePresetsTest extends TestCase {
 
     static function getDefaultTemplate() {
         return new PluginTemplate(

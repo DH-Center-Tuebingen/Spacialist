@@ -47,10 +47,10 @@ class Directory {
     /**
      * Validates if a file is inside the directory.
      *
-     * @param string $filepath The path to the file
-     * @return bool True if the file is inside the directory, false otherwise.
+     * @param string $filepath Absolute path to the file
+     * @return bool True if the filepath is inside the directory, false otherwise.
      */
-    public function contains(string $filepath): bool {
+    public function contains(string $filepath): bool {    
         return
             Str::startsWith($filepath, $this->directory) &&
             Storage::disk($this->disk)->exists($filepath);
@@ -73,6 +73,16 @@ class Directory {
             return Storage::disk($this->disk)->delete($filepath);
         }
         return false;
+    }
+    
+    /**
+     * Deletes a file from within the directory
+     * @param string $fileName The name of the file to delete.
+     * @return bool True if the file was deleted, false otherwise.
+     */
+    public function deleteFile(string $fileName) : bool{
+        $filepath = $this->directory . DIRECTORY_SEPARATOR . $fileName;
+        return $this->delete($filepath);
     }
 
     // TODO: resource is not allowed as type (php 8.3), thus $file only typehinted in docblock
