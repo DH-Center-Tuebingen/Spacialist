@@ -116,7 +116,6 @@ class PluginManager {
     }
 
     public function install(Plugin $plugin): void {
-
         $manifest = PluginManifest::fromPlugin($plugin);
 
         foreach($this->pluggableServices as $service) {
@@ -127,9 +126,9 @@ class PluginManager {
             $service->install($plugin, $manifest);
         }
 
-        $this->rebuildPluginCache();
         $plugin->installed_at = Carbon::now();
         $plugin->save();
+        $this->rebuildPluginCache();
 
         foreach($this->pluggableServices as $service) {
             $service->onAfterInstall($plugin, $manifest);
@@ -154,11 +153,11 @@ class PluginManager {
             $service->update($plugin, $manifest);
         }
 
-        $this->rebuildPluginCache();
         $plugin->update_available = null;
         $plugin->version = $manifest->getVersion();
         $plugin->save();
         
+        $this->rebuildPluginCache();
 
         foreach($this->pluggableServices as $service) {
             $service->onAfterUpdate($plugin, $manifest);
@@ -190,6 +189,7 @@ class PluginManager {
         }
 
         $this->rebuildPluginCache();
+        
         $plugin->installed_at = null;
         $plugin->save();
 
@@ -219,6 +219,8 @@ class PluginManager {
         foreach($this->pluggableServices as $service) {
             $service->onAfterRemove($plugin, $manifest);
         }
+        
+        $this->cache();
     }
 
     public function rebuildPluginCache() {

@@ -94,8 +94,8 @@ class PluginController extends Controller {
 
         return response()->json([
             "plugin" => $plugin,
-            "scripts" => [app(ScriptService::class)->getUrl($plugin)],
-            "styles" => app(CssService::class)->getUrls($plugin),
+            "scripts" => [app(PluginManager::class)->scriptService->getUrl($plugin)],
+            "styles" => app(PluginManager::class)->cssService->getUrls($plugin),
             "updated" => $uploadResult->isUpdate(),
             "fromVersion" => $fromVersion,
         ]);
@@ -135,8 +135,8 @@ class PluginController extends Controller {
 
         return response()->json([
             'plugin' => $plugin,
-            'scripts' => [app(ScriptService::class)->getUrl($plugin)],
-            'styles' => app(CssService::class)->getUrls($plugin),
+            'scripts' => [ app(PluginManager::class)->scriptService->getUrl($plugin)],
+            'styles' => app(PluginManager::class)->cssService->getUrls($plugin),
         ]);
     }
 
@@ -159,8 +159,8 @@ class PluginController extends Controller {
 
             return response()->json([
                 'plugin' => $plugin,
-                'scripts' => [app(ScriptService::class)->getUrl($plugin)],
-                'styles' => app(CssService::class)->getUrls($plugin),
+                'scripts' => [ app(PluginManager::class)->scriptService->getUrl($plugin)],
+                'styles' => app(PluginManager::class)->cssService->getUrls($plugin),
             ]);
         }catch (ModelNotFoundException $e) {
             // Already uninstalled
@@ -186,8 +186,8 @@ class PluginController extends Controller {
         $plugin->delete();
         return response()->json([
             'plugin' => $plugin,
-            'scripts' => [app(ScriptService::class)->getUrl($plugin)],
-            'styles' => app(CssService::class)->getUrls($plugin),
+            'scripts' => [ app(PluginManager::class)->scriptService->getUrl($plugin)],
+            'styles' => app(PluginManager::class)->cssService->getUrls($plugin),
         ]);
     }
     
@@ -226,7 +226,7 @@ class PluginController extends Controller {
      */
     public function publishScript(Plugin $plugin) {
         $this->requireInstalled($plugin);
-        $scriptUrl = app(ScriptService::class)->publish($plugin);
+        $scriptUrl =  app(PluginManager::class)->scriptService->publish($plugin);
         return response()->json($scriptUrl);
     }
 

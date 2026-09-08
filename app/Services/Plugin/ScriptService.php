@@ -2,12 +2,15 @@
 
 namespace App\Services\Plugin;
 
+use App\Enums\LifecycleOperation;
+use App\Exceptions\PluginLifecycleException;
 use App\File\Directory;
 use App\Plugin;
 use App\Plugin\PluginDirectory;
 use App\Plugin\PluginManifest;
 use App\Services\PluginManager;
 use App\Support\Log\PluginLog;
+use App\Traits\HasDynamicDisk;
 
 
 /**
@@ -16,6 +19,8 @@ use App\Support\Log\PluginLog;
  * directory and is loaded by default by the application.
  */
 class ScriptService extends PluginService {
+    
+    use HasDynamicDisk;
 
     public const PLUGIN_SCRIPT_LOCATION = "js/script.js";
 
@@ -51,7 +56,7 @@ class ScriptService extends PluginService {
         $currentLinkDepth = 0;
         while(is_link($scriptPath)) {
             if($currentLinkDepth >= $linkDepth) {
-                throw new \Exception("Maximum link depth of {$linkDepth} exceeded while resolving script path for plugin {$plugin->name}. Possible circular link detected.");
+                throw new \Exception("Maximum link depth of {$linkDepth} exceeded while resolving script path for plugin {$plugin->name}. Possible circular link detected.", LifecycleOperation::INSTALLATION);
             }
             $scriptPath = readlink($scriptPath);
             if($scriptPath === false) {
@@ -92,12 +97,12 @@ class ScriptService extends PluginService {
             $srcPath = $this->resolveScriptPath($plugin, 3);
 
             if(!isset($srcPath)) {
-                throw new \Exception("Script file for plugin {$plugin->name} does not exist at {$srcPath}.");
+                throw new PluginLifecycleException($plugin, "Script file for plugin {$plugin->name} does not exist at {$srcPath}.", LifecycleOperation::INSTALLATION);
             }
 
             $filehandle = fopen($srcPath, 'r');
             if(!$filehandle) {
-                throw new \Exception("Could not open script file for plugin {$plugin->name}.");
+                throw new PluginLifecycleException($plugin, "Could not open script file for plugin {$plugin->name}.", LifecycleOperation::INSTALLATION);
             }
 
             $storageDirectory->store(
@@ -126,7 +131,7 @@ class ScriptService extends PluginService {
          if(is_link($targetPath)) { // we assume that the symlink is valid and skip the unpublishing step
             PluginLog::for($plugin)->warning("Script is published as a symlink. Skipping unpublishing step.");
         } else {
-            $success = $storageDirectory->delete($scriptName);
+            $success = $storageDirectory->deleteFile($scriptName);
             if(!$success){
                 PluginLog::for($plugin)->warning("Script could not be deleted from the server.");
             }
@@ -175,6 +180,6 @@ class ScriptService extends PluginService {
      * @return Directory
      */
     public function getStorageDirectory(): Directory {
-        return new Directory('plugins', 'private');
+        return new Directory('plugins', $this->disk);
     }
 }

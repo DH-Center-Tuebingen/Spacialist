@@ -5,6 +5,7 @@ use App\Models\Plugin\CssFile;
 use App\Plugin;
 use App\Plugin\PluginManifest;
 use App\Services\Plugin\CssService;
+use App\Services\PluginManager;
 use Tests\Support\PluginGenerator;
 use Tests\Support\PluginTemplate;
 use Tests\TestCase;
@@ -48,7 +49,7 @@ class CssTest extends TestCase {
         $generator = new PluginGenerator([$template]);
         $generator->use(function () use ($template) {
             $manifest = PluginManifest::fromPlugin($template->plugin);
-            app(CssService::class)->verifyManifest($manifest);
+             app(PluginManager::class)->cssService->verifyManifest($manifest);
             $this->assertEquals([], CssFile::all()->toArray());
         });
     }
@@ -59,7 +60,7 @@ class CssTest extends TestCase {
         $generator->use(function () use ($template) {
             $plugin = $template->plugin;
             $manifest = PluginManifest::fromPlugin($template->plugin);
-            app(CssService::class)->createFromManifest($plugin, $manifest);
+             app(PluginManager::class)->cssService->createFromManifest($plugin, $manifest);
             $this->assertDatabaseHas('plugin_service_css_files', [
                 "src" => "path/to/file.css"
             ]);
@@ -74,7 +75,7 @@ class CssTest extends TestCase {
 
             $plugin = $template->plugin;
             $manifest = PluginManifest::fromPlugin($template->plugin);
-            app(CssService::class)->createFromManifest($plugin, $manifest);
+             app(PluginManager::class)->cssService->createFromManifest($plugin, $manifest);
 
             $this->assertDatabaseHas('plugin_service_css_files', [
                 "src" => "path/to/file_1.css"

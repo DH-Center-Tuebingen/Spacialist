@@ -36,7 +36,7 @@ class RouteService extends PluginService {
         $pluginDirectory = PluginDirectory::fromPlugin($plugin);
         $routesNode = $manifest->getTagNodes('routes');
         $middleware = 'api';
-        if(empty($routes)) {
+        if(empty($routesNode)) {
             $src = $this->findDeprecatedDefaultRoutes($plugin, $pluginDirectory);
         } else {
             $node = $routesNode[0];
@@ -98,17 +98,24 @@ class RouteService extends PluginService {
     }
 
     public function mapRoutes() {
+        info("Starting to map plugin routes.");
         if(!Schema::hasTable('plugins'))
             return;
 
+        info(1);
         $pluginRoutes = $this->getData();
+        info($pluginRoutes);
         foreach($pluginRoutes as $route) {
+            info(3);
             try {
                 $prefix = "api/v1/{$route['plugin_slug']}";
                 $namespace = "App\\Plugins\\{$route['plugin_name']}\\Controllers";
                 $routesPath = $route['src'];
+                info(4);
                 $api = $route['middleware'] ?? 'api';
 
+                info("Mapping routes for plugin {$route['plugin_name']} from file: {$routesPath}");
+                
                 if(file_exists($routesPath)) {                
                     Route::prefix($prefix)
                         ->middleware($api)

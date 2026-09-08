@@ -18,34 +18,29 @@ trait BootstrapCache
     * Cached data.
     */
     protected ?array $data = null;
+    protected bool $isDirty = false;
     
     /**
      * Retrieves the cached data. If the cache is not loaded, it will attempt to load it from disk.
      * If the cache file does not exist or is invalid, it will throw an exception.
      */
     public function getData(): array {
-        if($this->data !== null) {
+        if($this->data !== null && !$this->isDirty) {
             return $this->data;
         }
 
+        $filePath = $this->getAppPath();
         try{
             $this->cache();
         } catch(\Exception $e) {
-            if(! File::exists($this->getAppPath())) {
+            if(! File::exists($filePath)) {
                 throw new \Exception(
                     static::class . ' could not rebuild cache. File not found. Original error: ' . $e->getMessage()
                 );
             }
         }
 
-        $data = require $this->getAppPath();
-
-        if(! is_array($data)) {
-            $data = $this->fetch();
-            $this->cache();
-        }
-
-        return $this->data = $data;
+        return $this->data;
     }
 
     /**
@@ -168,5 +163,14 @@ PHP;
     protected function varExport(array $data): string
     {
         return var_export($data, true);
+    }
+    
+    /**
+     * Set's the cache dirty so that the next iteration will
+     * fetch the data and update the cache.
+     * @return void
+     */
+    protected function markDirty(): void {
+        $this->isDirty = true;
     }
 }

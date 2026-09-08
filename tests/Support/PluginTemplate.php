@@ -4,6 +4,7 @@ namespace Tests\Support;
 
 use App\Plugin;
 
+use Illuminate\Support\Str;
 use Tests\Support\PluginXml;
 
 
@@ -30,11 +31,27 @@ class PluginTemplate {
     private bool $generateCalled = false;
     private bool $skipInstallation = false;
 
+    /**
+     * Creates a template for a plugin that can be generated on the filesystem 
+     * and the database by the PluginGenerator.
+     * 
+     * The plugin will be installed by default.
+     * If you require the plugin to be created without installation, set the $skipInstallation parameter to true.
+     * 
+     * @param string $name - The name of the plugin.
+     * @param string $version - The version of the plugin.
+     * @param mixed $uuid - The UUID of the plugin. If null, a new UUID will be generated.
+     * @param mixed $skipInstallation - Whether to skip the installation process.
+     * @param mixed $createdAt - The creation timestamp of the plugin.
+     * @param mixed $installedAt - The installation timestamp of the plugin.
+     * @param mixed $updatedAt - The last update timestamp of the plugin.
+     * @param mixed $updateAvailable
+     */
     public function __construct(
         string $name,
-        string $uuid,
         string $version,
-        bool $skipInstallation = false,
+        ?string $uuid = null,
+        ?bool $skipInstallation = false,
         ?string $createdAt = null,
         ?string $installedAt = null,
         ?string $updatedAt = null,
@@ -42,10 +59,14 @@ class PluginTemplate {
     ) {
         $this->plugin = new Plugin();
         $this->plugin->name = $name;
-        $this->plugin->uuid = $uuid;
         $this->plugin->version = $version;
         $this->skipInstallation = $skipInstallation;
-
+        
+        if($uuid == null) {
+           $uuid = Str::uuid()->toString();
+        }
+        $this->plugin->uuid = $uuid;
+            
         if($updatedAt) {
             $this->plugin->updated_at = $updatedAt;
         }
