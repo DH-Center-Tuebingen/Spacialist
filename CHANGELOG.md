@@ -9,6 +9,7 @@ All notable changes to this project will be documented in this file.
 - .env variable `ALLOW_FILESYSTEM_MIGRATIONS` to explcitly enable filesystem migrations
 - Multi move in entity tree
 - Option to set entity attributes as required fields
+- Option to display _Single Choice Dropdowns_ as buttons instead of a dropdown
 ### Fixed
 - Removed redundant calls to the entity endpoint
 - Metadata tab error on submit (unknown variable)

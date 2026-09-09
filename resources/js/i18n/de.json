@@ -304,6 +304,9 @@
             },
             "restrictions": {
                 "entity_type": "Auf folgende Entitätstypen beschränken"
+            },
+            "metadata": {
+                "render_as_buttons": "Als Schaltflächen darstellen"
             }
         },
         "activity": "Aktivitäten",

@@ -304,6 +304,9 @@
             },
             "restrictions": {
                 "entity_type": "Restrict to following Entity Types"
+            },
+            "metadata": {
+                "render_as_buttons": "Render as buttons"
             }
         },
         "activity": "Activity",
