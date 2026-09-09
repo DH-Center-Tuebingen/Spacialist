@@ -160,7 +160,6 @@ class PermissionService extends PluginService {
             return [];
         }
         $permissions = json_decode(file_get_contents($pluginPermissionPath), true);
-        info(json_encode($permissions, JSON_PRETTY_PRINT));
         return $permissions;
     }
 

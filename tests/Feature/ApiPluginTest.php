@@ -81,7 +81,7 @@ class ApiPluginTest extends TestCase {
         // therefore we do it manually here to ensure the ids of the test plugins are always the same.
         DB::statement("ALTER SEQUENCE IF EXISTS plugins_id_seq RESTART");
         $fooTemplate = PluginTemplate::fromSlugArray(static::getFooPlugin())->addBasic()->setChangelog("Foo Plugin Changelog")->generate();
-        $barTemplate = PluginTemplate::fromSlugArray(static::getBarPlugin())->addBasic()->skipInstall()->generate();
+        $barTemplate = PluginTemplate::fromSlugArray(static::getBarPlugin())->addBasic()->created()->generate();
 
         $this->generator = new PluginGenerator([
             $fooTemplate,

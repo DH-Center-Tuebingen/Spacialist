@@ -25,10 +25,10 @@ class MigrationTemplate extends PluginTemplate {
         string $uuid = '123e4567-e89b-12d3-a456-426614174010',
         string $version = '1.0.0',
     ) {
-        parent::__construct($name, $uuid, $version);
+        parent::__construct(name: $name, uuid: $uuid, version: $version);
         // Keep uninstalled so PluginManager::install is not called during setUp().
         // The plugin record is still saved to the database by PluginGenerator::setUp().
-        $this->skipInstall();
+        $this->created();
     }
 
     public static function createFrom(

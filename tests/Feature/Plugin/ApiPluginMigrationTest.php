@@ -34,12 +34,8 @@ class ApiPluginMigrationTest extends TestCase {
     // -----------------------------------------------------------------------
 
     private function createDefaultTemplate(){
-        return $this->modifyDefaultTemplate(MigrationTemplate::createFrom(self::PLUGIN_NAME, self::PLUGIN_UUID))->addBasic()->generate();
+        return MigrationTemplate::createFrom(self::PLUGIN_NAME, self::PLUGIN_UUID)->setMigrationPathXml('CustomMigrationsDirectory')->addBasic()->generate();
     }
-    
-    protected function modifyDefaultTemplate(MigrationTemplate $template): MigrationTemplate {
-        return $template->setMigrationPathXml('CustomMigrationsDirectory');
-    } 
 
     // -----------------------------------------------------------------------
     // GET /api/v1/plugin/migrate/{plugin}/check
@@ -213,8 +209,7 @@ class ApiPluginMigrationTest extends TestCase {
 
     public function testRollbackMigrationsMarksThemAsPending(): void {
         $template = $this->createDefaultTemplate()
-            ->addDefaultMigrations()
-            ->install();
+            ->addDefaultMigrations();
 
         PluginGenerator::with([$template], function () use ($template) {
             $pluginId = $template->plugin->id;
@@ -242,7 +237,8 @@ class ApiPluginMigrationTest extends TestCase {
     public function testRollbackRequiresPluginWritePermission(): void {
         $template = $this->createDefaultTemplate()
             ->addDefaultMigrations()
-            ->install();
+            ->installed();
+
         PluginGenerator::with([$template], function () use ($template) {
             $pluginId = $template->plugin->id;
 

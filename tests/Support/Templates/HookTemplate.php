@@ -8,9 +8,9 @@ class HookTemplate extends PluginTemplate {
 
     public function __construct(?string $name = null, ?string $uuid = null, ?string $version = null) {
         parent::__construct(
-            $name ?? "HookPlugin",
-            $uuid ?? "123e4567-e89b-12d3-a456-426614174001",
-            $version ?? "1.0.0",
+            name: $name ?? "HookPlugin",
+            uuid: $uuid ?? "123e4567-e89b-12d3-a456-426614174001",
+            version: $version ?? "1.0.0",
         );
     }
 

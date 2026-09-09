@@ -29,8 +29,6 @@ class PluginTemplate {
     public ?string $changelog = null;
     public ?string $packageJson = null;
     private bool $generateCalled = false;
-    private bool $skipInstallation = false;
-
     /**
      * Creates a template for a plugin that can be generated on the filesystem 
      * and the database by the PluginGenerator.
@@ -41,26 +39,25 @@ class PluginTemplate {
      * @param string $name - The name of the plugin.
      * @param string $version - The version of the plugin.
      * @param mixed $uuid - The UUID of the plugin. If null, a new UUID will be generated.
-     * @param mixed $skipInstallation - Whether to skip the installation process.
      * @param mixed $createdAt - The creation timestamp of the plugin.
      * @param mixed $installedAt - The installation timestamp of the plugin.
      * @param mixed $updatedAt - The last update timestamp of the plugin.
+     * @param PluginLifecycleState $lifecycleState - The state the plugin should be setup to. Default is 'installed'.
      * @param mixed $updateAvailable
      */
     public function __construct(
         string $name,
         string $version,
         ?string $uuid = null,
-        ?bool $skipInstallation = false,
         ?string $createdAt = null,
         ?string $installedAt = null,
         ?string $updatedAt = null,
         ?string $updateAvailable = null,
+        private PluginLifecycleState $lifecycleState = PluginLifecycleState::INSTALLED,
     ) {
         $this->plugin = new Plugin();
         $this->plugin->name = $name;
         $this->plugin->version = $version;
-        $this->skipInstallation = $skipInstallation;
         
         if($uuid == null) {
            $uuid = Str::uuid()->toString();
@@ -108,7 +105,7 @@ class PluginTemplate {
             updatedAt: $array['updated_at'] ?? null,
         );
     }
-    
+
     /**
      * Allows for setting the changelog afterwards.
      * This will overwrite an existing changelog.
@@ -120,7 +117,7 @@ class PluginTemplate {
         $this->changelog = $value;
         return $this;
     }
-    
+
     /**
      * Sets the manifest file name, by default it's "plugin.xml".
      * 
@@ -131,7 +128,7 @@ class PluginTemplate {
         $this->manifest = $manifest;
         return $this;
     }
-    
+
     /**
      * Sets the manifest file to the legacy "App/info.xml" path.
      * 
@@ -242,7 +239,7 @@ class PluginTemplate {
      * @param array $content - An array of child tag content, where each item is an associative array of attributes, e.g.: [["src" => "Hooks/Hook1@method", "on" => "api/v1/version" ],...]
      * @return $this - Returns the PluginTemplate instance for chaining
      */
-    public function addXml(string $rootTag, string | null $childTag, array $content): static {
+    public function addXml(string $rootTag, string|null $childTag, array $content): static {
         $this->xml[] = [
             "rootTag" => $rootTag,
             "childTag" => $childTag,
@@ -306,18 +303,19 @@ class PluginTemplate {
         return $this->xml;
     }
 
+
     /**
-     * Set the skipInstall if the plugin should be generated in an uninstalled
-     * state, by default plugins are generated and installed directly.
-     * 
-     * @return $this
+     * Set the template to install in CREATED state.
+     * The plugin will not be installed when generated.
+     * @return PluginTemplate
      */
-    public function skipInstall():static {
-        $this->skipInstallation = true;
+    public function created(): static {
+        $this->lifecycleState = PluginLifecycleState::CREATED;
         return $this;
     }
+
     /**
-     * Sets the skipInstall property to false to install the plugin 
+     * Sets the lifecycle state to INSTALLED to install the plugin 
      * when generated.
      * 
      * Note: Normally this is the default behavior, but some implementation
@@ -326,17 +324,33 @@ class PluginTemplate {
      * 
      * @return $this
      */
-    public function install(): static {
-        $this->skipInstallation = false;
+    public function installed(): static {
+        $this->lifecycleState = PluginLifecycleState::INSTALLED;
         return $this;
     }
-    
+
     /**
-     * Check if the installation will be skipped.
-     * 
-     * @return bool
+     * Set the template in UNINSTALLED state.
+     * When generated the plugin will be: installed > uninstalled
+     * @return PluginTemplate
      */
-    public function isSkippingInstall(): bool {
-        return $this->skipInstallation;
+    public function uninstalled(): static {
+        $this->lifecycleState = PluginLifecycleState::UNINSTALLED;
+        return $this;
     }
+
+    /**
+     * Set the template in REMOVED state.
+     * When generated the plugin will be: installed > uninstalled > removed
+     * @return PluginTemplate
+     */
+    public function removed(): static {
+        $this->lifecycleState = PluginLifecycleState::REMOVED;
+        return $this;
+    }
+
+    public function getLifecycleState(): PluginLifecycleState {
+        return $this->lifecycleState;
+    }
+    
 }

@@ -87,7 +87,7 @@ class ApiPluginDiscoveryTest extends TestCase {
             name: 'RefreshablePlugin',
             uuid: Str::uuid()->toString(),
             version: '1.0.0'
-        ))->addBasic()->skipInstall()->generate("plugin.xml");
+        ))->addBasic()->created()->generate("plugin.xml");
 
         $this->generator = PluginGenerator::with([$template], function () use ($template) {
             $this->assertDatabaseHas('plugins', [

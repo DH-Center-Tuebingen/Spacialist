@@ -59,7 +59,7 @@ class ApiPluginPermissionTest extends TestCase {
                 ['name' => 'write', 'display_name' => 'Write', 'description' => 'Can write'],
             ],
         ];
-        $template = self::defaultPermissionTemplate($permissions)->skipInstall()->generate("plugin.xml");
+        $template = self::defaultPermissionTemplate($permissions)->created()->generate("plugin.xml");
         $this->generator = PluginGenerator::with([$template], function () use ($template) {
             $response = $this->userRequest()
                 ->post("/api/v1/plugin/install/{$template->plugin->id}");
@@ -87,7 +87,7 @@ class ApiPluginPermissionTest extends TestCase {
                 ['name' => 'read', 'display_name' => 'Read', 'description' => 'Can read'],
             ],
         ];
-        $template = self::defaultPermissionTemplate($permissions, 'Custom/permissions.json')->skipInstall()->generate("plugin.xml");
+        $template = self::defaultPermissionTemplate($permissions, 'Custom/permissions.json')->created()->generate("plugin.xml");
         $this->generator = PluginGenerator::with([$template], function () use ($template) {
             $response = $this->userRequest()
                 ->post("/api/v1/plugin/install/{$template->plugin->id}");
@@ -101,7 +101,7 @@ class ApiPluginPermissionTest extends TestCase {
     }
 
     function testInstallWithMissingPermissionsFileCreatesNone() {
-        $template = self::defaultPermissionTemplate()->skipInstall()->generate("plugin.xml");
+        $template = self::defaultPermissionTemplate()->created()->generate("plugin.xml");
         $this->generator = PluginGenerator::with([$template], function () use ($template) {
             $response = $this->userRequest()
                 ->post("/api/v1/plugin/install/{$template->plugin->id}");
@@ -120,7 +120,7 @@ class ApiPluginPermissionTest extends TestCase {
                 ['name' => 'read', 'display_name' => 'Read', 'description' => 'Can read'],
             ],
         ];
-        $template = self::defaultPermissionTemplate($permissions)->install()->generate("plugin.xml");
+        $template = self::defaultPermissionTemplate($permissions)->generate("plugin.xml");
         $this->generator = PluginGenerator::with([$template], function () use ($template) {
             $this->assertDatabaseHas('permissions', ['name' => 'permtest_kept_read']);
 
@@ -141,7 +141,7 @@ class ApiPluginPermissionTest extends TestCase {
                 ['name' => 'read', 'display_name' => 'Read', 'description' => 'Can read'],
             ],
         ];
-        $template = self::defaultPermissionTemplate($permissions)->skipInstall()->generate("plugin.xml");
+        $template = self::defaultPermissionTemplate($permissions)->created()->generate("plugin.xml");
         $this->generator = PluginGenerator::with([$template], function () use ($template) {
             $this->useUserWithPermissions(['plugin_read']);
             $response = $this->userRequest()

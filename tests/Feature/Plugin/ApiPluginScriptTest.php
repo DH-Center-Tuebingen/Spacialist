@@ -48,7 +48,7 @@ class ApiPluginScriptTest extends TestCase {
     }
 
     function testInstallPublishesScriptAndMakesItDownloadable() {
-        $template = self::defaultScriptTemplate()->skipInstall()->generate("plugin.xml");
+        $template = self::defaultScriptTemplate()->created()->generate("plugin.xml");
         $this->generator = PluginGenerator::with([$template], function () use ($template) {
             Storage::disk(static::FAKE_STORAGE)->assertMissing("plugins/scriptplugin-00000000-0000-0000-0000-000000000007.js");
             $response = $this->userRequest()
@@ -73,7 +73,7 @@ class ApiPluginScriptTest extends TestCase {
     }
 
     function testUninstallRemovesPublishedScript() {
-        $template = self::defaultScriptTemplate()->install()->generate("plugin.xml");
+        $template = self::defaultScriptTemplate()->generate("plugin.xml");
         $this->generator = PluginGenerator::with([$template], function () use ($template) {
             Storage::disk(static::FAKE_STORAGE)->assertExists("plugins/scriptplugin-00000000-0000-0000-0000-000000000007.js");
             $scriptUrl = app(\App\Services\Plugin\ScriptService::class)->getUrl($template->plugin);
@@ -96,7 +96,7 @@ class ApiPluginScriptTest extends TestCase {
             uuid: static::PLUGIN_UUID,
             version: "1.0.0"
         );
-        $template->addBasicChangelog()->skipInstall()->generate("plugin.xml");
+        $template->addBasicChangelog()->created()->generate("plugin.xml");
         
         $this->generator = PluginGenerator::with([$template], function () use ($template) {
             $response = $this->userRequest()

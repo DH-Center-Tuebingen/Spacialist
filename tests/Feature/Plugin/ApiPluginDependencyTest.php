@@ -71,7 +71,7 @@ class ApiPluginDependencyTest extends TestCase {
     }
 
     function testInstallWithEmptyDependencies() {
-        $template = self::defaultDependencyTemplate()->skipInstall()->generate("plugin.xml");
+        $template = self::defaultDependencyTemplate()->created()->generate("plugin.xml");
         $this->generator = PluginGenerator::with([$template], function () use ($template) {
             $response = $this->userRequest()
                 ->post("/api/v1/plugin/install/{$template->plugin->id}");
@@ -91,7 +91,7 @@ class ApiPluginDependencyTest extends TestCase {
     
     #[DataProvider('coreDependencySuccessProvider')]
     function testInstallWithCoreDependencySuccessfully($coreMin, $coreMax) {
-        $template = self::defaultDependencyTemplate(coreMin:$coreMin, coreMax:$coreMax)->skipInstall()->generate("plugin.xml");
+        $template = self::defaultDependencyTemplate(coreMin:$coreMin, coreMax:$coreMax)->created()->generate("plugin.xml");
         $this->generator = PluginGenerator::with([$template], function () use ($template) {
             $response = $this->userRequest()
                 ->post("/api/v1/plugin/install/{$template->plugin->id}");
@@ -101,7 +101,6 @@ class ApiPluginDependencyTest extends TestCase {
             $installedResponse = $this->userRequest()
                 ->get("/api/v1/plugin?installed=1");
             
-            info($installedResponse->json());
             // $installedResponse->assertStatus(200);
             // $installedResponse->assertJsonFragment([
             //     'name' => static::PLUGIN_NAME,
@@ -124,7 +123,7 @@ class ApiPluginDependencyTest extends TestCase {
     
     #[DataProvider('coreDependencyFailProvider')]
     function testInstallWithCoreDependencyFails($coreMin, $coreMax) {
-        $template = self::defaultDependencyTemplate(coreMin:$coreMin, coreMax:$coreMax)->skipInstall()->generate("plugin.xml");
+        $template = self::defaultDependencyTemplate(coreMin:$coreMin, coreMax:$coreMax)->created()->generate("plugin.xml");
         $this->generator = PluginGenerator::with([$template], function () use ($template) {
             $response = $this->userRequest()
                 ->post("/api/v1/plugin/install/{$template->plugin->id}");
@@ -167,7 +166,7 @@ class ApiPluginDependencyTest extends TestCase {
         }
         
     
-        $template = self::defaultDependencyTemplate(pluginDependencies: $plugins)->skipInstall()->generate("plugin.xml");
+        $template = self::defaultDependencyTemplate(pluginDependencies: $plugins)->created()->generate("plugin.xml");
         $templates = array_merge($others, [$template]);
         
         
@@ -245,7 +244,7 @@ class ApiPluginDependencyTest extends TestCase {
         }
         
     
-        $template = self::defaultDependencyTemplate(pluginDependencies: $plugins)->skipInstall()->generate("plugin.xml");
+        $template = self::defaultDependencyTemplate(pluginDependencies: $plugins)->created()->generate("plugin.xml");
         $templates = array_merge($others, [$template]);
         
         

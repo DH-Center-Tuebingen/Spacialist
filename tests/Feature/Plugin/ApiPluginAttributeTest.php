@@ -78,7 +78,7 @@ class ApiPluginAttributeTest extends TestCase {
 
     public function testInstallPluginWithAttributes(): void {
         $template = $this->getAttributeTemplate();
-        $template->skipInstall();
+        $template->created();
         $this->generator = new PluginGenerator([$template]);
         $this->generator->use(function () use ($template) {
             $response = $this->userRequest()->get("/api/v1/plugin/1");
