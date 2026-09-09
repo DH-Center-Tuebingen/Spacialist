@@ -104,22 +104,21 @@ class PluginDirectoryGenerator {
         }
 
         // Process structure array
-        foreach($template->getStructure() as $name => $content) {
-            $path = $pluginDir . '/' . $name;
+       self::recursivelyBuildStructure($pluginDir, $template->getStructure());
+
+        return $pluginDir;
+    }
+    
+    private static function recursivelyBuildStructure(string $basePath, array $structure): void {
+        foreach($structure as $name => $content) {
+            $path = $basePath . '/' . $name;
 
             if(is_array($content)) {
                 // Create directory and process contents
                 if(!file_exists($path)) {
                     mkdir($path, 0755, true);
                 }
-                foreach($content as $subName => $subContent) {
-                    if(is_int($subName) && is_string($subContent)) {
-                        // Numeric key with string value means a filename placeholder
-                        file_put_contents($path . '/' . $subContent, '');
-                    } else {
-                        file_put_contents($path . '/' . $subName, $subContent);
-                    }
-                }
+                self::recursivelyBuildStructure($path, $content);
             } else {
                 // Create file with content
                 $success = file_put_contents($path, $content);
@@ -130,9 +129,8 @@ class PluginDirectoryGenerator {
                 }
             }
         }
-
-        return $pluginDir;
     }
+
 
     /**
      * Generates the content for the package.json file of the plugin based on the plugin's information.

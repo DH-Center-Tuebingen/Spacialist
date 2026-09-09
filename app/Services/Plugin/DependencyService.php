@@ -41,11 +41,11 @@ class DependencyService extends PluginService {
     
     public function onBeforeInstall(Plugin $plugin, PluginManifest $manifest): void
     {
-        ['errors' => $errors] = $this->evaluateDependencies($plugin, $manifest);
-        if(count($errors) > 0){
+        ['errors' => $dependencyErrors] = $this->evaluateDependencies($plugin, $manifest);
+        if(count($dependencyErrors) > 0){
             throw new PluginLifecycleException(
                 $plugin, 
-                __('Installation requirements are not met: :dependencyError', ['dependencyError' => implode(" ;; ", $errors)])
+                __('Installation requirements are not met: :dependencyError', ['dependencyError' => implode(", ", $dependencyErrors)])
             );
         }
     }

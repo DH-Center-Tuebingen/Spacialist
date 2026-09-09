@@ -52,7 +52,7 @@ class ApiPluginAccessPointtest extends TestCase {
 
     function testInstallCreatesAccessPointFromManifest() {
         $accessPoint = ['id' => 'example_access_point', 'label' => 'example.label', 'path' => '/example_path'];
-        $template = self::defaultAccessPointTemplate([$accessPoint])->skipInstall()->generate("plugin.xml");
+        $template = self::defaultAccessPointTemplate([$accessPoint])->created()->generate("plugin.xml");
         $this->generator = PluginGenerator::with([$template], function () use ($template, $accessPoint) {
             $response = $this->userRequest()
                 ->post("/api/v1/plugin/install/{$template->plugin->id}");
@@ -73,7 +73,7 @@ class ApiPluginAccessPointtest extends TestCase {
             ['id' => 'access_point_a', 'label' => 'a.label', 'path' => '/path_a'],
             ['id' => 'access_point_b', 'label' => 'b.label', 'path' => '/path_b'],
         ];
-        $template = self::defaultAccessPointTemplate($accessPoints)->skipInstall()->generate("plugin.xml");
+        $template = self::defaultAccessPointTemplate($accessPoints)->created()->generate("plugin.xml");
         $this->generator = PluginGenerator::with([$template], function () use ($template, $accessPoints) {
             $response = $this->userRequest()
                 ->post("/api/v1/plugin/install/{$template->plugin->id}");
@@ -92,7 +92,7 @@ class ApiPluginAccessPointtest extends TestCase {
     }
 
     function testInstallWithEmptyAccessPointsCreatesNone() {
-        $template = self::defaultAccessPointTemplate()->skipInstall()->generate("plugin.xml");
+        $template = self::defaultAccessPointTemplate()->created()->generate("plugin.xml");
         $this->generator = PluginGenerator::with([$template], function () use ($template) {
             $response = $this->userRequest()
                 ->post("/api/v1/plugin/install/{$template->plugin->id}");
@@ -105,7 +105,7 @@ class ApiPluginAccessPointtest extends TestCase {
 
     #[\PHPUnit\Framework\Attributes\DataProvider('invalidAccessPointProvider')]
     function testInstallSkipsInvalidAccessPointDefinition($accessPoint) {
-        $template = self::defaultAccessPointTemplate([$accessPoint])->skipInstall()->generate("plugin.xml");
+        $template = self::defaultAccessPointTemplate([$accessPoint])->created()->generate("plugin.xml");
         $this->generator = PluginGenerator::with([$template], function () use ($template) {
             // An invalid access point definition should be skipped, but must not fail the whole installation.
             $response = $this->userRequest()
@@ -141,7 +141,7 @@ class ApiPluginAccessPointtest extends TestCase {
             ->addXml("accesspoints", "accesspoint", [
                 ['id' => $sharedIdentifier, 'label' => 'second.label', 'path' => '/second_path'],
             ])
-            ->skipInstall()
+            ->created()
             ->generate("plugin.xml");
 
         $this->generator = PluginGenerator::with([$firstTemplate, $secondTemplate], function () use ($firstTemplate, $secondTemplate, $sharedIdentifier) {
@@ -161,7 +161,7 @@ class ApiPluginAccessPointtest extends TestCase {
 
     function testInstallRequiresPluginWritePermission() {
         $accessPoint = ['id' => 'example_access_point', 'label' => 'example.label', 'path' => '/example_path'];
-        $template = self::defaultAccessPointTemplate([$accessPoint])->skipInstall()->generate("plugin.xml");
+        $template = self::defaultAccessPointTemplate([$accessPoint])->created()->generate("plugin.xml");
         $this->generator = PluginGenerator::with([$template], function () use ($template) {
             $this->useUserWithPermissions(['plugin_read']);
             $response = $this->userRequest()
@@ -175,7 +175,7 @@ class ApiPluginAccessPointtest extends TestCase {
 
     function testUninstallRemovesAccessPoints() {
         $accessPoint = ['id' => 'example_access_point', 'label' => 'example.label', 'path' => '/example_path'];
-        $template = self::defaultAccessPointTemplate([$accessPoint])->install()->generate("plugin.xml");
+        $template = self::defaultAccessPointTemplate([$accessPoint])->generate("plugin.xml");
         $this->generator = PluginGenerator::with([$template], function () use ($template, $accessPoint) {
             $this->assertDatabaseHas('plugin_service_access_points', [
                 'plugin_id' => $template->plugin->id,
@@ -195,7 +195,7 @@ class ApiPluginAccessPointtest extends TestCase {
 
     function testUninstallRequiresPluginWritePermission() {
         $accessPoint = ['id' => 'example_access_point', 'label' => 'example.label', 'path' => '/example_path'];
-        $template = self::defaultAccessPointTemplate([$accessPoint])->install()->generate("plugin.xml");
+        $template = self::defaultAccessPointTemplate([$accessPoint])->generate("plugin.xml");
         $this->generator = PluginGenerator::with([$template], function () use ($template, $accessPoint) {
             $this->useUserWithPermissions(['plugin_read']);
             $response = $this->userRequest()
@@ -216,7 +216,7 @@ class ApiPluginAccessPointtest extends TestCase {
 
     function testUserCanBeAssignedNewAccessPoint() {
         $accessPoint = ['id' => 'example_access_point', 'label' => 'example.label', 'path' => '/example_path'];
-        $template = self::defaultAccessPointTemplate([$accessPoint])->install()->generate("plugin.xml");
+        $template = self::defaultAccessPointTemplate([$accessPoint])->generate("plugin.xml");
         $this->generator = PluginGenerator::with([$template], function () use ($accessPoint) {
             $targetUser = User::factory()->create(['accesspoints' => []]);
             $this->useUserWithPermissions(['users_roles_write']);
@@ -236,7 +236,7 @@ class ApiPluginAccessPointtest extends TestCase {
             ['id' => 'access_point_a', 'label' => 'a.label', 'path' => '/path_a'],
             ['id' => 'access_point_b', 'label' => 'b.label', 'path' => '/path_b'],
         ];
-        $template = self::defaultAccessPointTemplate($accessPoints)->install()->generate("plugin.xml");
+        $template = self::defaultAccessPointTemplate($accessPoints)->generate("plugin.xml");
         $this->generator = PluginGenerator::with([$template], function () use ($accessPoints) {
             $targetUser = User::factory()->create(['accesspoints' => [$accessPoints[0]['id']]]);
             $this->useUserWithPermissions(['users_roles_write']);
@@ -253,7 +253,7 @@ class ApiPluginAccessPointtest extends TestCase {
 
     function testUserAccessPointsCanBeRemoved() {
         $accessPoint = ['id' => 'example_access_point', 'label' => 'example.label', 'path' => '/example_path'];
-        $template = self::defaultAccessPointTemplate([$accessPoint])->install()->generate("plugin.xml");
+        $template = self::defaultAccessPointTemplate([$accessPoint])->generate("plugin.xml");
         $this->generator = PluginGenerator::with([$template], function () use ($accessPoint) {
             $targetUser = User::factory()->create(['accesspoints' => [$accessPoint['id']]]);
             $this->useUserWithPermissions(['users_roles_write']);
@@ -270,7 +270,7 @@ class ApiPluginAccessPointtest extends TestCase {
 
     function testUserKeepsAccessPointsWhenPluginIsDisabled() {
         $accessPoint = ['id' => 'example_access_point', 'label' => 'example.label', 'path' => '/example_path'];
-        $template = self::defaultAccessPointTemplate([$accessPoint])->install()->generate("plugin.xml");
+        $template = self::defaultAccessPointTemplate([$accessPoint])->generate("plugin.xml");
         $this->generator = PluginGenerator::with([$template], function () use ($template, $accessPoint) {
             $targetUser = User::factory()->create(['accesspoints' => [$accessPoint['id']]]);
             $this->useUserWithPermissions(['plugin_write']);
@@ -285,7 +285,7 @@ class ApiPluginAccessPointtest extends TestCase {
 
     function testUserStillHasAccessPointsWhenPluginWasReenabled() {
         $accessPoint = ['id' => 'example_access_point', 'label' => 'example.label', 'path' => '/example_path'];
-        $template = self::defaultAccessPointTemplate([$accessPoint])->install()->generate("plugin.xml");
+        $template = self::defaultAccessPointTemplate([$accessPoint])->generate("plugin.xml");
         $this->generator = PluginGenerator::with([$template], function () use ($template, $accessPoint) {
             $targetUser = User::factory()->create(['accesspoints' => [$accessPoint['id']]]);
             $this->useUserWithPermissions(['plugin_write']);
@@ -300,7 +300,7 @@ class ApiPluginAccessPointtest extends TestCase {
 
     function testUserAccessPointsAreRemovedWhenPluginIsRemoved() {
         $accessPoint = ['id' => 'example_access_point', 'label' => 'example.label', 'path' => '/example_path'];
-        $template = self::defaultAccessPointTemplate([$accessPoint])->install()->generate("plugin.xml");
+        $template = self::defaultAccessPointTemplate([$accessPoint])->generate("plugin.xml");
         $this->generator = PluginGenerator::with([$template], function () use ($template, $accessPoint) {
             $targetUser = User::factory()->create(['accesspoints' => [$accessPoint['id'], 'another_access_point']]);
             $this->useUserWithPermissions(['plugin_write', 'plugin_delete']);

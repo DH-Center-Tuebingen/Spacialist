@@ -111,6 +111,17 @@ class PluginDirectory {
     }
 
     /**
+     * Factory method to create a Plugin Directory instance which allows 
+     * for chaining.
+     * 
+     * @param mixed $name
+     * @return Plugin\PluginDirectory
+     */
+    public static function fromName($name): PluginDirectory{
+        return new PluginDirectory($name);
+    }
+
+    /**
      * Get the namespace for a given path within the plugin. If no path is provided, 
      * returns the base namespace for the plugin.
      * 

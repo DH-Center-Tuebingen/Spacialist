@@ -38,28 +38,87 @@ class PluginGenerator {
         return (new static($templates))->use($callback, $skipTearDown);
     }
 
+    /**
+     * Run's the generator lifecycle:
+     * 
+     * - Setup Plugin directory
+     * - Executes callback function
+     * - Removes the plugin from the filesystem and resets the generator state.
+     * 
+     * The filesystem structure can be maintained by passing skipTearDown.
+     * Primarily interesting, for inspecting the generated template structure.
+     * 
+     * @param callable $callback
+     * @param bool $skipTearDown
+     * @return PluginGenerator
+     */
     public function use(callable $callback, bool $skipTearDown = false): static {
         $this->setUp();
-        try{
+        try {
             $callback();
         } finally {
-            if(!$skipTearDown) {
-                $this->tearDown();
-            }
+            $this->cleanUp($skipTearDown);
         }
         return $this;
     }
 
+    /**
+     * Cleans up the generator and the directories.
+     * Directory cleanup can be skipped using $skiptTearDown;
+     * 
+     * @param bool $skipTearDown
+     * @return void
+     */
+    public function cleanUp(bool $skipTearDown) {
+        if(!$skipTearDown) {
+            $this->tearDown();
+        }
+
+        $this->pluginMap = [];
+        $this->directoriesToCleanup = [];
+    }
+
+    /**
+     * Setup all templates according to their lifecycle state.
+     * 
+     * The state of all plugins will be changed in order of appearance
+     * before continuing to the next step. E.g. when all templates are marked as UNINStALLED
+     * all plugins will be first installed in order, and then uninstalled in the same order.
+     * 
+     * @return void
+     */
     public function setUp(): void {
+        $this->createTemplates();
+        $this->installTemplates();
+        $this->uninstallTemplates();
+        $this->removeTemplates();
+    }
+
+
+    /**
+     * Creates the provided template directories and stores the created plugins internally.
+     * 
+     * @return void
+     */
+    private function createTemplates() {
         foreach($this->templates as $template) {
             $plugin = clone ($template->plugin);
-            $pluginDir = self::getPluginDirectory($plugin['name']);
-            $this->directoriesToCleanup[] = PluginDirectoryGenerator::mockPluginDirectory($template, $pluginDir);
+            $pluginDir = self::getPluginDirectory($plugin['name']);            $this->directoriesToCleanup[] = PluginDirectoryGenerator::mockPluginDirectory($template, $pluginDir);
             $plugin->save();
             $template->plugin->id = $plugin->id; // Update the template's plugin ID to match the saved plugin
             $this->pluginMap[$plugin->name] = $plugin;
+        }
+    }
 
-            if(!$template->isSkippingInstall()) {
+    /**
+     * Processes all templates and installs them if necessary.
+     * 
+     * @return void
+     */
+    private function installTemplates() {
+        foreach($this->templates as $template) {
+            if(PluginLifecycle::RequiresInstall($template->getLifecycleState())) {
+                $plugin = $this->pluginMap[$template->plugin->name];
                 app(PluginManager::class)->install($plugin);
                 $this->overrideTimestamps($plugin, $template);
             }
@@ -72,12 +131,39 @@ class PluginGenerator {
         app(PluginManager::class)->rebuildPluginCache();
     }
 
+    /**
+     * Processes all templates and uninstalls them if necessary.
+     * 
+     * @return void
+     */
+    private function uninstallTemplates() {
+        foreach($this->templates as $template) {
+            if(PluginLifecycle::RequiresUninstall($template->getLifecycleState())) {
+                $plugin = $this->pluginMap[$template->plugin->name];
+                app(PluginManager::class)->uninstall($plugin);
+            }
+        }
+    }
+
+    /**
+     * Processes all templates and removes them if necessary.
+     * 
+     * @return void
+     */
+    private function removeTemplates() {
+        foreach($this->templates as $template) {
+            if(PluginLifecycle::RequiresRemove($template->getLifecycleState())) {
+                $plugin = $this->pluginMap[$template->plugin->name];
+                app(PluginManager::class)->remove($plugin);
+            }
+        }
+    }
+
+    /** */
     public function tearDown(): void {
         foreach($this->directoriesToCleanup as $dir) {
             PluginDirectoryGenerator::cleanup($dir);
         }
-        $this->pluginMap = [];
-        $this->directoriesToCleanup = [];
     }
 
     private function overrideTimestamps(Plugin $plugin, PluginTemplate $template): void {
@@ -102,7 +188,7 @@ class PluginGenerator {
         Log::notice("End of plugin templates log.");
         Log::notice("================================");
     }
-    
+
     public function getPlugin(string $name): ?Plugin {
         return $this->pluginMap[$name] ?? null;
     }

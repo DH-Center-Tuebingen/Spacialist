@@ -38,24 +38,27 @@ class RouteService extends PluginService {
         $middleware = 'api';
         if(empty($routesNode)) {
             $src = $this->findDeprecatedDefaultRoutes($plugin, $pluginDirectory);
+        } else if(count($routesNode) > 1) {
+            PluginLog::for($plugin)->warning("Multiple routes tags found. Please ensure your plugin manifest contains only one routes tag.");
+            return;
         } else {
             $node = $routesNode[0];
             if(!isset($node['attributes']) || !isset($node['attributes']["src"])) {
                 PluginLog::for($plugin)->warning("Routes tag found but 'src' attribute is missing. Please ensure your plugin manifest is correctly formatted.");
                 return;
             }
-            $srcFile = $node['attributes']["src"];
-            $src = $pluginDirectory->getAbsolutePluginPath($srcFile);
+            $src = $node['attributes']["src"];
             $middleware = $node['attributes']["middleware"] ?? 'api';
         }
-        
+
         // Plugins does not need a routes file.
         if($src === null) {
             return;
         }
 
-        if(!file_exists($src)) {
-            PluginLog::for($plugin)->warning("Routes file not found at path: {$src}. Please ensure the 'src' attribute in your plugin manifest points to a valid file.");
+        $absolutePath = PluginDirectory::fromPlugin($plugin)->getAbsolutePluginPath($src);
+        if(!file_exists($absolutePath)) {
+            PluginLog::for($plugin)->warning("Routes file not found at path: {$absolutePath}. Please ensure the 'src' attribute in your plugin manifest points to a valid file.");
             return;
         }
 
@@ -98,24 +101,17 @@ class RouteService extends PluginService {
     }
 
     public function mapRoutes() {
-        info("Starting to map plugin routes.");
         if(!Schema::hasTable('plugins'))
             return;
 
-        info(1);
         $pluginRoutes = $this->getData();
-        info($pluginRoutes);
         foreach($pluginRoutes as $route) {
-            info(3);
             try {
                 $prefix = "api/v1/{$route['plugin_slug']}";
                 $namespace = "App\\Plugins\\{$route['plugin_name']}\\Controllers";
-                $routesPath = $route['src'];
-                info(4);
+                $routesPath = PluginDirectory::fromName($route['plugin_name'])->getAbsolutePluginPath($route['src']);
                 $api = $route['middleware'] ?? 'api';
 
-                info("Mapping routes for plugin {$route['plugin_name']} from file: {$routesPath}");
-                
                 if(file_exists($routesPath)) {                
                     Route::prefix($prefix)
                         ->middleware($api)

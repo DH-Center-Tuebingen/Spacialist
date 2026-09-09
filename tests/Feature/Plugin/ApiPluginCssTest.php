@@ -57,7 +57,7 @@ class ApiPluginCssTest extends TestCase {
     }
 
     function testInstallPublishesCssFileAndCreatesRecord() {
-        $template = self::defaultCssTemplate(['style.css'])->skipInstall()->generate("plugin.xml");
+        $template = self::defaultCssTemplate(['style.css'])->created()->generate("plugin.xml");
         $this->generator = PluginGenerator::with([$template], function () use ($template) {
             // Storage::disk(static::FAKE_STORAGE)->assertMissing("plugin_css/cssplugin-00000000-0000-0000-0000-000000000004-style.css");
             
@@ -84,7 +84,7 @@ class ApiPluginCssTest extends TestCase {
     }
 
     function testInstallSkipsEmptyCssPath() {
-        $template = self::defaultCssTemplate()->addXml("css", "file", [['src' => '']])->skipInstall()->generate("plugin.xml");
+        $template = self::defaultCssTemplate()->addXml("css", "file", [['src' => '']])->created()->generate("plugin.xml");
         $this->generator = PluginGenerator::with([$template], function () use ($template) {
             $response = $this->userRequest()
                 ->post("/api/v1/plugin/install/{$template->plugin->id}");
@@ -96,7 +96,7 @@ class ApiPluginCssTest extends TestCase {
     }
 
     function testUninstallRemovesCssRecordAndUnpublishesFile() {
-        $template = self::defaultCssTemplate(['style.css'])->install()->generate("plugin.xml");
+        $template = self::defaultCssTemplate(['style.css'])->generate("plugin.xml");
         $this->generator = PluginGenerator::with([$template], function () use ($template) {
             
             $this->assertDatabaseHas('plugin_service_css_files', [

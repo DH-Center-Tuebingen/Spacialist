@@ -29,7 +29,7 @@ trait BootstrapCache
             return $this->data;
         }
 
-        $filePath = $this->getAppPath();
+        $filePath = $this->getCachFilePath();
         try{
             $this->cache();
         } catch(\Exception $e) {
@@ -40,7 +40,7 @@ trait BootstrapCache
             }
         }
 
-        return $this->data;
+        return $this->data ?? [];
     }
 
     /**
@@ -58,11 +58,11 @@ trait BootstrapCache
      * Build the cache array from the source of truth.
      */
     public function cache(): array {
-        File::ensureDirectoryExists(dirname($this->getAppPath()));
+        File::ensureDirectoryExists(dirname($this->getCachFilePath()));
 
-        $this->data = $this->fetch();
+        $this->data = $this->fetch() ?? [];
         File::put(
-            $this->getAppPath(),
+            $this->getCachFilePath(),
             $this->export($this->data)
         );
 
@@ -82,13 +82,13 @@ trait BootstrapCache
             return $this->data;
         }
 
-        if(! File::exists($this->getAppPath())) {
+        if(! File::exists($this->getCachFilePath())) {
             throw new RuntimeException(
                 static::class . ' cached data not found. Run build.'
             );
         }
 
-        $data = require $this->getAppPath();
+        $data = require $this->getCachFilePath();
 
         if(! is_array($data)) {
             throw new RuntimeException(
@@ -103,7 +103,7 @@ trait BootstrapCache
      * Get's the absolute system path to the cache file.
      * @return string
      */
-    protected function getAppPath(): string {
+    protected function getCachFilePath(): string {
         if(!$this->getCacheName()) {
             throw new RuntimeException(
                 static::class . ' cache path is not defined.'
@@ -122,19 +122,11 @@ trait BootstrapCache
     }
     
     /**
-     * Get's the absolute path to the cache file.
-     * @return string - absolute system path to the cache file
-     */
-    public function getCachedFilePath(): string {
-        return $this->getAppPath();
-    }
-    
-    /**
      * Determine if the cache exists.
      */
     public function cacheExists(): bool
     {
-        return File::exists($this->getAppPath());
+        return File::exists($this->getCachFilePath());
     }
 
     /**
@@ -142,7 +134,7 @@ trait BootstrapCache
      */
     public function clearCache(): void
     {
-        File::delete($this->getAppPath());
+        File::delete($this->getCachFilePath());
         $this->data = null;
     }
 

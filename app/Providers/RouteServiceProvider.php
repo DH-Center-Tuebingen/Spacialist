@@ -37,18 +37,8 @@ class RouteServiceProvider extends ServiceProvider
     public function map()
     {
         $this->mapApiRoutes();
-
         $this->mapWebRoutes();
-
-        try {
-            // This may fail when the relation is not yet created
-            // via a migration. Therefore we catch the exception to 
-            // avoid breaking the application.
-            app(RouteService::class)->mapRoutes();
-        } catch(\Exception $e) {
-            // Log the error but don't interrupt the application
-            \Log::error("Error loading plugin routes: " . $e->getMessage());
-        }
+        $this->mapPluginRoutes();
     }
 
     /**
@@ -78,5 +68,24 @@ class RouteServiceProvider extends ServiceProvider
              ->middleware('api')
              ->namespace($this->namespace)
              ->group(base_path('routes/api.php'));
+    }
+    /**
+     * Define the "plugin" routes for the application.
+     *
+     * These routes are typically loaded from plugins.
+     *
+     * @return void
+     */
+    public function mapPluginRoutes()
+    {
+        try {
+            // This may fail when the relation is not yet created
+            // via a migration. Therefore we catch the exception to 
+            // avoid breaking the application.
+            app(RouteService::class)->mapRoutes();
+        } catch(\Exception $e) {
+            // Log the error but don't interrupt the application
+            \Log::error("Error loading plugin routes: " . $e->getMessage());
+        }
     }
 }

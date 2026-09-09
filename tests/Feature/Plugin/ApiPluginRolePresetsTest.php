@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use Illuminate\Support\Collection;
 use Illuminate\Testing\Fluent\AssertableJson;
 
 use Tests\Support\PluginTemplate;
@@ -83,10 +84,7 @@ class ApiPluginRolePresetsTest extends TestCase {
     }
 
     function testSimpleRoleDefault() {
-        $template = self::defaultRoleTemplate();
-        $generator = new PluginGenerator([$template]);
-
-        $generator->use(function () {
+        PluginGenerator::with([self::defaultRoleTemplate()], function () {
             $response = $this->userRequest()->get('/api/v1/pre');
 
             $this->assertStatus($response, 200);
@@ -108,10 +106,7 @@ class ApiPluginRolePresetsTest extends TestCase {
     }
 
     function testSimpleRoleDeprecated() {
-        $template = self::multipleFilesTemplate();
-        $generator = new PluginGenerator([$template]);
-
-        $generator->use(function () {
+        PluginGenerator::with([self::multipleFilesTemplate()],function () {
             $response = $this->userRequest()->get('/api/v1/pre');
 
             $this->assertStatus($response, 200);
@@ -132,11 +127,8 @@ class ApiPluginRolePresetsTest extends TestCase {
         });
     }
 
-    function testMultipleFiles() {
-        $template = self::multipleFilesTemplate();
-        $generator = new PluginGenerator([$template]);
-        
-        $generator->use(function () {
+    function testMultipleFiles() {        
+        PluginGenerator::with([self::multipleFilesTemplate()], function () {
             $response = $this->userRequest()->get('/api/v1/pre');
 
             $this->assertStatus($response, 200);
@@ -160,7 +152,84 @@ class ApiPluginRolePresetsTest extends TestCase {
                     ->has('presets.1.fullSet')
                     ->whereContains('presets.1.fullSet', [
                         'complex_read',
+                        'simple_read',
                     ])
+                    ->etc()
+            );
+        });
+    }
+
+    function testRolesNotPresentWhenUninstalled() {
+        PluginGenerator::with([self::defaultRoleTemplate()->uninstalled()], function () {
+            $response = $this->userRequest()->get('/api/v1/pre');
+
+            $this->assertStatus($response, 200);
+            $response->assertJson(value: fn(AssertableJson $json) =>
+                $json->has('presets')
+                    ->where('presets.0.name', 'administrator')
+                    ->has('presets.0.fullSet')
+                    ->where('presets.0.fullSet', function(Collection $fullSet){
+                        $roles = [
+                            'complex_create',
+                            'complex_read',
+                            'complex_write',
+                            'complex_delete',
+                            'complex_share',
+                            'simple_create',
+                            'simple_read',
+                            'simple_write',
+                            'simple_delete',
+                            'simple_share',
+                        ];
+                        return !array_intersect($roles, $fullSet->toArray());
+                    })
+                    ->where('presets.1.name', 'guest')
+                    ->has('presets.1.fullSet')
+                    ->where('presets.1.fullSet', function(Collection $fullSet){
+                        $roles = [
+                            'complex_read',
+                            'simple_read',
+                        ];
+                        return !array_intersect($roles, $fullSet->toArray());
+                    })
+                    ->etc()
+            );
+        });
+    }
+
+    function testRolesNotPresentWhenRemoved() {
+        PluginGenerator::with([self::defaultRoleTemplate()->removed()], function () {
+            $response = $this->userRequest()->get('/api/v1/pre');
+
+            $this->assertStatus($response, 200);
+            $response->assertJson(value: fn(AssertableJson $json) =>
+                $json->has('presets')
+                    ->where('presets.0.name', 'administrator')
+                    ->has('presets.0.fullSet')
+                    ->where('presets.0.fullSet', function(Collection $fullSet){
+                        $roles = [
+                            'complex_create',
+                            'complex_read',
+                            'complex_write',
+                            'complex_delete',
+                            'complex_share',
+                            'simple_create',
+                            'simple_read',
+                            'simple_write',
+                            'simple_delete',
+                            'simple_share',
+                        ];
+                        return !array_intersect($roles, $fullSet->toArray());
+                    })
+                    ->where('presets.1.name', 'guest')
+                    ->has('presets.1.fullSet')
+                    ->where('presets.1.fullSet', function(Collection $fullSet){
+                        $roles = [
+                            'complex_read',
+                            'simple_read',
+                        ];
+                        return !array_intersect($roles, $fullSet->toArray());
+                    })
                     ->etc()
             );
         });
