@@ -10,7 +10,6 @@ use App\Entity;
 use App\EntityType;
 use App\Globals;
 use App\Permission;
-use App\Plugin;
 use App\Preference;
 use App\Role;
 use App\RolePreset;
@@ -18,6 +17,7 @@ use App\Services\PluginManager;
 use App\ThConcept;
 use App\User;
 
+use App\VersionInfo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Str;
@@ -28,7 +28,10 @@ class HomeController extends Controller {
      *
      * @return void
      */
-    public function __construct(private readonly AccessPointsService $accessPointsService) {
+    public function __construct(
+        private readonly AccessPointsService $accessPointsService,
+        protected VersionInfo $versionInfo
+    ) {
         parent::__construct();
         if(!Preference::hasPublicAccess()) {
             $this->middleware('auth:sanctum')->except(['welcome', 'index', 'external']);
@@ -82,7 +85,7 @@ class HomeController extends Controller {
 
         $concepts = ThConcept::getMap($locale);
         $tags = Globals::getTags();
-        $version = Globals::getVersion();
+        $version = $this->versionInfo->toObject();
         $plugins = app(PluginManager::class)->getPlugins(true);
         $bibliography = Bibliography::orderBy('id')->get();
 
@@ -174,5 +177,13 @@ class HomeController extends Controller {
         $plugins = app(PluginManager::class)->getInstalledPlugins();
         return view('home')
             ->with('plugins', $plugins);
+    }
+    
+    /**
+     * Returns the current app version.
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getVersion(){
+        return response()->json($this->versionInfo->toObject());
     }
 }

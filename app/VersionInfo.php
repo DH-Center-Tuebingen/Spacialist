@@ -5,36 +5,48 @@ namespace App;
 use Illuminate\Support\Str;
 
 class VersionInfo {
-    // Semantic versioning
-    private $major;
-    private $minor;
-    private $patch;
+    function __construct(
+        private int $major = 0,
+        private int $minor = 0, 
+        private int $patch = 0,
+        private string $release ="",
+        private string $releaseName ="",
+        private string $releaseHash ="",
+        private string $time = "",
+    ) {}
 
-    private $release;
-    private $releaseName;
-    private $releaseHash;
+    /**
+     * Set's the version values according to the ouput of a 'git describe --tags' command and a timestamp.
+     * 
+     * @param string $tag The git tag string, e.g. v1.3.10-rc-1-gabcdef
+     * @param string $timestamp The timestamp of the commit associated with the tag.
+     * @return void
+     */
+    public function setByGitTag(string $tag, string $timestamp){
+        $parts = explode('-', $tag);
+        $this->release = $parts[0];
+        $this->releaseName = ucfirst($parts[1]);
+        if(count($parts) >= 4) $this->releaseHash = $parts[3];
+        // cut off 'v' for semantic versioning
+        $semVer = explode('.', substr($this->release, 1));
+        $this->major = intval($semVer[0]);
+        $this->minor = intval($semVer[1]);
+        $this->patch = intval($semVer[2]);
 
-    private $time;
-
-    function __construct() {
+        $this->time = $timestamp;
+    }
+    
+    public function fetchFromGit(){
         exec('git describe --tags', $tag, $exitcode);
-        exec('git log -1 --format=%at', $ts, $exitcodeTs);
+        exec('git log -1 --format=%at', $timestamp, $exitcodeTs);
         if($exitcode === 0 && $exitcodeTs === 0) {
-            $content = [
-                $tag[0], $ts[0]
-            ];
-            $parts = explode('-', $content[0]);
-            $this->release = $parts[0];
-            $this->releaseName = ucfirst($parts[1]);
-            if(count($parts) >= 4) $this->releaseHash = $parts[3];
-            // cut off 'v' for semantic versioning
-            $semVer = explode('.', substr($this->release, 1));
-            $this->major = $semVer[0];
-            $this->minor = $semVer[1];
-            $this->patch = $semVer[2];
-
-            $this->time = $content[1];
+            $this->setByGitTag($tag[0], $timestamp[0]);
         } else {
+            // TODO ! DANGER ! 
+            // When the fetching of the version from git fails
+            // it sets the version to the lowest possible state.
+            // E.g. there is an update on an actual lower version,
+            // this would go through and potentially cause serious issues. [SO]
             $this->major = '0';
             $this->minor = '0';
             $this->patch = '0';
@@ -45,7 +57,7 @@ class VersionInfo {
             return;
         }
     }
-
+    
     /**
      * Get's the release version with the version prefix.
      * @return string - The release version with the version prefix, e.g. v1.3.10
@@ -97,5 +109,15 @@ class VersionInfo {
 
     public function getTime() {
         return $this->time;
+    }
+    
+    public function toObject(): array {
+        return [
+            'full' => $this->getFullRelease(),
+            'readable' => $this->getReadableRelease(),
+            'release' => $this->getRelease(),
+            'name' => $this->getReleaseName(),
+            'time' => $this->getTime()
+        ];
     }
 }

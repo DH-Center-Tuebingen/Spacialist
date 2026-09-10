@@ -171,9 +171,10 @@ class DependencyService extends PluginService {
             $errors[] = __("Multiple core dependencies are present.");
         } else if(count($coreDependencies) === 1) {
             $dependency = $coreDependencies[0];
-            $version = new VersionInfo();
-            
-            if(!$dependency->supportsVersion($version->getReleaseRaw())){
+            info("Dependency details:");
+            info($dependency->minVersion);
+            info($dependency->maxVersion);
+            if(!$dependency->supportsVersion(app(VersionInfo::class)->getReleaseRaw())){
                 $errors[] = __("Plugin is not compatible with the current Spacialist version.");
             }
         }

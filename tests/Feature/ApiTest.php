@@ -89,10 +89,17 @@ class ApiTest extends TestCase
 	#[TestDox('GET    /api/v1/version : Get Version Endpoint')]
     public function testVersionRequest()
     {
-        $vi = new VersionInfo();
+        // In GithubActions fetching git via the describe does fail and leads to 
+        // the VersionInfo using it's default values. For more consistent testing,
+        // we manually set the version info using a known git tag.
+        $versionInfo = new VersionInfo();
+        $versionInfo->setByGitTag("v0.11.1-kilcrea-94-g046891a48", time());
+        $this->app->instance(VersionInfo::class, $versionInfo);
+        
+        $vi = app(VersionInfo::class);
         $response = $this->userRequest()
             ->get('/api/v1/version');
-
+            
         $response->assertStatus(200);
         $content = $response->decodeResponseJson();
         $this->assertMatchesRegularExpression('/^\d+$/', $content['time']);
