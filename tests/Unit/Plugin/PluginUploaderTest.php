@@ -38,12 +38,8 @@ class PluginUploaderTest extends TestCase {
         parent::tearDown();
     }
 
-    // -----------------------------------------------------------------------
-    // Helpers
-    // -----------------------------------------------------------------------
-
     private function makeTemplate(string $version = '1.0.0'): PluginTemplate {
-        return new PluginTemplate(self::PLUGIN_NAME, self::PLUGIN_UUID, $version);
+        return new PluginTemplate(name: self::PLUGIN_NAME, uuid: self::PLUGIN_UUID, version: $version);
     }
 
     private function makeZipFromTemplate(PluginTemplate $template): string {
@@ -79,10 +75,7 @@ class PluginUploaderTest extends TestCase {
         return sys_get_temp_dir() . '/' . uniqid($filename . "_") . '.zip';
     }
 
-    // -----------------------------------------------------------------------
-    // upload() — happy paths
-    // -----------------------------------------------------------------------
-
+    
     public function testUploadCreatesNewPlugin(): void {
         $this->trackPluginDirs();
         $template = $this->makeTemplate('1.0.0')->addBasic()->generate();
@@ -141,10 +134,6 @@ class PluginUploaderTest extends TestCase {
         $this->assertTrue(file_exists($backupSentinel));
     }
 
-    // -----------------------------------------------------------------------
-    // upload() — error paths
-    // -----------------------------------------------------------------------
-
     public function testUploadRejectsInvalidZipFile(): void {
         $fakePath = $this->getTmpZipPath('fake');
         file_put_contents($fakePath, 'this is not a zip file');
@@ -178,10 +167,6 @@ class PluginUploaderTest extends TestCase {
         $this->expectException(HttpException::class);
         $this->uploader->upload(new SplFileInfo($zipPath));
     }
-
-    // -----------------------------------------------------------------------
-    // restoreBackup()
-    // -----------------------------------------------------------------------
 
     public function testRestoreBackupReturnsFalseWhenNoBackupExists(): void {
         $result = $this->uploader->restoreBackup(self::PLUGIN_NAME);
@@ -221,9 +206,6 @@ class PluginUploaderTest extends TestCase {
         $this->assertTrue(file_exists($pluginDir . '/backup.txt'), 'Backup file should be in plugin dir');
     }
 
-    // -----------------------------------------------------------------------
-    // doesPluginDirectoryExist()
-    // -----------------------------------------------------------------------
 
     public function testDoesPluginDirectoryExistReturnsTrueWhenDirectoryExists(): void {
         $dir = $this->createPluginDir();

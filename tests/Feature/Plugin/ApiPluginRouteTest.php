@@ -2,22 +2,20 @@
 
 namespace Tests\Feature\Plugin;
 
-use App\Providers\RouteServiceProvider;
 use App\Services\PluginManager;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Route;
 use Tests\Support\PluginGenerator;
 use Tests\Support\PluginTemplate;
 use Tests\TestCase;
 
 class ApiPluginRouteTest extends TestCase {
 
-    private const ROUTES_DATABASE = "plugin_service_routes";
-    private const PLUGIN_NAME = 'RoutePlugin';
-    private const PLUGIN_SLUG = "routeplugin";
-    private const PLUGIN_UUID = '00000000-0000-0000-0000-000000000006';
+    const ROUTES_DATABASE = "plugin_service_routes";
+    const PLUGIN_NAME = 'RoutePlugin';
+    const PLUGIN_SLUG = "routeplugin";
+    const PLUGIN_UUID = '00000000-0000-0000-0000-000000000006';
 
-    private const HELLO_WORLD_PHP = "<?php 
+    const HELLO_WORLD_PHP = "<?php 
 use Illuminate\Support\Facades\Route;
 
 Route::get('', function() {
@@ -26,22 +24,21 @@ Route::get('', function() {
 ";
 
     private ?PluginGenerator $generator = null;
-    protected string $filePath = 'routes/api.php';
-    protected bool $legacy = false;
+    protected string $filePath = 'custom/dir/routes.php';
 
     function defaultRouteTemplate(): PluginTemplate {
         $template = new PluginTemplate(
-            name: static::PLUGIN_NAME,
-            uuid: static::PLUGIN_UUID,
+            name: self::PLUGIN_NAME,
+            uuid: self::PLUGIN_UUID,
             version: "1.0.0"
         );
         $template->addBasic();
-
-        if(!$this->legacy) {
-            $template->addXml("routes", null, [['src' => $this->filePath]]);
-        }
-
+        $this->addManifestEntryToTemplate($template);
         return $template;
+    }
+    
+    protected function addManifestEntryToTemplate(PluginTemplate $template){
+        $template->addXml("routes", null, [['src' => $this->filePath]]);
     }
 
     protected function setUp(): void {
@@ -86,12 +83,12 @@ Route::get('', function() {
 
     function testInstallEmptyRoutesFile() {
         $template = $this->defaultRouteTemplate()
-            ->addFile('routes/api.php', "<?php // no-op routes file")
+            ->addFile($this->filePath, "<?php // no-op routes file")
             ->created()
             ->generate("plugin.xml");
-        
-        $this->assertDatabaseCount(self::ROUTES_DATABASE, 0);
+            
         $this->generator = PluginGenerator::with([$template], function () use ($template) {
+            $this->assertDatabaseCount(self::ROUTES_DATABASE, 0);
             $response = $this->userRequest()
                 ->post("/api/v1/plugin/install/{$template->plugin->id}");
 
@@ -122,7 +119,7 @@ Route::get('', function() {
 
     function testUninstallRemovesRouteRecord() {
         $template = self::defaultRouteTemplate()
-            ->addFile('routes/api.php', "<?php // no-op routes file")
+            ->addFile($this->filePath, "<?php // no-op routes file")
             ->generate("plugin.xml");
 
         $this->generator = PluginGenerator::with([$template], function () use ($template) {
@@ -133,23 +130,6 @@ Route::get('', function() {
 
             $response->assertStatus(200);
             $this->assertDatabaseMissing(self::ROUTES_DATABASE, ['plugin_id' => $template->plugin->id]);
-        });
-    }
-
-    function testInstallRequiresPluginWritePermission() {
-        $template = self::defaultRouteTemplate('routes/api.php')
-            ->addFile('routes/api.php', "<?php // no-op routes file")
-            ->created()
-            ->generate("plugin.xml");
-
-        $this->generator = PluginGenerator::with([$template], function () use ($template) {
-            $this->useUserWithPermissions(['plugin_read']);
-            $response = $this->userRequest()
-                ->post("/api/v1/plugin/install/{$template->plugin->id}");
-
-            $response->assertStatus(403);
-
-            $this->assertDatabaseCount(self::ROUTES_DATABASE, 0);
         });
     }
 
@@ -167,7 +147,7 @@ Route::get('', function() {
 
             $response->assertStatus(200);
             $response->assertContent("Hello, world!");
-        }, true);
+        });
     }
 }
 

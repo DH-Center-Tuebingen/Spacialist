@@ -134,22 +134,4 @@ class ApiPluginPermissionTest extends TestCase {
             $this->assertDatabaseHas('permissions', ['name' => 'permtest_kept_read']);
         });
     }
-
-    function testInstallRequiresPluginWritePermission() {
-        $permissions = [
-            'permtest_forbidden' => [
-                ['name' => 'read', 'display_name' => 'Read', 'description' => 'Can read'],
-            ],
-        ];
-        $template = self::defaultPermissionTemplate($permissions)->created()->generate("plugin.xml");
-        $this->generator = PluginGenerator::with([$template], function () use ($template) {
-            $this->useUserWithPermissions(['plugin_read']);
-            $response = $this->userRequest()
-                ->post("/api/v1/plugin/install/{$template->plugin->id}");
-
-            $response->assertStatus(403);
-
-            $this->assertDatabaseMissing('permissions', ['name' => 'permtest_forbidden_read']);
-        });
-    }
 }

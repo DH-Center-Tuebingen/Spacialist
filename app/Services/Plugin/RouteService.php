@@ -23,6 +23,8 @@ use Illuminate\Support\Facades\Route;
 class RouteService extends PluginService {
 
     use BootstrapCache;
+    
+    const DEPRECATED_DEFAULT_ROUTES = 'routes/api.php';
 
     protected function getCacheName(): string {
         return 'plugin-routes';
@@ -77,11 +79,11 @@ class RouteService extends PluginService {
 
     public function findDeprecatedDefaultRoutes(Plugin $plugin, PluginDirectory $pluginDirectory): ?string {
         $pluginDir = PluginDirectory::fromPlugin($plugin);
-        $filePath = $pluginDir->getAbsolutePluginPath('routes/api.php');
+        $absoluteFilePath = $pluginDir->getAbsolutePluginPath(self::DEPRECATED_DEFAULT_ROUTES);
 
-        if(file_exists($filePath)) {
+        if(file_exists($absoluteFilePath)) {
             PluginLog::for($plugin)->warning("Deprecated default routes found. Please update your plugin to use the new route registration method.");
-            return $filePath;
+            return self::DEPRECATED_DEFAULT_ROUTES;
         } else {
             return null;
         }

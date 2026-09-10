@@ -27,6 +27,8 @@ use Illuminate\Support\Facades\File;
  */
 class RolePresetService extends PluginService {
 
+    const DEPRECATED_ROLE_FILE = 'role-presets.json';
+
     /**
      * Install role presets defined in a plugin's role-presets.json
      */
@@ -92,7 +94,7 @@ class RolePresetService extends PluginService {
                 continue;
             }
             
-            if($src === $this->getDeprecatedRoleFile()) {
+            if($src === self::DEPRECATED_ROLE_FILE) {
                 $deprecatedRouteDefined = true;
             }
             
@@ -111,14 +113,9 @@ class RolePresetService extends PluginService {
         return $rolePresets;
     }
     
-    public function getDeprecatedRoleFile(){
-        return "role-presets.json";
-    }
-    
     public function getDeprecatedRolePresets(Plugin $plugin, PluginManifest $manifest): array {
-        $deprecatedFile = $this->getDeprecatedRoleFile();
         $directory = PluginDirectory::fromPlugin($plugin);
-        $deprecatedFilePath = $directory->getAbsolutePluginPath($deprecatedFile);
+        $deprecatedFilePath = $directory->getAbsolutePluginPath(self::DEPRECATED_ROLE_FILE);
         if(File::exists($deprecatedFilePath)) {
             $content = File::get($deprecatedFilePath);
             $parsedjson = json_decode($content, true);

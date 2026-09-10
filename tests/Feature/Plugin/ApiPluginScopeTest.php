@@ -1,10 +1,8 @@
 <?php
 
-namespace Tests\Feature;
+namespace Tests\Feature\Plugin;
 
 use App\Entity;
-use App\Plugin;
-use App\Services\PluginManager;
 use Carbon\Carbon;
 use Tests\TestCase;
 
@@ -51,7 +49,7 @@ class ApiPluginScopeTest extends TestCase {
     }
 
 
-    public function testScopePlugin(): void {
+    public function testInstallingScopePlugin(): void {
 
         $response = $this->userRequest()
             ->get('/api/v1/search/entity?q=');
@@ -60,57 +58,46 @@ class ApiPluginScopeTest extends TestCase {
         // we get all 8 entitiies.
         $response->assertStatus(200);
         $response->assertJsonCount(8, 'data');
+        $template = $this->getRestrictToType3Template();
+        PluginGenerator::with([$template], function() use ($template) {
+            // As this all happens in the same cycle,
+            // we need to manually reboot the model to trigger
+            // the boot method and apply the new plugin scope.
+            // In a real scenario, this would be handled automatically 
+            // as the plugin would be installed in a separate request/cycle.
+            self::rebootModel(Entity::class);
 
-        $this->generator = new PluginGenerator([$this->getRestrictToType3Template()]);
-        $this->generator->setUp();
+            $response = $this->userRequest()
+                ->get('/api/v1/search/entity?q=');
 
+            $response->assertStatus(200);
+            $response->assertJsonCount(2, 'data');
 
-        // As this all happens in the same cycle,
-        // we need to manually reboot the model to trigger
-        // the boot method and apply the new plugin scope.
-        // In a real scenario, this would be handled automatically 
-        // as the plugin would be installed in a separate request/cycle.
-        self::rebootModel(Entity::class);
+            $response->assertJsonFragment([
+                'id' => 7,
+                'name' => 'Site B',
+                'entity_type_id' => 3,
+            ]);
 
-        $response = $this->userRequest()
-            ->get('/api/v1/search/entity?q=');
-
-        $response->assertStatus(200);
-        $response->assertJsonCount(2, 'data');
-
-        $response->assertJsonFragment([
-            'id' => 7,
-            'name' => 'Site B',
-            'entity_type_id' => 3,
-        ]);
-
-        $response->assertJsonFragment([
-            'id' => 1,
-            'name' => 'Site A',
-            'entity_type_id' => 3,
-        ]);
-
-        $plugin = $this->generator->getPlugin('ScopePlugin');
-        if(!$plugin) {
-            throw new \Exception("Plugin not found in generator plugin map.");
-        }
-        app(PluginManager::class)->uninstall($plugin);
-        self::rebootModel(Entity::class);
-        
-
-        // Test if works after uninstalling the plugin
-        Plugin::where('id', 3)->update([
-            'installed_at' => null,
-            'updated_at' => Carbon::now(),
-        ]);
-        self::rebootModel(Entity::class);
-        // Re-run the search query
-        $response = $this->userRequest()
-            ->get('/api/v1/search/entity?q=');
-
-        $response->assertStatus(200);
-        $response->assertJsonCount(8, 'data');
+            $response->assertJsonFragment([
+                'id' => 1,
+                'name' => 'Site A',
+                'entity_type_id' => 3,
+            ]);
+        });
     }
+    
+    function testUninstallingScopePlugin(): void {
+        $template = $this->getRestrictToType3Template()->uninstalled();
+        PluginGenerator::with([$template], function() use ($template) {
+            self::rebootModel(Entity::class);
 
+            $response = $this->userRequest()
+                ->get('/api/v1/search/entity?q=');
+
+            $response->assertStatus(200);
+            $response->assertJsonCount(8, 'data');
+        });
+    }
 
 }

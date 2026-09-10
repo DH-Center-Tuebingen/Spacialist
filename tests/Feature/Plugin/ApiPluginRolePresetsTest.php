@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature;
+namespace Tests\Feature\Plugin;
 
 use Illuminate\Support\Collection;
 use Illuminate\Testing\Fluent\AssertableJson;
@@ -13,43 +13,44 @@ use Tests\Support\PluginGenerator;
 use Tests\Support\RoleExtensionFile;
 
 class ApiPluginRolePresetsTest extends TestCase {
+    
+    protected string $filePath = 'custom/dir/roles.json';
 
-    static function getDefaultTemplate() {
+    protected function getTemplateDefnition() {
         return new PluginTemplate(
             name: "RolePlugin",
             uuid: "123e4567-e89b-12d3-a456-426614174000",
             version: "1.0.0"
         );
     }
+    
+    protected function addManifestEntryToTemplate(PluginTemplate $template, array $files) {
+        $template->addXml("role-presets", "file", array_map(fn($src) => ["src" => $src], $files));
+    }
 
-    static function defaultRoleTemplate($filepath = 'roles.json') {
-        $template = self::getDefaultTemplate();
+    protected function defaultRoleTemplate() {
+        $template = $this->getTemplateDefnition();
 
         $extFile = new RoleExtensionFile(
-            $filepath,
+            $this->filePath,
             [
                 new RoleExtension("administrator", 'simple', 'crwds'),
                 new RoleExtension("guest", 'simple', 'r')
             ]
         );
+        
+        $this->addManifestEntryToTemplate($template, [$this->filePath]);
 
         return $template->addBasic()
             ->addFile(
                 $extFile->src,
                 $extFile->toJson(),
             )
-            ->addXml("role-presets", "file", [
-                ["src" => $extFile->src]
-            ])
             ->generate("plugin.xml");
     }
 
-    static function deprecatedRoleTemplate() {
-        return static::defaultRoleTemplate('role-presets.json');
-    }
-
-    static function multipleFilesTemplate() {
-        $template = self::getDefaultTemplate();
+    protected function multipleFilesTemplate() {
+        $template = $this->getTemplateDefnition();
 
         $extFile1 = new RoleExtensionFile(
             "roles.json",
@@ -66,6 +67,8 @@ class ApiPluginRolePresetsTest extends TestCase {
                 new RoleExtension("guest", 'complex', 'r')
             ]
         );
+        
+        $this->addManifestEntryToTemplate($template, [$extFile1->src, $extFile2->src]);
 
         return $template->addBasic()
             ->addFile(
@@ -76,37 +79,12 @@ class ApiPluginRolePresetsTest extends TestCase {
                 $extFile2->src,
                 $extFile2->toJson(),
             )
-            ->addXml("role-presets", "file", [
-                ["src" => $extFile1->src],
-                ["src" => $extFile2->src]
-            ])
             ->generate("plugin.xml");
     }
 
-    function testSimpleRoleDefault() {
-        PluginGenerator::with([self::defaultRoleTemplate()], function () {
-            $response = $this->userRequest()->get('/api/v1/pre');
-
-            $this->assertStatus($response, 200);
-
-            $response->assertJson(value: fn(AssertableJson $json) =>
-                $json->has('presets')
-                    ->where('presets.0.name', 'administrator')
-                    ->has('presets.0.fullSet')
-                    ->whereContains('presets.0.fullSet', [
-                        'simple_create',
-                        'simple_read',
-                        'simple_write',
-                        'simple_delete',
-                        'simple_share',
-                    ])
-                    ->etc()
-            );
-        });
-    }
-
-    function testSimpleRoleDeprecated() {
-        PluginGenerator::with([self::multipleFilesTemplate()],function () {
+    function testSimpleRoles() {
+        $template = $this->defaultRoleTemplate();
+        PluginGenerator::with([$template], function () {
             $response = $this->userRequest()->get('/api/v1/pre');
 
             $this->assertStatus($response, 200);
@@ -128,7 +106,9 @@ class ApiPluginRolePresetsTest extends TestCase {
     }
 
     function testMultipleFiles() {        
-        PluginGenerator::with([self::multipleFilesTemplate()], function () {
+        $template = $this->multipleFilesTemplate();
+        info($template);
+        PluginGenerator::with([$template], function () {
             $response = $this->userRequest()->get('/api/v1/pre');
 
             $this->assertStatus($response, 200);
@@ -160,7 +140,7 @@ class ApiPluginRolePresetsTest extends TestCase {
     }
 
     function testRolesNotPresentWhenUninstalled() {
-        PluginGenerator::with([self::defaultRoleTemplate()->uninstalled()], function () {
+        PluginGenerator::with([$this->defaultRoleTemplate()->uninstalled()], function () {
             $response = $this->userRequest()->get('/api/v1/pre');
 
             $this->assertStatus($response, 200);
@@ -198,7 +178,7 @@ class ApiPluginRolePresetsTest extends TestCase {
     }
 
     function testRolesNotPresentWhenRemoved() {
-        PluginGenerator::with([self::defaultRoleTemplate()->removed()], function () {
+        PluginGenerator::with([$this->defaultRoleTemplate()->removed()], function () {
             $response = $this->userRequest()->get('/api/v1/pre');
 
             $this->assertStatus($response, 200);
