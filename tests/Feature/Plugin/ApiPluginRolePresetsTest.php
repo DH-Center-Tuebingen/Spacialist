@@ -107,7 +107,6 @@ class ApiPluginRolePresetsTest extends TestCase {
 
     function testMultipleFiles() {        
         $template = $this->multipleFilesTemplate();
-        info($template);
         PluginGenerator::with([$template], function () {
             $response = $this->userRequest()->get('/api/v1/pre');
 
