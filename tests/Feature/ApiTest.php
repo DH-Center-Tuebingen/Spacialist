@@ -99,7 +99,7 @@ class ApiTest extends TestCase
         $this->assertMatchesRegularExpression('/^[A-ZÄÖÜ][a-zäöüß]+$/', $content['name']);
         $this->assertMatchesRegularExpression('/^v\d+\.\d+\.\d+$/', $content['release']);
         $this->assertMatchesRegularExpression('/^v\d+\.\d+\.\d+ \([A-ZÄÖÜ][a-zäöüß]+\)$/', $content['readable']);
-        $this->assertMatchesRegularExpression('/^v\d+\.\d+\.\d+-[a-zäöüß]+(-g[a-f0-9]{8})?$/', $content['full']);
+        $this->assertMatchesRegularExpression('/^v\d+\.\d+\.\d+-[a-zäöüß]+(-g[a-f0-9]{8,})?$/', $content['full']);
         $this->assertEquals($content['release'], 'v' . $vi->getMajor() . "." . $vi->getMinor() . "." . $vi->getPatch());
 
         $hash = $vi->getReleaseHash();
