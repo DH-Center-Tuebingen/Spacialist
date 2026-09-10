@@ -21,17 +21,7 @@ Route::middleware('auth:sanctum')->prefix('download')->group(function () {
 
 Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
     Route::get('/pre', 'HomeController@getGlobalData');
-    Route::get('/version', function () {
-        $versionInfo = new App\VersionInfo();
-        return response()->json([
-            'full' => $versionInfo->getFullRelease(),
-            'readable' => $versionInfo->getReadableRelease(),
-            'release' => $versionInfo->getRelease(),
-            'name' => $versionInfo->getReleaseName(),
-            'time' => $versionInfo->getTime()
-        ]);
-    });
-
+    Route::get('/version', 'HomeController@getVersion');
     Route::post('/access/check', 'HomeController@checkAccesspointAccess');
 });
 

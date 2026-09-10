@@ -31,6 +31,8 @@ All notable changes to this project will be documented in this file.
 - Plugin with same version number can be uploaded
     - Improves developer experience when testing plugin deployment
     - Allows for a simple 'repair' of an installed plugin
+- VersionInfo is now a Singleton that can be overwritten in tests
+    - GithubActions could not fetch the version from Github resulting in testing against version 0.0.0, making it impossible to test the minimum boundary against said version. 
 
 ## 0.11.1
 ### Added

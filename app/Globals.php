@@ -32,17 +32,6 @@ class Globals {
         ");
     }
 
-    public static function getVersion(): array {
-        $versionInfo = new VersionInfo();
-        return [
-            'full' => $versionInfo->getFullRelease(),
-            'readable' => $versionInfo->getReadableRelease(),
-            'release' => $versionInfo->getRelease(),
-            'name' => $versionInfo->getReleaseName(),
-            'time' => $versionInfo->getTime()
-        ];
-    }
-
     public static function getGeometryTypes(): array {
         if(Plugin::isInstalled('Map')) {
             return Geodata::getAvailableGeometryTypes();
