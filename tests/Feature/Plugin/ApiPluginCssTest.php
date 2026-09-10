@@ -38,7 +38,7 @@ class ApiPluginCssTest extends TestCase {
 
     protected function setUp(): void {
         parent::setUp();
-        Storage::persistentFake(static::FAKE_STORAGE);
+        Storage::fake(static::FAKE_STORAGE);
         app(PluginManager::class)->cssService->setDisk(static::FAKE_STORAGE);
         Carbon::setTestNow('2020-07-20 10:15:30');
     }
@@ -55,11 +55,23 @@ class ApiPluginCssTest extends TestCase {
         Carbon::setTestNow();
         $this->ensureTeardown();
     }
+    
+    function testInstallSkipsEmptyCssPath() {
+        $template = self::defaultCssTemplate()->addXml("css", "file", [['src' => '']])->created()->generate("plugin.xml");
+        $this->generator = PluginGenerator::with([$template], function () use ($template) {
+            $response = $this->userRequest()
+                ->post("/api/v1/plugin/install/{$template->plugin->id}");
+
+            $response->assertStatus(200);
+
+            $this->assertDatabaseCount('plugin_service_css_files', 0);
+        });
+    }
 
     function testInstallPublishesCssFileAndCreatesRecord() {
         $template = self::defaultCssTemplate(['style.css'])->created()->generate("plugin.xml");
         $this->generator = PluginGenerator::with([$template], function () use ($template) {
-            // Storage::disk(static::FAKE_STORAGE)->assertMissing("plugin_css/cssplugin-00000000-0000-0000-0000-000000000004-style.css");
+            Storage::disk(static::FAKE_STORAGE)->assertMissing("plugin_css/cssplugin-00000000-0000-0000-0000-000000000004-style.css");
             
             $this->assertDatabaseMissing('plugin_service_css_files', [
                 'plugin_id' => $template->plugin->id,
@@ -80,18 +92,6 @@ class ApiPluginCssTest extends TestCase {
             $cssResponse = $this->userRequest()->get('/' . $styles[0]);
             $cssResponse->assertStatus(200);
             Storage::disk(static::FAKE_STORAGE)->assertExists("plugin_css/cssplugin-00000000-0000-0000-0000-000000000004-style.css");
-        });
-    }
-
-    function testInstallSkipsEmptyCssPath() {
-        $template = self::defaultCssTemplate()->addXml("css", "file", [['src' => '']])->created()->generate("plugin.xml");
-        $this->generator = PluginGenerator::with([$template], function () use ($template) {
-            $response = $this->userRequest()
-                ->post("/api/v1/plugin/install/{$template->plugin->id}");
-
-            $response->assertStatus(200);
-
-            $this->assertDatabaseCount('plugin_service_css_files', 0);
         });
     }
 

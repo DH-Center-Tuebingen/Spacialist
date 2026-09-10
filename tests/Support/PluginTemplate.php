@@ -4,6 +4,7 @@ namespace Tests\Support;
 
 use App\Plugin;
 
+use Stringable;
 use Illuminate\Support\Str;
 use Tests\Support\PluginXml;
 
@@ -20,7 +21,7 @@ use Tests\Support\PluginXml;
  * to mock templates more efficiently while keeping the test files tidy.  
  * 
  */
-class PluginTemplate {
+class PluginTemplate implements Stringable {
 
     public Plugin $plugin;
     private $manifest = "plugin.xml";
@@ -351,6 +352,32 @@ class PluginTemplate {
 
     public function getLifecycleState(): PluginLifecycleState {
         return $this->lifecycleState;
+    }
+    
+    
+    private function printXMLRecursively($xml, $indent = 0): string {
+        $text = str_repeat("    ", $indent);
+        foreach($xml as $key => $value) {
+            if(is_array($value)) {
+                $text .= $key . ":\n" . $this->printXMLRecursively($value, ++$indent);
+            } else {
+                $text .= $key . ": " . $value . "\n";
+            }
+        }
+        return $text;
+    }
+    
+    public function __toString(): string {
+        $output = "\n============  Plugin Template: " . $this->plugin->name . " ============\n";
+        $output .= "Name: " . $this->plugin->name . "\n";
+        $output .= "UUID: " . $this->plugin->uuid . "\n";
+        $output .= "Version: " . $this->plugin->version . "\n";
+        $output .= "Lifecycle State: " . $this->lifecycleState->name . "\n";
+        $output .= "________________________________________\n";
+        $output .= $this->xml === [] ? "- EMPTY - \n" :  $this->printXMLRecursively($this->xml) . "\n";
+        $output .= "END =========  Plugin Template: ". $this->plugin->name .   "======== END\n";
+        return $output;
+    
     }
     
 }

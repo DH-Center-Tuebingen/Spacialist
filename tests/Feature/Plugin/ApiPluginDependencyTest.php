@@ -1,10 +1,7 @@
 <?php
 
-namespace Tests\Feature;
+namespace Tests\Feature\Plugin;
 
-
-use App\Globals;
-use App\Plugin;
 use App\VersionInfo;
 use Illuminate\Support\Str;
 use Tests\Support\PluginTemplate;

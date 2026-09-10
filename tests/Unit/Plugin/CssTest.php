@@ -6,6 +6,7 @@ use App\Plugin;
 use App\Plugin\PluginManifest;
 use App\Services\Plugin\CssService;
 use App\Services\PluginManager;
+use Directory;
 use Tests\Support\PluginGenerator;
 use Tests\Support\PluginTemplate;
 use Tests\TestCase;
@@ -46,8 +47,7 @@ class CssTest extends TestCase {
 
     public function testNoCssEntriesInManifest() {
         $template = $this->mockCssPlugin();
-        $generator = new PluginGenerator([$template]);
-        $generator->use(function () use ($template) {
+        PluginGenerator::with([$template], function () use ($template) {
             $manifest = PluginManifest::fromPlugin($template->plugin);
              app(PluginManager::class)->cssService->verifyManifest($manifest);
             $this->assertEquals([], CssFile::all()->toArray());
@@ -56,22 +56,19 @@ class CssTest extends TestCase {
 
     public function testSingleCssEntryInManifest() {
         $template = $this->mockCssPlugin($cssEntries = ["path/to/file.css"]);
-        $generator = new PluginGenerator([$template]);
-        $generator->use(function () use ($template) {
+        PluginGenerator::with([$template], function () use ($template) {
             $plugin = $template->plugin;
             $manifest = PluginManifest::fromPlugin($template->plugin);
-             app(PluginManager::class)->cssService->createFromManifest($plugin, $manifest);
+            app(PluginManager::class)->cssService->createFromManifest($plugin, $manifest);
             $this->assertDatabaseHas('plugin_service_css_files', [
                 "src" => "path/to/file.css"
             ]);
-
         });
     }
 
     public function testMultipleCssEntriesInManifest() {
         $template = $this->mockCssPlugin($cssEntries = ["path/to/file_1.css", "path/to/file_2.css"]);
-        $generator = new PluginGenerator([$template]);
-        $generator->use(function () use ($template) {
+        PluginGenerator::with([$template], function () use ($template) {
 
             $plugin = $template->plugin;
             $manifest = PluginManifest::fromPlugin($template->plugin);
