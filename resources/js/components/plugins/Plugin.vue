@@ -1,15 +1,14 @@
 <template>
     <div
         :key="value.name"
-        class="col"
     >
         <div
             class="card h-100"
             :style="computedStyle"
         >
             <div class="card-body d-flex flex-column pb-1">
-                <header class="d-flex justify-content-between gap-2 mb-2">
-                    <h5 class="card-title mb-0">
+                <header class="d-flex justify-content-between align-items-center gap-2 mb-2">
+                    <h5 class="card-title mb-0 text-truncate" :title="getPluginTitle(value)">
                         {{ getPluginTitle(value) }}
                     </h5>
                     <div class="toolbar d-flex align-items-center gap-1">
@@ -82,7 +81,6 @@
                                         class="dropdown-item text-danger"
                                         @click="remove()"
                                     >
-                                        <!-- :class="{disabled: isInstalled(), 'opacity-50': isInstalled()}" -->
                                         <i class="fas fa-fw fa-trash" />
                                         {{ t('global.remove') }}
                                     </button>

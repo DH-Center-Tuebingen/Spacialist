@@ -1,12 +1,12 @@
 <template>
     <div
-        class="d-flex flex-column h-100"
+        class="sp-plugins d-flex flex-column h-100 row flex-nowrap"
         ref="root"
     >
         <header class="mb-3">
             <h4>
                 {{ t('main.plugins.title', 2) }}
-                <div class="float-end">
+                <div class="float-end d-flex gap-2">
                     <file-upload
                         ref="uploadButton"
                         class="btn btn-sm btn-outline-primary clickable"
@@ -24,7 +24,7 @@
                         </span>
                     </file-upload>
                     <button
-                        class="btn btn-sm btn-outline-secondary ms-2"
+                        class="btn btn-sm btn-outline-secondary"
                         @click="pluginStore.refresh()"
                     >
                         <i class="fas fa-fw fa-sync" /> {{ t('global.refresh') }}
@@ -32,7 +32,7 @@
                 </div>
             </h4>
         </header>
-        <div class="container-fluid flex-fill overflow-y-auto">
+        <div class="flex-fill overflow-y-auto">
             <LoadingContainer
                 class="row g-3 "
                 :loading="loading"
@@ -64,7 +64,7 @@
                     v-for="plugin in pluginStore.pluginsSortedByTitle"
                     :key="plugin.name"
                     :value="plugin"
-                    class="col col-12 col-md-6 col-xl-4 col-xxl-3"
+                    class="col-12 col-md-6 col-xl-4 col-xxl-3"
                 />
                 <alert
                     v-if="(!pluginStore.pluginsSortedByTitle || pluginStore.pluginsSortedByTitle == 0)"
