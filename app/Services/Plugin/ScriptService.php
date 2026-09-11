@@ -128,6 +128,7 @@ class ScriptService extends PluginService {
         $scriptName = $this->getScriptName($plugin);
         $targetPath = $storageDirectory->getDirectoryPath($scriptName);
 
+        $success = true;
          if(is_link($targetPath)) { // we assume that the symlink is valid and skip the unpublishing step
             PluginLog::for($plugin)->warning("Script is published as a symlink. Skipping unpublishing step.");
         } else {
