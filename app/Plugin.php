@@ -44,6 +44,15 @@ class Plugin extends Model {
         return strtolower(str_replace(' ', '', $this->name));
     }
 
+    /**
+     * Reads the plugin's Manifest file, extracts all the data
+     * 
+     * checks if the plugin name matches any installed
+     * plugin
+     * 
+     * @param PluginManifest $manifest
+     * @return Plugin|\stdClass
+     */
     public static function updateOrCreateFromManifest(PluginManifest $manifest): Plugin {
         $name = $manifest->getName();
         $existingPlugin = self::where('name', $name)->first();
@@ -74,7 +83,15 @@ class Plugin extends Model {
     }
     
     
-    public static function updateMetadataFromManifest(Plugin $plugin, PluginManifest $manifest): void {
+    /**
+     * Reads the metadata from the manifest file and updates the table accordingly.
+     * The plugin's metadata is updated but not saved yet.
+     * 
+     * @param Plugin $plugin 
+     * @param PluginManifest $manifest
+     * @return bool Returns true when the metadata was updated with new values otherwise false.
+     */
+    private static function updateMetadataFromManifest(Plugin $plugin, PluginManifest $manifest): bool {
         $manifestAuthors = $manifest->getAuthors() ?? [];
         $manifestDescription = $manifest->getDescription() ?? "";
         $manifestLicence = $manifest->getLicence() ?? "";
@@ -89,15 +106,17 @@ class Plugin extends Model {
         
         // We only want to update the metadata if it has actually changed.
         if(
-            $manifestAuthors !== $authors ||
+            count(array_diff($manifestAuthors, $authors)) > 0 ||
             $manifestDescription !== $description ||
             $manifestLicence !== $licence
         ) {
             $plugin->metadata = [
-                'authors' => $authors,
-                'description' => $description,
-                'licence' => $licence,
+                'authors' => $manifestAuthors,
+                'description' => $manifestDescription,
+                'licence' => $manifestLicence,
             ];
+            return true;
         }
+        return false;
     }
 }
