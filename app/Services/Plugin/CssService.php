@@ -11,7 +11,6 @@ use App\Plugin\PluginManifest;
 use App\Services\PluginManager;
 use App\Support\BootstrapCache;
 use App\Support\Log\PluginLog;
-use App\Traits\HasDynamicDisk;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -28,7 +27,6 @@ use Illuminate\Support\Facades\DB;
 class CssService extends PluginService implements ManifestContent {
 
     use BootstrapCache;
-    use HasDynamicDisk;
     protected function fetch(): array {
         return CssFile::all()->toArray();
     }
@@ -189,7 +187,7 @@ class CssService extends PluginService implements ManifestContent {
      * @return Directory
      */
     public function getStorageDirectory(): Directory {
-        return new Directory("plugin_css", $this->disk);
+        return new Directory("plugin_css", "public");
     }
 
     /**
@@ -231,7 +229,7 @@ class CssService extends PluginService implements ManifestContent {
         $files = CssFile::where('plugin_id', $plugin->id)->get();
         $urls = [];
         foreach($files as $cssFile) {
-            $scriptUrl = "api/download/plugin/css/" . $this->getTargetName($plugin, $cssFile->src);
+            $scriptUrl = "storage/plugin_css/" . $this->getTargetName($plugin, $cssFile->src) . "?$plugin->version";
             $urls[] = $scriptUrl;
         }
         return $urls;

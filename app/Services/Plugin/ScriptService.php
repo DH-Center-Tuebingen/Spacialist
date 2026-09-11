@@ -10,7 +10,6 @@ use App\Plugin\PluginDirectory;
 use App\Plugin\PluginManifest;
 use App\Services\PluginManager;
 use App\Support\Log\PluginLog;
-use App\Traits\HasDynamicDisk;
 
 
 /**
@@ -19,8 +18,6 @@ use App\Traits\HasDynamicDisk;
  * directory and is loaded by default by the application.
  */
 class ScriptService extends PluginService {
-    
-    use HasDynamicDisk;
 
     public const PLUGIN_SCRIPT_LOCATION = "js/script.js";
 
@@ -156,7 +153,7 @@ class ScriptService extends PluginService {
      * @return string
      */
     public function getUrl(Plugin $plugin): string {
-        return "api/download/plugin/{$plugin->slugName()}-{$plugin->uuid}.js?version=$plugin->version";
+        return "storage/plugins/{$plugin->slugName()}-{$plugin->uuid}.js?version=$plugin->version";
     }
 
 
@@ -181,6 +178,6 @@ class ScriptService extends PluginService {
      * @return Directory
      */
     public function getStorageDirectory(): Directory {
-        return new Directory('plugins', $this->disk);
+        return new Directory('plugins', 'public');
     }
 }
