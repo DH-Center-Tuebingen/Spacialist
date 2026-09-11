@@ -11,7 +11,7 @@ class VersionInfo {
         private int $patch = 0,
         private string $release ="",
         private string $releaseName ="",
-        private string $releaseHash ="",
+        private ?string $releaseHash = null,
         private string $time = "",
     ) {}
 
@@ -78,7 +78,7 @@ class VersionInfo {
         return $this->releaseName;
     }
 
-    public function getReleaseHash() {
+    public function getReleaseHash(): ?string {
         return $this->releaseHash;
     }
 
