@@ -11,7 +11,6 @@ use Tests\PluginTestCase;
 
 class ApiPluginCssTest extends PluginTestCase {
 
-    private const FAKE_STORAGE = 'fake_css_storage';
     private const PLUGIN_NAME = 'CssPlugin';
     private const PLUGIN_UUID = '00000000-0000-0000-0000-000000000004';
 
@@ -38,7 +37,6 @@ class ApiPluginCssTest extends PluginTestCase {
 
     protected function setUp(): void {
         parent::setUp();
-        Storage::fake(static::FAKE_STORAGE);
         Carbon::setTestNow('2020-07-20 10:15:30');
     }
 
@@ -70,7 +68,7 @@ class ApiPluginCssTest extends PluginTestCase {
     function testInstallPublishesCssFileAndCreatesRecord() {
         $template = self::defaultCssTemplate(['style.css'])->created()->generate("plugin.xml");
         $this->generator = PluginGenerator::with([$template], function () use ($template) {
-            Storage::disk(static::FAKE_STORAGE)->assertMissing("plugin_css/cssplugin-00000000-0000-0000-0000-000000000004-style.css");
+            Storage::disk("public")->assertMissing("plugin_css/cssplugin-00000000-0000-0000-0000-000000000004-style.css");
             
             $this->assertDatabaseMissing('plugin_service_css_files', [
                 'plugin_id' => $template->plugin->id,
@@ -88,9 +86,11 @@ class ApiPluginCssTest extends PluginTestCase {
 
             $styles = $response->json('styles');
             $this->assertCount(1, $styles);
-            $cssResponse = $this->userRequest()->get('/' . $styles[0]);
-            $cssResponse->assertStatus(200);
-            Storage::disk(static::FAKE_STORAGE)->assertExists("plugin_css/cssplugin-00000000-0000-0000-0000-000000000004-style.css");
+            Storage::disk("public")->assertExists("plugin_css/cssplugin-00000000-0000-0000-0000-000000000004-style.css");
+            $this->assertEquals(
+                "body { color: red; }",
+                Storage::disk("public")->get("plugin_css/cssplugin-00000000-0000-0000-0000-000000000004-style.css")
+            );
         });
     }
 
@@ -102,7 +102,7 @@ class ApiPluginCssTest extends PluginTestCase {
                 'plugin_id' => $template->plugin->id,
                 'src' => 'style.css',
                 ]);
-            Storage::disk(static::FAKE_STORAGE)->assertExists("plugin_css/cssplugin-00000000-0000-0000-0000-000000000004-style.css");
+            Storage::disk("public")->assertExists("plugin_css/cssplugin-00000000-0000-0000-0000-000000000004-style.css");
                 
             $response = $this->userRequest()
                 ->post("/api/v1/plugin/uninstall/{$template->plugin->id}");
@@ -112,7 +112,7 @@ class ApiPluginCssTest extends PluginTestCase {
             $this->assertDatabaseMissing('plugin_service_css_files', [
                 'plugin_id' => $template->plugin->id,
             ]);
-            Storage::disk(static::FAKE_STORAGE)->assertMissing("plugin_css/cssplugin-00000000-0000-0000-0000-000000000004-style.css");
+            Storage::disk("public")->assertMissing("plugin_css/cssplugin-00000000-0000-0000-0000-000000000004-style.css");
         });
     }
 }

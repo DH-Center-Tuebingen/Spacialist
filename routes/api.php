@@ -15,8 +15,6 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth:sanctum')->prefix('download')->group(function () {
     Route::get('/avatar', 'UserController@downloadAvatar');
     Route::get('/bibliography', 'BibliographyController@downloadFile');
-    Route::get('/plugin/{filepath}', 'PluginController@downloadScript');
-    Route::get('/plugin/css/{filepath}', 'PluginController@downloadCss');
 });
 
 Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
