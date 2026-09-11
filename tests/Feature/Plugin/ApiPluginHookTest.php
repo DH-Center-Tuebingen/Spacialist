@@ -2,11 +2,11 @@
 
 namespace Tests\Feature\Plugin;
 
-use Tests\TestCase;
+use Tests\PluginTestCase;
 use Tests\Support\Templates\HookTemplate;
 use Tests\Support\PluginGenerator;
 
-class ApiPluginHookTest extends TestCase {
+class ApiPluginHookTest extends PluginTestCase {
 
 
     function testHookInteraction() {

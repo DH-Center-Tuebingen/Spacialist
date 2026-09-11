@@ -6,9 +6,9 @@ use App\Services\PluginManager;
 use Carbon\Carbon;
 use Tests\Support\PluginGenerator;
 use Tests\Support\PluginTemplate;
-use Tests\TestCase;
+use Tests\PluginTestCase;
 
-class ApiPluginRouteTest extends TestCase {
+class ApiPluginRouteTest extends PluginTestCase {
 
     const ROUTES_DATABASE = "plugin_service_routes";
     const PLUGIN_NAME = 'RoutePlugin';

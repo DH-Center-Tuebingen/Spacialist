@@ -6,9 +6,9 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Tests\Support\PluginGenerator;
 use Tests\Support\PluginTemplate;
-use Tests\TestCase;
+use Tests\PluginTestCase;
 
-class ApiPluginAttributeTest extends TestCase {
+class ApiPluginAttributeTest extends PluginTestCase {
 
     private ?PluginGenerator $generator = null;
 

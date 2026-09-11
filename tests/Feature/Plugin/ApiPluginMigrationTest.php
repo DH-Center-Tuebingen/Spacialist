@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Tests\Support\Templates\MigrationTemplate;
 use Tests\Support\PluginGenerator;
-use Tests\TestCase;
+use Tests\PluginTestCase;
 
 /**
  * Feature tests for the plugin migration API.
@@ -18,7 +18,7 @@ use Tests\TestCase;
  *   POST /api/v1/plugin/migrate/{plugin}/rollback       – rollback            (plugin_write)
  *   POST /api/v1/plugin/migrate/{plugin}/force_add      – addMigrationToDatabase (plugin_write)
  */
-class ApiPluginMigrationTest extends TestCase {
+class ApiPluginMigrationTest extends PluginTestCase {
 
     private const PLUGIN_NAME = 'MigPlugin';
     private const PLUGIN_UUID = '00000000-0000-0000-0000-000000000001';

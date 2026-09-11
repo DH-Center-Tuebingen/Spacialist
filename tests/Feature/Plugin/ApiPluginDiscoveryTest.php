@@ -7,9 +7,9 @@ use Illuminate\Support\Str;
 use Tests\Support\PluginDirectoryGenerator;
 use Tests\Support\PluginGenerator;
 use Tests\Support\PluginTemplate;
-use Tests\TestCase;
+use Tests\PluginTestCase;
 
-class ApiPluginDiscoveryTest extends TestCase {
+class ApiPluginDiscoveryTest extends PluginTestCase {
 
     private array $manualCleanupDirs = [];
     private ?PluginGenerator $generator = null;

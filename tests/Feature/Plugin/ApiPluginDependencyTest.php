@@ -6,14 +6,14 @@ use App\VersionInfo;
 use Illuminate\Support\Str;
 use Tests\Support\PluginTemplate;
 use Carbon\Carbon;
-use Tests\TestCase;
+use Tests\PluginTestCase;
 
 use Tests\Support\PluginGenerator;
 
 use PHPUnit\Framework\Attributes\DataProvider;
 
 
-class ApiPluginDependencyTest extends TestCase {
+class ApiPluginDependencyTest extends PluginTestCase {
     
     private const PLUGIN_NAME = 'DependencyPlugin';
     private const PLUGIN_UUID = '00000000-0000-0000-0000-000000000002';

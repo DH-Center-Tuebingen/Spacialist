@@ -7,12 +7,12 @@ use Illuminate\Testing\Fluent\AssertableJson;
 
 use Tests\Support\PluginTemplate;
 use Tests\Support\RoleExtension;
-use Tests\TestCase;
+use Tests\PluginTestCase;
 
 use Tests\Support\PluginGenerator;
 use Tests\Support\RoleExtensionFile;
 
-class ApiPluginRolePresetsTest extends TestCase {
+class ApiPluginRolePresetsTest extends PluginTestCase {
     
     protected string $filePath = 'custom/dir/roles.json';
 

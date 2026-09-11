@@ -5,9 +5,9 @@ namespace Tests\Feature\Plugin;
 use Carbon\Carbon;
 use Tests\Support\PluginGenerator;
 use Tests\Support\PluginTemplate;
-use Tests\TestCase;
+use Tests\PluginTestCase;
 
-class ApiPluginPermissionTest extends TestCase {
+class ApiPluginPermissionTest extends PluginTestCase {
 
     private const PLUGIN_NAME = 'PermissionPlugin';
     private const PLUGIN_UUID = '00000000-0000-0000-0000-000000000005';

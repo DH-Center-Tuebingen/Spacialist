@@ -7,9 +7,9 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
 use Tests\Support\PluginGenerator;
 use Tests\Support\PluginTemplate;
-use Tests\TestCase;
+use Tests\PluginTestCase;
 
-class ApiPluginCssTest extends TestCase {
+class ApiPluginCssTest extends PluginTestCase {
 
     private const FAKE_STORAGE = 'fake_css_storage';
     private const PLUGIN_NAME = 'CssPlugin';
@@ -39,7 +39,6 @@ class ApiPluginCssTest extends TestCase {
     protected function setUp(): void {
         parent::setUp();
         Storage::fake(static::FAKE_STORAGE);
-        app(PluginManager::class)->cssService->setDisk(static::FAKE_STORAGE);
         Carbon::setTestNow('2020-07-20 10:15:30');
     }
 
