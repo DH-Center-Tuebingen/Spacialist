@@ -41,7 +41,7 @@ class Plugin extends Model {
     }
 
     public function slugName(): string {
-        return strtolower(str_replace(' ', '', $this->name));
+        return Str::slug($this->name);
     }
 
     /**
