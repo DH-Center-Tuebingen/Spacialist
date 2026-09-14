@@ -6,7 +6,9 @@ use App\AttributeTypes\Units\Implementations\UnitManager;
 use App\Bibliography;
 use App\Geodata;
 use App\Preference;
+use App\VersionInfo;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\View;
@@ -116,5 +118,16 @@ class AppServiceProvider extends ServiceProvider {
      * @return void
      */
     public function register() {
+        
+        // Creates a singleton instance of VersionInfo only when the application requests it for the first time.
+        $this->app->singleton(VersionInfo::class, function ($app) {
+            $versionInfo = new VersionInfo();
+            try{
+                $versionInfo->fetchFromGit();
+            } catch(\Exception $e) {
+                Log::error("Failed to fetch version info from Git: " . $e->getMessage());
+            }
+            return $versionInfo;
+        });
     }
 }

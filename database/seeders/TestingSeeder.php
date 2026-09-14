@@ -16,6 +16,7 @@ use Database\Seeders\General\RolesPermissionsSeeder;
 use Database\Seeders\General\RolesTableSeeder;
 use Database\Seeders\Testing\BibliographyTableSeeder;
 use Database\Seeders\Testing\CommentsSeeder;
+use Database\Seeders\Testing\DatabaseTableSeeder;
 use Database\Seeders\Testing\UserSeeder;
 use Database\Seeders\Testing\PluginSeeder;
 use Illuminate\Database\Seeder;

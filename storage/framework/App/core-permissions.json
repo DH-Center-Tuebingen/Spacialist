@@ -241,5 +241,32 @@
             "display_name": "Share Thesaurus Concepts",
             "description": "Ability to share and export thesaurus concepts"
         }
+    ], 
+    "plugin": [
+        {
+            "name": "read",
+            "display_name": "Read Plugins",
+            "description": "Ability to read plugins and their data"
+        },
+        {
+            "name": "write",
+            "display_name": "Write Plugins",
+            "description": "Ability to write plugins and their data"
+        },
+        {
+            "name": "create",
+            "display_name": "Create Plugins",
+            "description": "Ability to create plugins"
+        },
+        {
+            "name": "delete",
+            "display_name": "Delete Plugins",
+            "description": "Ability to delete plugins"
+        },
+        {
+            "name": "share",
+            "display_name": "Share Plugins",
+            "description": "Ability to share and export plugins"
+        }
     ]
 }

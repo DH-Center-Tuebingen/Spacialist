@@ -13,6 +13,7 @@ import {
 import {
     sortConcepts,
 } from '@/helpers/helpers.js';
+import usePluginStore from './plugin.js';
 
 export const useAttributeStore = defineStore('attribute', {
     state: _ => ({
@@ -51,15 +52,16 @@ export const useAttributeStore = defineStore('attribute', {
             return filteredSelection;
         },
         getTableAttributeTypes: state => state.attributeTypes.filter(type => type.in_table),
-        isFromPlugin: state => datatype => {
-            return !!useSystemStore().registeredPluginAttributes[datatype];
+        isFromPlugin: state => datatype => {          
+            const registeredPluginAttributes = usePluginStore().registeredAttributes;
+            return !!usePluginStore().registeredAttributes[datatype];
         },
         getPluginAttributeLabel: state => datatype => {
             const attributeType = state.attributeTypes.find(attributeType => {
                 return attributeType.datatype == datatype && !!attributeType.plugin;
             });
 
-            return attributeType?.label;
+            return attributeType?.label ?? datatype ?? "N / A";
         },
     },
     actions: {

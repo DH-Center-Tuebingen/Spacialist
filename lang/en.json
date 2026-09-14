@@ -108,5 +108,21 @@
     "This tag does not exist": "This tag does not exist",
     "HTML not supported for file type": "HTML not supported for file type :mime",
     "Presentations not yet supported!": "Presentations not yet supported!",
-    "Start date of a time period must not be after it's end date": "Start date of a time period must not be after it's end date"
+    "Start date of a time period must not be after it's end date": "Start date of a time period must not be after it's end date",
+    
+    "This plugin is not installed.": "This plugin is not installed.",
+    "A plugin with the name ':pluginName' and the same or later version (:uploadedVersion and :existingVersion) already exists. Aborting.": "A plugin with the name ':pluginName' and the same or later version (:uploadedVersion and :existingVersion) already exists. Aborting.",
+    "Installation requirements are not met: :dependencyError": "Installation requirements are not met: :dependencyError",
+    "Required Plugin is missing ':pluginName'": "Required Plugin is missing ':pluginName'",
+    "Required Plugin is not installed ':pluginName'": "Required Plugin is not installed ':pluginName'",
+    "Plugin is not compatible with the current Spacialist version.": "Plugin is not compatible with the current Spacialist version.",
+    
+    "Could not open provided plugin zip file. Aborting.": "Could not open provided plugin zip file. Aborting.",
+    "Format mismatch. Only a folder is allowed on root level.": "Format mismatch. Only a folder is allowed on root level.",
+    "Error while extracting zip file. Please check file permissions or ask your system adminstrator.": "Error while extracting zip file. Please check file permissions or ask your system adminstrator.",
+    "Plugin upload was unsuccessful. Plugin directory has been removed.": "Plugin upload was unsuccessful. Plugin directory has been removed.",
+    "Plugin was uploaded but could not be updated. Backup has been restored.": "Plugin was uploaded but could not be updated. Backup has been restored.",
+    "This migration does not exist or has already been run.": "This migration does not exist or has already been run.",
+    "Directory name must match manifest name: :dirName ≠ :manifestName": "Directory name must match manifest name: :dirName ≠ :manifestName",
+    "Invalid plugin name: :name": "Invalid plugin name: :name"
 }

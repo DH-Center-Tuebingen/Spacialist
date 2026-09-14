@@ -63,7 +63,7 @@ const updateUserAt = (context, userId, data, isProfile) => {
 
 export const useUserStore = defineStore('user', {
     state: _ => ({
-        user: {},
+        user: null,
         users: [],
         deletedUsers: [],
         roles: [],
@@ -97,7 +97,7 @@ export const useUserStore = defineStore('user', {
             return (value, prop = 'id') => {
                 if(!value) return null;
 
-                if(state.userLoggedIn) {
+                if(this.userLoggedIn) {
                     const isNum = !isNaN(value);
                     const lValue = isNum ? value : value.toLowerCase();
                     if(prop == 'id' && value == state.user?.id) {
@@ -142,11 +142,15 @@ export const useUserStore = defineStore('user', {
                 return state.rolePresets.find(preset => preset[prop] = value) || {};
             };
         },
+        userLoggedIn(state) {
+            return !!state.user;
+        }
     },
     actions: {
         async checkAuth() {
             try{
                 const user = await fetchUser();
+                console.log('Fetched user', user);
                 this.setActiveUser(user);
                 return user;
             } catch {
@@ -164,7 +168,7 @@ export const useUserStore = defineStore('user', {
         },
         async logout() {
             await logout();
-            this.setActiveUser({});
+            this.setActiveUser(null);
         },
         setActiveUser(user, merge = false) {
             if(merge) {

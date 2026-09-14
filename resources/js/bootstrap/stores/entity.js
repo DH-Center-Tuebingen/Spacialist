@@ -35,6 +35,7 @@ import {
     deleteEntity,
     deleteEntityType,
     duplicateEntityType,
+    fetchChildren as fetchChildrenApi,
     fetchEntityMetadata,
     getEntity,
     getEntityComments,
@@ -317,21 +318,16 @@ export const useEntityStore = defineStore('entity', {
                     ...node,
                 };
             }
-            if(!entity.root_entity_id) {
-                if(entityExists) {
-                    const idx = this.tree.findIndex(itm => itm.id == node.id);
-                    if(idx > -1) {
-                        this.tree.splice(idx, 1, node);
-                    }
+
+            const isTopLevelEntity = !entity.root_entity_id;
+            if(isTopLevelEntity) {
+                if(this.tree.length == 0 || node.rank > this.tree.at(-1).rank) {
+                    this.tree.push(node);
                 } else {
-                    if(this.tree.length == 0 || node.rank > this.tree.at(-1).rank) {
-                        this.tree.push(node);
-                    } else {
-                        const idx = this.tree.findIndex(c => c.rank == node.rank);
-                        this.tree.splice(idx, 0, node);
-                        for(let i=idx+1; i<this.tree.length; i++) {
-                            this.tree[i].rank++;
-                        }
+                    const idx = this.tree.findIndex(c => c.rank == node.rank);
+                    this.tree.splice(idx, 0, node);
+                    for(let i = idx + 1; i < this.tree.length; i++) {
+                        this.tree[i].rank++;
                     }
                 }
             } else {
@@ -339,23 +335,25 @@ export const useEntityStore = defineStore('entity', {
                 delete node.already_existing;
                 const parent = this.entities[node.root_entity_id];
                 if(parent) {
-                    if(parent.childrenLoaded) {
-                        if(entityExists) {
-                            const idx = parent.children.findIndex(itm => itm.id == node.id);
-                            if(idx > -1) {
-                                parent.children.splice(idx, 1, node);
+                    const existingIndex = parent.children.findIndex(c => c.id == node.id);
+                    if(existingIndex > -1) {
+                        parent.children.splice(existingIndex, 1);
+                    }
+
+                    let inserted = false;
+                    for(let insertIndex = 0; insertIndex < parent.children.length; insertIndex++) {
+                        if(inserted) {
+                            if(parent.children[insertIndex].rank >= node.rank) {
+                                parent.children.splice(insertIndex, 0, node);
+                                inserted = true;
                             }
                         } else {
-                            if(node.rank > parent.children.at(-1).rank) {
-                                parent.children.push(node);
-                            } else {
-                                const idx = parent.children.findIndex(c => c.rank == node.rank);
-                                parent.children.splice(idx, 0, node);
-                                for(let i=idx+1; i<parent.children.length; i++) {
-                                    parent.children[i].rank++;
-                                }
-                            }
+                            parent.children[insertIndex].rank++;
                         }
+                    }
+
+                    if(!inserted) {
+                        parent.children.push(node);
                     }
                     if(doCount) {
                         if(!entityExists) {
@@ -565,6 +563,13 @@ export const useEntityStore = defineStore('entity', {
             if(idx > -1) {
                 this.selectedEntityUserIds.splice(idx, 1);
             }
+        },
+        async fetchChildren(id, sort = { by: 'rank', dir: 'asc' }) {
+            const childData = await fetchChildrenApi(id)
+            return this.setDescendants({
+                entities: childData,
+                sort: sort,
+            });
         },
         async fetchEntityComments(id) {
             if(id != this.selectedEntity?.id) return;

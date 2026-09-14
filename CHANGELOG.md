@@ -6,7 +6,13 @@ All notable changes to this project will be documented in this file.
 - Access Points (Plugins can define additional access points to restrict user access to certain parts of the plugin)
 - Plugin-System now supports custom components, e.g. attribute types
 - Plugin-System now supports PluginScopes
+- Plugin-System now supports Hooks: Custom functions that are executed after API calls.
+- Plugin-System now supports CSS files
+- Plugin script can be (re-)published via interface 
 - .env variable `ALLOW_FILESYSTEM_MIGRATIONS` to explcitly enable filesystem migrations
+- API endpoint for getting all entity details data in one request: GET::v1/entity/{id}/entity_detail
+- Added specific log file for plugins
+- .jsconfig for intellisense to work properly with aliases
 - Multi move in entity tree
 - Option to set entity attributes as required fields
 - Option to display _Single Choice Dropdowns_ as buttons instead of a dropdown
@@ -14,6 +20,9 @@ All notable changes to this project will be documented in this file.
 - Removed redundant calls to the entity endpoint
 - Metadata tab error on submit (unknown variable)
 - Errors in _map.js_
+- Login was not routed properly
+- Plugin-Switch not resetting on failed installation
+- Retrieve plugin preferences from plugin store
 - Error on _Entity_ delete
 - Alignment of _User Label_ in _Metadata_ tab
 - Submit Epoch/Timeperiod without start or end value
@@ -32,6 +41,15 @@ All notable changes to this project will be documented in this file.
 - Now entity metadata is only loaded when accessing the metadata tab
 - Migrations now have logging automatically disabled
 - Migrations that require filesystem changes can now be handled using the `App\Traits\FilesystemMigration` trait (call `$this->safelyMoveDirectoryBetweenDisks(...)` with `ALLOW_FILESYTEM_MIGRATIONS` set to `true`)
+- Moved plugin state into separate store
+- Plugins no longer require a routes file
+- Plugin scripts and styles are now loaded from the public storage again.
+- Exposed bootstrap on window object
+- Plugin with same version number can be uploaded
+    - Improves developer experience when testing plugin deployment
+    - Allows for a simple 'repair' of an installed plugin
+- VersionInfo is now a Singleton that can be overwritten in tests
+    - GithubActions could not fetch the version from Github resulting in testing against version 0.0.0, making it impossible to test the minimum boundary against said version. 
 - Disable Caret in disabled _Single Choice Dropdowns_ and _Multiple Choice Dropdowns_
 - _Attribute Usage Indicator_ in _Data Model Editor_ now also displays names of _Entity Types_ that use this _Attribute_
 - API endpoint for getting all entity data in one request to speed up entity loading

@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Clickbar\Magellan\Data\Geometries\Geometry;
 use App\Traits\CommentTrait;
 use App\Traits\ModerationTrait;
+use Exception;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Searchable\Searchable;
@@ -245,8 +246,12 @@ class AttributeValue extends Model implements Searchable
     public static function getFormattedKeyValue($datatype, $rawValue) : stdClass {
         $class = AttributeBase::getMatchingClass($datatype);
         $keyValue = new stdClass();
-        $keyValue->key = $class::getField();
-        $keyValue->val = $class::unserialize($rawValue);
+        if($class) {
+            $keyValue->key = $class::getField();
+            $keyValue->val = $class::unserialize($rawValue);
+        } else{
+            throw new Exception("No matching attribute class found for datatype {$datatype}.");
+        }
 
         return $keyValue;
     }

@@ -31,6 +31,8 @@ import '@/bootstrap/websocket.js';
 
 // Plugin System
 import { SpPS } from '@/bootstrap/plugins.js';
+import * as bootstrap from 'bootstrap';
+window.bootstrap = bootstrap;
 
 import initGlobalComponents from '@/bootstrap/global-components.js';
 import initDirectives from '@/bootstrap/directives.js';

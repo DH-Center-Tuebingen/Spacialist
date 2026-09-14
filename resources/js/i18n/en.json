@@ -3,6 +3,7 @@
         "save": "Save",
         "delete": "Delete",
         "restore": "Restore",
+        "activate": "Activate",
         "deactivate": "Deactivate",
         "reactivate": "Reactivate",
         "remove": "Remove",
@@ -15,21 +16,23 @@
         "edit": "Edit",
         "edited": "edited",
         "duplicate": "Duplicate",
-        "export":"Export",
+        "export": "Export",
         "sort": "Sort",
         "resort": "Re-sort",
         "update": "Update",
         "replace": "Replace",
+        "refresh": "Refresh",
         "clear": "Clear",
         "confirm": "OK",
-        "create": "Create",
         "apply": "Apply",
+        "create": "Create",
         "move": "Move",
         "parse": "Parse",
         "conflict": "Conflict",
         "file": "File",
         "remove_file": "Remove file",
         "no_file": "No file",
+        "file_drop_here": "Drop file here ...",
         "list": {
             "and_more": "and more | and {cnt} more",
             "nr_of_entries": "No Entries | 1 Entry | {cnt} Entries",
@@ -77,7 +80,8 @@
             "occur": "Error occured",
             "headers": "Headers",
             "request_failed": "<code class=\"fw-normal\">{method}</code>-Request to endpoint <code class=\"bg-light-dark rounded px-2 normal text-dark\">{url}</code> failed with status code <span class=\"fw-medium\">{status}</span>.",
-            "value_invalid": "This value is invalid"
+            "value_invalid": "This value is invalid",
+            "loading_data": "Could not load data from server. Please check your internet connection and try again."
         },
         "search": "Search…",
         "search_no_results": "No results",
@@ -709,7 +713,7 @@
                     "users_roles": "Users & Roles",
                     "preferences": "Preferences",
                     "thesaurus": "Thesaurus",
-                    "is_plugin": "Plugin"
+                    "plugin": "Plugin"
                 },
                 "moderation": {
                     "required": "Requires Moderation"
@@ -865,13 +869,18 @@
         "plugins": {
             "title": "Plugin | Plugins",
             "upload": "Upload Plugin",
-            "authors": "Authors",
-            "deactivate": "Deactivate",
-            "activate": "Activate",
-            "remove": "Remove",
+            "author": "Author | Authors",
             "update_to": "Update to <span class=\"fw-bold\">{ version }</span>",
             "changelog_info": "Show Changelog",
             "not_found": "No plugins found.",
+            "migrate": "Run",
+            "refresh-script": "Renew script file",
+            "rollback": "Rollback",
+            "section": {
+                "info": "Information",
+                "migrations": "Migrationen",
+                "changelog": "Changelog"
+            },
             "modal": {
                 "changelog_title": "Plugin"
             },
@@ -880,6 +889,14 @@
                     "title": "Plugin updated",
                     "message": "Plugin {name} successfully updated to version {v} (from version {vo})."
                 }
+            },
+            "info": {
+                "add_migration_to_db": "Adds this migration manually to the database without running the migration. This is only necessary for older applications prior to version 0.12. Only continue if you know what you are doing!",
+                "no_migrations": "Plugin has no migrations.",
+                "migration_notice": "Please note, that the migration system is only available since version 0.12. If your application was installed before that, the migrations are not reflected correctly. The migrations must be set manually to reflect the correct application state.",
+                "migration-confirm": "Are you sure you want to run migrations? This may result in data loss, only continue if you know what you are doing!",
+                "rollback-confirm": "Are you sure you want to rollback the migrations? This may result in data loss, only continue if you know what you are doing!",
+                "no_changelog": "No changelog available."
             }
         },
         "about": {
@@ -1019,7 +1036,6 @@
             "import_settings": "Import-Settings",
             "upload_csv_info": "Select a CSV file to import data.",
             "drop_csv_file": "Drop CSV file here",
-            "csv_file_error": "CSV file could not be read.",
             "selected_entity_type": "Entity-Type",
             "column_entity_name": "Entity Name-Column",
             "column_entity_parent": "Entity Parent-Column",

@@ -2,27 +2,24 @@
 
 namespace App;
 
-use App\File\Directory;
-use App\Services\AccessPointsService;
-use Carbon\Carbon;
+use App\Plugin\PluginManifest;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
-
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
-class Plugin extends Model
-{
+class Plugin extends Model {
     /**
      * The attributes that are assignable.
      *
      * @var array
      */
     protected $fillable = [
+        'name',
+        'version',
+        'uuid',
+        'installed_at',
+        'update_available',
+        'metadata',
     ];
 
     /**
@@ -31,521 +28,95 @@ class Plugin extends Model
      * @var array
      */
     protected $casts = [
+        'metadata' => 'array',
         'installed_at' => 'datetime',
     ];
 
-    protected $metadataFields = [
-        'authors',
-        'description',
-        'licence',
-        'title',
-    ];
-
-    private static function pluginDirectory() {
-        $pluginDirectory = config('app.plugin_directory');
-        return base_path($pluginDirectory);
-    }
-
-    public static function getPluginPath(string $path = ''):string {
-        if($path === ''){
-            return self::pluginDirectory();
-        }
-        return self::pluginDirectory() . Str::start($path, '/');
+    public static function getInstalledPlugins(): Collection {
+        return self::whereNotNull('installed_at')->get();
     }
 
     public static function isInstalled($name): bool {
         return self::whereNotNull('installed_at')->where('name', $name)->exists();
     }
 
-    public static function getInstalled(): Collection {
-        return self::whereNotNull('installed_at')->get();
-    }
-
     public function slugName(): string {
         return Str::slug($this->name);
     }
 
-    public function getPath(string $path = ''): string {
-        $pluginPath = $this->name;
-        if($path !== ''){
-            $pluginPath .= Str::start($path, '/');
-        }
-        return self::getPluginPath($pluginPath);
-    }
-
-    public function publicName($withPath = true): string {
-        $slug = $this->slugName();
-        $uuid = $this->uuid;
-        $name = "{$slug}-{$uuid}.js";
-        if($withPath) {
-            $name = "plugins/$name";
-        }
-        return $name;
-    }
-
-    public static function getPluginInfo($path, $isString = false): mixed {
-        if(!$isString) {
-            $infoPath = Str::finish($path, '/') . 'App/info.xml';
-            if(!File::isFile($infoPath)) return false;
-            $xmlString = file_get_contents($infoPath);
-        } else {
-            $xmlString = $path;
-        }
-
-        $xmlObject = simplexml_load_string($xmlString);
-
-        return json_decode(json_encode($xmlObject), true);
-    }
-
-    public function getInfo() {
-        return self::getPluginInfo($this->getPath());
-    }
-
-    public function getMetadata(): array {
-        $info = $this->getInfo();
-        if($info !== false) {
-            $metadata = [];
-            foreach($this->metadataFields as $field) {
-                if($field == 'authors') {
-                    if(!array_key_exists($field, $info) || !array_key_exists('author', $info[$field])) {
-                        $metadata[$field] = [];
-                        continue;
-                    }
-
-                    $authors = $info[$field]['author'];
-                    $metadata[$field] = is_array($authors) ? $authors : [$authors];
-                } else {
-                    if(!array_key_exists($field, $info)) {
-                        $metadata[$field] = "";
-                        continue;
-                    }
-                    $metadata[$field] = $info[$field];
-                }
-            }
-            return $metadata;
-        } else {
-            return [];
-        }
-    }
-
-    public function getChangelog(?string $since = null): string {
-        $changelog = $this->getPath('CHANGELOG.md');
-        if(!File::isFile($changelog)) return '';
-        $changes = file_get_contents($changelog);
-        if(isset($since) && preg_match("/\\n#+\s(v\s?)?$since(\s-\s.+)?\\n/i", $changes, $matches, PREG_OFFSET_CAPTURE) !== false) {
-            if(count($matches) > 0) {
-                $changes = substr($changes, 0, $matches[0][1]);
-            }
-        }
-        return $changes;
-    }
-
-    public function getAccessPoints(): array {
-        $info = self::getInfo();
-        $accesspoints = [];
-        $addedNames = [];
-        $addedPaths = [];
-        if($info !== false) {
-            if(array_key_exists('accesspoints', $info)) {
-                foreach($info['accesspoints'] as $accesspoint) {
-                    $name = $this->name . '-' . $accesspoint['id'];
-                    $label = $accesspoint['label'];
-                    $path = Str::finish(Str::start($accesspoint['path'], '/'), '/');
-                    // $path = '/' . $this->slugName() . Str::finish(Str::start($accesspoint['url'], '/'), '/');
-                    if(array_key_exists($name, $addedNames)) {
-                        throw new \Exception("An accesspoint with the name ($name) already exists");
-                    }
-                    if(array_key_exists($path, $addedPaths)) {
-                        throw new \Exception("An accesspoint with the path ($path) already exists");
-                    }
-
-                    $addedNames[$name] = true;
-                    $addedPaths[$path] = true;
-
-                    $accesspoints[$name] = [
-                        'label' => $label,
-                        'path' => $path,
-                    ];
-                }
-            }
-        }
-        return $accesspoints;
-    }
-
-    private function getScopeCacheKey(): string {
-        return 'plugin_scopes_' . $this->id;
-    }
-
-    public function getScopes(): array {
-        return Cache::rememberForever($this->getScopeCacheKey(), function() {
-            $info = self::getInfo();
-            $scopes = [];
-            if($info !== false) {
-                if(array_key_exists('scopes', $info)) {
-                    foreach($info['scopes'] as $scope) {
-                        $attributes = $scope['@attributes'];
-                        if(!array_key_exists('src', $attributes)) {
-                            Log::error('<scope> attribute \'src\' is required');
-                            continue;
-                        }
-                        if(!array_key_exists('on', $attributes)) {
-                            Log::error('<scope> attribute \'on\' is required');
-                            continue;
-                        }
-
-                        $src = $attributes['src'];
-                        $on = $attributes['on'];
-
-                        $srcDir = $this->getPath("Scopes");
-                        if(!file_exists($srcDir) || !is_dir($srcDir)) {
-                            Log::error('Missing \'Scopes\' directory');
-                            continue;
-                        }
-                        $srcPath = $srcDir . DIRECTORY_SEPARATOR . $src;
-                        if(!file_exists($srcPath)) {
-                            Log::error("Missing file '$src'");
-                            continue;
-                        }
-                        if(!class_exists($on)) {
-                            Log::error("Class '{$on}' does not exist!");
-                            continue;
-                        }
-                        $className = Str::replaceEnd('.php', '', $src);
-                        $namespacedSrc = "App\\Plugins\\$this->name\\Scopes\\$className";
-
-                        if(!array_key_exists($on, $scopes)) {
-                            $scopes[$on] = [];
-                        }
-
-                        $scopes[$on][] = $namespacedSrc;
-                    }
-                }
-            }
-            return $scopes;
-        });
-    }
-
     /**
-     * Get all scopes defined in Plugins for a given model class (e.g. App\Entity).
+     * Reads the plugin's Manifest file, extracts all the data
+     * 
+     * checks if the plugin name matches any installed
+     * plugin
+     * 
+     * @param PluginManifest $manifest
+     * @return Plugin|\stdClass
      */
-    public static function getScopesFor(string $modelClass) {
-        $scopes = [];
+    public static function updateOrCreateFromManifest(PluginManifest $manifest): Plugin {
+        $name = $manifest->getName();
+        $existingPlugin = self::where('name', $name)->first();
+        $newPlugin = null;
 
-        $installedPlugins = Plugin::getInstalled();
-        foreach($installedPlugins as $plugin) {
-            $pluginScopes = $plugin->getScopes();
-            if(array_key_exists($modelClass, $pluginScopes)) {
-                foreach($pluginScopes[$modelClass] as $scope) {
-                    $scopes[] = $scope;
-                }
-            }
-        }
-
-        return $scopes;
-    }
-
-    public function getRegisteredAttributes(): array {
-        $info = $this->getInfo();
-        $attributes = [];
-        if($info !== false) {
-            if(array_key_exists('attributes', $info)) {
-                $attributes = $info['attributes']['attribute'];
-                // If only one <attribute> exists, this <attribute> is returned
-                // instead of an array, but we always want an array
-                if(array_key_exists('@attributes', $attributes)) {
-                    $attributes = [$attributes];
-                }
-            }
-        }
-        return $attributes;
-    }
-
-    public static function updateOrCreateFromInfo(array $info): Plugin {
-        $id = $info['name'];
-        $plugin = self::where('name', $id)->first();
-        // discovered new Plugin, add it to DB
-        if(!isset($plugin)) {
-            $plugin = new self();
-            $plugin->name = $id;
-            $plugin->version = $info['version'];
-            $plugin->uuid = Str::uuid();
-            $plugin->save();
+        $isCreation = false;
+        if(!isset($existingPlugin)) {
+            $newPlugin = new self();
+            $newPlugin->uuid = Str::uuid();
+            $newPlugin->name = $name;
+            $isCreation = true;
         } else {
-            $plugin->updateUpdateState($info['version']);
+            $newPlugin = clone($existingPlugin);
         }
 
-        return $plugin;
-    }
+        if(version_compare($newPlugin->version, $manifest->getVersion(), '==') !== 0) {
+            $newPlugin->version = $manifest->getVersion();
+        }
+        
+        static::updateMetadataFromManifest($newPlugin, $manifest);
 
-    public static function updateState(): void {
-        $availablePlugins = File::directories(self::getPluginPath());
-        self::discoverPlugins($availablePlugins);
-        self::cleanupPlugins($availablePlugins);
-    }
-
-    public static function cleanupPlugins(array $list): void {
-        $pluginNames = [];
-
-        foreach($list as $p) {
-            $pluginNames[] = File::basename($p);
+        // Avoid bumping updated_at when nothing actually changed.
+        if($isCreation || $newPlugin->isDirty()) {
+            $newPlugin->save();
         }
 
-        $nonExistingPlugins = self::whereNotIn('name', $pluginNames)->get();
+        return $newPlugin;
+    }
+    
+    
+    /**
+     * Reads the metadata from the manifest file and updates the table accordingly.
+     * The plugin's metadata is updated but not saved yet.
+     * 
+     * @param Plugin $plugin 
+     * @param PluginManifest $manifest
+     * @return bool Returns true when the metadata was updated with new values otherwise false.
+     */
+    private static function updateMetadataFromManifest(Plugin $plugin, PluginManifest $manifest): bool {
+        $manifestAuthors = $manifest->getAuthors() ?? [];
+        $manifestDescription = $manifest->getDescription() ?? "";
+        $manifestLicence = $manifest->getLicence() ?? "";
 
-        foreach($nonExistingPlugins as $removedPlugin) {
-            $removedPlugin->handleRemove();
+        $metadata = $plugin->metadata ?? [];
+        
+        // Either the array key does not exist at all or when it's null, we provide a default value.
+        $authors = (isset($metadata['authors']) ? $metadata['authors'] : []) ?? [];
+        $description = (isset($metadata['description']) ? $metadata['description'] : "") ?? "";
+        $licence = (isset($metadata['licence']) ? $metadata['licence'] : "") ?? "";
+
+        
+        // We only want to update the metadata if it has actually changed.
+        if(
+            count(array_diff($manifestAuthors, $authors)) > 0 ||
+            $manifestDescription !== $description ||
+            $manifestLicence !== $licence
+        ) {
+            $plugin->metadata = [
+                'authors' => $manifestAuthors,
+                'description' => $manifestDescription,
+                'licence' => $manifestLicence,
+            ];
+            return true;
         }
-    }
-
-    public static function discoverPlugins(array $list): void {
-        foreach($list as $ap) {
-            $info = self::getPluginInfo($ap);
-            if($info !== false) {
-                self::updateOrCreateFromInfo($info);
-            }
-        }
-    }
-
-    public static function discoverPluginByName($name): ?Plugin {
-        $pluginPath = self::getPluginPath($name);
-        $info = self::getPluginInfo($pluginPath);
-        if($info === false) {
-            return null;
-        }
-
-        $plugin = self::updateOrCreateFromInfo($info);
-        return $plugin;
-    }
-
-    public static function getWithMetadata() {
-        self::updateState();
-        $plugins = self::all();
-
-        foreach($plugins as $plugin) {
-            $plugin->metadata = $plugin->getMetadata();
-            $plugin->changelog = $plugin->getChangelog();
-        }
-        return $plugins;
-    }
-
-    public static function getDirectory(): Directory {
-        return new Directory('plugins');
-    }
-
-    public function updateUpdateState($fromInfoVersion): void {
-        if($this->version != $fromInfoVersion) {
-            // installed version splitted
-            preg_match('/(\d+)\.(\d+).(\d+)(-.+)?/', $this->version, $iv);
-            // available/latest version splitted
-            preg_match('/(\d+)\.(\d+).(\d+)(-.+)?/', $fromInfoVersion, $lv);
-
-            if(
-                ($lv[1] > $iv[1] || $lv[2] > $iv[2] || $lv[3] > $iv[3]) ||
-                (!isset($lv[4]) && isset($iv[4])) ||
-                (isset($lv[4]) && isset($iv[4]) && $lv[4] > $iv[4])
-            ) {
-                $this->update_available = $fromInfoVersion;
-            } else {
-                $this->update_available = null;
-            }
-            $this->save();
-        }
-    }
-
-    public function clearCache(): void {
-        Cache::forget($this->getScopeCacheKey());
-
-        // TODO: Models are meant for the data layer only,
-        // we should restructure the code into service classes (e.g. PluginMigrationService)
-        app(AccessPointsService::class)->clearCache();
-    }
-
-    public function handleInstallation(bool $isUpdate = false): void {
-        $this->runMigrations();
-        $this->publishScript();
-        $this->addPermissions();
-        $this->installPresetsFromFile();
-        $this->clearCache();
-
-        if(!$isUpdate) {
-            $this->installed_at = Carbon::now();
-        }
-        $this->save();
-    }
-
-    public function handleUpdate(): string {
-        $oldVersion = $this->version;
-        // TODO is it really the same as install?
-        $this->handleInstallation(true);
-        $info = $this->getInfo();
-        $this->update_available = null;
-        $this->version = $info['version'];
-        $this->save();
-        return $oldVersion;
-    }
-
-    public function handleUninstall(): void {
-        $this->removeScript();
-        $this->clearCache();
-        $this->installed_at = null;
-        $this->save();
-    }
-
-    public function handleRemove(): void {
-        // if installed, first rollback migrations and delete all files and presets
-        if(isset($this->installed_at)) {
-            $this->handleUninstall();
-            $this->rollbackMigrations();
-            $this->removePermissions();
-            $this->uninstallPresets();
-        }
-
-        $this->removePreferences();
-        sp_remove_dir($this->getPath());
-        $this->delete();
-    }
-
-    public function getPermissions(): mixed {
-        $pluginPermissionPath = $this->getPath('App/permissions.json');
-        if(!File::isFile($pluginPermissionPath)) {
-            return [];
-        }
-
-        return json_decode(file_get_contents($pluginPermissionPath), true);
-    }
-
-    public function getPermissionGroups(): array {
-        $permissions = $this->getPermissions();
-        if(!isset($permissions) || !is_array($permissions)) {
-            return [];
-        }
-        return array_keys($permissions);
-    }
-
-    public function getRolePresets(): mixed {
-        $rolePresets = $this->getPath('App/role-presets.json');
-        if(!File::isFile($rolePresets)) {
-            return [];
-        }
-
-        return json_decode(file_get_contents($rolePresets), true);
-    }
-
-    private function getClassWithPrefix($path, $classname): string {
-        return "App\\Plugins\\$this->name\\$path\\$classname";
-    }
-
-    private function getMigrationPath(): string {
-        return $this->getPath('Migration');
-    }
-    private function getSortedMigrations(bool $desc = false): array {
-        $migrationPath = $this->getMigrationPath();
-        if(file_exists($migrationPath) && is_dir($migrationPath)) {
-            $migrations = collect(File::files($migrationPath))->map(function($f) {
-                return $f->getFilename();
-            });
-            if($desc) {
-                $migrations = $migrations->sortDesc();
-            } else {
-                $migrations = $migrations->sort();
-            }
-
-            return $migrations->values()->toArray();
-        }
-        return [];
-    }
-
-    private function runMigrations(): void {
-        foreach($this->getSortedMigrations() as $migration) {
-            preg_match("/^[1-9]\d{3}_\d{2}_\d{2}_\d{6}_(.*)\.php$/", $migration, $matches);
-            if(count($matches) != 2) continue;
-
-            $className = Str::studly($matches[1]);
-            require($this->getPath("Migration/$migration"));
-            $prefixedClassName = $this->getClassWithPrefix('Migration', $className);
-            $instance = new $prefixedClassName();
-            call_user_func([$instance, 'migrate']);
-        }
-    }
-
-    private function rollbackMigrations(): void {
-        foreach($this->getSortedMigrations(true) as $migration) {
-            preg_match("/^[1-9]\d{3}_\d{2}_\d{2}_\d{6}_(.*)\.php$/", $migration, $matches);
-            if(count($matches) != 2) continue;
-
-            $className = Str::studly($matches[1]);
-            require($this->getPath("Migration/$migration"));
-            $prefixedClassName = $this->getClassWithPrefix('Migration', $className);
-            $instance = new $prefixedClassName();
-            call_user_func([$instance, 'rollback']);
-        }
-    }
-
-    private function publishScript(): void {
-        $name = $this->name;
-        $scriptPath = $this->getPath("js/script.js");
-        if(file_exists($scriptPath)) {
-            $filehandle = fopen($scriptPath, 'r');
-
-            if(!$filehandle) {
-                throw new \Exception("Could not open script file for plugin $name.");
-            }
-
-            self::getDirectory()->store(
-                $this->publicName(false),
-                $filehandle
-            );
-            fclose($filehandle);
-        } else {
-            throw new \Exception("Script file for plugin $name does not exist at $scriptPath.");
-        }
-    }
-
-    private function removeScript(): void {
-        self::getDirectory()->delete($this->publicName(false));
-    }
-
-    private function addPermissions(): void {
-        $permGroups = $this->getPermissions();
-        foreach($permGroups as $group => $permSet) {
-            foreach($permSet as $perm) {
-                $permission = new Permission();
-                $permission->name = $group . "_" . $perm['name'];
-                $permission->display_name = $perm['display_name'];
-                $permission->description = $perm['description'];
-                $permission->guard_name = 'web';
-                $permission->save();
-            }
-        }
-    }
-
-    private function removePermissions(): void {
-        $permGroups = $this->getPermissions();
-        foreach($permGroups as $group => $permSet) {
-            foreach($permSet as $perm) {
-                Permission::where('name', $group . "_" . $perm['name'])->delete();
-            }
-        }
-    }
-
-    private function installPresetsFromFile(): void {
-        $rolePresets = $this->getRolePresets();
-        foreach($rolePresets as $preset) {
-            $baseRolePreset = RolePreset::where('name', $preset['extends'])->firstOrFail();
-            $pluginPreset = new RolePresetPlugin();
-            $pluginPreset->rule_set = $preset['rule_set'];
-            $pluginPreset->extends = $baseRolePreset->id;
-            $pluginPreset->from = $this->id;
-            $pluginPreset->save();
-        }
-    }
-
-    private function uninstallPresets(): void {
-        RolePresetPlugin::where('from', $this->id)->delete();
-    }
-
-    private function removePreferences(): void {
-        $id = Str::kebab($this->name);
-        Preference::where('label', 'ilike', "plugin.$id.%")->delete();
+        return false;
     }
 }

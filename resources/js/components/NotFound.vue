@@ -9,29 +9,38 @@
         <!-- eslint-disable vue/no-v-html -->
         <p
             class="lead"
-            v-html="t('main.app.not_found.msg', {site: currentRoute.path})"
+            v-html="t('main.app.not_found.msg', { site: currentRoute.path })"
         />
         <!-- eslint-enable vue/no-v-html -->
         <div class="mt-2 d-flex flex-row gap-4">
             <router-link
                 class="btn btn-outline-primary"
-                :to="{name: 'home'}"
+                :to="{ name: 'home' }"
             >
                 <i class="fas fa-fw fa-house" />
                 {{ t('main.app.not_found.go_to') }}
             </router-link>
             <router-link
                 class="btn btn-outline-warning"
-                :to="{path: currentRoute.path, params: currentRoute.params, query: currentRoute.query, force: true}"
+                :to="{ path: currentRoute.path, params: currentRoute.params, query: currentRoute.query, force: true }"
             >
                 <i class="fas fa-fw fa-redo" />
                 {{ t('main.app.not_found.retry') }}
             </router-link>
+            <button
+                class="btn btn-outline-secondary"
+                @click.prevent="logout()"
+            >
+                <i class="fas fa-fw fa-sign-out-alt" />
+                {{ t('global.user.logout') }}
+            </button>
         </div>
     </div>
 </template>
 
 <script>
+    import router from '@/bootstrap/router';
+    import useUserStore from '@/bootstrap/stores/user';
     import { useI18n } from 'vue-i18n';
     import {
         useRoute,
@@ -41,14 +50,24 @@
         setup() {
             const { t } = useI18n();
             const currentRoute = useRoute();
+            const userStore = useUserStore();
+
+            // Due to AccessPoints we need to be able
+            // to log out. If we reach an accesspoint that
+            // is not accessible, the user would be stuck unless
+            // they delete their cookies manually [SO]
+            const logout = _ => {
+                userStore.logout().then(_ => {
+                    router.push({
+                        name: 'login'
+                    });
+                });
+            }
 
             return {
                 t,
-                // HELPERS
-                // LOCAL
                 currentRoute,
-                // PROPS
-                // STATE
+                logout,
             };
         }
     }

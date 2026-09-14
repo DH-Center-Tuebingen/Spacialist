@@ -2,11 +2,15 @@
 
 namespace App\Services;
 
-use App\Plugin;
-use Illuminate\Support\Facades\Cache;
+use App\Services\PluginManager;
 
+/**
+ * 
+ * Manages all acces points.
+ * 
+ * This combines the CORE_ACCESSPOINTS and the pluglin accespoints.
+ */
 class AccessPointsService {
-    private const CACHE_KEY = 'access_points';
 
     public const /*array*/ CORE_ACCESSPOINTS = [
         "Default" => [
@@ -15,24 +19,11 @@ class AccessPointsService {
         ],
     ];
 
-    public function clearCache(): void {
-        Cache::forget(self::CACHE_KEY);
-    }
-
     public function get(): array {
-        return Cache::rememberForever(self::CACHE_KEY, function() {
-            $accesspoints = self::CORE_ACCESSPOINTS;
-            $accesspoints = array_merge($accesspoints, $this->loadAccessPointsFromPlugins());
-            return $accesspoints;
-        });
-    }
-
-    private function loadAccessPointsFromPlugins(): array {
-        $installedPlugins = Plugin::getInstalled();
-        $accesspoints = [];
-        foreach($installedPlugins as $plugin) {
-            $accesspoints = array_merge($accesspoints, $plugin->getAccessPoints());
-        }
+        $accesspoints = self::CORE_ACCESSPOINTS;
+        $pluginAccessPoints = app(PluginManager::class)->accessPoints->getData();
+        $accesspoints = array_merge($accesspoints, $pluginAccessPoints);
         return $accesspoints;
     }
+
 }

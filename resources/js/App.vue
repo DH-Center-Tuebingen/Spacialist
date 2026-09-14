@@ -61,17 +61,18 @@
                     }
                 }
                 state.init = true;
+                
+                provideToast({
+                    duration: 2500,
+                    autohide: true,
+                    channel: 'success',
+                    icon: true,
+                    simple: false,
+                    is_tag: false,
+                    container: 'toast-container',
+                });
 
                 nextTick(_ => {
-                    provideToast({
-                        duration: 2500,
-                        autohide: true,
-                        channel: 'success',
-                        icon: true,
-                        simple: false,
-                        is_tag: false,
-                        container: 'toast-container',
-                    });
                     useToast();
                 });
             });

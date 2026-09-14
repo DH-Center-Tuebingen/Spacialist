@@ -70,6 +70,10 @@ return [
             'path' => storage_path('logs/test.log'),
             'level' => 'debug',
         ],
+        'plugin' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/plugin.log'),
+        ]
     ],
 
 ];

@@ -1,125 +1,80 @@
 <template>
-    <div class="d-flex flex-column h-100">
-        <h4>
-            {{ t('main.plugins.title', 2) }}
-            <file-upload
-                ref="upload"
-                v-model="state.files"
-                class="btn btn-sm btn-outline-primary clickable"
-                accept="application/zip"
-                extensions="zip"
-                :custom-action="uploadZip"
-                :directory="false"
-                :disabled="!can('preferences_create')"
-                :multiple="false"
-                :drop="true"
-                @input-file="inputFile"
+    <div
+        class="sp-plugins d-flex flex-column h-100 row flex-nowrap"
+        ref="root"
+    >
+        <header class="mb-2">
+            <h4>
+                {{ t('main.plugins.title', 2) }}
+                <div class="float-end d-flex gap-2">
+                    <file-upload
+                        ref="uploadButton"
+                        class="btn btn-sm btn-outline-primary clickable"
+                        accept="application/zip"
+                        extensions="zip"
+                        :custom-action="uploadZip"
+                        :directory="false"
+                        :disabled="!can('preferences_create')"
+                        :multiple="false"
+                        :drop="true"
+                        @input-file="inputFile"
+                    >
+                        <span>
+                            <i class="fas fa-fw fa-file-import" /> {{ t('main.plugins.upload') }}
+                        </span>
+                    </file-upload>
+                    <button
+                        class="btn btn-sm btn-outline-secondary"
+                        @click="pluginStore.refresh()"
+                    >
+                        <i class="fas fa-fw fa-sync" /> {{ t('global.refresh') }}
+                    </button>
+                </div>
+            </h4>
+        </header>
+        <div class="flex-fill overflow-y-auto">
+            <LoadingContainer
+                class="row g-3 "
+                :loading="loading"
             >
-                <span>
-                    <i class="fas fa-fw fa-file-import" /> {{ t('main.plugins.upload') }}
-                </span>
-            </file-upload>
-        </h4>
-        <div class="row row-cols-3 g-3">
-            <div
-                v-for="plugin in state.sortedPlugins"
-                :key="plugin.name"
-                class="col"
-            >
-                <div class="card h-100">
-                    <div class="card-body d-flex flex-column">
-                        <div class="d-flex flex-row flex-grow-1 mb-3 justify-content-between">
-                            <div class="pe-2">
-                                <h5 class="card-title mb-1">
-                                    {{ plugin.metadata.title }}
-                                </h5>
-                                <h6 class="card-subtitle mb-2 text-muted">
-                                    <span class="badge bg-dark">
-                                        v{{ plugin.version }}
-                                    </span>
-                                    <span class="badge bg-primary ms-1">
-                                        {{ plugin.metadata.licence }}
-                                    </span>
-                                </h6>
-                                <p class="card-text border-start border-warning border-4 ps-2">
-                                    <md-viewer :source="plugin.metadata.description" />
-                                </p>
-                            </div>
-                            <div class="border-start ps-2">
-                                <h6 class="mb-0 text-end">
-                                    {{ t('main.plugins.authors') }}
-                                </h6>
-                                <ul class="list-group list-group-flush">
-                                    <li
-                                        v-for="(author, i) in plugin.metadata.authors"
-                                        :key="i"
-                                        class="list-group-item"
-                                    >
-                                        {{ author }}
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-                        <div class="">
-                            <button
-                                v-if="isInstalled(plugin)"
-                                type="button"
-                                class="btn btn-sm btn-outline-warning"
-                                @click="uninstall(plugin)"
-                            >
-                                <i class="fas fa-fw fa-times" />
-                                {{ t('main.plugins.deactivate') }}
-                            </button>
-                            <button
-                                v-else
-                                type="button"
-                                class="btn btn-sm btn-outline-success"
-                                @click="install(plugin)"
-                            >
-                                <i class="fas fa-fw fa-plus" />
-                                {{ t('main.plugins.activate') }}
-                            </button>
-                            <div
-                                v-if="updateAvailable(plugin)"
-                                class="btn-group"
-                                role="group"
-                            >
-                                <button
-                                    type="button"
-                                    class="btn btn-sm btn-outline-primary ms-2"
-                                    @click="update(plugin)"
+                <Transition name="zoom">
+                    <div
+                        v-if="fileDragged"
+                        class="position-fixed top-0 start-0 w-100 h-100 d-flex m-0"
+                        style="z-index: 20;"
+                    >
+                        <div
+                            class="file-drop-frame m-2 d-flex flex-fill justify-content-center align-items-center text-body-tertiary bg-light bg-opacity-75 border border-1 rounded"
+                            style="border-style: dashed !important;"
+                        >
+                            <span class="d-flex justify-content-center align-items-center gap-3 p-1 px-4 rounded">
+                                <i class="fas fa-fw fa-file-import fa-2x" />
+
+                                <span
+                                    class="fw-bold"
+                                    style="font-size: 1.5rem;"
                                 >
-                                    <i class="fas fa-fw fa-download" />
-                                    <!-- eslint-disable-next-line vue/no-v-html -->
-                                    <span v-html="t('main.plugins.update_to', {version: plugin.update_available})" />
-                                </button>
-                                <button
-                                    type="button"
-                                    class="btn btn-sm btn-outline-primary"
-                                    :title="t('main.plugins.changelog_info')"
-                                    @click="showChangelog(plugin)"
-                                >
-                                    <i class="fas fa-fw fa-file-pen" />
-                                </button>
-                            </div>
-                            <button
-                                type="button"
-                                class="btn btn-sm btn-outline-danger ms-2"
-                                @click="remove(plugin)"
-                            >
-                                <i class="fas fa-fw fa-trash" />
-                                {{ t('main.plugins.remove') }}
-                            </button>
+                                    {{ t("global.file_drop_here") }}
+                                </span>
+                            </span>
                         </div>
                     </div>
-                </div>
-            </div>
-            <alert
-                v-if="(!state.sortedPlugins || state.sortedPlugins.length == 0)"
-                :message="t('main.plugins.not_found')"
-                :type="'info'"
-                :noicon="false"
-            />
+                </Transition>
+                <Plugin
+                    v-for="plugin in pluginStore.pluginsSortedByTitle"
+                    :key="plugin.name"
+                    :value="plugin"
+                    class="col-12 col-md-6 col-xl-4 col-xxl-3"
+                    :style="getPluginStyle(plugin)"
+                    @click.capture="selectPlugin(plugin)"
+                />
+                <alert
+                    v-if="(!pluginStore.pluginsSortedByTitle || pluginStore.pluginsSortedByTitle == 0)"
+                    :message="t('main.plugins.not_found')"
+                    :type="'info'"
+                    :noicon="false"
+                />
+            </LoadingContainer>
         </div>
     </div>
 </template>
@@ -127,104 +82,118 @@
 <script>
     import {
         computed,
-        reactive,
+        onMounted,
+        ref,
+        useTemplateRef,
     } from 'vue';
 
-    import { useI18n } from 'vue-i18n';
-    import useSystemStore from '@/bootstrap/stores/system.js';
 
-    import { useToast } from '@/plugins/toast.js';
+    import { useI18n } from 'vue-i18n';
+
+    import usePluginStore from '../bootstrap/stores/plugin';
 
     import {
         can,
     } from '@/helpers/helpers.js';
 
-    import {
-        showChangelogModal,
-    } from '@/helpers/modal.js';
+    import Plugin from './plugins/Plugin.vue';
+    import LoadingContainer from './structure/LoadingContainer.vue';
+    import { useLoad } from '../composables/load';
+    import { useBootstrapDropdownZAdjust } from '@/composables/bootstrap-dropdown-z-adjust';
+
 
     export default {
+        components: {
+            Plugin,
+            LoadingContainer,
+        },
         setup(props) {
             const { t } = useI18n();
-            const systemStore = useSystemStore();
-            const toast = useToast();
+            const pluginStore = usePluginStore();
+            const { execAsync, error, loading } = useLoad()
+            const root = useTemplateRef('root')
 
-            // FUNCTIONS
-            const isInstalled = plugin => {
-                return !!plugin.installed_at;
+            // When the Plugins are shown in more than 1 column, the dropdown
+            // is obscured by the next row, so we need to adjust the zIndex of 
+            // the dropdown card when the dropdpwn opens.
+            const { updateAllDropdowns } = useBootstrapDropdownZAdjust(root)
+
+
+            onMounted(() => {
+                // Ensure plugins are loaded
+                refreshPlugins();
+            });
+
+            const refreshPlugins = async _ => {
+                await execAsync(pluginStore.refresh);
             };
-            const updateAvailable = plugin => {
-                return !!plugin.update_available;
-            };
-            const showChangelog = plugin => {
-                showChangelogModal(plugin);
-            };
-            const install = plugin => {
-                systemStore.installPlugin(plugin.id);
-            };
-            const uninstall = plugin => {
-                systemStore.uninstallPlugin(plugin.id);
-            };
-            const update = plugin => {
-                systemStore.patchPlugin(plugin.id).then(_ => {
-                    const vo = plugin.version;
-                    const label = t('main.plugins.toasts.update.message', {
-                        name: plugin.metadata.title,
-                        vo: vo,
-                        v: plugin.version,
-                    });
-                    const title = t('main.plugins.toasts.update.title');
-                    toast.$toast(label, title, {
-                        channel: 'success',
-                        duration: 10000,
-                    });
-                });
-            };
-            const remove = plugin => {
-                systemStore.removePlugin(plugin.id);
-            };
+
             const inputFile = (newFile, oldFile) => {
                 if(!can('preferences_create')) return;
 
                 // Enable automatic upload
                 if(!!newFile && (Boolean(newFile) !== Boolean(oldFile) || oldFile.error !== newFile.error)) {
                     if(!newFile.active) {
-                        newFile.active = true
+                        newFile.active = true;
                     }
                 }
             };
-            const uploadZip = (file, component) => {
-                return systemStore.uploadPlugin(file.file).then(_ => {
-                    state.files = [];
-                });
+            const uploadZip = async (file, component) => {
+                const result = await execAsync(async () => pluginStore.upload(file.file));
+                console.log("File uploaded", result)
+                // Currently we must reload the page when the plugin is
+                // updated, to remove the old script from the browser and 
+                // that the new script can run without collisions.
+                // TODO: This should be improved with a more sophisticated frontend
+                // system in a future release.
+                // if(result && result.updated) {
+                //     const label = t('main.plugins.toasts.update.message', {
+                //         name: getPluginTitle(plugin),
+                //         vo: vo,
+                //         v: plugin.version,
+                //     });
+                //     const title = t('main.plugins.toasts.update.title');
+                //     toast.$toast(label, title, {
+                //         channel: 'success',
+                //         duration: 3000,
+                //     });
+                //     setTimeout(() => window.location.reload(), 3000)
+                // }
             };
 
-            // DATA
-            const state = reactive({
-                plugins: computed(_ => systemStore.plugins),
-                sortedPlugins: computed(_ => Object.values(state.plugins).sort((a, b) => a.metadata.title > b.metadata.title)),
-                files: [],
-            });
+            const uploadButton = ref(null);
+
+            const fileDragged = computed(() => uploadButton.value?.dropActive || false);
+
+            const selectedPlugin = ref(null);
+            const selectPlugin = (plugin) => {
+                selectedPlugin.value = plugin;
+            };
+
+            const getPluginStyle = (plugin) => {
+                return {
+                    // Always bring the selected plugin to the front
+                    // so that the dropdown is not hidden behind other plugin
+                    // cards.
+                    zIndex: plugin.id === selectedPlugin.value?.id ? 2 : 1
+                };
+            };
 
             // RETURN
             return {
                 t,
-                // HELPERS
                 can,
                 // LOCAL
-                isInstalled,
-                updateAvailable,
-                showChangelog,
-                install,
-                uninstall,
-                update,
-                remove,
+                error,
+                fileDragged,
                 inputFile,
+                loading,
+                getPluginStyle,
+                pluginStore,
+                selectPlugin,
+                uploadButton,
                 uploadZip,
-                // PROPS
-                // STATE
-                state,
             };
         },
-    }
+    };
 </script>

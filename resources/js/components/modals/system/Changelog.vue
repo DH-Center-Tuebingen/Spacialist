@@ -24,9 +24,9 @@
             </div>
             <div class="modal-body overflow-hidden d-flex flex-row">
                 <div class="rounded-4 ps-4 pe-0 py-3 bg-primary bg-opacity-10 overflow-hidden col d-flex flex-row">
-                    <md-viewer
+                    <MarkdownText
                         class="font-monospace col overflow-y-auto pe-4"
-                        :source="plugin.changelog"
+                        :value="changelog"
                     />
                 </div>
             </div>
@@ -43,17 +43,24 @@
         </div>
     </vue-final-modal>
 </template>
-  
+
 <script>
     import {
         reactive,
-        toRefs,
+        ref,
+        onMounted,
     } from 'vue';
     import { useI18n } from 'vue-i18n';
 
+    import { getChangelog } from '@/api/plugin';
+    import MarkdownText from '@/components/mde/MarkdownText.vue';
+
     export default {
+        components: {
+            MarkdownText  
+        },
         props: {
-        plugin: {
+            plugin: {
                 required: true,
                 type: Object,
             },
@@ -61,27 +68,39 @@
         emits: ['closing'],
         setup(props, context) {
             const { t } = useI18n();
-            const {
-                plugin
-            } = toRefs(props);
+
+            const changelog = ref('');
+            const loading = ref(false);
+
+            const loadChangelog = async () => {
+                try {
+                    loading.value = true;
+                    changelog.value = await getChangelog(props.plugin.id)
+
+                } catch(error) {
+                    console.error('Failed to load changelog', error);
+                } finally {
+                    if(!changelog.value) {
+                        changelog.value = t('main.plugins.info.no_changelog');
+                    }
+                    loading.value = false;
+                }
+            };
+
+            onMounted(() => {
+                loadChangelog();
+            });
 
             // FUNCTIONS
             const closeModal = _ => {
                 context.emit('closing', false);
             };
 
-            // DATA
-            const state = reactive({
-            });
-
             // RETURN
             return {
                 t,
-                // HELPERS
-                // LOCAL
                 closeModal,
-                // STATE
-                state,
+                changelog,
             };
         },
     };

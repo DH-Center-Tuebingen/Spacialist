@@ -107,5 +107,20 @@
     "This tag does not exist": "Dieses Schlagwort existiert nicht",
     "HTML not supported for file type": "HTML wird für den Dateityp :mime nicht unterstützt",
     "Presentations not yet supported!": "Präsentationen werden noch nicht unterstützt!",
-    "Start date of a time period must not be after it's end date": "Das Startdatum einer Zeitspanne darf nicht nach ihrem Enddatum liegen"
+    "Start date of a time period must not be after it's end date": "Das Startdatum einer Zeitspanne darf nicht nach ihrem Enddatum liegen",
+    
+    "A plugin with the name ':pluginName' and the same or later version (:uploadedVersion and :existingVersion) already exists. Aborting.": "Ein Plugin mit dem Namen ':pluginName', hat aber die gleiche oder eine niedrigere Version (:uploadedVersion and :existingVersion). Abbruch.",
+    "Installation requirements are not met: :dependencyError": "Voraussetzungen für die Installation sind nicht erfüllt: :dependencyError",
+    "Required Plugin is missing ':pluginName'": "Benötigtes Plugin existiert nicht ':pluginName'",
+    "Required Plugin is not installed ':pluginName'": "Benötigtes Plugin ist nicht installiert ':pluginName'",
+    "Plugin is not compatible with the current Spacialist version.": "Plugin ist inkompatibel mit der aktuellen Spacialist Version.",
+    
+    "Could not open provided plugin zip file. Aborting.": "Das bereitgestellte Plugin-ZIP-Archiv konnte nicht geöffnet werden. Abbruch.",
+    "Format mismatch. Only a folder is allowed on root level.": "Inkorrekte ZIP-Struktur: Die oberste Ebene muss genau ein Ordner sein.",
+    "Error while extracting zip file. Please check file permissions or ask your system adminstrator.": "Fehler beim Entpacken der ZIP-Datei. Bitte überprüfen Sie die Dateiberechtigungen oder wenden Sie sich an einen Systemadministrator.",
+    "Plugin upload was unsuccessful. Plugin directory has been removed.": "Plugin-Upload war nicht erfolgreich. Das Plugin-Verzeichnis wurde entfernt.",
+    "Plugin was uploaded but could not be updated. Backup has been restored.": "Plugin wurde hochgeladen, konnte aber nicht aktualisiert werden. Das Backup wurde wiederhergestellt.",
+    "This migration does not exist or has already been run.": "Diese Migration existiert nicht oder wurde bereits ausgeführt.",
+    "Directory name must match manifest name: :dirName ≠ :manifestName": "Ordnername muss mit dem Namen in der Manifest Datei übereinstimmen: :dirName ≠ :manifestName",
+    "Invalid plugin name: :name": "Unerlaubter Plugin-Name: :name"
 }

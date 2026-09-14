@@ -1,6 +1,7 @@
 import { only } from '@/helpers/helpers.js';
 import useAttributeStore from './stores/attribute.js';
 import useEntityStore from './stores/entity.js';
+import usePluginStore from './stores/plugin.js';
 import useSystemStore from './stores/system.js';
 import useUserStore from './stores/user.js';
 import i18n from './i18n.js';
@@ -49,6 +50,7 @@ import {
 
 import RouteRootDummy from '@/components/plugins/RouteRootDummy.vue';
 import * as buffer from 'buffer';
+import { ensureNotToStartWith, ensureStartsWith } from '@/helpers/string.js';
 
 const defaultPluginOptions = {
     id: null,
@@ -96,6 +98,18 @@ const {
 
 window.Vue = Vue;
 window.Buffer = buffer.Buffer;
+
+function requireOptions(options, requiredOptions) {
+    requiredOptions.forEach(opt => {
+        const missingOptions = []
+        if(!options[opt]) {
+            missingOptions.push(opt)
+        }
+        if(missingOptions.length > 0) {
+            throw new Error(`Missing required options: ${missingOptions.join(', ')}`);
+        }
+    });
+}
 
 export const SpPS = {
     api: {
@@ -149,6 +163,7 @@ export const SpPS = {
         SpPS.data.t = t;
         SpPS.api.store.attributeStore = useAttributeStore();
         SpPS.api.store.entityStore = useEntityStore();
+        SpPS.api.store.pluginStore = usePluginStore();
         SpPS.api.store.systemStore = useSystemStore();
         SpPS.api.store.userStore = useUserStore();
     },
@@ -215,7 +230,7 @@ export const SpPS = {
             SpPS.registerRoutes(mergedOptions.id, mergedOptions.routes);
         }
         if(mergedOptions.store) {
-            SpPS.api.store.systemStore.addPluginStore(mergedOptions.id, mergedOptions.store);
+            SpPS.api.store.pluginStore.addStore(mergedOptions.id, mergedOptions.store);
         }
         SpPS.data.plugins[options.id] = mergedOptions;
     },
@@ -226,25 +241,31 @@ export const SpPS = {
         if(!SpPS.data.plugins[options.id]) {
             throw new Error('No plugin with that ID is installed! Register it first, before registering an access point.');
         }
+
+        requireOptions(options, ['id', 'path', 'component']);
+
         const defaultOptions = {
             id: null,
             path: null,
             component: null,
             routes: [],
         };
+
         const mergedOptions = {
             ...defaultOptions,
             ...only(options, Object.keys(defaultOptions)),
         };
+
         const pluginRoute = {
-            path: `/${mergedOptions.path}`,
-            name: `${mergedOptions.id}_${mergedOptions.path}`,
+            path: ensureStartsWith(mergedOptions.path, '/'),
+            name: `${mergedOptions.id}_${ensureNotToStartWith(mergedOptions.path, '/')}`,
             component: mergedOptions.component,
             children: mergedOptions.routes,
             meta: {
                 auth: true
             }
         };
+
         router.addRoute(pluginRoute);
     },
     intoSlot: (options) => {
@@ -274,7 +295,17 @@ export const SpPS = {
                 SpPS.data.app.component(mergedOptions.componentTag, mergedOptions.component);
             }
         }
-        SpPS.api.store.systemStore.registerPluginInSlot(mergedOptions);
+        SpPS.api.store.pluginStore.registerInSlot(mergedOptions);
+    },
+    registerSlot: (options) => {
+        if(!options.of || !SpPS.data.plugins[options.of]) {
+            throw new Error('This plugin part has no associated plugin or that plugin is not installed!');
+        }
+        if(!options.name) {
+            throw new Error('No slot for plugin provided!');
+        }
+
+        usePluginStore().registerSlot(options.of, options.name);
     },
     registerComponent: (options) => {
         if(!options.of || !SpPS.data.plugins[options.of]) {
@@ -302,7 +333,7 @@ export const SpPS = {
                 }
             }
         } else {
-            SpPS.api.store.systemStore.registerPluginAttribute(mergedOptions);
+            SpPS.api.store.pluginStore.registerAttribute(mergedOptions);
         }
     },
     registerPreference: (options) => {
@@ -342,7 +373,7 @@ export const SpPS = {
                 SpPS.data.app.component(mergedOptions.componentTag, mergedOptions.component);
             }
         }
-        SpPS.api.store.systemStore.registerPluginPreference(mergedOptions);
+        SpPS.api.store.pluginStore.registerPreference(mergedOptions);
     },
 };
 

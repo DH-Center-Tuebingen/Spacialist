@@ -2,22 +2,30 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\PluginLifecycleException;
 use App\Plugin;
 use App\Preference;
+use App\Services\PluginManager;
+use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
-use ZipArchive;
-use Illuminate\Support\Str;
+use App\Plugin\PluginDirectory;
+use App\Plugin\PluginUploader;
+use App\Services\Plugin\AttributeService;
+use App\Services\Plugin\MigrationService;
+use App\Services\Plugin\DiscoveryService;
+use App\Support\Log\PluginLog;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
-class PluginController extends Controller
-{
+class PluginController extends Controller {
     /**
      * Create a new controller instance.
      *
      * @return void
      */
-    public function __construct()
-    {
+    public function __construct() {
         parent::__construct();
         if(!Preference::hasPublicAccess()) {
             $this->middleware('auth')->except(['welcome', 'index']);
@@ -25,193 +33,328 @@ class PluginController extends Controller
         $this->middleware('guest')->only('welcome');
     }
 
-    public function getPlugins(Request $request) {
-        Plugin::updateState();
-
-        $plugins = [];
-        if($request->query('installed') == 1) {
-            $plugins = Plugin::whereNotNull('installed_at')->get();
-        } else if($request->query('uninstalled') == 1) {
-            $plugins = Plugin::whereNull('installed_at')->get();
-        } else {
-            $plugins = Plugin::all();
+    private function requireInstalled(Plugin $plugin) {
+        if(!isset($plugin->installed_at)) {
+            abort(403, __('This plugin is not installed.'));
         }
+    }
 
-        foreach($plugins as $plugin) {
-            $plugin->metadata = $plugin->getMetadata();
-            $plugin->changelog = $plugin->getChangelog();
-            $plugin->registeredAttributes = $plugin->getRegisteredAttributes();
+    private function requireNotInstalled(Plugin $plugin) {
+        if(isset($plugin->installed_at)) {
+            abort(403, __('This plugin is already installed.'));
         }
-
-        return response()->json($plugins);
     }
 
     public function uploadPlugin(Request $request) {
-        $user = auth()->user();
-        if(!$user->can('preferences_create')) {
-            return response()->json([
-                'error' => __('You do not have the permission to upload plugin as zip')
-            ], 403);
-        }
+
         $this->validate($request, [
             'file' => 'required|file'
         ]);
 
-        $file = $request->file('file');
-
-        $mandatoryFiles = [
-            'App/info.xml',
-            'js/script.js',
-            'routes/api.php',
-        ];
-
-        $zipFile = new ZipArchive;
-        $isOpen = $zipFile->open($file->getRealPath(), ZipArchive::RDONLY);
-
-        if(!$isOpen) {
+        $uploader = app(PluginUploader::class);
+        $uploadResult = null;
+        try{
+            $uploadResult = $uploader->upload($request->file('file'));
+        }catch(Exception $e) {
             return response()->json([
-                'error' => __('Could not open provided plugin zip file. Aborting.')
-            ], 403);
+                'error' => $e->getMessage()
+            ], 422);
         }
-
-        $rootFolder = $zipFile->getNameIndex(0);
-        if(!Str::endsWith($rootFolder, '/')) {
-            return response()->json([
-                'error' => __('Format mismatch. Only a folder is allowed on root level.')
-            ], 403);
-        }
-        $pluginName = substr($rootFolder, 0, -1);
-        foreach($mandatoryFiles as $filepath) {
-            if($zipFile->locateName("{$rootFolder}{$filepath}") === false) {
-                return response()->json([
-                    'error' => __("Format mismatch. Mandatory file '{$rootFolder}{$filepath}' is missing.")
-                ], 403);
+        
+        $pluginName = $uploadResult->pluginName;
+        $fromVersion = null;
+        $success = true;
+        if($uploadResult->isUpdate()) {
+            $plugin = $uploadResult->plugin;
+            $fromVersion = $plugin->version;
+            $success = DB::transaction(function () use ($plugin) {
+                app(PluginManager::class)->update($plugin);
+                // Return true if update was successful.
+                return true;
+            });
+        } else {
+            PluginLog::forName($pluginName)->info("Plugin {$pluginName} was uploaded and installed successfully.");
+            $plugin = app(DiscoveryService::class)->discoverByName($pluginName);
+            if(!isset($plugin)) {
+                $success = false;
             }
         }
-
-        $pluginPath = Plugin::getPluginPath($pluginName);
-        if(file_exists($pluginPath)) {
-            $installedPlugin = Plugin::where('name', $pluginName)->first();
-            $infoContent = Plugin::getPluginInfo($zipFile->getFromName("{$rootFolder}App/info.xml"), true);
-
-            if($installedPlugin->version >= $infoContent['version']) {
-                return response()->json([
-                    'error' => __("A plugin with the name '$pluginName' and the same or later version ({$infoContent['version']} and {$installedPlugin->version}) already exists. Aborting.")
-                ], 403);
+        
+        if(!$success) {
+            $message = "";
+            if($uploadResult->isUpdate()) {
+                $uploader->restoreBackup($pluginName);
+                $message = "Plugin was uploaded but could not be updated. Backup has been restored.";
+                PluginLog::forName($pluginName)->error($message);
+            } else {
+                (new PluginDirectory($pluginName))->remove();
+                $message = "Plugin upload was unsuccessful. Plugin directory has been removed.";
+                PluginLog::forName($pluginName)->error($message);
             }
-        }
 
-        $extractPath = Str::finish(Plugin::getPluginPath(), '/');
-        $extracted = $zipFile->extractTo($extractPath);
-        $zipFile->close();
-
-        if(!$extracted) {
             return response()->json([
-                'error' => __("Error while extracting zip file. Please check file permissions or ask your system adminstrator.")
+                'error' => __($message)
             ], 403);
         }
 
-        $plugin = Plugin::discoverPluginByName($pluginName);
-
-        if(!isset($plugin)) {
-            return response()->json([
-                'error' => __("Error while reading from extracted content. Please check file permissions or ask your system adminstrator.")
-            ], 403);
-        }
-
-        $plugin->metadata = $plugin->getMetadata();
-        return response()->json($plugin);
+        return response()->json([
+            "plugin" => $plugin,
+            "scripts" => [app(PluginManager::class)->scriptService->getUrl($plugin)],
+            "styles" => app(PluginManager::class)->cssService->getUrls($plugin),
+            "updated" => $uploadResult->isUpdate(),
+            "fromVersion" => $fromVersion,
+        ]);
     }
 
-    public function installPlugin(Request $request, $id) {
-        try {
-            Plugin::where('id', $id)->whereNotNull('installed_at')->firstOrFail();
-            // Already installed
-            return response()->json([], 204);
-        } catch(ModelNotFoundException $e) {
-            $plugin = Plugin::where('id', $id)->whereNull('installed_at')->first();
-            try {
-                $plugin->handleInstallation();
-            } catch(ModelNotFoundException $e) {
-                info("odelNotFoundException: " . $e->getMessage());
-                return response()->json([
-                    'error' => __('Error while installing plugin. Preset does not exist.')
-                ], 403);
-            } catch(\Exception $e) {
-                info("Exception: " . $e->getMessage());
-                return response()->json([
-                    'error' => __('Error while installing plugin. Please check file permissions or ask your system administrator.')
-                ], 403);
-            }
+    /**
+     * Installs the plugin.
+     * 
+     * @param Request $request
+     * @param Plugin $plugin
+     * @return JsonResponse<array{
+     *     plugin: Plugin,
+     *     scripts: string[],
+     *     styles: string[]
+     * }>
+     */
+    public function installPlugin(Request $request, Plugin $plugin): JsonResponse {
+        $this->requireNotInstalled($plugin);
+
+        try{
+            app(PluginManager::class)->install($plugin);
+        }catch (ModelNotFoundException $e) {
+            return response()->json([
+                'error' => __('Error while installing plugin. Preset does not exist.')
+            ], 403);
+        }catch (PluginLifecycleException $e) {
+            return response()->json([
+                'error' => $e->getMessage()
+            ], 422);
+        }catch (Exception $e) {
+            report($e);
+            PluginLog::for($plugin)->error("Unexpected error during plugin installation: " . $e->getMessage(), ['exception' => $e]);
+            return response()->json([
+                'error' => __('Error while installing plugin. Please check file permissions or ask your system administrator.')
+            ], 403);
+        }
+
+        return response()->json([
+            'plugin' => $plugin,
+            'scripts' => [ app(PluginManager::class)->scriptService->getUrl($plugin)],
+            'styles' => app(PluginManager::class)->cssService->getUrls($plugin),
+        ]);
+    }
+
+    /**
+     * Uninstall the plugin. 
+     * 
+     * @param Request $request
+     * @param Plugin $plugin
+     * @return JsonResponse<array{
+     *     plugin: Plugin,
+     *     scripts: string[],
+     *     styles: string[]
+     * }> | JsonResponse<array>[] - Returns the plugin with its scripts and styles. If the plugin was already uninstalled, a 204 No Content response will be returned.
+     */
+    public function uninstallPlugin(Request $request, Plugin $plugin): JsonResponse {
+        $this->requireInstalled($plugin);
+
+        try{
+            app(PluginManager::class)->uninstall($plugin);
 
             return response()->json([
                 'plugin' => $plugin,
-                'install_location' => $plugin->publicName(false),
+                'scripts' => [ app(PluginManager::class)->scriptService->getUrl($plugin)],
+                'styles' => app(PluginManager::class)->cssService->getUrls($plugin),
             ]);
-        }
-    }
-
-    public function updatePlugin(Request $request, $id) {
-        try {
-            $plugin = Plugin::findOrFail($id);
-        } catch(ModelNotFoundException $e) {
-            return response()->json([
-                'error' => __('This plugin does not exist.')
-            ], 403);
-        }
-        try {
-            $updatedFrom = $plugin->handleUpdate();
-        } catch(\Exception $e) {
-            return response()->json([
-                'error' => __('Error while updating plugin. Please check file permissions or ask your system administrator.')
-            ], 403);
-        }
-        $plugin->changelog = $plugin->getChangelog($updatedFrom);
-        return response()->json($plugin);
-    }
-
-    public function uninstallPlugin(Request $request, $id) {
-        try {
-            $plugin = Plugin::where('id', $id)->whereNotNull('installed_at')->firstOrFail();
-            $plugin->handleUninstall();
-            return response()->json([
-                'plugin' => $plugin,
-                'uninstall_location' => $plugin->publicName(false),
-            ]);
-        } catch(ModelNotFoundException $e) {
+        }catch (ModelNotFoundException $e) {
             // Already uninstalled
             return response()->json([], 204);
         }
     }
 
-    public function removePlugin(Request $request, $id) {
-        try {
-            $plugin = Plugin::findOrFail($id);
-        } catch(ModelNotFoundException $e) {
-            return response()->json([
-                'error' => __('This plugin does not exist.')
-            ], 403);
-        }
+    /**
+     * Removes the plugin from the system 
+     * 
+     * @param Request $request
+     * @param Plugin $plugin
+     * @return JsonResponse<array{
+     *     plugin: Plugin,
+     *     scripts: string[],
+     *     styles: string[]
+     * }>
+     */
+    public function removePlugin(Request $request, Plugin $plugin): JsonResponse {
+        $this->requireNotInstalled($plugin);
 
-        $plugin->handleRemove();
+        app(PluginManager::class)->remove($plugin);
         $plugin->delete();
         return response()->json([
-            'uninstall_location' => $plugin->publicName(false),
+            'plugin' => $plugin,
+            'scripts' => [ app(PluginManager::class)->scriptService->getUrl($plugin)],
+            'styles' => app(PluginManager::class)->cssService->getUrls($plugin),
         ]);
     }
+    
+    /**
+     * Gets all plugins. 
+     * Can be limited to 'installed' and 'uninstalled' plugins by setting the respective query parameter to 1.
+     * @param Request $request
+     * @return JsonResponse<Plugin[]> - Returns the list of all plugins.
+     */
+    public function getPlugins(Request $request) {
+        app(DiscoveryService::class)->discover();
 
-    public function downloadScript(Request $request, string $filepath) {
-        if($filepath === ''){
+        $plugins = [];
+        if($request->query('installed') == 1) {
+            $plugins = app(PluginManager::class)->getInstalledPlugins();
+        } else if($request->query('uninstalled') == 1) {
+            // We only cache installed plugins. When we need 
+            $plugins = Plugin::whereNull('installed_at')->get();
+        } else {
+            $plugins = app(PluginManager::class)->getPlugins();
+        }
+
+        $attributesMap = app(AttributeService::class)->getMappedByPlugins();
+        foreach($plugins as $plugin) {
+            $plugin->registeredAttributes = $attributesMap[$plugin->id] ?? [];
+        }
+
+        return response()->json($plugins);
+    }
+    
+    /**
+     * Publishes the JavaScript file to the storage. 
+     * 
+     * @param Plugin $plugin
+     * @return JsonResponse<string> - Returns the URL of the published script.
+     */
+    public function publishScript(Plugin $plugin) {
+        $this->requireInstalled($plugin);
+        $scriptUrl =  app(PluginManager::class)->scriptService->publish($plugin);
+        return response()->json($scriptUrl);
+    }
+
+    /**
+     * Get's the changelog of the plugin as md string.
+     * If no changelog was found, an empty string will be returned 
+     * 
+     * @param Request $request
+     * @param Plugin $plugin
+     * @return JsonResponse<string> - Returns the plugin's changelog, or an empty string if no changelog was found.
+     */
+    public function getChangelog(Request $request, Plugin $plugin): JsonResponse {
+        $changelog = PluginDirectory::fromPlugin($plugin)->readChangelog();
+        return response()->json($changelog);
+    }
+
+    /**
+     * Downloads the plugin script from the server.
+     * 
+     * @param Request $request
+     * @param string $filepath
+     * @return BinaryFileResponse|JsonResponse<string>
+     */
+    public function downloadScript(Request $request, string $filepath): JsonResponse|BinaryFileResponse {
+        if($filepath === '') {
             return response()->json([
                 'error' => __('No source provided.')
             ], 400);
         }
-        return Plugin::getDirectory()->downloadRelative($filepath);
+        return app(PluginManager::class)
+            ->scriptService
+            ->getStorageDirectory()
+            ->downloadRelative($filepath);
     }
 
-    //// REBASING:: Plugin Attribute
-    // public function downloadScript(Request $request) {
-    //     $file = "plugins/" . $request->query('src');
-    //     return Plugin::getDirectory()->download($file);
-    // }
+    /**
+     * Downloads the css script from the server.
+     * 
+     * @param Request $request
+     * @param string $filepath
+     * @return BinaryFileResponse|JsonResponse<string>
+     */
+    public function downloadCss(Request $request, string $filepath): JsonResponse|BinaryFileResponse {
+        if($filepath === '') {
+            return response()->json([
+                'error' => __('No source provided.')
+            ], 400);
+        }
+        return app(PluginManager::class)
+            ->cssService
+            ->getStorageDirectory()
+            ->downloadRelative($filepath);
+    }
+
+    /** 
+     * Runs all missing migrations of a plugin.
+     * @return \Illuminate\Http\JsonResponse - Returns the current migration state after execution
+     */
+    public function migrate(Request $request, Plugin $plugin) {
+        app(MigrationService::class)->run($plugin);
+        $migrationState = app(MigrationService::class)->inspect($plugin);
+        return response()->json($migrationState);
+    }
+
+    /**
+     * Rolls back all applied migrations of a plugin.
+     * @return \Illuminate\Http\JsonResponse - Returns the current migration state after execution
+     */
+    public function rollback(Request $request, Plugin $plugin) {
+        app(MigrationService::class)->rollback($plugin);
+        $migrationState = app(MigrationService::class)->inspect($plugin);
+        return response()->json($migrationState);
+    }
+
+    /**
+     * Adds a migration to the database without running it.
+     * This is primarily used if the plugin was installed before the migration system was implemented.
+     * @return \Illuminate\Http\JsonResponse - Returns the current migration state after execution
+     */
+    public function addMigrationToDatabase(Request $request, Plugin $plugin) {
+        $this->validate($request, [
+            'name' => 'required|string'
+        ]);
+
+        $migrationName = $request->input('name');
+        $missingMigrations = app(MigrationService::class)->getMissingMigrations($plugin);
+        if(!in_array($migrationName, $missingMigrations)) {
+            return response()->json([
+                'error' => __('This migration does not exist or has already been run.')
+            ], 400);
+        }
+
+        app(MigrationService::class)->set($migrationName, $plugin);
+        $migrationState = app(MigrationService::class)->inspect($plugin);
+        return response()->json($migrationState);
+    }
+
+    /**
+     * Get the migration state for a plugin.
+     * @return \Illuminate\Http\JsonResponse - Returns the current migration state after execution
+     */
+    public function getMigrationState(Request $request, Plugin $plugin) {
+        $migrationState = app(MigrationService::class)->inspect($plugin);
+        return response()->json($migrationState);
+    }
+
+    /**
+     * Rebuilds the plugin cache and returns all plugins with their metadata.
+     * @return \Illuminate\Http\JsonResponse - Returns all plugins with their metadata after rebuilding the cache.
+     */
+    public function refresh(Request $request) {
+        app(DiscoveryService::class)->discover();
+        app(PluginManager::class)->rebuildPluginCache();
+        return response()->json(Plugin::all());
+    }
+
+    /**
+     * Refreshes the metadata of a plugin.
+     * @return \Illuminate\Http\JsonResponse - Returns the plugin with its metadata.
+     */
+    public function refreshInfo(Request $request, Plugin $plugin) {
+        $refreshedPlugin = app(DiscoveryService::class)->discoverByName($plugin->name);
+        app(PluginManager::class)->rebuildPluginCache();
+        return response()->json($refreshedPlugin);
+    }
 }

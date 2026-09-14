@@ -1,0 +1,13 @@
+{
+    "compilerOptions": {
+        "baseUrl": ".",
+        "paths": {
+            "@/*": ["resources/js/*"],
+            "%store": ["resources/js/bootstrap/store.js"],
+            "%router": ["resources/js/bootstrap/router.js"]
+        }
+    },
+    "include": [
+        "resources/js/**/*"
+    ]
+}

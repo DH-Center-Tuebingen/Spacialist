@@ -10,26 +10,28 @@ use App\Entity;
 use App\EntityType;
 use App\Globals;
 use App\Permission;
-use App\Plugin;
 use App\Preference;
 use App\Role;
 use App\RolePreset;
+use App\Services\PluginManager;
 use App\ThConcept;
 use App\User;
 
+use App\VersionInfo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Str;
 
-class HomeController extends Controller
-{
+class HomeController extends Controller {
     /**
      * Create a new controller instance.
      *
      * @return void
      */
-    public function __construct(private readonly AccessPointsService $accessPointsService)
-    {
+    public function __construct(
+        private readonly AccessPointsService $accessPointsService,
+        protected VersionInfo $versionInfo
+    ) {
         parent::__construct();
         if(!Preference::hasPublicAccess()) {
             $this->middleware('auth:sanctum')->except(['welcome', 'index', 'external']);
@@ -40,8 +42,11 @@ class HomeController extends Controller
     public function checkAccesspointAccess(Request $request) {
         $user = auth()->user();
         $accessPath = Str::finish($request->get('endpoint', '/'), '/');
-
-        if(!isset($user->accesspoints) || count($user->accesspoints) == 0) {
+        // We remove the trailing slash as currently the access points are
+        // stored without trailing slashes.
+        $accessPath= substr($accessPath, 0, -1);
+                        
+        if(!isset($user->accesspoints) || count($user->accesspoints) === 0) {
             // do not redirect if user has no access points defined (aka access to everything)
             return response()->json(null, 204);
         }
@@ -54,7 +59,7 @@ class HomeController extends Controller
                 }
             }
         }
-
+        
         $firstUserAccesspoint = $user->accesspoints[0];
         if(array_key_exists($firstUserAccesspoint, $availableAccesspoints)) {
             return response()->json([
@@ -80,8 +85,8 @@ class HomeController extends Controller
 
         $concepts = ThConcept::getMap($locale);
         $tags = Globals::getTags();
-        $version = Globals::getVersion();
-        $plugins = Plugin::getWithMetadata();
+        $version = $this->versionInfo->toObject();
+        $plugins = app(PluginManager::class)->getPlugins(true);
         $bibliography = Bibliography::orderBy('id')->get();
 
         $attributes = Attribute::whereNull('parent_id')
@@ -175,8 +180,16 @@ class HomeController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function index() {
-        $plugins = Plugin::getInstalled();
+        $plugins = app(PluginManager::class)->getInstalledPlugins();
         return view('home')
             ->with('plugins', $plugins);
+    }
+    
+    /**
+     * Returns the current app version.
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getVersion(){
+        return response()->json($this->versionInfo->toObject());
     }
 }

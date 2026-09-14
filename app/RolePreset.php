@@ -36,4 +36,8 @@ class RolePreset extends Model
 
         return $allRules;
     }
+    
+    public function uninstallFrom($pluginId) {
+        $this->plugin_presets()->where('from', $pluginId)->delete();
+    }
 }
