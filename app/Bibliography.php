@@ -126,6 +126,11 @@ class Bibliography extends Model implements Searchable
         'language'     => 'string',
     ];
 
+    /**
+     * Typedefinitions according to the BibTex specification (Oren Patashnik, 1988)
+     * @link https://ftp.mpi-inf.mpg.de/pub/tex/mirror/ftp.dante.de/pub/tex/biblio/bibtex/base/btxdoc.pdf
+     * @var array
+     */
     public const bibtexTypes = [
         "article" => [
             "fields" => [
@@ -199,6 +204,7 @@ class Bibliography extends Model implements Searchable
                 'publisher',
                 'series',
                 'title',
+                'type',
                 'url',
                 'volume',
                 'year',
@@ -293,6 +299,7 @@ class Bibliography extends Model implements Searchable
                 'publisher',
                 'series',
                 'title',
+                'type',
                 'url',
                 'volume',
                 'year',
@@ -439,6 +446,7 @@ class Bibliography extends Model implements Searchable
                 'note',
                 'number',
                 'title',
+                'type',
                 'url',
                 'year',
             ],
