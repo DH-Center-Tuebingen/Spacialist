@@ -283,7 +283,7 @@
                     password_confirm: v.fields.password_confirm.value,
                 };
 
-                if(v.fields.accesspoints.value.length > 0) {
+                if(v.fields.accesspoints.value?.length > 0) {
                     user.accesspoints = [];
                     v.fields.accesspoints.value.forEach(ap => {
                         for(let key in state.accessPoints) {

@@ -48,9 +48,9 @@
                     </dt>
                     <dd
                         class="col-md-9 font-monospace"
-                        :title="state.data.data.entry_type"
+                        :title="state.data.entry_type"
                     >
-                        {{ t(`main.bibliography.types.${state.data.data.entry_type}`) }}
+                        {{ t(`main.bibliography.types.${state.data.entry_type}`) }}
                     </dd>
                     <dt class="col-md-3 text-end">
                         {{ t('main.bibliography.column.author') }}
@@ -101,7 +101,7 @@
                 </a>
                 <bibtex-code
                     :code="state.toBibtexify"
-                    :type="state.data.type"
+                    :type="state.data.entry_type"
                 />
             </div>
             <div class="modal-footer">
@@ -177,7 +177,7 @@
                     last_updated: null,
                     title: '',
                     author: '',
-                    type: '',
+                    entry_type: '',
                     data: {},
                 },
                 file: null,
@@ -221,6 +221,8 @@
                 state.data.author = author;
                 state.data.entry_type = entry_type;
                 state.data.data = data;
+
+                state.file = item?.file;
             }
 
             // RETURN

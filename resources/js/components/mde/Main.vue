@@ -60,6 +60,7 @@
     import { replaceAll } from '@milkdown/utils';
 
     import { usePreventNavigation } from '@/helpers/form.js';
+    import { _debounce } from '@/helpers/helpers.js';
 
     export default {
         components: {
@@ -161,14 +162,18 @@
             // Only add the prevent navigation hook if the editor is not readonly
             // otherwise the hook will be added concurrently and unecessary when the editor is used
             // in preview mode.
-            if(!readonly.value)
+            if(!readonly.value) {
                 usePreventNavigation(_ => state.dirty);
+            }
+
+            const debouncedWatch = _debounce(markdownString => {
+                state.dirty = markdownString != data.value;
+                context.emit('update', markdownString);
+            }, 200);
 
             watch(_ => state.markdownString, markdownString => {
-                    state.dirty = markdownString != data.value;
-                    context.emit('update', markdownString);
-                }
-            );
+                debouncedWatch(markdownString);
+            });
 
             // RETURN
             return {

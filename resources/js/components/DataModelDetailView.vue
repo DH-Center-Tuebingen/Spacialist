@@ -163,6 +163,7 @@
                     :show-info="true"
                     @add-element="addAttributeToEntityType"
                     @edit-element="onEditEntityAttribute"
+                    @require-element="onRequireEntityAttribute"
                     @remove-element="onRemoveAttributeFromEntityType"
                     @reorder-list="reorderEntityAttribute"
                 />
@@ -243,9 +244,9 @@
             };
             const addAttributeToEntityType = async e => {
                 try {
-                    const data = await entityStore.addEntityTypeAttribute(currentRoute.params.id, e.element.id, e.to + 1);
+                    const data = await entityStore.addEntityTypeAttribute(state.entityType.id, e.element.id, e.to + 1);
                     if(e.element.is_system && e.element.datatype == 'system-separator') {
-                        showEditAttribute(data.id, currentRoute.params.id, {
+                        showEditAttribute(data.id, state.entityType.id, {
                             is_system: e.element.is_system,
                             datatype: data.datatype,
                             pivot: data.pivot,
@@ -264,11 +265,15 @@
                 }
             };
             const onEditEntityAttribute = e => {
-                showEditAttribute(e.element.id, currentRoute.params.id, {
+                showEditAttribute(e.element.id, state.entityType.id, {
                     is_system: e.element.is_system,
                     datatype: e.element.datatype,
                     pivot: e.element.pivot,
                 });
+            };
+            const onRequireEntityAttribute = async e => {
+                const isRequired = e.active === true;
+                await entityStore.setEntityAttributeRequired(state.entityType.id, e.element.id, e.element.pivot.id, isRequired);
             };
             const onRemoveAttributeFromEntityType = e => {
                 const etid = currentRoute.params.id;
@@ -462,6 +467,7 @@
                 removeAllEntityTypes,
                 addAttributeToEntityType,
                 onEditEntityAttribute,
+                onRequireEntityAttribute,
                 onRemoveAttributeFromEntityType,
                 reorderEntityAttribute,
                 // PROPS

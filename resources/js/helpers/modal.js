@@ -1,4 +1,3 @@
-
 import useAttributeStore from '@/bootstrap/stores/attribute.js';
 import useBibliographyStore from '@/bootstrap/stores/bibliography.js';
 import useEntityStore from '@/bootstrap/stores/entity.js';
@@ -571,13 +570,25 @@ export function ShowMoveEntity(entity, onMoved) {
             onCancel(e) {
                 modal.destroy();
             },
-            onConfirm(parentId) {
-                useEntityStore().move(entity.id, parentId).then(data => {
-                    if(!!onMoved) {
-                        onMoved(entity.id, parentId, data);
-                    }
-                    modal.destroy();
-                });
+            onConfirm(parentId, entity_ids) {
+                if(entity_ids && entity_ids.length > 0) {
+                    useEntityStore().moveMultiple(entity_ids, parentId).then(data => {
+                        if(!!onMoved) {
+                            entity_ids.forEach(entity_id => {
+                                onMoved(entity_id, parentId, data);
+                            });
+                        }
+                        useEntityStore().setTreeSelectionMode(false);
+                        modal.destroy();
+                    });
+                } else {
+                    useEntityStore().move(entity.id, parentId).then(data => {
+                        if(!!onMoved) {
+                            onMoved(entity.id, parentId, data);
+                        }
+                        modal.destroy();
+                    });
+                }
             },
         },
     });
@@ -723,7 +734,7 @@ export function showMultiEditAttribute(entityIds, attributes) {
                     entries.push(entry);
                 }
                 multieditAttributes(entityIds, entries).then(_ => {
-                    useEntityStore().setTreeSeletionMode(false);
+                    useEntityStore().setTreeSelectionMode(false);
                     modal.destroy();
                     const title = t('main.entity.tree.multiedit.toast.saved.title');
                     const msg = t('main.entity.tree.multiedit.toast.saved.msg', {

@@ -35,7 +35,7 @@
                 <button
                     type="submit"
                     class="btn btn-outline-success"
-                    :disabled="!state.isDirty"
+                    :disabled="!state.isDirty || state.loading"
                     @click="confirm()"
                 >
                     <i class="fas fa-fw fa-save" /> {{ t('global.save') }}
@@ -97,6 +97,7 @@
                 if(!can('entity_data_write')) return;
 
                 const values =  listRef.value.getDirtyValues();
+                state.loading = true;
 
                 context.emit('confirm', {
                     values: values,
@@ -109,6 +110,7 @@
             // DATA
             const listRef = ref({});
             const state = reactive({
+                loading: false,
                 attributesInitialized: false,
                 isDirty: false,
                 sortedAttributes: attributes.value.filter(a => a.datatype != 'system-separator').sort((a, b) => a.id > b.id),
@@ -121,8 +123,9 @@
                 for(let i=0; i<state.sortedAttributes.length; i++) {
                     const curr = state.sortedAttributes[i];
                     state.defaultValues[curr.id] = {
-                        value: getInitialAttributeValue(curr),
+                        value: getInitialAttributeValue(curr, 'datatype'),
                     };
+
                 }
                 state.attributeSelections = attributeStore.getAttributeSelections(state.sortedAttributes);
                 state.attributesInitialized = true;

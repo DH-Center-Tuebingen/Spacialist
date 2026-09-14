@@ -25,6 +25,7 @@ class EntityAttribute extends Model
 
     protected $casts = [
         'depends_on' => 'array',
+        'metadata' => 'object',
     ];
 
     public function getActivitylogOptions() : LogOptions
@@ -33,6 +34,10 @@ class EntityAttribute extends Model
             ->logOnly(['id'])
             ->logFillable()
             ->logOnlyDirty();
+    }
+
+    public function isRequired(): bool {
+        return isset($this->metadata) && property_exists($this->metadata, 'required') && $this->metadata->required === true;
     }
 
     public function removeFromEntityType() {

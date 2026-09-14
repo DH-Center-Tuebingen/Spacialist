@@ -240,7 +240,7 @@ export function getInitialAttributeValue(attribute, typeAttr = 'type') {
         case 'boolean':
             return 0;
         case 'percentage':
-            return 50;
+            return null;
         case 'serial':
             let str = attribute.textContent;
             let toRepl = '%d';
@@ -334,6 +334,26 @@ export function getEmptyAttributeValue(type) {
         default:
             return '';
     }
+}
+
+export function hasKey(data, key) {
+    if(!data || !key) return false;
+
+    return key in data;
+}
+
+export function isEmpty(value) {
+    if(!value) return true;
+    if(Array.isArray(value) && value.length === 0) return true;
+    // Date is a special case - it is typeof object, but has no keys
+    // even though it is not empty
+    if(
+        typeof value == 'object' &&
+        !(value instanceof Date) &&
+        Object.keys(value).length === 0
+    ) return true;
+
+    return false;
 }
 
 export function getAttributeValueAsString(rawValue, datatype) {

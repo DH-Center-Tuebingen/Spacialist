@@ -12,6 +12,7 @@
         <li>
             <a
                 class="dropdown-item"
+                :class="{'disabled': disabledOptions?.add}"
                 href="#"
                 @click.stop.prevent="addEntity"
                 @dblclick.stop.prevent=""
@@ -25,6 +26,7 @@
         <li>
             <a
                 class="dropdown-item"
+                :class="{'disabled': disabledOptions?.add}"
                 href="#"
                 @click.stop.prevent="addEntity('above')"
                 @dblclick.stop.prevent=""
@@ -38,6 +40,7 @@
         <li>
             <a
                 class="dropdown-item"
+                :class="{'disabled': disabledOptions?.add}"
                 href="#"
                 @click.stop.prevent="addEntity('below')"
                 @dblclick.stop.prevent=""
@@ -51,6 +54,7 @@
         <li>
             <a
                 class="dropdown-item"
+                :class="{'disabled': disabledOptions?.duplicate}"
                 href="#"
                 @click.stop.prevent="duplicateEntity"
                 @dblclick.stop.prevent=""
@@ -64,6 +68,7 @@
         <li>
             <a
                 class="dropdown-item"
+                :class="{'disabled': disabledOptions?.move}"
                 href="#"
                 @click.stop.prevent="moveEntity"
                 @dblclick.stop.prevent=""
@@ -77,6 +82,7 @@
         <li v-if="can('entity_share')">
             <a
                 class="dropdown-item"
+                :class="{'disabled': disabledOptions?.export}"
                 href="#"
                 @click.stop.prevent="exportWithChildren"
                 @dblclick.stop.prevent=""
@@ -91,6 +97,7 @@
             <a
                 v-if="can('entity_delete')"
                 class="dropdown-item"
+                :class="{'disabled': disabledOptions?.delete}"
                 href="#"
                 @click.stop.prevent="deleteEntity"
                 @dblclick.stop.prevent=""
@@ -137,6 +144,10 @@
             data: {
                 type: Object,
                 required: true
+            },
+            disabledOptions: {
+                type: Object,
+                required: false,
             }
         },
         emits: [
@@ -151,6 +162,7 @@
             });
 
             const addEntity = where => {
+                if(props.disabledOptions?.add) return;
                 if(where == 'above') {
                     const parent = entityStore.getEntity(props.data.root_entity_id);
                     showAddEntity(parent, null, props.data.rank);
@@ -162,24 +174,28 @@
                 }
             };
             const duplicateEntity = _ => {
+                if(props.disabledOptions?.duplicate) return;
                 duplicateEntityApi(props.data).then(data => {
                     entityStore.add(data);
                     context.emit('close');
                 });
             };
             const moveEntity = _ => {
+                if(props.disabledOptions?.move) return;
                 ShowMoveEntity(props.data);
                 context.emit('close');
             };
 
             const deleteEntity = _ => {
                 if(!can('entity_delete')) return;
+                if(props.disabledOptions?.delete) return;
                 showDeleteEntity(props.data.id);
                 context.emit('close');
             };
 
             const exportWithChildren = async _ => {
                 if(!can('entity_share')) return;
+                if(props.disabledOptions?.export) return;
                 try{
                     const exported = await exportEntityTreeApi(props.data.id);
                     console.log(exported);

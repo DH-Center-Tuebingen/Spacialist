@@ -43,6 +43,10 @@ const updateUserAt = (context, userId, data, isProfile) => {
             );
         }
 
+        if(data.roles) {
+            data.roles = data.roles.map(roleId => context.getRoleBy(roleId));
+        }
+
         const cleanData = only(data, allowedProps);
         const currentData = context.users[idx];
 
@@ -68,6 +72,9 @@ export const useUserStore = defineStore('user', {
         preferences: {},
     }),
     getters: {
+        userLoggedIn: state => {
+            return !!state.user?.id;
+        },
         isSameUser: state => userId => {
             return state.user.id == userId;
         },

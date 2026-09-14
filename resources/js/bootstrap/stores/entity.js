@@ -43,6 +43,7 @@ import {
     getEntityParentMetadata,
     handleModeration,
     moveEntity,
+    moveMultipleEntities,
     patchEntityType,
     patchAttribute as apiPatchAttribute,
     patchAttributes as apiPatchAttributes,
@@ -389,6 +390,12 @@ export const useEntityStore = defineStore('entity', {
             });
             this.processEntityMove(entityId, parentId, rank, to_end);
         },
+        async moveMultiple(entityIds, parentId) {
+            await moveMultipleEntities(entityIds, parentId);
+            for(const entityId of entityIds) {
+                this.processEntityMove(entityId, parentId, 0, true);
+            }
+        },
         processEntityMove(entityId, parentId, rank, to_end) {
             const entity = this.getEntity(entityId);
             const oldRank = entity.rank;
@@ -508,7 +515,7 @@ export const useEntityStore = defineStore('entity', {
                     }
                 }
                 delete this.entities[entityId];
-                handlePostDelete(entityId);
+                handlePostDelete(this, entityId);
             } catch(e) {
                 console.error(e);
             }
@@ -813,6 +820,28 @@ export const useEntityStore = defineStore('entity', {
                 }
                 return data;
             });
+        },
+        async setEntityAttributeRequired(entityTypeId, attributeId, entityAttributeId, isRequired) {
+            const attributes = this.getEntityTypeAttributes(entityTypeId);
+            const attribute = attributes.find(attribute => {
+                return attribute.id == attributeId;
+            });
+            if(attribute) {
+                const metadata = {
+                    required: isRequired,
+                };
+                return this.patchEntityMetadata(
+                    entityTypeId,
+                    attributeId,
+                    entityAttributeId,
+                    metadata,
+                ).then(_ => {
+                    if(!attribute.pivot.metadata) {
+                        attribute.pivot.metadata = {};
+                    }
+                    attribute.pivot.metadata.required = isRequired;
+                });
+            }
         },
         async removeEntityTypeAttribute(id, entityTypeId) {
             return removeEntityTypeAttribute(id).then(_ => {

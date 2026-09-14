@@ -95,7 +95,7 @@ export async function getEntityData(id) {
 
 export async function getEntityDetailsData(id) {
     return await $httpQueue.add(
-        () => http.get(`/entity/${id}/entity_detail`)
+        () => http.get(`/entity/${id}/bundled_data`)
             .then(response => {
                 // PHP returns Array if it is empty
                 if(response.data instanceof Array) {
@@ -561,6 +561,14 @@ export async function moveEntity(entityId, {
     return $httpQueue.add(
         () => http.patch(`/entity/${entityId}/rank`, data).then(response => response.data)
     );
+}
+
+export async function moveMultipleEntities(entityIds, parentId) {
+    const data = {
+        parent_id: parentId,
+        entity_ids: entityIds,
+    };
+    return $httpQueue.add(() => http.patch(`/entity/move`, data));
 }
 
 export async function patchEntityType(etid, updatedProps) {

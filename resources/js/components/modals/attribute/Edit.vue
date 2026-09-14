@@ -72,6 +72,45 @@
                             >
                         </div>
                     </div>
+                    <div class="row">
+                        <label
+                            class="col-form-label text-end col-md-2"
+                            for="attribute-check-required"
+                        >
+                            {{ t('global.required') }}:
+                        </label>
+                        <div class="col-md-10 d-flex align-items-center">
+                            <div class="form-check form-switch">
+                                <input
+                                    id="attribute-check-required"
+                                    v-model="state.required"
+                                    class="form-check-input"
+                                    type="checkbox"
+                                >
+                            </div>
+                        </div>
+                    </div>
+                    <div
+                        v-if="state.supportsButtonRendering"
+                        class="row"
+                    >
+                        <label
+                            class="col-form-label text-end col-md-2"
+                            for="attribute-check-render-as-button"
+                        >
+                            {{ t('global.render_as_buttons') }}:
+                        </label>
+                        <div class="col-md-10 d-flex align-items-center">
+                            <div class="form-check form-switch">
+                                <input
+                                    id="attribute-check-render-as-button"
+                                    v-model="state.renderAsButtons"
+                                    class="form-check-input"
+                                    type="checkbox"
+                                >
+                            </div>
+                        </div>
+                    </div>
                 </template>
                 <hr>
                 <h5 class="text-center">
@@ -184,21 +223,28 @@
             const confirmEdit = _ => {
                 const data = {
                     dependency: state.dependency,
+                    metadata: {},
                 };
 
                 // Check for changes in width metadata
                 if(state.attribute.pivot &&
                     (!state.attribute.pivot.metadata || state.width != state.attribute.pivot.metadata.width)
                 ) {
-                    data.metadata = {
-                        width: state.width,
-                    };
+                    data.metadata.width = state.width;
+                }
+                if(state.attribute.pivot &&
+                    (!state.attribute.pivot.metadata || state.required != state.attribute.pivot.metadata.required)
+                ) {
+                    data.metadata.required = state.required;
+                }
+                if(state.attribute.pivot &&
+                    (!state.attribute.pivot.metadata || state.renderAsButtons != state.attribute.pivot.metadata.as_buttons)
+                ) {
+                    data.metadata.as_buttons = state.renderAsButtons;
                 }
                 if(state.attribute.is_system && state.separatorTitle && (!state.attribute.pivot.metadata?.title || state.separatorTitle != state.attribute.pivot.metadata.title)
                 ) {
-                    data.metadata = {
-                        title: state.separatorTitle,
-                    };
+                    data.metadata.title = state.separatorTitle;
                 }
 
                 context.emit('confirm', data);
@@ -231,6 +277,8 @@
                     groups: [getEmptyGroup(false)],
                 },
                 width: 100,
+                required: false,
+                renderAsButtons: false,
                 isValid: computed(_ => {
                     return state.dependency.groups.every(group => {
                         return group.rules.length == 0 || group.rules.every(rule => validateDependencyRule(rule));
@@ -245,6 +293,7 @@
                     });
                     return supportedEntityTypeAttributes;
                 }),
+                supportsButtonRendering: computed(_ => state.attribute?.datatype == 'string-sc'),
             });
 
             // ON MOUNTED
@@ -256,6 +305,8 @@
                 }
                 if(state.attribute?.pivot?.metadata) {
                     state.width = state.attribute.pivot.metadata.width || 100;
+                    state.required = state.attribute.pivot.metadata?.required === true;
+                    state.renderAsButtons = state.attribute.pivot.metadata?.as_buttons === true;
                     if(state.attribute.is_system) {
                         state.separatorTitle = state.attribute.pivot.metadata.title;
                     }

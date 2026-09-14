@@ -13,6 +13,9 @@ All notable changes to this project will be documented in this file.
 - API endpoint for getting all entity details data in one request: GET::v1/entity/{id}/entity_detail
 - Added specific log file for plugins
 - .jsconfig for intellisense to work properly with aliases
+- Multi move in entity tree
+- Option to set entity attributes as required fields
+- Option to display _Single Choice Dropdowns_ as buttons instead of a dropdown
 ### Fixed
 - Removed redundant calls to the entity endpoint
 - Metadata tab error on submit (unknown variable)
@@ -20,6 +23,19 @@ All notable changes to this project will be documented in this file.
 - Login was not routed properly
 - Plugin-Switch not resetting on failed installation
 - Retrieve plugin preferences from plugin store
+- Error on _Entity_ delete
+- Alignment of _User Label_ in _Metadata_ tab
+- Submit Epoch/Timeperiod without start or end value
+- Save data with unconfigured/disconnected Websockets
+- Overflow of _Richtext_ in Attributes list
+- Unsmooth editing of long _Richtext_ attributes
+- Login state in menu bar
+- Rare case of role names not shown in _User Management_ after changes
+- Empty _Percentage_ attribute had a value of `50` instead of none
+- Break long words/links in Markdown Editor/Viewer
+- Citation key for entry types without required fields
+- Available fields in BibTex entries
+- Collapsed Navbar on small screens
 ### Changed
 - Alerts can now be dismissed
 - Now entity metadata is only loaded when accessing the metadata tab
@@ -34,6 +50,9 @@ All notable changes to this project will be documented in this file.
     - Allows for a simple 'repair' of an installed plugin
 - VersionInfo is now a Singleton that can be overwritten in tests
     - GithubActions could not fetch the version from Github resulting in testing against version 0.0.0, making it impossible to test the minimum boundary against said version. 
+- Disable Caret in disabled _Single Choice Dropdowns_ and _Multiple Choice Dropdowns_
+- _Attribute Usage Indicator_ in _Data Model Editor_ now also displays names of _Entity Types_ that use this _Attribute_
+- API endpoint for getting all entity data in one request to speed up entity loading
 
 ## 0.11.1
 ### Added

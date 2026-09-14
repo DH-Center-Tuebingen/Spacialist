@@ -553,8 +553,10 @@ class EditorController extends Controller {
             ], 403);
         }
         $this->validate($request, [
-            'title' => 'string|required_without:width',
-            'width' => 'integer|required_without:title',
+            'title' => 'string|required_without_all:width,required,as_buttons',
+            'width' => 'integer|required_without_all:title,required,as_buttons',
+            'required' => 'boolean|required_without_all:title,width,as_buttons',
+            'as_buttons' => 'boolean|required_without_all:title,width,required',
         ]);
 
         try {
@@ -565,18 +567,22 @@ class EditorController extends Controller {
             ], 400);
         }
 
-        $metadata = json_decode($entityAttribute->metadata) ?? new \stdClass();
+        $metadata = $entityAttribute->metadata ?? new \stdClass();
 
         if($request->has('title')) {
-            $title = $request->get('title');
-            $metadata->title = $title;
+            $metadata->title = $request->get('title');
         }
         if($request->has('width')) {
-            $width = $request->get('width');
-            $metadata->width = $width;
+            $metadata->width = $request->get('width');
+        }
+        if($request->has('required')) {
+            $metadata->required = $request->get('required');
+        }
+        if($request->has('as_buttons')) {
+            $metadata->as_buttons = $request->get('as_buttons');
         }
 
-        $entityAttribute->metadata = json_encode($metadata);
+        $entityAttribute->metadata = $metadata;
         $entityAttribute->save();
 
         return response()->json($metadata, 200);

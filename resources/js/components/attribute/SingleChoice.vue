@@ -1,5 +1,21 @@
 <template>
+    <div
+        v-if="asButtons"
+        class="d-flex flex-row justify-content-center gap-2 flex-wrap"
+    >
+        <button
+            v-for="option in state.filteredSelections"
+            :key="option.id"
+            class="btn btn-outline-primary"
+            :class="{'active': v.value?.id === option.id}"
+            :disabled="disabled"
+            @click="handleButtonSelection(option)"
+        >
+            {{ translateConcept(option.concept_url) }}
+        </button>
+    </div>
     <multiselect
+        v-else
         ref="multiselect"
         v-model="v.value"
         :classes="multiselectResetClasslist"
@@ -8,6 +24,7 @@
         :object="true"
         :mode="'single'"
         :disabled="disabled"
+        :caret="!disabled"
         :options="state.filteredSelections"
         :name="name"
         :searchable="true"
@@ -114,6 +131,11 @@
                 required: false,
                 default: -1,
             },
+            asButtons: {
+                type: Boolean,
+                required: false,
+                default: false,
+            },
         },
         emits: ['change', 'update-selection'],
         setup(props, context) {
@@ -176,14 +198,24 @@
                 updateCurrentValue();
             };
 
+            const handleButtonSelection = concept => {
+                if(disabled.value) return;
+                if(v.value?.id == concept.id) {
+                    v.handleChange(null);
+                } else {
+                    v.handleChange(concept);
+                }
+            };
+
             const resetFieldState = _ => {
                 v.resetField({
                     value: value.value
                 });
             };
-            const undirtyField = _ => {
+            const undirtyField = x => {
+                x = x || v.value;
                 v.resetField({
-                    value: v.value,
+                    value: x,
                 });
             };
 
@@ -307,6 +339,7 @@
                 handleTab,
                 isTabOption,
                 multiselect,
+                handleButtonSelection,
                 resetFieldState,
                 setSearchQuery,
                 undirtyField,

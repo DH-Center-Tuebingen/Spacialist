@@ -8,6 +8,7 @@
         :object="false"
         :mode="'tags'"
         :disabled="disabled"
+        :caret="!disabled"
         :options="users"
         :close-on-select="false"
         :searchable="true"

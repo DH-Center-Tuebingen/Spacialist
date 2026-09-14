@@ -11,6 +11,7 @@
         "reset_password": "Reset Password",
         "cancel": "Cancel",
         "close": "Close",
+        "required": "Required",
         "add": "Add",
         "edit": "Edit",
         "edited": "edited",
@@ -307,6 +308,9 @@
             },
             "restrictions": {
                 "entity_type": "Restrict to following Entity Types"
+            },
+            "metadata": {
+                "render_as_buttons": "Render as buttons"
             }
         },
         "activity": "Activity",
@@ -507,6 +511,10 @@
                 "deleted": {
                     "title": "Entity deleted",
                     "msg": "{name} successful deleted."
+                },
+                "required_missing": {
+                    "title": "Required fields missing",
+                    "msg": "Please fill in all required fields."
                 }
             },
             "tree": {
@@ -536,6 +544,7 @@
                 "multiedit": {
                     "title": "Toggle Multiedit",
                     "open": "Open Multiedit Tool",
+                    "warning": "This operation will edit all selected entities at once!",
                     "toast": {
                         "saved": {
                             "title": "Multiedit successful",
@@ -609,6 +618,8 @@
                 },
                 "table": {
                     "add_row": "Add row",
+                    "add_row_above": "Add row above",
+                    "add_row_below": "Add row below",
                     "error": {
                         "deleted_entity": "Deleted Entity"
                     },
@@ -987,10 +998,14 @@
                 "institution": "Institution",
                 "organization": "Organization",
                 "school": "School",
+                "abstract": "Abstract",
+                "language": "Language",
                 "doi": "DOI",
+                "isbn": "ISBN",
+                "issn": "ISSN",
                 "url": "URL",
                 "email": "@:global.email",
-                "subtype": "Type (specified)"
+                "type": "Type (specified)"
             },
             "types": {
                 "article": "Article",

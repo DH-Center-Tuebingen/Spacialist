@@ -89,7 +89,13 @@ class HomeController extends Controller {
         $plugins = app(PluginManager::class)->getPlugins(true);
         $bibliography = Bibliography::orderBy('id')->get();
 
-        $attributes = Attribute::whereNull('parent_id')->withCount('entity_types')->orderBy('id')->get();
+        $attributes = Attribute::whereNull('parent_id')
+            ->with('entity_types:id,thesaurus_url')
+            ->orderBy('id')
+            ->get()
+            ->each(function ($attribute) {
+                $attribute->entity_types->each->makeHidden('pivot');
+            });
         $attributeSelections = Attribute::getSelectionsFor($attributes);
         $attributeTypes = AttributeRegistry::getTypes(true);
 
