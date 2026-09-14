@@ -3,7 +3,7 @@
         class="sp-plugins d-flex flex-column h-100 row flex-nowrap"
         ref="root"
     >
-        <header class="mb-3">
+        <header class="mb-2">
             <h4>
                 {{ t('main.plugins.title', 2) }}
                 <div class="float-end d-flex gap-2">
