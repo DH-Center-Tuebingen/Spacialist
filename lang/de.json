@@ -120,5 +120,7 @@
     "Error while extracting zip file. Please check file permissions or ask your system adminstrator.": "Fehler beim Entpacken der ZIP-Datei. Bitte überprüfen Sie die Dateiberechtigungen oder wenden Sie sich an einen Systemadministrator.",
     "Plugin upload was unsuccessful. Plugin directory has been removed.": "Plugin-Upload war nicht erfolgreich. Das Plugin-Verzeichnis wurde entfernt.",
     "Plugin was uploaded but could not be updated. Backup has been restored.": "Plugin wurde hochgeladen, konnte aber nicht aktualisiert werden. Das Backup wurde wiederhergestellt.",
-    "This migration does not exist or has already been run.": "Diese Migration existiert nicht oder wurde bereits ausgeführt."
+    "This migration does not exist or has already been run.": "Diese Migration existiert nicht oder wurde bereits ausgeführt.",
+    "Directory name must match manifest name: :dirName ≠ :manifestName": "Ordnername muss mit dem Namen in der Manifest Datei übereinstimmen: :dirName ≠ :manifestName",
+    "Invalid plugin name: :name": "Unerlaubter Plugin-Name: :name"
 }

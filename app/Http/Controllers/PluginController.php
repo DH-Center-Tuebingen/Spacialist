@@ -6,6 +6,7 @@ use App\Exceptions\PluginLifecycleException;
 use App\Plugin;
 use App\Preference;
 use App\Services\PluginManager;
+use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use App\Plugin\PluginDirectory;
@@ -51,10 +52,16 @@ class PluginController extends Controller {
         ]);
 
         $uploader = app(PluginUploader::class);
-        $uploadResult = $uploader->upload($request->file('file'));
-
+        $uploadResult = null;
+        try{
+            $uploadResult = $uploader->upload($request->file('file'));
+        }catch(Exception $e) {
+            return response()->json([
+                'error' => $e->getMessage()
+            ], 422);
+        }
+        
         $pluginName = $uploadResult->pluginName;
-
         $fromVersion = null;
         $success = true;
         if($uploadResult->isUpdate()) {
@@ -123,7 +130,7 @@ class PluginController extends Controller {
             return response()->json([
                 'error' => $e->getMessage()
             ], 422);
-        }catch (\Exception $e) {
+        }catch (Exception $e) {
             report($e);
             PluginLog::for($plugin)->error("Unexpected error during plugin installation: " . $e->getMessage(), ['exception' => $e]);
             return response()->json([

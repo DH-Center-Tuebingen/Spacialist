@@ -43,10 +43,10 @@ class PluginUploaderTest extends TestCase {
         return new PluginTemplate(name: $name, uuid: self::PLUGIN_UUID, version: $version);
     }
 
-    private function makeZipFromTemplate(PluginTemplate $template): string {
+    private function makeZipFromTemplate(PluginTemplate $template, string $fakeDirName = null): string {
         $zipPath = $this->getTmpZipPath('test_plugin');
         $this->tempFiles[] = $zipPath;
-        PluginDirectoryGenerator::mockPluginZipFile($template, $zipPath);
+        PluginDirectoryGenerator::mockPluginZipFile($template, $zipPath, $fakeDirName);
         return $zipPath;
     }
 
@@ -151,6 +151,16 @@ class PluginUploaderTest extends TestCase {
 
         $this->expectException(Exception::class);
         $this->expectExceptionMessage("Invalid plugin name: Invalid Name");
+        $this->uploader->upload(new SplFileInfo($zipPath));
+    }
+    
+    public function testUploadRejectsInvalidDirectoryName(): void {
+        $template = $this->makeTemplate('1.0.0')->addBasic()->generate();
+        $zipPath = $this->makeZipFromTemplate($template, 'incorrect-name');
+        $this->tempFiles[] = $zipPath;
+
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage("Directory name must match manifest name: incorrect-name ≠ UploadTestPlugin");
         $this->uploader->upload(new SplFileInfo($zipPath));
     }
 

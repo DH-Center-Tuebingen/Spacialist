@@ -33,12 +33,14 @@ class PluginDirectoryGenerator {
      * 
      * @param PluginTemplate $template
      * @param string $zipFilePath
+     * @param string|null $fakeDirName Optional fake directory name to use inside the zip file.
      * @return void
      */
-    public static function mockPluginZipFile(PluginTemplate $template, string $zipFilePath): void {
+    public static function mockPluginZipFile(PluginTemplate $template, string $zipFilePath, string $fakeDirName = null): void {
         $tempDir = sys_get_temp_dir() . '/' . uniqid('plugin_zip_');
         mkdir($tempDir, 0755, true);
-        $pluginDir = self::mockPluginDirectory($template, $tempDir . '/' . $template->plugin['name']);
+        $dirName = $fakeDirName ? $fakeDirName : $template->plugin['name'];
+        $pluginDir = self::mockPluginDirectory($template, $tempDir . '/' . $dirName);
 
         $zip = new ZipArchive();
         if($zip->open($zipFilePath, ZipArchive::CREATE) === true) {

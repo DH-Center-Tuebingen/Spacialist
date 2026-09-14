@@ -31,11 +31,12 @@ class PluginUploader {
     public function upload(SplFileInfo $file): PluginUploadResult {
         $zipFile = $this->tryOpenZipFile($file);
         $pluginName = $this->getSingleRootDirectory($zipFile);
-        $this->requireValidPluginName($pluginName);
-        
         $existingPlugin = Plugin::where('name', $pluginName)->first();
         
-        $this->validateExistingVersionIsOlder($zipFile, $existingPlugin);
+        $manifest = PluginManifest::fromZip($zipFile, $pluginName);
+        $this->requireValidPluginName($manifest->getName());
+        $this->requireDirectoryMatchesManifestName($pluginName, $manifest);
+        $this->validateExistingVersionIsOlder($manifest, $existingPlugin);
         if($this->doesPluginDirectoryExist($pluginName)) {
             $backupPath = $this->ensureBackupDirectoryExists();
             $this->removeExistingBackup($backupPath, $pluginName);
@@ -55,10 +56,15 @@ class PluginUploader {
      */
     private function requireValidPluginName(string $name): void {
         if(empty($name) || !preg_match('/^[a-zA-Z0-9_\-]+$/', $name)) {
-            throw new Exception("Invalid plugin name: {$name}");
+            throw new Exception(__("Invalid plugin name: :name", ['name' => $name]));
         }
     }
 
+    private function requireDirectoryMatchesManifestName(string $pluginName, PluginManifest $manifest): void {
+        if($pluginName !== $manifest->getName()) {
+            throw new Exception(__("Directory name must match manifest name: :dirName ≠ :manifestName", ['dirName' => $pluginName, 'manifestName' => $manifest->getName()]));
+        }
+    }
 
     /**
      * Restores an existing backup to the plugin folder.
@@ -87,7 +93,7 @@ class PluginUploader {
         if($isOpen === true) {
             return $zipFile;
         } else {
-            abort(403, __('Could not open provided plugin zip file. Aborting.'));
+            abort(422, __('Could not open provided plugin zip file. Aborting.'));
         }
     }
     
@@ -133,14 +139,14 @@ class PluginUploader {
             }
 
             if($foundRoot != null && $foundRoot != $root) {
-                abort(403, __('Format mismatch. Archive must contain exactly one root folder.'));
+                abort(422, __('Format mismatch. Archive must contain exactly one root folder.'));
             } else {
                 $foundRoot = $root;
             }
         }
 
         if($foundRoot === null) {
-            abort(403, __('Could not find root directory in zip file. Aborting.'));
+            abort(422, __('Could not find root directory in zip file. Aborting.'));
         }
 
         // Foundroot should always be without trailing slashes.
@@ -152,13 +158,12 @@ class PluginUploader {
         return file_exists($pluginPath);
     }
 
-    private function validateExistingVersionIsOlder(ZipArchive $zipFile, ?Plugin $existingPlugin): void {
+    private function validateExistingVersionIsOlder(PluginManifest $manifest, ?Plugin $existingPlugin = null): void {
 
         if($existingPlugin == null) {
             return;
         }
 
-        $manifest = PluginManifest::fromZip($zipFile, $existingPlugin->name);
         $existingVersion = $existingPlugin->version ?? '0.0.0';
         $uploadedVersion = $manifest->getVersion();
 
@@ -171,7 +176,7 @@ class PluginUploader {
         //      version, for example, if the active version is corrupted, you can just 
         //      'repair' that version by performing an upload of the same version.
         if(version_compare($existingVersion, $uploadedVersion, ">")) {
-            abort(403, __("A plugin with the name ':pluginName' and the same or later version (:uploadedVersion and :existingVersion) already exists. Aborting.", [
+            abort(409, __("A plugin with the name ':pluginName' and the same or later version (:uploadedVersion and :existingVersion) already exists. Aborting.", [
                 'pluginName' => $existingPlugin->name,
                 'uploadedVersion' => $uploadedVersion,
                 'existingVersion' => $existingVersion,
@@ -215,7 +220,7 @@ class PluginUploader {
         $zipFile->close();
 
         if(!$extracted) {
-            return abort(403, __("Error while extracting zip file. Please check file permissions or ask your system adminstrator."));
+            return abort(422, __("Error while extracting zip file. Please check file permissions or ask your system adminstrator."));
         }
     }
 }
