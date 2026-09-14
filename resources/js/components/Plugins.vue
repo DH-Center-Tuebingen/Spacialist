@@ -65,6 +65,8 @@
                     :key="plugin.name"
                     :value="plugin"
                     class="col-12 col-md-6 col-xl-4 col-xxl-3"
+                    :style="getPluginStyle(plugin)"
+                    @click.capture="selectPlugin(plugin)"
                 />
                 <alert
                     v-if="(!pluginStore.pluginsSortedByTitle || pluginStore.pluginsSortedByTitle == 0)"
@@ -163,20 +165,34 @@
 
             const fileDragged = computed(() => uploadButton.value?.dropActive || false);
 
+            const selectedPlugin = ref(null);
+            const selectPlugin = (plugin) => {
+                selectedPlugin.value = plugin;
+            };
+
+            const getPluginStyle = (plugin) => {
+                return {
+                    // Always bring the selected plugin to the front
+                    // so that the dropdown is not hidden behind other plugin
+                    // cards.
+                    zIndex: plugin.id === selectedPlugin.value?.id ? 2 : 1
+                };
+            };
+
             // RETURN
             return {
                 t,
-                // HELPERS
                 can,
                 // LOCAL
-                inputFile,
-                uploadZip,
-                uploadButton,
-                // PROPS
-                pluginStore,
-                fileDragged,
-                loading,
                 error,
+                fileDragged,
+                inputFile,
+                loading,
+                getPluginStyle,
+                pluginStore,
+                selectPlugin,
+                uploadButton,
+                uploadZip,
             };
         },
     };
