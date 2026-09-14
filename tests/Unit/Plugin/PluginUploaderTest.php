@@ -5,6 +5,7 @@ namespace Tests\Unit\Plugin;
 use App\Plugin;
 use App\Plugin\PluginDirectory;
 use App\Plugin\PluginUploader;
+use Exception;
 use SplFileInfo;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Tests\Support\PluginDirectoryGenerator;
@@ -38,8 +39,8 @@ class PluginUploaderTest extends TestCase {
         parent::tearDown();
     }
 
-    private function makeTemplate(string $version = '1.0.0'): PluginTemplate {
-        return new PluginTemplate(name: self::PLUGIN_NAME, uuid: self::PLUGIN_UUID, version: $version);
+    private function makeTemplate(string $version = '1.0.0', string $name = self::PLUGIN_NAME): PluginTemplate {
+        return new PluginTemplate(name: $name, uuid: self::PLUGIN_UUID, version: $version);
     }
 
     private function makeZipFromTemplate(PluginTemplate $template): string {
@@ -141,6 +142,16 @@ class PluginUploaderTest extends TestCase {
 
         $this->expectException(HttpException::class);
         $this->uploader->upload(new SplFileInfo($fakePath));
+    }
+    
+    public function testUploadRejectsInvalidPluginName(): void {
+        $template = $this->makeTemplate('1.0.0', 'Invalid Name')->addBasic()->generate();
+        $zipPath = $this->makeZipFromTemplate($template);
+        $this->tempFiles[] = $zipPath;
+
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage("Invalid plugin name: Invalid Name");
+        $this->uploader->upload(new SplFileInfo($zipPath));
     }
 
     public function testUploadRejectsZipWithMultipleRoots(): void {

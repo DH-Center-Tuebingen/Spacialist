@@ -3,9 +3,10 @@
 namespace App\Plugin;
 
 use App\Plugin;
-use App\Plugin\Support\PluginUploadResult;
-use Illuminate\Support\Str;
 use App\Plugin\PluginDirectory;
+use App\Plugin\Support\PluginUploadResult;
+use Exception;
+use Illuminate\Support\Str;
 use SplFileInfo;
 use ZipArchive;
 
@@ -30,6 +31,8 @@ class PluginUploader {
     public function upload(SplFileInfo $file): PluginUploadResult {
         $zipFile = $this->tryOpenZipFile($file);
         $pluginName = $this->getSingleRootDirectory($zipFile);
+        $this->requireValidPluginName($pluginName);
+        
         $existingPlugin = Plugin::where('name', $pluginName)->first();
         
         $this->validateExistingVersionIsOlder($zipFile, $existingPlugin);
@@ -41,6 +44,19 @@ class PluginUploader {
 
         $this->extractZipFile($zipFile, $pluginName);
         return new PluginUploadResult($pluginName, $existingPlugin);
+    }
+    
+    /**
+     * Checks if the provided name is a valid plugin name, otherwise an error will be thrown.
+     * 
+     * @param string $name The name of the plugin to validate.
+     * @throws Exception Throws an exception if the name is invalid.
+     * @return void
+     */
+    private function requireValidPluginName(string $name): void {
+        if(empty($name) || !preg_match('/^[a-zA-Z0-9_\-]+$/', $name)) {
+            throw new Exception("Invalid plugin name: {$name}");
+        }
     }
 
 
@@ -166,8 +182,6 @@ class PluginUploader {
     private function moveExistingPluginToBackup(string $backupPath, string $pluginName) {
         $existingPluginPath = PluginDirectory::getPath($pluginName);
         $backupPluginPath = $backupPath . '/' . $pluginName;
-
-
 
         if(!file_exists($existingPluginPath)) {
             return null;
