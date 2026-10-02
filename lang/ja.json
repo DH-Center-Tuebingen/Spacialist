@@ -106,5 +106,7 @@
     "This tag does not exist": "このタグは存在しません",
     "HTML not supported for file type": "ファイルタイプ :mime のHTMLはサポートされていません",
     "Presentations not yet supported!": "プレゼンテーションはまだサポートされていません！",
-    "Start date of a time period must not be after it's end date": "期間の開始日を終了日より遅くすることはできません"
+    "Start date of a time period must not be after it's end date": "期間の開始日を終了日より遅くすることはできません",
+    "This attribute already exists on this entity-type": "This attribute already exists on this entity-type",
+    "You do not have the permission to modify an entity' data": "You do not have the permission to modify an entity' data"
 }
