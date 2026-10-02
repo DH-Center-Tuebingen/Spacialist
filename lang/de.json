@@ -107,5 +107,6 @@
     "This tag does not exist": "Dieses Schlagwort existiert nicht",
     "HTML not supported for file type": "HTML wird für den Dateityp :mime nicht unterstützt",
     "Presentations not yet supported!": "Präsentationen werden noch nicht unterstützt!",
-    "Start date of a time period must not be after it's end date": "Das Startdatum einer Zeitspanne darf nicht nach ihrem Enddatum liegen"
+    "Start date of a time period must not be after it's end date": "Das Startdatum einer Zeitspanne darf nicht nach ihrem Enddatum liegen",
+    "You do not have the permission to modify an entity' data": "You do not have the permission to modify an entity' data"
 }
