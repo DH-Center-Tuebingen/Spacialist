@@ -57,6 +57,7 @@
         "vue-router": "^4.2.2"
     },
     "dependencies": {
+        "@dh-center-tuebingen/dhc-components": "^0.1.1",
         "@f3ve/vue-markdown-it": "^0.2.0",
         "@fontsource/raleway": "^5.2.5",
         "@fontsource/source-code-pro": "^5.2.5",
@@ -87,7 +88,6 @@
         "circular-dependency-plugin": "^5.2.2",
         "d3-dsv": "^3.0.1",
         "dayjs": "^1.11.7",
-        "dhc-components": "github:DH-Center-Tuebingen/dhc-components",
         "emojibase-data": "^16.0.0",
         "highlight.js": "^11.8.0",
         "lodash": "^4.17.21",
