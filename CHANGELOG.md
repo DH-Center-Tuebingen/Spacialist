@@ -27,6 +27,7 @@ All notable changes to this project will be documented in this file.
 - Citation key for entry types without required fields
 - Available fields in BibTex entries
 - Collapsed Navbar on small screens
+- Pasting Bibliography Items from Clipboard
 ### Changed
 - Alerts can now be dismissed
 - Now entity metadata is only loaded when accessing the metadata tab

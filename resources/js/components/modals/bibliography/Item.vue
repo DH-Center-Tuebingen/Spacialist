@@ -246,7 +246,15 @@
                         state.fieldData.fields.citekey = entry.key;
                         for(let k in entry.fields) {
                             const p = entry.fields[k];
-                            state.fieldData.fields[k] = k == 'author' ? p.join(' and ') : p.join(', ');
+                            if(Array.isArray(p)) {
+                                if(k == 'author') {
+                                    state.fieldData.fields[k] = p.map(author => `${author.firstName} ${author.lastName}`).join(' and ');
+                                } else {
+                                    state.fieldData.fields[k] = p.join(', ');
+                                }
+                            } else {
+                                state.fieldData.fields[k] = p;
+                            }
                         }
                     });
                 } catch(err) {
