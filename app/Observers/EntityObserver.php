@@ -28,6 +28,10 @@ class EntityObserver
             try {
                 User::findOrFail($uid)->notify(new EntityUpdatedNotification($entity));
             } catch(ModelNotFoundException $e) {
+            } catch(BroadcastException $e) {
+                if(env('APP_DEBUG')) {
+                    info("BroadcastException while handling saved() event in EntityObserver");
+                }
             }
         }
     }

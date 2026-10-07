@@ -43,6 +43,10 @@ const updateUserAt = (context, userId, data, isProfile) => {
             );
         }
 
+        if(data.roles) {
+            data.roles = data.roles.map(roleId => context.getRoleBy(roleId));
+        }
+
         const cleanData = only(data, allowedProps);
         const currentData = context.users[idx];
 
@@ -59,7 +63,6 @@ const updateUserAt = (context, userId, data, isProfile) => {
 
 export const useUserStore = defineStore('user', {
     state: _ => ({
-        userLoggedIn: false,
         user: {},
         users: [],
         deletedUsers: [],
@@ -69,6 +72,9 @@ export const useUserStore = defineStore('user', {
         preferences: {},
     }),
     getters: {
+        userLoggedIn: state => {
+            return !!state.user?.id;
+        },
         isSameUser: state => userId => {
             return state.user.id == userId;
         },
@@ -148,22 +154,17 @@ export const useUserStore = defineStore('user', {
                 return null;
             }
         },
-        setLoginState(value) {
-            this.userLoggedIn = value;
-        },
         setPreferences(preferences) {
             this.preferences = preferences;
         },
         async login(credentials) {
             await getCsrfCookie();
             const user = await login(credentials);
-            this.userLoggedIn = true;
             this.setActiveUser(user);
             await useSystemStore().initialize();
         },
         async logout() {
             await logout();
-            this.setLoginState(false);
             this.setActiveUser({});
         },
         setActiveUser(user, merge = false) {

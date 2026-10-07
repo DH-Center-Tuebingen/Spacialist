@@ -190,6 +190,7 @@
         :selections="state.selection"
         :selection-from="data.root_attribute_id"
         :selection-from-value="reactTo"
+        :as-buttons="data?.pivot?.metadata?.as_buttons"
         @update-selection="onSelectionUpdate"
         @change="updateDirtyState"
     />

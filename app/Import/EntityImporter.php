@@ -21,7 +21,6 @@ enum Action {
 };
 
 class EntityImporter {
-
     const PARENT_DELIMITER = "\\\\";
 
     private $metadata;
@@ -31,7 +30,6 @@ class EntityImporter {
     private string $nameColumn;
     private ?string $parentColumn = null;
     private ImportResolution $resolver;
-
 
     public function __construct($metadata, $data) {
         $this->resolver = new ImportResolution();
@@ -204,7 +202,6 @@ class EntityImporter {
     }
 
     private function validateLocation($row, $rowIndex): bool {
-
         $parentTypeId = null;
         $parentPath = $this->getParentColumn($row);
         if(!empty($parentPath)) {
@@ -277,7 +274,6 @@ class EntityImporter {
 
         return trim($row[$this->parentColumn]);
     }
-
 
     private function checkIfParentDoesExist($row) {
         $parent = $this->getParentColumn($row);

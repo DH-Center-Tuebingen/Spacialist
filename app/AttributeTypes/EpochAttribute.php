@@ -76,8 +76,8 @@ class EpochAttribute extends AttributeBase
     public static function unserialize(mixed $data) : mixed {
         $sl = isset($data['startLabel']) ? Str::upper($data['startLabel']) : null;
         $el = isset($data['endLabel']) ? Str::upper($data['endLabel']) : null;
-        $s = $data['start'];
-        $e = $data['end'];
+        $s = $data['start'] ?? null;
+        $e = $data['end'] ?? null;
         if(
             (isset($s) && !isset($sl))
             ||

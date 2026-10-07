@@ -35,6 +35,9 @@ import {
     Node
 } from '@/helpers/tree.js';
 import {
+    kebabToPascal
+} from '@/helpers/string.js';
+import {
     searchEntity,
 } from '@/api.js';
 import {
@@ -288,7 +291,7 @@ export const SpPS = {
             if(!mergedOptions.componentTag) {
                 mergedOptions.componentTag = mergedOptions.key;
             }
-            mergedOptions.componentTag = `sp-plugin-${mergedOptions.componentTag}`;
+            mergedOptions.componentTag = kebabToPascal(`sp-plugin-${mergedOptions.componentTag}`);
             if(!!mergedOptions.component) {
                 if(typeof mergedOptions.component == 'string') {
                     SpPS.data.app.component(mergedOptions.componentTag, {

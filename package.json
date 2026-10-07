@@ -57,6 +57,7 @@
         "vue-router": "^4.2.2"
     },
     "dependencies": {
+        "@dh-center-tuebingen/dhc-components": "^0.1.1",
         "@f3ve/vue-markdown-it": "^0.2.0",
         "@fontsource/raleway": "^5.2.5",
         "@fontsource/source-code-pro": "^5.2.5",

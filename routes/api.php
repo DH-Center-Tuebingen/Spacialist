@@ -58,7 +58,7 @@ Route::middleware('auth:sanctum')->prefix('v1/entity')->group(function() {
     // This route is only used for the map plugin
     Route::get('/entity_type/{etid}/data/{aid}', 'EntityController@getDataForEntityType')->where('etid', '[0-9]+')->where('aid', '[0-9]+');
     Route::get('/{id}/data/{aid?}', 'EntityController@getData')->where('id', '[0-9]+');
-    Route::get('/{id}/entity_detail', 'EntityController@getEntityDetail')->where('id', '[0-9]+');
+    Route::get('/{id}/bundled_data', 'EntityController@getBundledData')->where('id', '[0-9]+');
     Route::get('/{id}/metadata', 'EntityController@getMetadata')->where('id', '[0-9]+');
     Route::get('/{id}/reference', 'ReferenceController@getByEntity')->where('id', '[0-9]+');
     Route::get('/{id}/export', 'EntityController@exportEntityTree')->where('id', '[0-9]+');

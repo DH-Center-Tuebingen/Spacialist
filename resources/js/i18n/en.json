@@ -304,6 +304,9 @@
             },
             "restrictions": {
                 "entity_type": "Restrict to following Entity Types"
+            },
+            "metadata": {
+                "render_as_buttons": "Render as buttons"
             }
         },
         "activity": "Activity",
@@ -978,10 +981,14 @@
                 "institution": "Institution",
                 "organization": "Organization",
                 "school": "School",
+                "abstract": "Abstract",
+                "language": "Language",
                 "doi": "DOI",
+                "isbn": "ISBN",
+                "issn": "ISSN",
                 "url": "URL",
                 "email": "@:global.email",
-                "subtype": "Type (specified)"
+                "type": "Type (specified)"
             },
             "types": {
                 "article": "Article",

@@ -7,20 +7,37 @@ All notable changes to this project will be documented in this file.
 - Plugin-System now supports custom components, e.g. attribute types
 - Plugin-System now supports PluginScopes
 - .env variable `ALLOW_FILESYSTEM_MIGRATIONS` to explcitly enable filesystem migrations
-- API endpoint for getting all entity details data in one request: GET::v1/entity/{id}/entity_detail
 - Multi move in entity tree
 - Option to set entity attributes as required fields
+- Option to display _Single Choice Dropdowns_ as buttons instead of a dropdown
 ### Fixed
 - Removed redundant calls to the entity endpoint
 - Metadata tab error on submit (unknown variable)
 - Errors in _map.js_
 - Values in disabled _Percentage_ attribute could be changed using mousewhell
+- Error on _Entity_ delete
+- Alignment of _User Label_ in _Metadata_ tab
+- Submit Epoch/Timeperiod without start or end value
+- Save data with unconfigured/disconnected Websockets
+- Overflow of _Richtext_ in Attributes list
+- Unsmooth editing of long _Richtext_ attributes
+- Login state in menu bar
+- Rare case of role names not shown in _User Management_ after changes
+- Empty _Percentage_ attribute had a value of `50` instead of none
+- Break long words/links in Markdown Editor/Viewer
+- Citation key for entry types without required fields
+- Available fields in BibTex entries
+- Collapsed Navbar on small screens
+- Pasting Bibliography Items from Clipboard
+- Drag & Drop in _AttributeList_
 ### Changed
 - Alerts can now be dismissed
 - Now entity metadata is only loaded when accessing the metadata tab
 - Migrations now have logging automatically disabled
 - Migrations that require filesystem changes can now be handled using the `App\Traits\FilesystemMigration` trait (call `$this->safelyMoveDirectoryBetweenDisks(...)` with `ALLOW_FILESYTEM_MIGRATIONS` set to `true`)
 - Disable Caret in disabled _Single Choice Dropdowns_ and _Multiple Choice Dropdowns_
+- _Attribute Usage Indicator_ in _Data Model Editor_ now also displays names of _Entity Types_ that use this _Attribute_
+- API endpoint for getting all entity data in one request to speed up entity loading
 
 ## 0.11.1
 ### Added

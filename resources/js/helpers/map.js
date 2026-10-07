@@ -15,7 +15,7 @@ import {
 } from 'ol/proj/proj4';
 
 import TileLayer from 'ol/layer/Tile';
-import VectorLayer from 'ol/layer/Vector';
+import VectorLayer from 'ol/layer/WebGLVector';
 
 import WKT from 'ol/format/WKT';
 import MVT from 'ol/format/MVT';

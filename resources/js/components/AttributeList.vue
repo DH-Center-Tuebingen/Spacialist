@@ -20,7 +20,7 @@
             >
                 <div class="d-flex align-items-center gap-2">
                     <div
-                        class="row gx-3 flex-fill"
+                        class="row gx-3 flex-fill overflow-hidden"
                         :class="addModerationStateClasses(element.id)"
                     >
                         <label
@@ -147,7 +147,7 @@
                                 <i class="fas fa-fw fa-circle-info" />
                             </a>
                             <sup
-                                v-if="hasEmitter('onEditElement') && !!element.pivot.depends_on && Object.keys(element.pivot.depends_on).length > 0"
+                                v-if="hasEmitter('onEditElement') && Object.keys(element?.pivot?.depends_on ?? {}).length > 0"
                                 :title="t('global.dependency.depends_on.desc')"
                             >
                                 <i class="fas fa-diagram-next text-warning fa-rotate-180" />

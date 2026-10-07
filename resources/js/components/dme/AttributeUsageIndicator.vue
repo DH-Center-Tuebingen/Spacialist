@@ -1,12 +1,12 @@
 <template>
-    <span 
+    <span
         :class="state.classes"
-        :title="t('main.datamodel.attribute.indicator_info', { cnt: count }, count)"
+        :title="title"
     >
-        <!-- 
+        <!--
             The icon is not ideal, it should be a circle with outline.
             But in FontAwesome this icon is not available to us.
-            When switching to a different icon library, this should be updated.  
+            When switching to a different icon library, this should be updated.
         -->
         <i class="fas fa-circle-info" />
     </span>
@@ -22,9 +22,9 @@
 
     export default {
         props: {
-            count: {
+            list: {
                 required: true,
-                type: Number,
+                type: Array,
             },
             size: {
                 required: false,
@@ -34,12 +34,24 @@
         },
         setup(props, context) {
             const { t } = useI18n();
-            
+
+            const count = computed(() => props.list.length);
+
+            const listToString = computed(() => props.list.join(', '));
+
+            const title = computed(() => {
+                let content = t('main.datamodel.attribute.indicator_info', { cnt: count.value }, count.value);
+                if(props.list.length > 0) {
+                    content += `\n${listToString.value}`;
+                }
+                return content;
+            });
+
             const state = reactive({
                 classes: computed(_ => {
                     const classes = [];
-                    if(props.count > 0) {
-                        classes.push('text-secondary');   
+                    if(count.value > 0) {
+                        classes.push('text-secondary');
                         classes.push('opacity-25');
                     }else {
                         classes.push('text-danger');
@@ -50,6 +62,7 @@
 
             return {
                 t,
+                title,
                 state,
             };
         },

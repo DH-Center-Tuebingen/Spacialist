@@ -33,6 +33,7 @@ class Bibliography extends Model implements Searchable
         'booktitle',
         'publisher',
         'address',
+        'email',
         'misc',
         'howpublished',
         'entry_type',
@@ -45,6 +46,7 @@ class Bibliography extends Model implements Searchable
         'month',
         'note',
         'organization',
+        'url',
         'school',
         'series',
         'type',
@@ -124,6 +126,11 @@ class Bibliography extends Model implements Searchable
         'language'     => 'string',
     ];
 
+    /**
+     * Typedefinitions according to the BibTex specification (Oren Patashnik, 1988)
+     * @link https://ftp.mpi-inf.mpg.de/pub/tex/mirror/ftp.dante.de/pub/tex/biblio/bibtex/base/btxdoc.pdf
+     * @var array
+     */
     public const bibtexTypes = [
         "article" => [
             "fields" => [
@@ -391,7 +398,7 @@ class Bibliography extends Model implements Searchable
                 'note',
                 'school',
                 'title',
-                'type'   ,
+                'type',
                 'url',
                 'year',
             ],
@@ -651,6 +658,10 @@ class Bibliography extends Model implements Searchable
             $key .= "_" . $fields['year'];
         }
 
+        // if none of the above fields exist, use entry type and a random 4 chars
+        if($key == '') {
+            $key = $fields['entry_type'] . '_' . Str::random(4);
+        }
         $initalKey = $key;
         $suffixes = array_merge(range('a', 'z'), range('A', 'Z'));
         $suffixesCount = count($suffixes);
