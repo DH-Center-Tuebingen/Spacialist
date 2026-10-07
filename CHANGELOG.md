@@ -28,6 +28,7 @@ All notable changes to this project will be documented in this file.
 - Available fields in BibTex entries
 - Collapsed Navbar on small screens
 - Pasting Bibliography Items from Clipboard
+- Drag & Drop in _AttributeList_
 ### Changed
 - Alerts can now be dismissed
 - Now entity metadata is only loaded when accessing the metadata tab
