@@ -25,19 +25,23 @@
                 {{ t('main.preference.categories.system') }}
             </h6>
             <nav class="nav nav-underline flex-column px-2">
-                <router-link
+                <template
                     v-for="(cat, k) in state.categories.system"
                     :key="`sys-pref-subcat-${k}`"
-                    :to="{ name: 'preferences', hash: `#${k}` }"
-                    :class="setNavClasses(k)"
                 >
-                    <span v-if="cat.custom">
-                        {{ t(cat.title) }}
-                    </span>
-                    <span v-else>
-                        {{ t(`main.preference.categories.sub.${k}`) }}
-                    </span>
-                </router-link>
+                    <router-link
+                        v-if="!cat.hide || !cat.hide()"
+                        :to="{ name: 'preferences', hash: `#${k}` }"
+                        :class="setNavClasses(k)"
+                    >
+                        <span v-if="cat.custom">
+                            {{ t(cat.title) }}
+                        </span>
+                        <span v-else>
+                            {{ t(`main.preference.categories.sub.${k}`) }}
+                        </span>
+                    </router-link>
+                </template>
             </nav>
         </div>
         <div class="col-10 d-flex flex-column h-100 overflow-scroll">
@@ -59,7 +63,7 @@
                 </button>
             </h3>
             <div
-                v-if="state.categoryPreferences && state.categoryPreferences.length > 0"
+                v-if="(!state.selectedCategory.hide || !state.selectedCategory.hide()) && state.selectedCategory?.preferences.length > 0"
                 class="table-responsive flex-grow-1 overflow-x-hidden"
             >
                 <table
@@ -68,7 +72,7 @@
                 >
                     <tbody>
                         <tr
-                            v-for="preferencesBlock in state.categoryPreferences"
+                            v-for="preferencesBlock in state.selectedCategory.preferences"
                             :key="preferencesBlock.label"
                         >
                             <td>
@@ -79,8 +83,7 @@
                             <td>
                                 <component
                                     :is="preferencesBlock.component"
-                                    :model-value="(preferencesBlock.data === 'v-model') ? state.preferences[preferencesBlock.label] : null"
-                                    :data="(preferencesBlock.data === undefined) ? state.preferences[preferencesBlock.label] : null"
+                                    :data="state.preferences[preferencesBlock.label]"
                                     @update:model-value="value => updateValue(preferencesBlock, value)"
                                     @changed="e => trackChanges(preferencesBlock.label, e)"
                                 />
@@ -111,7 +114,6 @@
     import useSystemStore from '@/bootstrap/stores/system.js';
     import useUserStore from '@/bootstrap/stores/user.js';
     import { useToast } from '@/plugins/toast.js';
-    import { patchPreferences } from '@/api.js';
 
     import {
         useRoute,
@@ -129,6 +131,7 @@
     import Tags from '@/components/preferences/Tags.vue';
     import ThesaurusLink from '@/components/preferences/ThesaurusLink.vue';
     import ProjectName from '@/components/preferences/ProjectName.vue';
+    import OpenAccess from '@/components/preferences/OpenAccess.vue';
     import ProjectMaintainer from '@/components/preferences/ProjectMaintainer.vue';
 
     export default {
@@ -141,6 +144,7 @@
             'tags-preference': Tags,
             'thesaurus-link-preference': ThesaurusLink,
             'project-name-preference': ProjectName,
+            'open-access-preference': OpenAccess,
             'project-maintainer-preference': ProjectMaintainer,
         },
         setup(props, context) {
@@ -176,7 +180,6 @@
                     state.dirtyData[c] = {};
                 }
                 if(!state.dirtyData[c][label]) {
-
                     // The endpoint expect all values to be set.
                     // If any of those change they will be overwritten.
                     state.dirtyData[c][label] = {
@@ -194,7 +197,7 @@
                 }
             };
 
-            const savePreferences = _ => {
+            const savePreferences = async () => {
                 if(!state.hasDirtyData) return;
 
                 let updatedLanguage = null;
@@ -211,52 +214,60 @@
                     const curr = state.dirtyData.system[k];
                     changes.push(curr);
                 }
-                const data = {
-                    changes: changes,
-                };
 
-                patchPreferences(data).then(_ => {
-                    // Update language if value has changed
-                    if(!!updatedLanguage) {
-                        locale.value = updatedLanguage;
-                    }
-                    state.dirtyData = {};
+                await systemStore.patchPreferences(changes);
 
-                    const label = t('main.preference.toasts.updated.msg');
-                    toast.$toast(label, '', {
-                        channel: 'success',
-                        simple: true,
-                    });
+                // Update language if value has changed
+                if(!!updatedLanguage) {
+                    locale.value = updatedLanguage;
+                }
+                state.dirtyData = {};
+
+                const label = t('main.preference.toasts.updated.msg');
+                toast.$toast(label, '', {
+                    channel: 'success',
+                    simple: true,
                 });
             };
 
-            const setProgramPreferences = (categories, name) => {
-                for(let k in preferencesConfig[name]) {
-                    const subcategory = preferencesConfig[name][k];
-                    categories[name][k] = {
-                        preferences: subcategory.preferences.slice(),
-                    };
-                }
-            };
-
-            const setPluginPreferences = (categories, name) => {
-                for(let k in state.pluginPreferences[name]) {
-                    const subcategory = state.pluginPreferences[name][k];
-                    if(!categories[name][k]) {
-                        categories[name][k] = {
-                            preferences: subcategory.preferences.slice(),
-                        };
-                        if(subcategory.custom) {
-                            categories[name][k].custom = true;
-                            categories[name][k].title = subcategory.title;
+            const setPluginPreferences = () => {
+                for(let category in state.categories) {
+                    for(let k in state.pluginPreferences[category]) {
+                        const subcategory = state.pluginPreferences[category][k];
+                        if(!state.categories[category][k]) {
+                            state.categories[category][k] = {
+                                preferences: subcategory.preferences.slice(),
+                            };
+                            if(subcategory.custom) {
+                                state.categories[category][k].custom = true;
+                                state.categories[category][k].title = subcategory.title;
+                            }
+                        } else {
+                            state.categories[category][k].preferences = categories[category][k].preferences.concat(subcategory.preferences.slice());
                         }
-                    } else {
-                        categories[name][k].preferences = categories[name][k].preferences.concat(subcategory.preferences.slice());
                     }
                 }
             };
 
             // DATA
+            const state = reactive({
+                category: 'system',
+                subcategory: 'general',
+                dirtyData: {},
+                hasDirtyData: computed(_ => Object.keys(state.dirtyData).length > 0),
+                systemPreferences: computed(_ => systemStore.systemPreferences),
+                userPreferences: computed(_ => userStore.preferences),
+                preferences: computed(_ => {
+                    if(state.category == 'system') {
+                        return state.systemPreferences;
+                    } else {
+                        return state.userPreferences;
+                    }
+                }),
+                pluginPreferences: computed(_ => systemStore.registeredPluginPreferences),
+                categories: computed(_ => systemStore.preferenceConfig),
+                selectedCategory: computed(_ => state.categories[state.category][state.subcategory]),
+            });
             const preferencesConfig = {
                 user: {
                     general: {
@@ -317,9 +328,9 @@
                                 data: 'v-model'
                             },
                             {
-                                title: 'main.preference.key.project.maintainer',
-                                label: 'prefs.project-maintainer',
-                                component: 'project-maintainer-preference',
+                                title: 'main.preference.key.project.public',
+                                label: 'prefs.enable-open-access',
+                                component: 'open-access-preference',
                             },
                         ],
                     },
@@ -352,48 +363,21 @@
                             },
                         ],
                     },
+                    openaccess: {
+                        hide: _ => !state?.systemPreferences['prefs.enable-open-access'],
+                        preferences: [
+                            {
+                                title: 'main.preference.key.project.maintainer',
+                                label: 'prefs.project-maintainer',
+                                component: 'project-maintainer-preference',
+                            },
+                        ],
+                    },
                 },
             };
-            const state = reactive({
-                category: 'system',
-                subcategory: 'general',
-                dirtyData: {},
-                hasDirtyData: computed(_ => Object.keys(state.dirtyData).length > 0),
-                systemPreferences: computed(_ => {
-                    const sysPrefs = systemStore.systemPreferences;
-                    return sysPrefs;
-                }),
-                userPreferences: computed(_ => {
-                    const userPrefs = userStore.preferences;
-                    return userPrefs;
-                }),
-                preferences: computed(_ => {
-                    if(state.category == 'system') {
-                        return state.systemPreferences;
-                    } else {
-                        return state.userPreferences;
-                    }
-                }),
-                pluginPreferences: computed(_ => systemStore.registeredPluginPreferences),
-                categories: computed(_ => {
-                    const categories = {
-                        user: {},
-                        system: {},
-                    };
-
-                    for(let category in categories) {
-                        setProgramPreferences(categories, category);
-                        setPluginPreferences(categories, category);
-                    }
-
-                    return categories;
-                }),
-                categoryPreferences: computed(_ => {
-                    return state.categories[state.category][state.subcategory].preferences;
-                }),
-            });
 
             setCategories(currentRoute);
+            setPluginPreferences();
 
             watch(currentRoute, (newValue, oldValue) => {
                 setCategories(newValue);

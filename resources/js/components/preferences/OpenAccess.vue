@@ -2,12 +2,12 @@
     <div class="row">
         <label
             class="col-md-2 form-label"
-            for="show-tooltips-toggle"
+            for="open-access-toggle"
         />
         <div class="col-md-10">
             <div class="form-check form-switch">
                 <input
-                    id="show-tooltips-toggle"
+                    id="open-access-toggle"
                     v-model="state.enabled"
                     class="form-check-input"
                     type="checkbox"
@@ -71,5 +71,5 @@
                 state,
             };
         }
-    }
+    };
 </script>

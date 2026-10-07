@@ -15,7 +15,7 @@
                                 class="text-muted text-decoration-none"
                                 :to="{ name: 'entryview-entity', params: {id: entity.id}}"
                             >
-                                Go to Entry
+                                Open Details
                                 <i class="fas fa-fw fa-arrow-up-right-from-square" />
                             </router-link>
                         </div>

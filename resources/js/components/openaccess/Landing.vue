@@ -52,7 +52,7 @@
 
     import useSystemStore from '@/bootstrap/stores/system.js';
 
-    import { Markdown } from 'dhc-components';
+    import Markdown from '@dh-center-tuebingen/dhc-components/Display/Markdown';
 
     export default {
         components:{

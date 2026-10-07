@@ -73,7 +73,7 @@ class User extends Authenticatable
         $storedFilename = $avatarDirectory->store($filename, $file);
         $this->avatar = $storedFilename;
         $this->save();
-        return$storedFilename;
+        return $storedFilename;
     }
 
     public function deleteAvatar() : void{
@@ -128,7 +128,7 @@ class User extends Authenticatable
     public static function getDirectory(): Directory {
         return new Directory('avatars');
     }
-    
+
     public static function create($name, $nickname, $email, $password, $accesspoints = []) :User {
         $user = new User();
         $user->name = $name;

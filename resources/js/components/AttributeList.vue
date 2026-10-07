@@ -141,6 +141,7 @@
                                 data-bs-trigger="focus"
                                 data-bs-placement="top"
                                 :data-bs-content="getConceptNote(element.thesaurus_url)"
+                                :title="getConceptNote(element.thesaurus_url)"
                                 href="#"
                                 @click.prevent
                             >
@@ -234,12 +235,14 @@
         getConceptNote,
     } from '@/helpers/helpers.js';
 
+    import Attribute from '@/components/attribute/Attribute.vue'; // TODO really needed?
     import ModerationPanel from '@/components/moderation/Panel.vue';
     import ValidityIndicator from '@/components/forms/indicators/ValidityIndicator.vue';
     import DotIndicator from '@/components/indicators/DotIndicator.vue';
 
     export default {
         components: {
+            Attribute,
             ModerationPanel,
             ValidityIndicator,
             DotIndicator,

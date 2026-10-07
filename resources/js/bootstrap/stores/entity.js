@@ -44,6 +44,8 @@ import {
     moveEntity,
     moveMultipleEntities,
     patchEntityType,
+    setEntityTypeFile as apiSetEntityTypeFile,
+    deleteEntityTypeFile as apiDeleteEntityTypeFile,
     patchAttribute as apiPatchAttribute,
     patchAttributes as apiPatchAttributes,
     removeEntityTypeAttribute,
@@ -752,7 +754,7 @@ export const useEntityStore = defineStore('entity', {
         async updateEntityType(id, props) {
             return patchEntityType(id, props).then(data => {
                 const entityType = this.entityTypes[id];
-                const values = only(data, ['thesaurus_url', 'updated_at', 'is_root', 'sub_entity_types', 'color']);
+                const values = only(data, ['thesaurus_url', 'updated_at', 'is_root', 'sub_entity_types', 'color', 'in_open_access']);
                 for(let k in values) {
                     entityType[k] = values[k];
                 }
@@ -893,6 +895,17 @@ export const useEntityStore = defineStore('entity', {
                     }
                 }
             });
+        },
+        async setEntityTypeFile(id, file) {
+            const entityType = this.getEntityType(id);
+            const filepath = await apiSetEntityTypeFile(id, file);
+            entityType.metadata.image = filepath;
+            return filepath;
+        },
+        async deleteEntityTypeFile(id) {
+            await apiDeleteEntityTypeFile(id);
+            const entityType = this.getEntityType(id);
+            delete entityType.metadata.image;
         },
         async updateDependency(entityTypeId, attributeId, dependency) {
             return updateAttributeDependency(entityTypeId, attributeId, dependency).then(response => {

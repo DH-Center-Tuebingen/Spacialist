@@ -8,12 +8,15 @@ use App\Entity;
 use App\EntityAttribute;
 use App\EntityType;
 use App\Preference;
+use App\Reference;
 use App\ThConcept;
 use App\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\App;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class OpenAccessController extends Controller {
     private static $supported_attributes = [
@@ -70,7 +73,9 @@ class OpenAccessController extends Controller {
         }
         return response()->json(
             EntityType::withCount('entities')
-            ->get()
+                ->where('in_open_access', true)
+                ->get()
+                ->getDictionary()
         );
     }
 
@@ -138,6 +143,7 @@ class OpenAccessController extends Controller {
         return response()->json([
             'entity' => $entity,
             'metadata'=> $metadata,
+            'references' => Reference::getByEntity($entity->id),
         ]);
     }
 
@@ -168,6 +174,11 @@ class OpenAccessController extends Controller {
         }
 
         return response()->json($data);
+    }
+
+    public function downloadEntityTypeFile(Request $request): JsonResponse|BinaryFileResponse {
+        $filepath = $request->query('path');
+        return EntityType::getDirectory()->download($filepath);
     }
 
     // POST
@@ -212,16 +223,24 @@ class OpenAccessController extends Controller {
         $query = Entity::where('entity_type_id', $id);
 
         foreach($filters as $key => $value) {
-            $attribute = Attribute::find($key);
-            $valueCol = AttributeValue::getValueColumn($attribute->datatype);
-            if($isOr) {
-                $query->orWhereHas('attributes', function($subq) use ($key, $value, $valueCol) {
-                    $subq->where('id', $key)->whereIn($valueCol, $value);
-                });
+            if($key == 'name') {
+                if($isOr) {
+                    $query->orWhere('name', 'ilike', '%' . $value . '%');
+                } else {
+                    $query->where('name', 'ilike', '%' . $value . '%');
+                }
             } else {
-                $query->whereHas('attributes', function($subq) use ($key, $value, $valueCol) {
-                    $subq->where('attributes.id', $key)->whereIn($valueCol, $value);
-                });
+                $attribute = Attribute::find($key);
+                $valueCol = AttributeValue::getValueColumn($attribute->datatype);
+                if($isOr) {
+                    $query->orWhereHas('attributes', function($subq) use ($key, $value, $valueCol) {
+                        $subq->where('id', $key)->whereIn($valueCol, $value);
+                    });
+                } else {
+                    $query->whereHas('attributes', function($subq) use ($key, $value, $valueCol) {
+                        $subq->where('attributes.id', $key)->whereIn($valueCol, $value);
+                    });
+                }
             }
         }
 

@@ -144,31 +144,58 @@
                 </div>
             </div>
             <hr>
-            <div>
-                <h4>
-                    Summary/Description
-                </h4>
-                <Richtext
-                    v-if="state.metadata?.metadata?.summary"
-                    class="bg-secondary bg-opacity-10 rounded font-serif"
-                    :classes="'mt-2 px-2 py-1 rounded text-body'"
-                    :disabled="true"
-                    :value="state.metadata.metadata.summary"
-                />
-                <span
-                    v-else
-                    class="fst-italic text-muted"
-                >
-                    No summary/description available
-                </span>
-            </div>
-            <hr>
-            <div>
-                <h4>Files</h4>
-                <span class="fst-italic text-muted">
-                    No files linked with this entry
-                </span>
-            </div>
+            <Accordion
+                name="entity-view-accordion"
+                :items="state.accordionItems"
+                :only-one-open="true"
+                :open="false"
+            >
+                <template #references>
+                    <div
+                        v-if="state.hasReferences"
+                        class="list-group"
+                    >
+                        <div
+                            v-for="(reference, i) in state.combinedReferences"
+                            :key="i"
+                            class="list-group-item pt-0"
+                        >
+                            <header class="text-end">
+                                <span class="text-muted fw-light small">
+                                    {{ date(reference.updated_at) }}
+                                </span>
+                            </header>
+                            <Quotation :value="reference" />
+                        </div>
+                    </div>
+                    <span
+                        v-else
+                        class="fst-italic text-muted"
+                    >
+                        No references available
+                    </span>
+                </template>
+                <template #summary>
+                    <Richtext
+                        v-if="state.metadata?.metadata?.summary"
+                        class="bg-secondary bg-opacity-10 rounded font-serif"
+                        :classes="'mt-2 px-2 py-1 rounded text-body'"
+                        :disabled="true"
+                        :value="state.metadata.metadata.summary"
+                    />
+                    <span
+                        v-else
+                        class="fst-italic text-muted"
+                    >
+                        No summary/description available
+                    </span>
+                </template>
+                <template #files>
+                    <span class="fst-italic text-muted">
+                        No files linked with this entry
+                    </span>
+                </template>
+            </Accordion>
         </div>
     </div>
 </template>
@@ -200,6 +227,7 @@
 
     import {
         ago,
+        date,
     } from '@/helpers/filters.js';
 
     import {
@@ -209,14 +237,18 @@
 
     import { useI18n } from 'vue-i18n';
 
-    import { IconStat } from 'dhc-components';
+    import IconStat from '@dh-center-tuebingen/dhc-components/Indicators/IconStat';
+    import Accordion from '@dh-center-tuebingen/dhc-components/Layout/Accordion';
 
     import EntityTypeLabel from '@/components/entity/EntityTypeLabel.vue';
+    import Quotation from '@/components/bibliography/Quotation.vue';
 
     export default {
         components: {
+            Accordion,
             EntityTypeLabel,
             IconStat,
+            Quotation,
         },
         setup(props) {
             const { t } = useI18n();
@@ -228,11 +260,11 @@
             const initialize = async _ => {
                 const entityData = await getEntity(route.params.id);
                 state.entity = entityData.entity;
+                state.references = entityData.references;
                 state.metadata = entityData.metadata;
 
                 const attributeData = await getEntityData(route.params.id);
                 state.attributeData = attributeData;
-                console.log(attributeData);
                 state.loaded = true;
                 nextTick(_ => {
                     const popup = new Popover(userPopoverRef.value, {
@@ -272,9 +304,29 @@
                 map: false,
                 loaded: false,
                 entity: null,
+                references: {},
                 metadata: null,
                 attributeData: null,
                 hiddenAttributes: {},
+                accordionItems: computed(_ => {
+                    return [
+                        {
+                            name: 'references',
+                            title: 'References',
+                            disabled: !state.hasReferences,
+                        },
+                        {
+                            name: 'summary',
+                            title: 'Summary/Description',
+                            disabled: !state.metadata?.metadata?.summary,
+                        },
+                        {
+                            name: 'files',
+                            title: 'Files',
+                            disabled: true,
+                        },
+                    ];
+                }),
                 entityType: computed(_ => {
                     if(!state.entity) return;
                     return entityStore.entityTypes[state.entity.entity_type_id];
@@ -307,6 +359,41 @@
 
                     return allEditors;
                 }),
+                hasReferences: computed(_ => Object.keys(state.references).length > 0),
+                hasEntityReferences: computed(_ => {
+                    if(!state.hasReferences) return false;
+                    return state.references.on_entity?.length > 0;
+                }),
+                hasAttributeReferences: computed(_ => {
+                    if(!state.hasReferences) return false;
+                    const {
+                        on_entity,
+                        ...refs
+                    } = state.references;
+                    const isEmpty = !Object.keys(refs).length > 0;
+                    if(isEmpty) return false;
+                    return Object.values(refs).some(v => v.length > 0);
+                }),
+                combinedReferences: computed(_ => {
+                    if(!state.hasReferences) return [];
+
+                    const references = [];
+                    if(state.hasAttributeReferences) {
+                        const {
+                            on_entity,
+                            ...refs
+                        } = state.references;
+
+                        for(let k in refs) {
+                            references.push(...refs[k]);
+                        }
+                    }
+                    if(state.hasEntityReferences) {
+                        references.push(...state.references.on_entity);
+                    }
+
+                    return references;
+                })
             });
 
             // WATCHER
@@ -316,6 +403,7 @@
                 t,
                 // HELPERS
                 ago,
+                date,
                 getCertaintyClass,
                 translateConcept,
                 // LOCAL

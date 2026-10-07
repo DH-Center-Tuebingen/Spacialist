@@ -2,6 +2,28 @@
     <div class="col-4 h-100 pe-0 overflow-hidden d-flex flex-column">
         <h4>Filters</h4>
         <div class="d-flex flex-column pe-3 overflow-y-auto flex-grow-1">
+            <div class="mb-3">
+                <h5 class="d-flex flex-row align-items-start">
+                    Textsuche
+                </h5>
+                <form
+                    class="input-group mb-3"
+                    @submit.prevent="updateNameSearch"
+                >
+                    <input
+                        v-model="nameSearch"
+                        type="text"
+                        class="form-control"
+                        placeholder="Nach Name filtern"
+                    >
+                    <button
+                        class="btn btn-outline-secondary"
+                        type="submit"
+                    >
+                        <i class="fas fa-fw fa-search" />
+                    </button>
+                </form>
+            </div>
             <div
                 v-for="attribute in attributes"
                 :key="attribute.id"
@@ -14,7 +36,7 @@
                             {{ getAttributeCount(attribute.attribute_id) }}
                         </small>
                     </div>
-                    <span class="small fw-light">
+                    <span class="small fw-light text-end">
                         {{ t(`global.attributes.${attribute.attribute.datatype}`) }}
                     </span>
                 </h5>
@@ -81,6 +103,7 @@
 <script>
     import {
         computed,
+        ref,
     } from 'vue';
 
     import {
@@ -108,8 +131,10 @@
             },
         },
         emits: ['change-filter', 'reset-filter'],
-        setup(props) {
+        setup(props, context) {
             const { t } = useI18n();
+
+            const nameSearch = ref('');
 
             const mappedAttributes = computed(() => {
                 return props.attributeValues;
@@ -133,12 +158,18 @@
                 return Object.keys(props.attributeValues[attributeId]).length;
             };
 
+            const updateNameSearch = e => {
+                context.emit('change-filter', 'name', nameSearch.value);
+            };
+
             return {
                 t,
                 translateConcept,
+                nameSearch,
                 mappedAttributes,
                 getAttributeCount,
-            }
-        }
-    }
+                updateNameSearch,
+            };
+        },
+    };
 </script>

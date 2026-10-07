@@ -605,7 +605,7 @@ export async function moveMultipleEntities(entityIds, parentId) {
 }
 
 export async function patchEntityType(etid, updatedProps) {
-    const allowedData = only(updatedProps, ['thesaurus_url', 'is_root', 'sub_entity_types', 'color']);
+    const allowedData = only(updatedProps, ['thesaurus_url', 'is_root', 'sub_entity_types', 'color', 'in_open_access', 'metadata']);
     // If no allowed props updated, do nothing
     if(Object.keys(allowedData).length < 1) {
         return;
@@ -620,6 +620,20 @@ export async function patchEntityType(etid, updatedProps) {
 
     return $httpQueue.add(
         () => http.patch(`/editor/dm/entity_type/${etid}`, data).then(response => response.data)
+    );
+}
+
+export async function setEntityTypeFile(etid, file) {
+    const data = new FormData();
+    data.append('file', file);
+    return $httpQueue.add(
+        () => http.post(`/editor/dm/entity_type/${etid}/file`, data).then(response => response.data)
+    );
+}
+
+export async function deleteEntityTypeFile(etid) {
+    return await $httpQueue.add(
+        () => http.delete(`/editor/dm/entity_type/${etid}/file`).then(response => response.data)
     );
 }
 

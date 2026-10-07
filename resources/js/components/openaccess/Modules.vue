@@ -11,7 +11,7 @@
                 v-slot="{ navigate }"
             >
                 <div
-                    class="card h-100 clickable"
+                    class="card h-100 clickable rounded-3"
                     @click="navigate"
                 >
                     <div class="card-body d-flex flex-column justify-content-between">
@@ -38,7 +38,7 @@
                 v-slot="{ navigate }"
             >
                 <div
-                    class="card h-100 clickable"
+                    class="card h-100 clickable rounded-3"
                     @click="navigate"
                 >
                     <div class="card-body d-flex flex-column justify-content-between">
@@ -61,7 +61,7 @@
                 v-slot="{ navigate }"
             >
                 <div
-                    class="card h-100 clickable"
+                    class="card h-100 clickable rounded-3"
                     @click="navigate"
                 >
                     <div class="card-body d-flex flex-column justify-content-between">

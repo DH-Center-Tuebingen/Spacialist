@@ -49,8 +49,8 @@
                 if(!entityStore.entityTypes) {
                     return [];
                 }
-                const filtered = Object.values(entityStore.entityTypes).filter(entityType => entityType.entities_count > 0)
-                return filtered.sort(sortTranslated());
+                const filtered = Object.values(entityStore.entityTypes).filter(entityType => entityType.entities_count > 0);
+                return filtered.toSorted(sortTranslated());
             });
 
             const selectEntityType = entityType => {

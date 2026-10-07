@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Broadcast;
 Route::middleware('auth:sanctum')->prefix('download')->group(function () {
     Route::get('/avatar', 'UserController@downloadAvatar');
     Route::get('/bibliography', 'BibliographyController@downloadFile');
+    Route::get('/entity_type', 'EditorController@downloadFile');
     Route::get('/plugin/{filepath}', 'PluginController@downloadScript');
 });
 
@@ -112,6 +113,7 @@ Route::middleware('auth:sanctum')->prefix('v1/editor')->group(function() {
     Route::post('/dm/attribute', 'EditorController@addAttribute');
     Route::post('/dm/entity_type/{etid}/attribute', 'EditorController@addAttributeToEntityType')->where('etid', '[0-9]+');
     Route::post('/dm/entity_type/{ctid}/duplicate', 'EditorController@duplicateEntityType')->where('ctid', '[0-9]+');
+    Route::post('/dm/entity_type/{etid}/file', 'EditorController@patchEntityTypeFile')->where('etid', '[0-9]+');
 
     Route::patch('/dm/entity_type/{etid}', 'EditorController@patchEntityType')->where('etid', '[0-9]+');
     Route::patch('/dm/entity_type/{ctid}/attribute/{aid}/position', 'EditorController@reorderAttribute')->where('ctid', '[0-9]+')->where('aid', '[0-9]+');
@@ -121,6 +123,7 @@ Route::middleware('auth:sanctum')->prefix('v1/editor')->group(function() {
     Route::delete('/dm/entity_type/{id}', 'EditorController@deleteEntityType')->where('id', '[0-9]+');
     Route::delete('/dm/attribute/{id}', 'EditorController@deleteAttribute')->where('id', '[0-9]+');
     Route::delete('/dm/entity_type/attribute/{id}', 'EditorController@removeAttributeFromEntityType')->where('id', '[0-9]+');
+    Route::delete('/dm/entity_type/{etid}/file', 'EditorController@deleteEntityTypeFile')->where('etid', '[0-9]+');
 });
 
 // USER
@@ -258,6 +261,7 @@ Route::prefix('v1/open')->group(function() {
     Route::get('entity_type/{entityType}/attribute_values', 'OpenAccessController@getAttributeValuesForEntityType');
     Route::get('entity/{id}', 'OpenAccessController@getEntity')->where('id', '[0-9]+');
     Route::get('entity/{id}/data', 'OpenAccessController@getEntityData')->where('id', '[0-9]+');
+    Route::get('download/entity_type', 'OpenAccessController@downloadEntityTypeFile');
 
     Route::post('result', 'OpenAccessController@getFilterResults');
     Route::post('result/by_type/{id}', 'OpenAccessController@getFilterResultsForType')->where('id', '[0-9]+');

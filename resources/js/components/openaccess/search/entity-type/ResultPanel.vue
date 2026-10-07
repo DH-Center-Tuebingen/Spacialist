@@ -38,7 +38,8 @@
 </template>
 
 <script>
-    import { LoadingSpinner, Pagination } from 'dhc-components';
+    import LoadingSpinner from '@dh-center-tuebingen/dhc-components/Indicators/LoadingSpinner';
+    import Pagination from '@dh-center-tuebingen/dhc-components/Layout/Pagination';
 
     import Card from '@/components/openaccess/Card.vue';
 

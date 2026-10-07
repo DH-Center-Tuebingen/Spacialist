@@ -86,7 +86,7 @@
                     if(!state.selectedEntityTypeId) {
                         return null;
                     }
-                    return entityStore.entityTypes[state.selectedEntityTypeId] || null;
+                    return entityStore.getEntityType(state.selectedEntityTypeId) || null;
                 }),
                 // [SO] I would argue for the prototype that is way to complicated
                 // this caused the error that only loaded entities were included in the filter options
@@ -183,10 +183,14 @@
 
             const handleFilterChange = (attributeId, options) => {
                 state.filterpanelFilters[attributeId] = options;
-                if(options.length > 0) {
-                    state.filters[attributeId] = options.map(o => o.key);
+                if(attributeId == 'name') {
+                    state.filters[attributeId] = options;
                 } else {
-                    resetFilter(attributeId);
+                    if(options.length > 0) {
+                        state.filters[attributeId] = options.map(o => o.key);
+                    } else {
+                        resetFilter(attributeId);
+                    }
                 }
             };
 

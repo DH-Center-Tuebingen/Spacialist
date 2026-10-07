@@ -11,11 +11,11 @@
                     @click.prevent="$emit('select', entityType)"
                 >
                     <img
-                        :src="`https://picsum.photos/400?random=${entityType.id}`"
-                        class="card-img-top rounded-top-4"
+                        :src="`api/v1/open/download/entity_type?path=${entityType.metadata.image}`"
+                        class="card-img-top rounded-4"
                         :alt="`${translateConcept(entityType.thesaurus_url)} Image missing`"
                     >
-                    <div class="card-body">
+                    <div class="card-body position-absolute bottom-0 start-0 w-100 bg-white bg-opacity-75 rounded-bottom-4 p-2">
                         <h5 class="card-title d-flex align-items-center justify-content-between">
                             <span>
                                 {{ translateConcept(entityType.thesaurus_url) }}
@@ -24,8 +24,11 @@
                                 {{ entityType.entities_count }}
                             </span>
                         </h5>
-                        <p class="card-text text-truncate">
-                            This is a longer card with supporting text below as a natural lead-in to additional content. This content is a little bit longer.
+                        <p
+                            v-if="entityType.metadata?.open_access_summary"
+                            class="card-text text-truncate"
+                        >
+                            {{ entityType.metadata.open_access_summary }}
                         </p>
                     </div>
                 </div>

@@ -5,7 +5,7 @@ import PQueue from 'p-queue';
 
 // Init plugins
 
-import 'dhc-components/css'; // TODO needed?
+import '@dh-center-tuebingen/dhc-components/css'; // TODO needed?
 
 // Helpers/Filter
 

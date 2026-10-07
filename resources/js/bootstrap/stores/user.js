@@ -97,8 +97,8 @@ export const useUserStore = defineStore('user', {
             return (value, prop = 'id') => {
                 if(!value) return null;
 
-                const maintainerPreference = state.preferences['prefs.project-maintainer'];
-                if(this.userLoggedIn || maintainerPreference?.public) {
+                const openAccessPreference = state.preferences['prefs.enable-open-access'];
+                if(this.userLoggedIn || openAccessPreference) {
                     const isNum = !isNaN(value);
                     const lValue = isNum ? value : value.toLowerCase();
                     if(prop == 'id' && value == this.user?.id) {
@@ -156,6 +156,9 @@ export const useUserStore = defineStore('user', {
         },
         setPreferences(preferences) {
             this.preferences = preferences;
+        },
+        updatePreference(preference) {
+            this.preferences[preference.label] = preference.value;
         },
         async login(credentials) {
             await getCsrfCookie();
