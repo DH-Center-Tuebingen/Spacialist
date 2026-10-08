@@ -41,12 +41,12 @@ class EntityType extends Model
 
     public function uploadFile($file): string {
         $directory = self::getDirectory();
-        if(array_key_exists('image', $this->metadata)) {
+        if(array_key_exists('image', $this->metadata ?? [])) {
             $directory->delete($this->metadata['image']);
         }
         $filename = $this->id . "." . $file->getClientOriginalExtension();
         $storedFilename = $directory->store($filename, $file);
-        $metadata = $this->metadata;
+        $metadata = $this->metadata ?? [];
         $metadata['image'] = $storedFilename;
         $this->metadata = $metadata;
         $this->save();
