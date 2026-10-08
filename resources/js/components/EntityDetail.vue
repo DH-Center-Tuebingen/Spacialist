@@ -697,7 +697,21 @@
                     return state.commentLoadingState === 'failed';
                 }),
                 activeUsers: computed(_ => entityStore.getActiveEntityUsers),
-                view: computed(_ => route.query.view || 'attributes-default')
+                hasDefaultGroup: computed(_ => {
+                    return state.entityAttributes.some(a => {
+                        return !a.is_system &&
+                            a.datatype != 'system-separator' &&
+                            !state.hiddenAttributes[a.id]?.hide;
+                    });
+                }),
+                activeTabs: computed(_ => {
+                    return state.entityAttributes.filter(attribute => {
+                        return attribute.is_system &&
+                            attribute.datatype == 'system-separator' &&
+                            !state.hiddenAttributes[attribute.id]?.hide;
+                    }).map(attribute => `attributes-${attribute.pivot.id}`);
+                }),
+                view: computed(_ => route.query.view || 'attributes-default'),
             });
             const channels = {};
 
@@ -850,6 +864,32 @@
                 });
             };
             const setDetailPanelView = (tab = 'attributes-default') => {
+                // check if provided `view` query param is valid
+                if(!state.activeTabs.includes(tab)) {
+                    // if not either set it to the default tab (if exists)
+                    // or set to first available group and also update
+                    // route url if needed
+                    let updateRoute = false;
+                    if(state.hasDefaultGroup) {
+                        updateRoute = tab != 'attributes-default';
+                        tab = 'attributes-default';
+                    } else {
+                        updateRoute = true;
+                        tab = state.activeTabs[0];
+                    }
+                    if(updateRoute) {
+                        const query = {
+                            view: tab,
+                        };
+                        router.push({
+                            query: {
+                                ...route.query,
+                                ...query,
+                            }
+                        });
+                    }
+                }
+
                 const tabId = tab.substring(tab.indexOf('-') + 1);
                 let newTab, oldTabs, newPanel, oldPanels;
                 if(tab === 'comments') {
