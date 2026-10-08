@@ -698,11 +698,22 @@
                 }),
                 activeUsers: computed(_ => entityStore.getActiveEntityUsers),
                 hasDefaultGroup: computed(_ => {
-                    return state.entityAttributes.some(a => {
-                        return !a.is_system &&
-                            a.datatype != 'system-separator' &&
-                            !state.hiddenAttributes[a.id]?.hide;
-                    });
+                    let hasDefault = false;
+                    // loop over all entity attributes and check if first
+                    // not hidden attribute is either an attribute
+                    // or a group
+                    for(let i=0; i<state.entityAttributes.length; i++) {
+                        const attribute = state.entityAttributes[i];
+                        if(state.hiddenAttributes[attribute.id]?.hide) continue;
+                        if(attribute.datatype != 'system-separator') {
+                            hasDefault = true;
+                            break;
+                        } else if(attribute.is_system && attribute.datatype == 'system-separator') {
+                            hasDefault = false;
+                            break;
+                        }
+                    }
+                    return hasDefault;
                 }),
                 activeTabs: computed(_ => {
                     return state.entityAttributes.filter(attribute => {
