@@ -8,14 +8,12 @@ use PHPUnit\Framework\Attributes\TestDox;
 
 use App\VersionInfo;
 
-class ApiTest extends TestCase
-{
+class ApiTest extends TestCase {
     /**
 	 * @return void
 	 */
 	#[TestDox('GET    / : Get Base App Endpoint')]
-    public function testApiRoot()
-    {
+    public function testApiRoot() {
         $response = $this->get('/');
 
         $response->assertStatus(200);
@@ -25,8 +23,7 @@ class ApiTest extends TestCase
 	 * @return void
 	 */
 	#[TestDox('GET    /welcome : Get Welcome Page Endpoint')]
-    public function testWelcomePage()
-    {
+    public function testWelcomePage() {
         $response = $this->get('/welcome');
 
         $response->assertStatus(200);
@@ -36,8 +33,7 @@ class ApiTest extends TestCase
 	 * @return void
 	 */
 	#[TestDox('GET    /api/v1/pre : Get Pre Endpoint Failed Unauth')]
-    public function testUnauthPreRequest()
-    {
+    public function testUnauthPreRequest() {
         $this->unsetTestUser();
         // Unauthenticated request redirects to /login
         $response = $this->get('/api/v1/pre');
@@ -50,8 +46,7 @@ class ApiTest extends TestCase
 	 * @return void
 	 */
 	#[TestDox('GET    /api/v1/pre : Get Pre Endpoint')]
-    public function testAuthPreRequest()
-    {
+    public function testAuthPreRequest() {
         $response = $this->userRequest()
             ->get('/api/v1/pre');
 
@@ -87,19 +82,18 @@ class ApiTest extends TestCase
 	 * @return void
 	 */
 	#[TestDox('GET    /api/v1/version : Get Version Endpoint')]
-    public function testVersionRequest()
-    {
-        // In GithubActions fetching git via the describe does fail and leads to 
+    public function testVersionRequest() {
+        // In GithubActions fetching git via the describe does fail and leads to
         // the VersionInfo using it's default values. For more consistent testing,
         // we manually set the version info using a known git tag.
         $versionInfo = new VersionInfo();
         $versionInfo->setByGitTag("v0.11.1-kilcrea-94-g046891a48", time());
         $this->app->instance(VersionInfo::class, $versionInfo);
-        
+
         $vi = app(VersionInfo::class);
         $response = $this->userRequest()
             ->get('/api/v1/version');
-            
+
         $response->assertStatus(200);
         $content = $response->decodeResponseJson();
         $this->assertMatchesRegularExpression('/^\d+$/', $content['time']);

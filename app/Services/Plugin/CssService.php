@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\DB;
 
 /**
  * Adds capability to publish custom CSS files to a plugin.
- * 
+ *
  * '''xml
  * ...
  *    <css>
@@ -25,8 +25,8 @@ use Illuminate\Support\Facades\DB;
  * '''
  */
 class CssService extends PluginService implements ManifestContent {
-
     use BootstrapCache;
+
     protected function fetch(): array {
         return CssFile::all()->toArray();
     }
@@ -72,7 +72,7 @@ class CssService extends PluginService implements ManifestContent {
                 PluginLog::logWarning("Invalid CSS file path in manifest for plugin {$plugin->name}:" . json_encode($cssPath));
                 continue;
             }
-            
+
             CssFile::create([
                 'plugin_id' => $plugin->id,
                 'src' => $cssPath,
@@ -95,7 +95,7 @@ class CssService extends PluginService implements ManifestContent {
 
     /**
      * Publish a single file to the storage directory.
-     * 
+     *
      * @param Plugin $plugin
      * @param string $cssPath Path of the css file relative to the plugin root. If the file is not found a warning will be issued in the `plugin.log`.
      * @return void
@@ -112,7 +112,7 @@ class CssService extends PluginService implements ManifestContent {
             if(!$filehandle) {
                 PluginLog::logWarning("Could not open CSS file for plugin {$plugin->name} at path {$pluginPath}.");
                 return;
-            }            
+            }
             $this->getStorageDirectory()->store(
                 $this->getTargetName($plugin, $pluginPath),
                 $filehandle
@@ -122,7 +122,7 @@ class CssService extends PluginService implements ManifestContent {
             PluginLog::logWarning("CSS file for plugin {$plugin->name} does not exist at path {$pluginPath}.");
         }
     }
-    
+
     /**
      * Unpublish all CSS files specified inside the manifest.
      * @param Plugin $plugin
@@ -134,13 +134,12 @@ class CssService extends PluginService implements ManifestContent {
         foreach($cssFiles as $cssFilePath) {
             $cssFileName = $this->getTargetName($plugin, $cssFilePath);
             $result = $cssDirectory->deleteFile($cssFileName);
-            
+
             if(!$result) {
                 PluginLog::logWarning("Failed to delete CSS file for plugin {$plugin->name} at path {$cssFileName}.");
             }
         }
     }
-
 
     public function retrieveManifestValues(PluginManifest $manifest): array {
         $cssEntries = $manifest->getTagNodes("css/file");
@@ -172,9 +171,8 @@ class CssService extends PluginService implements ManifestContent {
         return true;
     }
 
-
     /**
-     * List all file 
+     * List all files
      * @param Plugin $plugin
      * @return string[]
      */
@@ -218,7 +216,6 @@ class CssService extends PluginService implements ManifestContent {
         }
         return $tags;
     }
-
 
     /**
      * Returns all CSS download URLs.

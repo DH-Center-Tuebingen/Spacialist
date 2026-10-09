@@ -3,11 +3,11 @@
 namespace App\Providers;
 
 use App\Services\Plugin\RouteService;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
 
-class RouteServiceProvider extends ServiceProvider
-{
+class RouteServiceProvider extends ServiceProvider {
     /**
      * This namespace is applied to your controller routes.
      *
@@ -22,8 +22,7 @@ class RouteServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    public function boot()
-    {
+    public function boot() {
         //
 
         parent::boot();
@@ -34,8 +33,7 @@ class RouteServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    public function map()
-    {
+    public function map() {
         $this->mapApiRoutes();
         $this->mapWebRoutes();
         $this->mapPluginRoutes();
@@ -48,8 +46,7 @@ class RouteServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    protected function mapWebRoutes()
-    {
+    protected function mapWebRoutes() {
         Route::middleware('web')
              ->namespace($this->namespace)
              ->group(base_path('routes/web.php'));
@@ -62,13 +59,13 @@ class RouteServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    protected function mapApiRoutes()
-    {
+    protected function mapApiRoutes() {
         Route::prefix('api')
              ->middleware('api')
              ->namespace($this->namespace)
              ->group(base_path('routes/api.php'));
     }
+
     /**
      * Define the "plugin" routes for the application.
      *
@@ -76,16 +73,15 @@ class RouteServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    public function mapPluginRoutes()
-    {
+    public function mapPluginRoutes() {
         try {
             // This may fail when the relation is not yet created
-            // via a migration. Therefore we catch the exception to 
+            // via a migration. Therefore we catch the exception to
             // avoid breaking the application.
             app(RouteService::class)->mapRoutes();
         } catch(\Exception $e) {
             // Log the error but don't interrupt the application
-            \Log::error("Error loading plugin routes: " . $e->getMessage());
+            Log::error("Error loading plugin routes: " . $e->getMessage());
         }
     }
 }

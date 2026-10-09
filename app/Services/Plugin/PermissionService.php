@@ -30,7 +30,6 @@ use Illuminate\Support\Facades\File;
  * ```
  */
 class PermissionService extends PluginService {
-
     private array $existingPermissions = [];
 
     public function install(Plugin $plugin, PluginManifest $manifest): void {
@@ -39,14 +38,14 @@ class PermissionService extends PluginService {
 
     /**
      * For Future Referencec:: We should not remove the permissions on uninstall, as it will
-     * also remove the permissions from all roles (which it should), but we should be able to 
-     * toggle the plugins off and on without having to reassign the permissions to the roles again. 
+     * also remove the permissions from all roles (which it should), but we should be able to
+     * toggle the plugins off and on without having to reassign the permissions to the roles again.
      * So we will just keep the permissions in the system, even if the plugin is uninstalled.
      */
     // public function uninstall(Plugin $plugin, PluginManifest $manifest): void {
     //     // $this->removePermissions($plugin);
     // }
-    
+
     public function onRemove(Plugin $plugin, PluginManifest $manifest): void {
         $this->removePermissions($plugin);
     }
@@ -85,7 +84,7 @@ class PermissionService extends PluginService {
 
     /**
      *  Adds permissions defined in the plugin's permissions.json to the system.
-     * 
+     *
      * @param Plugin $plugin
      * @return void
      */
@@ -96,7 +95,7 @@ class PermissionService extends PluginService {
 
     /**
      * Add all permissions defined in the given permission groups to the system.
-     * 
+     *
      * @param array $permGroups - An associative array where keys are permission group names and values are arrays of permissions. Each permission is an associative array containing 'name', 'display_name', and 'description' keys.
      * @return void
      */
@@ -111,7 +110,7 @@ class PermissionService extends PluginService {
 
     /**
      * Creates an unsaved Permission model instance based on the given group and permission data.
-     * 
+     *
      * @param string $group - The permission group name
      * @param array $permission - An associative array containing 'name', 'display_name', and 'description' keys for the permission
      * @param string $guardName - The guard name for the 'Spatie' permission (default is 'web')
@@ -151,11 +150,11 @@ class PermissionService extends PluginService {
                 $pluginDirectory = PluginDirectory::fromPlugin($plugin);
                 $pluginPermissionPath = $pluginDirectory->getAbsolutePluginPath($relativePath);
             }
-        }else{
+        } else {
             $pluginDirectory = PluginDirectory::fromPlugin($plugin);
             $pluginPermissionPath = $pluginDirectory->getAbsolutePluginPath('App/permissions.json');
         }
-        
+
         if(!File::isFile($pluginPermissionPath)) {
             return [];
         }
@@ -167,6 +166,4 @@ class PermissionService extends PluginService {
         $manifest = PluginManifest::fromPlugin($plugin);
         return array_keys($this->getPermissions($plugin, $manifest));
     }
-
-
 }

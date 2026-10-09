@@ -1,11 +1,12 @@
 <?php
+
 namespace App\Models\Plugin;
 
 use App\Plugin;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class AccessPoint extends Model
-{
+class AccessPoint extends Model {
     protected $table = 'plugin_service_access_points';
 
     protected $fillable = [
@@ -18,9 +19,7 @@ class AccessPoint extends Model
     /**
      * The plugin this hook belongs to.
      */
-    public function plugin()
-    {
+    public function plugin(): BelongsTo  {
         return $this->belongsTo(Plugin::class, 'plugin_id');
     }
-    
 }

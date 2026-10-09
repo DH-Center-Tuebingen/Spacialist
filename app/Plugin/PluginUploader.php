@@ -11,20 +11,19 @@ use SplFileInfo;
 use ZipArchive;
 
 class PluginUploader {
-
     /**
-     * Uploads a plugin zip file, extracts it to the plugin directory, 
+     * Uploads a plugin zip file, extracts it to the plugin directory,
      * and returns the name of the uploaded plugin.
-     * 
+     *
      * The zip file must contain a single root directory with the same name
-     * as the plugin. 
-     * 
-     * If a plugin with the same name already exists, 
-     * it is moved to a backup directory before extracting the new plugin. 
+     * as the plugin.
+     *
+     * If a plugin with the same name already exists,
+     * it is moved to a backup directory before extracting the new plugin.
      * The backup directory is located at "plugins/_backups" and is created if it does not exist.
-     * If a backup of the same plugin already exists in the backup directory, 
-     * it is removed before moving the existing plugin to the backup directory. 
-     *  
+     * If a backup of the same plugin already exists in the backup directory,
+     * it is removed before moving the existing plugin to the backup directory.
+     *
      * @param SplFileInfo $file - The uploaded plugin zip file
      * @return PluginUploadResult - The result of the upload, containing the plugin name and whether the plugin was updated or created.
      */
@@ -32,7 +31,7 @@ class PluginUploader {
         $zipFile = $this->tryOpenZipFile($file);
         $pluginName = $this->getSingleRootDirectory($zipFile);
         $existingPlugin = Plugin::where('name', $pluginName)->first();
-        
+
         $manifest = PluginManifest::fromZip($zipFile, $pluginName);
         $this->requireValidPluginName($manifest->getName());
         $this->requireDirectoryMatchesManifestName($pluginName, $manifest);
@@ -46,10 +45,10 @@ class PluginUploader {
         $this->extractZipFile($zipFile, $pluginName);
         return new PluginUploadResult($pluginName, $existingPlugin);
     }
-    
+
     /**
      * Checks if the provided name is a valid plugin name, otherwise an error will be thrown.
-     * 
+     *
      * @param string $name The name of the plugin to validate.
      * @throws Exception Throws an exception if the name is invalid.
      * @return void
@@ -68,7 +67,7 @@ class PluginUploader {
 
     /**
      * Restores an existing backup to the plugin folder.
-     * 
+     *
      * @param string $pluginName
      * @return bool - Returns true if the backup was successfully restored, false if no backup exists for the given plugin name.
      */
@@ -96,16 +95,16 @@ class PluginUploader {
             abort(422, __('Could not open provided plugin zip file. Aborting.'));
         }
     }
-    
+
     /**
-     * Checks if the archive has a single root directory. 
+     * Checks if the archive has a single root directory.
      * This directory dictates the name of the uploaded plugin.
      * That's how the plugin system knows what plugin is getting
      * updated.
-     * 
+     *
      * Note: Retrieving the root directory is unnecessarily expensive
      * as we cannot assume, that the first entry is the root directory.
-     * 
+     *
      * @param ZipArchive $zipFile
      * @return string
      */
@@ -152,14 +151,13 @@ class PluginUploader {
         // Foundroot should always be without trailing slashes.
         return $foundRoot;
     }
-    
+
     public function doesPluginDirectoryExist(string $pluginName): bool {
         $pluginPath = PluginDirectory::getPath($pluginName);
         return file_exists($pluginPath);
     }
 
     private function validateExistingVersionIsOlder(PluginManifest $manifest, ?Plugin $existingPlugin = null): void {
-
         if($existingPlugin == null) {
             return;
         }
@@ -167,14 +165,6 @@ class PluginUploader {
         $existingVersion = $existingPlugin->version ?? '0.0.0';
         $uploadedVersion = $manifest->getVersion();
 
-        // I think it's a good idea to only restrict the upload to older versions
-        // as I had some troubles with it requiring always a newer version.
-        // a)   Plugin Development: When you develop a plugin and you test a plugin still
-        //      in development, it is combersome to always update the version number for
-        //      every upload.
-        // b)   It doesn't hurt and is slightly beneficial to allow an upload of the same
-        //      version, for example, if the active version is corrupted, you can just 
-        //      'repair' that version by performing an upload of the same version.
         if(version_compare($existingVersion, $uploadedVersion, ">")) {
             abort(409, __("A plugin with the name ':pluginName' and the same or later version (:uploadedVersion and :existingVersion) already exists. Aborting.", [
                 'pluginName' => $existingPlugin->name,
@@ -190,7 +180,7 @@ class PluginUploader {
 
         if(!file_exists($existingPluginPath)) {
             return null;
-        }        
+        }
         rename($existingPluginPath, $backupPluginPath);
     }
 
@@ -211,7 +201,7 @@ class PluginUploader {
     }
 
     private function extractZipFile(ZipArchive $zipFile, string $pluginName) {
-        // As the zip file contains a single root directory with the same name as the plugin, 
+        // As the zip file contains a single root directory with the same name as the plugin,
         // we can safely extract it directly to the plugin directory.
         $pluginDirectory = PluginDirectory::getPath();
         $extractPath = Str::finish($pluginDirectory, '/');

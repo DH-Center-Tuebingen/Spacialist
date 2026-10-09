@@ -5,7 +5,6 @@ namespace App\Traits;
 use App\Services\Plugin\ScopeService;
 
 trait HasPluginScopes {
-
     /**
      * Register plugin scopes for this model
      *

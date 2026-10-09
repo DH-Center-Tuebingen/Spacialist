@@ -5,6 +5,8 @@ import {
     onBeforeRouteLeave,
 } from 'vue-router';
 
+import useUserStore from '@/bootstrap/stores/user.js';
+
 // Pages
 import Login from '@/components/Login.vue';
 import AppView from '@/components/AppView.vue';
@@ -33,7 +35,6 @@ import SingleSearch from '@/components/openaccess/SingleSearch.vue';
 
 import DummyComponent from '@/components/DummyComponent.vue';
 import NotFound from '@/components/NotFound.vue';
-import useUserStore from './stores/user';
 
 export {
     onBeforeRouteUpdate,

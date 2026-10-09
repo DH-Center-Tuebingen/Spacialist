@@ -11,11 +11,10 @@ use App\Support\Log\PluginLog;
 use App\Support\Plugin\Dependency;
 use App\VersionInfo;
 
-
 /**
  * Simple dependency requirements for the Plugin System.
  * Plugins can only be installed when the requirement is met.
- * 
+ *
  * ```xml
  * <dependencies>
  *      <core min='0.12.0'>
@@ -26,42 +25,37 @@ use App\VersionInfo;
  * ```
  */
 class DependencyService extends PluginService {
-
     use BootstrapCache;
-    
-    public function getCacheName(): string
-    {
+
+    public function getCacheName(): string {
         return 'plugin-dependencies';
     }
-    
-    protected function fetch(): array
-    {
+
+    protected function fetch(): array {
         return Dependencies::all()->toArray();
     }
-    
-    public function onBeforeInstall(Plugin $plugin, PluginManifest $manifest): void
-    {
+
+    public function onBeforeInstall(Plugin $plugin, PluginManifest $manifest): void {
         ['errors' => $dependencyErrors] = $this->evaluateDependencies($plugin, $manifest);
-        if(count($dependencyErrors) > 0){
+        if(count($dependencyErrors) > 0) {
             throw new PluginLifecycleException(
-                $plugin, 
+                $plugin,
                 __('Installation requirements are not met: :dependencyError', ['dependencyError' => implode(", ", $dependencyErrors)])
             );
         }
     }
-    
-    public function uninstall(Plugin $plugin, PluginManifest $manifest): void
-    {
+
+    public function uninstall(Plugin $plugin, PluginManifest $manifest): void {
         parent::uninstall($plugin, $manifest);
     }
-    
+
     private function getDependenciesFromManifest(PluginManifest $manifest): array {
         return $manifest->getTagNodes('dependencies/*');
     }
-    
+
     /**
      * Checks if all dependencies are met.
-     * 
+     *
      * @param Plugin\PluginManifest $manifest
      * @return array{ dependencies: Dependency[], errors: string[] } - Returns an array of the missing plugin names.
      */
@@ -74,29 +68,29 @@ class DependencyService extends PluginService {
                 'errors' => [],
             ];
         }
-    
+
         [
             'core' => $coreDependencies,
             'plugins' => $pluginDependencies,
             'unsupported' => $unsupportedDependencies,
         ] = $this->decomposeDependencies($dependencies);
-        
+
         $this->logWarningOfUnsupportedDependencies($plugin, $unsupportedDependencies);
-        $errors = array_merge($errors, $this->evaluatePluginDependencies($pluginDependencies));   
+        $errors = array_merge($errors, $this->evaluatePluginDependencies($pluginDependencies));
         $errors = array_merge($errors, $this->evaluateCoreDependencies($coreDependencies));
-        
+
         return [
             'dependencies' => $dependencies,
             'errors' => $errors,
         ];
     }
-    
+
     /**
      * Sorts the dependencies into three differnt buckets: core, plugins and unsupported.
-     * 
+     *
      * @param array<array<string, mixed>> $dependencies - The raw dependencies extracted from the manifest.
      */
-    private function decomposeDependencies(array $dependencies) : array{
+    private function decomposeDependencies(array $dependencies) : array {
         $data = [
             'core' => [],
             'plugins' => [],
@@ -107,16 +101,16 @@ class DependencyService extends PluginService {
                 case 'plugin': $data['plugins'][] = new Dependency($dependency); break;
                 case 'core': $data['core'][] = new Dependency($dependency); break;
                 default: $data['unsupported'][] = new Dependency($dependency);
-            } 
+            }
         }
-        
+
         return $data;
     }
-    
-    
+
+
     /**
      * Evaluates all unsupported dependencies and log them to the plugin log.
-     * 
+     *
      * @param Plugin $plugin
      * @param Dependency[] $dependencies List of plugin dependencies.
      * @return void
@@ -130,16 +124,16 @@ class DependencyService extends PluginService {
         $dependencyText = implode(", ", $dependencyList);
         PluginLog::for($plugin)->warning("Dependencies are not supporter and ignored: $dependencyText");
     }
-    
+
     /**
      * Evaluates if the plugin dependencies are met:
      * + Does the plugin exists
      * + Does the plugin meet the specified version range
-     * 
+     *
      * @param Dependency[] $dependencies List of plugin dependencies.
      * @return string[] - Returns an array of errors messages encountered during evaliation.
      */
-    private function evaluatePluginDependencies(array $dependencies): array{
+    private function evaluatePluginDependencies(array $dependencies): array {
         $errors = [];
         foreach($dependencies as $dependency) {
             $requiredPlugin = Plugin::where('name', $dependency->name)->first();
@@ -156,25 +150,25 @@ class DependencyService extends PluginService {
         }
         return $errors;
     }
-    
+
     /**
      * Evaluates if the core dependencies are met:
      * + Is there only a single core dependency (or none at all)
      * + Is the core dependency in the version range.
-     * 
+     *
      * @param Dependency[] $coreDependencies List of core dependencies.
      * @return string[] - Returns an array of errors messages encountered during evaliation.
      */
     private function evaluateCoreDependencies(array $coreDependencies): array {
         $errors = [];
-        if(count($coreDependencies) > 1){
+        if(count($coreDependencies) > 1) {
             $errors[] = __("Multiple core dependencies are present.");
         } else if(count($coreDependencies) === 1) {
             $dependency = $coreDependencies[0];
             info("Dependency details:");
             info($dependency->minVersion);
             info($dependency->maxVersion);
-            if(!$dependency->supportsVersion(app(VersionInfo::class)->getReleaseRaw())){
+            if(!$dependency->supportsVersion(app(VersionInfo::class)->getReleaseRaw())) {
                 $errors[] = __("Plugin is not compatible with the current Spacialist version.");
             }
         }

@@ -5,7 +5,6 @@ namespace Tests\Support\Templates;
 use Tests\Support\PluginTemplate;
 
 class ScopeTemplate extends PluginTemplate {
-
     public function addEntityScope() {
         $this->addXml("scopes", "scope", [
             ["src" => "Scopes/EntityScope", "on" => "App\Entity"]

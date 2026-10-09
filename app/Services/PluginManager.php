@@ -25,16 +25,14 @@ use App\Support\BootstrapCache;
 /**
  * A service class that manages all plugin related business logic,
  * such as installation, updates, and uninstallation of plugins.
- * 
- * It orchestrates the various features of the plugin system, 
+ *
+ * It orchestrates the various features of the plugin system,
  * such as hooks, migrations, permissions, ... .
- * 
+ *
  * To add a new feature to the plugin system, you can create a new PluginService
  * that implements the corresponding methods for installation, update, and uninstallation.
  */
-
 class PluginManager {
-
     use BootstrapCache;
 
     private array $pluggableServices = [];
@@ -91,7 +89,7 @@ class PluginManager {
             $plugin->name = $p['name'];
             $plugin->uuid = $p['uuid'];
             $plugin->installed_at = $p['installed_at'];
-            
+
             if(!$slim){
                 $plugin->version = $p['version'];
                 $plugin->update_available = $p['update_available'] ?? null;
@@ -106,7 +104,7 @@ class PluginManager {
     /**
      * Retrieves all installed plugins preferably from the Bootstrap Cache.
      * If the cache is not set it will be built.
-     * 
+     *
      * @return array
      */
     public function getInstalledPlugins(): array {
@@ -137,7 +135,7 @@ class PluginManager {
 
     /**
      * Updates a plugin.
-     * 
+     *
      * @param Plugin $plugin
      * @return string
      */
@@ -156,7 +154,7 @@ class PluginManager {
         $plugin->update_available = null;
         $plugin->version = $manifest->getVersion();
         $plugin->save();
-        
+
         $this->rebuildPluginCache();
 
         foreach($this->pluggableServices as $service) {
@@ -167,11 +165,11 @@ class PluginManager {
     }
 
     /**
-     * Uninstalls a plugin. This will not remove the plugin, but removes all 
-     * functionalities of the plugin from the database. 
-     * 
+     * Uninstalls a plugin. This will not remove the plugin, but removes all
+     * functionalities of the plugin from the database.
+     *
      * @param Plugin $plugin
-     * @param mixed $manifest - Manifest can be optionally provided to avoid reading the manifest multiple times during the uninstall process. 
+     * @param mixed $manifest - Manifest can be optionally provided to avoid reading the manifest multiple times during the uninstall process.
      *                          If not provided, it will be read it from the plugin.
      * @return void
      */
@@ -179,7 +177,7 @@ class PluginManager {
         if($manifest === null) {
             $manifest = PluginManifest::fromPlugin($plugin);
         }
-        
+
         foreach($this->pluggableServices as $service) {
             $service->onBeforeUninstall($plugin, $manifest);
         }
@@ -189,7 +187,7 @@ class PluginManager {
         }
 
         $this->rebuildPluginCache();
-        
+
         $plugin->installed_at = null;
         $plugin->save();
 
@@ -219,7 +217,7 @@ class PluginManager {
         foreach($this->pluggableServices as $service) {
             $service->onAfterRemove($plugin, $manifest);
         }
-        
+
         $this->cache();
     }
 
@@ -234,7 +232,7 @@ class PluginManager {
             }
         }
     }
-    
+
     public function clearPluginCache(): void {
         $this->clearCache();
         foreach($this->pluggableServices as $service) {

@@ -9,7 +9,6 @@ use Tests\Support\PluginTemplate;
 use Tests\PluginTestCase;
 
 class ApiPluginAttributeTest extends PluginTestCase {
-
     private ?PluginGenerator $generator = null;
 
     private function getAttributePlugin(): array {
@@ -52,7 +51,6 @@ class ApiPluginAttributeTest extends PluginTestCase {
         $this->ensureTeardown();
     }
 
-
     public function testGetPluginAttributesPlugin(): void {
         $template = $this->getAttributeTemplate();
         $this->generator = new PluginGenerator([$template]);
@@ -74,7 +72,6 @@ class ApiPluginAttributeTest extends PluginTestCase {
             ]);
         });
     }
-
 
     public function testInstallPluginWithAttributes(): void {
         $template = $this->getAttributeTemplate();

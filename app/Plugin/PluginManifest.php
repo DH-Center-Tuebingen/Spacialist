@@ -10,36 +10,36 @@ use SimpleXMLElement;
 use ZipArchive;
 
 /**
- * Each plugin has a manifest file (plugin.xml) that contains metadata 
- * about the plugin, such as its name, version, author, description, 
- * and also requests specific permissions for the plugin, like custom 
+ * Each plugin has a manifest file (plugin.xml) that contains metadata
+ * about the plugin, such as its name, version, author, description,
+ * and also requests specific permissions for the plugin, like custom
  * components, preferences, Hooks, ... .
- * 
- * This utility class is responsible for parsing the plugin manifest 
- * and providing access to its contents. 
+ *
+ * This utility class is responsible for parsing the plugin manifest
+ * and providing access to its contents.
  */
 class PluginManifest {
-
     public const MANIFEST_FILE_PATHS = [
         'plugin.xml',
         'App/info.xml',
     ];
 
     public function __construct(protected SimpleXMLElement $content) {
+
     }
 
     /**
      * Returns the text content of a leaf.
-     * 
-     * @param string $xpath - The xpath to a single leaf 
+     *
+     * @param string $xpath - The xpath to a single leaf
      * @return string
      */
-    public function getTextContent(string $xpath): string {    
+    public function getTextContent(string $xpath): string {
         $result = $this->content->xpath($xpath);
         if($result === false || count($result) === 0) {
             return "";
         }
-        
+
         return (string) $result[0];
     }
 
@@ -77,7 +77,7 @@ class PluginManifest {
     /**
      * Returns an array of nodes matching the given xpath, where each node is represented as an associative array containing the tag name, text content, and attributes.
      * If none was found, an empty array is returned.
-     * 
+     *
      * @param string $xpath
      * @return array<array{attributes: array, tag: mixed, text: string>}>
      */
@@ -87,7 +87,6 @@ class PluginManifest {
         if(!$xmlNodeArray || count($xmlNodeArray) === 0) {
             return [];
         }
-
 
         foreach($xmlNodeArray as $xmlNode) {
             $tag = $xmlNode->getName();
@@ -102,7 +101,6 @@ class PluginManifest {
                 "attributes" => $attributes,
             ];
 
-
             $children[] = $node;
         }
 
@@ -110,11 +108,11 @@ class PluginManifest {
     }
 
     // STATIC METHODS
-    
+
     /**
      * Reads the manifest file, like the read() function
      * but obtains the plugin path by just the pluginName.
-     * 
+     *
      * @param string $pluginName The name of the plugin (in PascalCase), which is also the name of the plugin directory.
      * @return bool| PluginManifest
      */
@@ -125,7 +123,7 @@ class PluginManifest {
 
     /**
      * Tries to read a manifest file
-     * 
+     *
      * @param mixed $path The absolute path to the plugin directory.
      * @return bool|PluginManifest
      */
@@ -156,7 +154,7 @@ class PluginManifest {
     }
 
     private function emitDeprecationWarning() {
-        PluginLog::logWarning("Plugin '{$this->getName()}' is using a deprecated manifest file location. This will be not supported in future versions. Please move the manifest file to the root of the plugin directory and name it 'plugin.xml'.");
+        PluginLog::logWarning("Plugin '{$this->getName()}' is using a deprecated manifest file location. This will no longer be supported with release 1.0. Please move the manifest file to the root of the plugin directory and name it 'plugin.xml'.");
     }
 
     private static function isFilePathDeprecated(string $filePath): bool {
@@ -186,9 +184,9 @@ class PluginManifest {
         foreach(self::MANIFEST_FILE_PATHS as $manifestFilePath) {
             if($pluginName) {
                 $manifestFilePath = Str::finish($pluginName, '/') . $manifestFilePath;
-            }            
-            
-            $manifestFilePath = str_replace(["/", "\\"], DIRECTORY_SEPARATOR, $manifestFilePath);   
+            }
+
+            $manifestFilePath = str_replace(["/", "\\"], DIRECTORY_SEPARATOR, $manifestFilePath);
             if($zip->locateName($manifestFilePath) !== false) {
                 $xmlString = $zip->getFromName($manifestFilePath);
                 $manifest = self::parse($xmlString);

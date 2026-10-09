@@ -8,8 +8,10 @@ class PluginUploadResult {
     public function __construct(
         public readonly string $pluginName,
         public readonly ?Plugin $plugin = null,
-    ) {}
-    
+    ) {
+
+    }
+
     public function isUpdate(): bool {
         return $this->plugin !== null;
     }

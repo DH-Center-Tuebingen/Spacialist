@@ -53,14 +53,14 @@ class PluginController extends Controller {
 
         $uploader = app(PluginUploader::class);
         $uploadResult = null;
-        try{
+        try {
             $uploadResult = $uploader->upload($request->file('file'));
-        }catch(Exception $e) {
+        } catch(Exception $e) {
             return response()->json([
                 'error' => $e->getMessage()
             ], 422);
         }
-        
+
         $pluginName = $uploadResult->pluginName;
         $fromVersion = null;
         $success = true;
@@ -79,7 +79,7 @@ class PluginController extends Controller {
                 $success = false;
             }
         }
-        
+
         if(!$success) {
             $message = "";
             if($uploadResult->isUpdate()) {
@@ -108,7 +108,7 @@ class PluginController extends Controller {
 
     /**
      * Installs the plugin.
-     * 
+     *
      * @param Request $request
      * @param Plugin $plugin
      * @return JsonResponse<array{
@@ -120,17 +120,17 @@ class PluginController extends Controller {
     public function installPlugin(Request $request, Plugin $plugin): JsonResponse {
         $this->requireNotInstalled($plugin);
 
-        try{
+        try {
             app(PluginManager::class)->install($plugin);
-        }catch (ModelNotFoundException $e) {
+        } catch (ModelNotFoundException $e) {
             return response()->json([
                 'error' => __('Error while installing plugin. Preset does not exist.')
             ], 403);
-        }catch (PluginLifecycleException $e) {
+        } catch (PluginLifecycleException $e) {
             return response()->json([
                 'error' => $e->getMessage()
             ], 422);
-        }catch (Exception $e) {
+        } catch (Exception $e) {
             report($e);
             PluginLog::for($plugin)->error("Unexpected error during plugin installation: " . $e->getMessage(), ['exception' => $e]);
             return response()->json([
@@ -140,14 +140,14 @@ class PluginController extends Controller {
 
         return response()->json([
             'plugin' => $plugin,
-            'scripts' => [ app(PluginManager::class)->scriptService->getUrl($plugin)],
+            'scripts' => [app(PluginManager::class)->scriptService->getUrl($plugin)],
             'styles' => app(PluginManager::class)->cssService->getUrls($plugin),
         ]);
     }
 
     /**
-     * Uninstall the plugin. 
-     * 
+     * Uninstall the plugin.
+     *
      * @param Request $request
      * @param Plugin $plugin
      * @return JsonResponse<array{
@@ -159,12 +159,12 @@ class PluginController extends Controller {
     public function uninstallPlugin(Request $request, Plugin $plugin): JsonResponse {
         $this->requireInstalled($plugin);
 
-        try{
+        try {
             app(PluginManager::class)->uninstall($plugin);
 
             return response()->json([
                 'plugin' => $plugin,
-                'scripts' => [ app(PluginManager::class)->scriptService->getUrl($plugin)],
+                'scripts' => [app(PluginManager::class)->scriptService->getUrl($plugin)],
                 'styles' => app(PluginManager::class)->cssService->getUrls($plugin),
             ]);
         }catch (ModelNotFoundException $e) {
@@ -174,8 +174,8 @@ class PluginController extends Controller {
     }
 
     /**
-     * Removes the plugin from the system 
-     * 
+     * Removes the plugin from the system
+     *
      * @param Request $request
      * @param Plugin $plugin
      * @return JsonResponse<array{
@@ -191,13 +191,13 @@ class PluginController extends Controller {
         $plugin->delete();
         return response()->json([
             'plugin' => $plugin,
-            'scripts' => [ app(PluginManager::class)->scriptService->getUrl($plugin)],
+            'scripts' => [app(PluginManager::class)->scriptService->getUrl($plugin)],
             'styles' => app(PluginManager::class)->cssService->getUrls($plugin),
         ]);
     }
-    
+
     /**
-     * Gets all plugins. 
+     * Gets all plugins.
      * Can be limited to 'installed' and 'uninstalled' plugins by setting the respective query parameter to 1.
      * @param Request $request
      * @return JsonResponse<Plugin[]> - Returns the list of all plugins.
@@ -209,7 +209,7 @@ class PluginController extends Controller {
         if($request->query('installed') == 1) {
             $plugins = app(PluginManager::class)->getInstalledPlugins();
         } else if($request->query('uninstalled') == 1) {
-            // We only cache installed plugins. When we need 
+            // We only cache installed plugins. When we need
             $plugins = Plugin::whereNull('installed_at')->get();
         } else {
             $plugins = app(PluginManager::class)->getPlugins();
@@ -222,23 +222,23 @@ class PluginController extends Controller {
 
         return response()->json($plugins);
     }
-    
+
     /**
-     * Publishes the JavaScript file to the storage. 
-     * 
+     * Publishes the JavaScript file to the storage.
+     *
      * @param Plugin $plugin
      * @return JsonResponse<string> - Returns the URL of the published script.
      */
     public function publishScript(Plugin $plugin) {
         $this->requireInstalled($plugin);
-        $scriptUrl =  app(PluginManager::class)->scriptService->publish($plugin);
+        $scriptUrl = app(PluginManager::class)->scriptService->publish($plugin);
         return response()->json($scriptUrl);
     }
 
     /**
      * Get's the changelog of the plugin as md string.
-     * If no changelog was found, an empty string will be returned 
-     * 
+     * If no changelog was found, an empty string will be returned
+     *
      * @param Request $request
      * @param Plugin $plugin
      * @return JsonResponse<string> - Returns the plugin's changelog, or an empty string if no changelog was found.
@@ -250,7 +250,7 @@ class PluginController extends Controller {
 
     /**
      * Downloads the plugin script from the server.
-     * 
+     *
      * @param Request $request
      * @param string $filepath
      * @return BinaryFileResponse|JsonResponse<string>
@@ -269,7 +269,7 @@ class PluginController extends Controller {
 
     /**
      * Downloads the css script from the server.
-     * 
+     *
      * @param Request $request
      * @param string $filepath
      * @return BinaryFileResponse|JsonResponse<string>
@@ -286,7 +286,7 @@ class PluginController extends Controller {
             ->downloadRelative($filepath);
     }
 
-    /** 
+    /**
      * Runs all missing migrations of a plugin.
      * @return \Illuminate\Http\JsonResponse - Returns the current migration state after execution
      */

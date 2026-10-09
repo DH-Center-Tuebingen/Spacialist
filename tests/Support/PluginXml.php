@@ -9,6 +9,7 @@ use Tests\Support\PluginTemplate;
  */
 class PluginXml {
     public function __construct(protected PluginTemplate $template) {
+
     }
 
     /**
@@ -22,7 +23,7 @@ class PluginXml {
     }
 
     /**
-     * Retrieves the xml from the template and generates 
+     * Retrieves the xml from the template and generates
      * the string representation.
      * @return string String representation of the template xml.
      */
@@ -36,13 +37,13 @@ class PluginXml {
 
     /**
      * Generates the XML content.
-     * 
+     *
      * Normally uses a the provided root tag and generates child nodes according to the attributes provided
      * inside the content array. If child nodes are set to null, the root tags will be generated according to
      * the provided content.
-     * 
-     * @param string $rootTag - Root tag name. 
-     * @param string|null $childTag - Child tag name. 
+     *
+     * @param string $rootTag - Root tag name.
+     * @param string|null $childTag - Child tag name.
      * @param array $content - Array of associative array which define the attribute key/value pairs. This will be used to generate the tags. E.g. if count of content is 6, 5 child nodes will be generated.
      * @return string XML string representation of the provided values.
      */
@@ -56,7 +57,7 @@ class PluginXml {
 
     /**
      * Creates the xml content string using the $rootTag as outer tag, while adding $childTags with the attribute key-value paris defined in $content.
-     * 
+     *
      * NOTE: The $childTag can be overwritten by setting the '_tag' key in the $content array.
      * @param string $rootTag The root XML tag.
      * @param string $childTag The child XML tag.
@@ -76,7 +77,7 @@ class PluginXml {
         $xmlContent .= "    </$rootTag>";
         return $xmlContent;
     }
-    
+
     /**
      * Generates a one or multiple tags and sets their attributes to $content.
      * @param string $rootTag The root XML tag.
@@ -92,7 +93,7 @@ class PluginXml {
         }
         return $xmlContent;
     }
-    
+
     /**
      * Generates the tag attributes. If a value is null it will be skipped.
      * If you need to use a null value, use the string 'null'.
@@ -102,17 +103,16 @@ class PluginXml {
     private function buildAttributes(array $attributes): string {
         $attrString = "";
         foreach($attributes as $key => $value) {
-            if($value !== null){ 
+            if($value !== null){
                 $attrString .= "$key=\"$value\" ";
             }
         }
         return trim($attrString);
     }
-    
 
     /**
      * Generates a plugin xml file based on the template.
-     * 
+     *
      * @return string
      */
     public function generateInfoXml(): string {
@@ -136,7 +136,7 @@ class PluginXml {
     </plugin>
     XML;
     }
-    
+
     /**
      * Generates the authors list from the template.
      * @return string The generated XML string for the authors list.
@@ -152,5 +152,4 @@ class PluginXml {
         }
         return "<authors>\n" . $authorsXml . "</authors>";
     }
-
 }

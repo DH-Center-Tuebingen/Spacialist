@@ -59,7 +59,6 @@ abstract class TestCase extends BaseTestCase {
                 foreach($json['errors'] as $key => $value) {
                     $message .= "==> ". $key . ":: " . json_encode($value) . "\n  ";
                 }
-
             }
         } catch(\Exception $e) {
             // No error message found in response
@@ -79,7 +78,6 @@ abstract class TestCase extends BaseTestCase {
         if(isset($this->user)) {
             $this->user = null;
         }
-
         Auth::guard('web')->logout(true);
     }
 
@@ -88,7 +86,7 @@ abstract class TestCase extends BaseTestCase {
             'Accept' => 'application/json' // When not setting this, Laravels validation will return a 302 on failure!
         ]);
     }
-    
+
     public function useGuest(){
         $this->unsetTestUser();
         $this->setTestUser(2);
@@ -100,23 +98,23 @@ abstract class TestCase extends BaseTestCase {
         $user->givePermissionTo($permissions);
         $this->setTestUser($user->id);
     }
-    
+
     /**
      * Use a user that has all group permissions except the ones specified in the argument using a shorthand string (e.g. "rwds").
-     * 
+     *
      * @param $group string The permission group to use, e.g. "plugin"
-     * @param $without stringThe permissions to revoke RWDS (Read, Write, Delete, Share) 
+     * @param $without stringThe permissions to revoke RWDS (Read, Write, Delete, Share)
      */
     public function useUserWithoutPermission(string $group, string $without) {
-        $without = strtolower($without);    
+        $without = strtolower($without);
         $permissions = [
             'r' => $group . '_read',
             'c' => $group . '_create',
             'w' => $group . '_write',
             'd' => $group . '_delete',
             's' => $group . '_share',
-        ];   
-        
+        ];
+
         while(strlen($without) > 0) {
             $char = substr($without, 0, 1);
             if(isset($permissions[$char])) {
@@ -124,13 +122,13 @@ abstract class TestCase extends BaseTestCase {
             }
             $without = substr($without, 1);
         }
-    
+
         $this->unsetTestUser();
         $user = User::factory()->create();
         $user->givePermissionTo(array_values($permissions));
         $this->setTestUser($user->id);
     }
-    
+
     /**
      * The booted method of laravel models is called before the testCase is run.
      * Therefore when you need to modify any model and have those changes being
@@ -139,12 +137,12 @@ abstract class TestCase extends BaseTestCase {
     public static function rebootModel($modelClass) {
         // Clear global scopes before rebooting
         $reflection = new \ReflectionClass($modelClass);
-        
+
         // Clear global scopes
         $scopesProperty = $reflection->getProperty('globalScopes');
         $scopesProperty->setAccessible(true);
         $scopesProperty->setValue(null, []);
-        
+
         // Flush event listeners and reboot
         $modelClass::flushEventListeners();
         $modelClass::boot();

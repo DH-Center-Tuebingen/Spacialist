@@ -16,19 +16,18 @@ use Psy\Readline\Hoa\Console;
 
 /**
  * Plugin do support global Laravel Scopes.
- * 
+ *
  * https://laravel.com/docs/13.x/eloquent#global-scopes
- * 
+ *
  * ```xml
  * <scopes>
  *     <scope src="App\Plugins\ExamplePlugin\Scopes\ExampleScope" on="App\Entity" />
  *     <scope src="App\Plugins\ExamplePlugin\Scopes\AnotherScope" on="App\Entity" />
  * </scopes>
  * ```
- * 
+ *
  */
 class ScopeService extends PluginService implements ManifestContent {
-
     use BootstrapCache;
 
     protected function getCacheName(): string {
@@ -46,7 +45,7 @@ class ScopeService extends PluginService implements ManifestContent {
         $this->clearScopesOf($plugin);
         $this->createScopesFor($plugin, $scopes);
     }
-    
+
     public function uninstall(Plugin $plugin, PluginManifest $pluginManifest): void {
         $this->clearScopesOf($plugin);
     }
@@ -90,7 +89,7 @@ class ScopeService extends PluginService implements ManifestContent {
         foreach($nodes as $scope) {
             $attributes = $scope['attributes'] ?? [];
             $on = $attributes['on'];
-            
+
             $namespaceSrc = str_replace("/", "\\", $attributes['src']);
             $namespaceSrc = Str::start($namespaceSrc, "\\");
             $namespacedSrc = PluginDirectory::namespaceOf($manifest->getName(), $namespaceSrc);
@@ -105,7 +104,6 @@ class ScopeService extends PluginService implements ManifestContent {
         return $scopes;
     }
 
-
     protected function getScopesOf(Plugin $plugin): array {
         $info = $plugin->getInfo();
         $scopes = [];
@@ -114,8 +112,6 @@ class ScopeService extends PluginService implements ManifestContent {
                 $pluginLogger = new PluginLog($plugin);
                 foreach($info['scopes'] as $scope) {
                     if(isset($scope['@attributes'])) {
-
-
                         // VERIFY
                         // $attributes = $scope['@attributes'];
                         // if(!array_key_exists('src', $attributes)) {

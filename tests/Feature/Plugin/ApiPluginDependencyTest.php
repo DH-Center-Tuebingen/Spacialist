@@ -12,9 +12,7 @@ use Tests\Support\PluginGenerator;
 
 use PHPUnit\Framework\Attributes\DataProvider;
 
-
 class ApiPluginDependencyTest extends PluginTestCase {
-    
     private const PLUGIN_NAME = 'DependencyPlugin';
     private const PLUGIN_UUID = '00000000-0000-0000-0000-000000000002';
 
@@ -27,33 +25,33 @@ class ApiPluginDependencyTest extends PluginTestCase {
             version: "1.0.0"
         );
         $template->addBasic();
-        
-        if($coreMin || $coreMax){    
+
+        if($coreMin || $coreMax) {
             $coreDependency = ['_tag' => 'core'];
-        
+
             if($coreMin){
                 $coreDependency['min'] = $coreMin;
             }
-            
+
             if($coreMax){
                 $coreDependency['max'] = $coreMax;
             }
-            
+
             $pluginDependencies[] = $coreDependency;
         }
-        
-        if(count($pluginDependencies) > 0 || $addEmpty) {        
+
+        if(count($pluginDependencies) > 0 || $addEmpty) {
             $template->addXml("dependencies", 'plugin', $pluginDependencies);
         }
 
         return $template;
     }
-    
+
     protected function setUp(): void {
         parent::setUp();
         Carbon::setTestNow('2020-07-20 10:15:30');
     }
-    
+
     private function ensureTeardown() {
         if($this->generator !== null) {
             $this->generator->tearDown();
@@ -69,17 +67,17 @@ class ApiPluginDependencyTest extends PluginTestCase {
 
     function testInstallWithEmptyDependencies() {
         $this->app->instance(VersionInfo::class, new VersionInfo(0,11,0));
-        
+
         $template = self::defaultDependencyTemplate()->created()->generate("plugin.xml");
         $this->generator = PluginGenerator::with([$template], function () use ($template) {
             $response = $this->userRequest()
                 ->post("/api/v1/plugin/install/{$template->plugin->id}");
-                
+
             $response->assertStatus(200);
-            
+
             $installedResponse = $this->userRequest()
                 ->get("/api/v1/plugin");
-            
+
             $installedResponse->assertStatus(200);
             $installedResponse->assertJsonFragment([
                 'name' => static::PLUGIN_NAME,
@@ -87,22 +85,22 @@ class ApiPluginDependencyTest extends PluginTestCase {
             ]);
         });
     }
-    
+
     #[DataProvider('coreDependencySuccessProvider')]
     function testInstallWithCoreDependencySuccessfully($coreMin, $coreMax) {
         $this->app->instance(VersionInfo::class, new VersionInfo(0,11,0));
-        
+
         info("CORE MAX => " . $coreMax);
         $template = self::defaultDependencyTemplate(coreMin:$coreMin, coreMax:$coreMax)->created()->generate("plugin.xml");
         $this->generator = PluginGenerator::with([$template], function () use ($template) {
             $response = $this->userRequest()
                 ->post("/api/v1/plugin/install/{$template->plugin->id}");
-                
+
             $response->assertStatus(200);
-            
+
             $installedResponse = $this->userRequest()
                 ->get("/api/v1/plugin?installed=1");
-            
+
             $installedResponse->assertStatus(200);
             $installedResponse->assertJsonFragment([
                 'name' => static::PLUGIN_NAME,
@@ -110,7 +108,7 @@ class ApiPluginDependencyTest extends PluginTestCase {
             ]);
         });
     }
-    
+
     static function coreDependencySuccessProvider() {
         return [
             // "No limits" => [null, null],
@@ -121,28 +119,28 @@ class ApiPluginDependencyTest extends PluginTestCase {
             "Max version is current version" => [null, "0.11.0"],
         ];
     }
-    
+
     #[DataProvider('coreDependencyFailProvider')]
     function testInstallWithCoreDependencyFails($coreMin, $coreMax) {
         $this->app->instance(VersionInfo::class, new VersionInfo(0,11,0));
-        
+
         $template = self::defaultDependencyTemplate(coreMin:$coreMin, coreMax:$coreMax)->created()->generate("plugin.xml");
         $this->generator = PluginGenerator::with([$template], function () use ($template) {
             $response = $this->userRequest()
                 ->post("/api/v1/plugin/install/{$template->plugin->id}");
-                
+
             $response->assertStatus(422);
-            
+
             $installedResponse = $this->userRequest()
                 ->get("/api/v1/plugin?installed=1");
-            
+
             $installedResponse->assertStatus(200);
             $installedResponse->assertJsonMissing([
                 'name' => static::PLUGIN_NAME,
             ]);
         });
     }
-    
+
     static function coreDependencyFailProvider() {
         return [
             "Min too high" => ['99.0', null],
@@ -151,43 +149,40 @@ class ApiPluginDependencyTest extends PluginTestCase {
             "Min and Max out of range (higher)" => ['99.0.1', '99.0.2'],
         ];
     }
-    
-    
+
     #[DataProvider('pluginDependencySuccessProvider')]
     function testInstallWithPluginDependencySuccessfully(...$plugins) {
         $this->app->instance(VersionInfo::class, new VersionInfo(0,11,0));
-          
+
         $currentVersion = "1.1.1";
         $others = [];
-        foreach($plugins as $plugin) {        
+        foreach($plugins as $plugin) {
             $other = new PluginTemplate(
                 name: $plugin['name'],
                 uuid: Str::uuid()->toString(),
                 version: $currentVersion
             );
-            
+
             $other->addBasic()->generate("plugin.xml");
             $others[] = $other;
         }
-        
-    
+
         $template = self::defaultDependencyTemplate(pluginDependencies: $plugins)
             ->created()
             ->generate("plugin.xml");
 
         $templates = array_merge($others, [$template]);
-        
-        
+
         $this->generator = PluginGenerator::with($templates, function () use ($template) {
-                    
+
             $response = $this->userRequest()
                 ->post("/api/v1/plugin/install/{$template->plugin->id}");
-                
+
             $response->assertStatus(200);
-            
+
             $installedResponse = $this->userRequest()
                 ->get("/api/v1/plugin?installed=1");
-            
+
             $installedResponse->assertStatus(200);
             $installedResponse->assertJsonFragment([
                 'name' => static::PLUGIN_NAME,
@@ -195,7 +190,7 @@ class ApiPluginDependencyTest extends PluginTestCase {
             ]);
         });
     }
-    
+
     static function pluginDependencySuccessProvider() {
         $currentVersion = "1.1.1";
         return [
@@ -231,49 +226,46 @@ class ApiPluginDependencyTest extends PluginTestCase {
             ],
         ];
     }
-    
-    
+
     #[DataProvider('pluginDependencyFailureProvider')]
-    function testInstallWithPluginDependencyFails(...$plugins) {        
+    function testInstallWithPluginDependencyFails(...$plugins) {
         $this->app->instance(VersionInfo::class, new VersionInfo(0,11,0));
-        
+
         $currentVersion = app(VersionInfo::class)->getReleaseRaw();
         $others = [];
         foreach($plugins as $plugin) {
             if($plugin['_missing'] ?? false) {
                 continue;
             }
-            
+
             $other = new PluginTemplate(
                 name: $plugin['name'],
                 uuid: Str::uuid()->toString(),
                 version: $currentVersion
             );
-            
+
             $other->addBasic()->generate("plugin.xml");
             $others[] = $other;
         }
-        
-    
+
         $template = self::defaultDependencyTemplate(pluginDependencies: $plugins)->created()->generate("plugin.xml");
         $templates = array_merge($others, [$template]);
-        
-        
+
         $this->generator = PluginGenerator::with($templates, function () use ($template) {
             $response = $this->userRequest()
                 ->post("/api/v1/plugin/install/{$template->plugin->id}");
             $response->assertStatus(422);
-            
+
             $installedResponse = $this->userRequest()
                 ->get("/api/v1/plugin?installed=1");
-            
+
             $installedResponse->assertStatus(200);
             $installedResponse->assertJsonMissing([
                 'name' => static::PLUGIN_NAME,
             ]);
         });
     }
-    
+
     static function pluginDependencyFailureProvider() {
         return [
             "One > no limits but missing" => [['_missing' => true, 'name' => 'a', 'min' => null, 'max' => null]],
@@ -309,6 +301,4 @@ class ApiPluginDependencyTest extends PluginTestCase {
             ],
         ];
     }
-    
-
 }

@@ -19,7 +19,6 @@ use Tests\PluginTestCase;
  *   POST /api/v1/plugin/migrate/{plugin}/force_add      – addMigrationToDatabase (plugin_write)
  */
 class ApiPluginMigrationTest extends PluginTestCase {
-
     private const PLUGIN_NAME = 'MigPlugin';
     private const PLUGIN_UUID = '00000000-0000-0000-0000-000000000001';
 

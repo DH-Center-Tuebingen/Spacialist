@@ -9,7 +9,6 @@ use App\Support\Log\PluginLog;
 use Illuminate\Support\Facades\File;
 
 class DiscoveryService extends PluginService {
-
     /**
      * Finds the directories of the plugins in the plugin directory. This is done by looking for subdirectories in the plugin directory.
      * @return array<string> Full paths of the plugin directories.
@@ -19,14 +18,14 @@ class DiscoveryService extends PluginService {
     }
 
     /**
-     * Finds the names of the plugins in the plugin directory. This is done by looking for subdirectories in the plugin directory. 
+     * Finds the names of the plugins in the plugin directory. This is done by looking for subdirectories in the plugin directory.
      * @return array<string> Names of the plugins (which are the same as the names of the subdirectories in the plugin directory).
      */
     public static function getPluginNames(): array {
         $directories = self::getPluginPaths();
         return array_map(fn($path) => basename($path), $directories);
     }
-    
+
     /**
      * Summary of discover
      * @return array

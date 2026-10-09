@@ -11,16 +11,15 @@ use App\Validators\HookValidator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
-
 /**
- * Service that manages plugin hooks. Hooks are a way for plugins to inject functionality 
+ * Service that manages plugin hooks. Hooks are a way for plugins to inject functionality
  * into existing routes or other parts of the application without modifying core code.
- * 
+ *
  * A order can be specified that forces the execution of hooks a specific position compared
- * to other hooks. Hooks with a higher value will be executed later than hooks with a lower value. 
- * So that later modifications will overwrite previous ones. The default order value is 0 and by default they are executed in the order 
+ * to other hooks. Hooks with a higher value will be executed later than hooks with a lower value.
+ * So that later modifications will overwrite previous ones. The default order value is 0 and by default they are executed in the order
  * of their creation.
- * 
+ *
  * ```xml
  * <Hooks>
  *     <Hook on="api/vx/target/endpoint" src="Class@method" order="1"/>
@@ -29,7 +28,6 @@ use Illuminate\Support\Facades\Log;
  * ```
  */
 class HookService extends PluginService {
-
     use BootstrapCache;
 
     const FORBIDDEN_HOOKS = [
@@ -103,7 +101,7 @@ class HookService extends PluginService {
     public function addHook(array $hook, Plugin $plugin) {
         $hookModel = self::createHookFromJson($hook, $plugin);
         $pluginNamespace = PluginDirectory::namespaceOf($plugin->name);
-        
+
         $method = Method::parseFromString($hookModel->src);
         if(!$method->exists($pluginNamespace)) {
             $fullClass = $method->expandNamespace($pluginNamespace);
@@ -115,7 +113,7 @@ class HookService extends PluginService {
 
     /**
      * Executes all hooks on a specific route.
-     * 
+     *
      * @param string $src - The source to execute hooks for(e.g. route name or other identifier)
      * @param mixed $request - The request object to pass to the hook methods
      * @param mixed $response - The response object to pass to the hook methods. This is passed by reference so hooks can modify it directly.
@@ -161,7 +159,6 @@ class HookService extends PluginService {
      * @return Hook - The unsaved Hook model instance.
      */
     public function createHookFromJson(array $hookJson, ?Plugin $plugin = null): Hook {
-
         $validator = new HookValidator();
         $hookModel = $validator->validate($hookJson);
 

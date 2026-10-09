@@ -13,17 +13,16 @@ use Illuminate\Support\Facades\Route;
 
 /**
  * Specifies routes defined by the plugin. The routes file will be loaded and registered with the application.
- * 
+ *
  * WARNING: When no route is specified in the manifest, the deprecated routes at 'routes/api.php' will be evaluated, this will be removed in a future version.
- * 
+ *
  * ```xml
  * <routes src="/lib/App/routes.php" middleware="api" />
  * ```
  */
 class RouteService extends PluginService {
-
     use BootstrapCache;
-    
+
     const DEPRECATED_DEFAULT_ROUTES = 'routes/api.php';
 
     protected function getCacheName(): string {
@@ -114,7 +113,7 @@ class RouteService extends PluginService {
                 $routesPath = PluginDirectory::fromName($route['plugin_name'])->getAbsolutePluginPath($route['src']);
                 $api = $route['middleware'] ?? 'api';
 
-                if(file_exists($routesPath)) {                
+                if(file_exists($routesPath)) {
                     Route::prefix($prefix)
                         ->middleware($api)
                         ->namespace($namespace)

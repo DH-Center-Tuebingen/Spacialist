@@ -8,21 +8,19 @@ use Stringable;
 use Illuminate\Support\Str;
 use Tests\Support\PluginXml;
 
-
 /**
  * The PluginTemplate class is used for testing to replicate PluginTemplates
  * on the FileSystem to mimic the actual plugin functionality.
- * 
+ *
  * It works together with the PluginGenerator and PluginDirectoryGenerator
  * to create the database structure and also the physical structure on the filesystem.
- * 
+ *
  * Normally it's sufficient to work with the PluginTemplate directly,
- * but if you have a more complex use-case you may create a child class 
- * to mock templates more efficiently while keeping the test files tidy.  
- * 
+ * but if you have a more complex use-case you may create a child class
+ * to mock templates more efficiently while keeping the test files tidy.
+ *
  */
 class PluginTemplate implements Stringable {
-
     public Plugin $plugin;
     private $manifest = "plugin.xml";
     protected $structure = [];
@@ -31,12 +29,12 @@ class PluginTemplate implements Stringable {
     public ?string $packageJson = null;
     private bool $generateCalled = false;
     /**
-     * Creates a template for a plugin that can be generated on the filesystem 
+     * Creates a template for a plugin that can be generated on the filesystem
      * and the database by the PluginGenerator.
-     * 
+     *
      * The plugin will be installed by default.
      * If you require the plugin to be created without installation, set the $skipInstallation parameter to true.
-     * 
+     *
      * @param string $name - The name of the plugin.
      * @param string $version - The version of the plugin.
      * @param mixed $uuid - The UUID of the plugin. If null, a new UUID will be generated.
@@ -59,12 +57,12 @@ class PluginTemplate implements Stringable {
         $this->plugin = new Plugin();
         $this->plugin->name = $name;
         $this->plugin->version = $version;
-        
+
         if($uuid == null) {
            $uuid = Str::uuid()->toString();
         }
         $this->plugin->uuid = $uuid;
-            
+
         if($updatedAt) {
             $this->plugin->updated_at = $updatedAt;
         }
@@ -86,7 +84,7 @@ class PluginTemplate implements Stringable {
      * When we have an array describing the plugin similar to the
      * database representation of said plugin, we can generate it using
      * that slug named representation.
-     * 
+     *
      * @param array $array - Plugin definition as an associated arrays, where keys are plugin properties in slug_case. Required keys: 'name', 'uuid', 'version'. Optional keys: 'update_available', 'created_at', 'installed_at', 'updated_at'.
      * @throws \Exception
      * @return $this
@@ -110,7 +108,7 @@ class PluginTemplate implements Stringable {
     /**
      * Allows for setting the changelog afterwards.
      * This will overwrite an existing changelog.
-     * 
+     *
      * @param mixed $value - The content of the changelog, if null the changelog will be removed.
      * @return $this - Returns the PluginTemplate instance for chaining
      */
@@ -121,7 +119,7 @@ class PluginTemplate implements Stringable {
 
     /**
      * Sets the manifest file name, by default it's "plugin.xml".
-     * 
+     *
      * @param string $manifest - The manifest file name, e.g. "custom_manifest.xml"
      * @return $this - Returns the PluginTemplate instance for chaining
      */
@@ -132,7 +130,7 @@ class PluginTemplate implements Stringable {
 
     /**
      * Sets the manifest file to the legacy "App/info.xml" path.
-     * 
+     *
      * @return $this - Returns the PluginTemplate instance for chaining
      */
     public function setLegacyManifest(): static {
@@ -143,7 +141,7 @@ class PluginTemplate implements Stringable {
     /**
      * Sets the content of the package.json file.
      * This will overwrite an existing package.json content.
-     * 
+     *
      * @param mixed $packageJson - The content of the package.json file as a string, if null the package.json file will not be created.
      * @return $this - Returns the PluginTemplate instance for chaining
      */
@@ -155,7 +153,7 @@ class PluginTemplate implements Stringable {
     /**
      * Add a filesystem file to the template.
      * This will be replicated on the file system when the plugin is generated.
-     * 
+     *
      * @param string $filePath - The file path relative to the plugin root, e.g. "src/Example.php"
      * @param string $fileContent - The content of the file as a string
      * @throws \Exception if the file path is invalid or conflicts with an existing file/directory
@@ -187,7 +185,7 @@ class PluginTemplate implements Stringable {
 
     /**
      * Adds the basic features: changelog and js-script
-     * 
+     *
      * @return $this
      */
     public function addBasic(): static {
@@ -200,8 +198,8 @@ class PluginTemplate implements Stringable {
      * ```js
      *      console.log('Hello from {PluginName}');
      * ```
-     * 
-     * 
+     *
+     *
      * @return $this
      */
     public function addBasicJs(): static {
@@ -211,7 +209,7 @@ class PluginTemplate implements Stringable {
 
     /**
      * Adds the default changelog file with the content "[DEFAULT CHANGELOG]"
-     * 
+     *
      * @return $this
      */
     public function addBasicChangelog(): static {
@@ -222,7 +220,7 @@ class PluginTemplate implements Stringable {
     /**
      * Adds a custom xml node to the manifest file.
      * The XML should be kept simplistic and normally only has a maximum of 2 levels:
-     * 
+     *
      * ```xml
      * <rootTag>
      *    <childTag attribute1="value1" attribute2="value2" />
@@ -230,11 +228,11 @@ class PluginTemplate implements Stringable {
      *    ...
      * </rootTag>
      * <!-- or, if childTag is null -->
-     * 
+     *
      * <rootTag attribute1="value1" attribute2="value2" />
      * <rootTag attribute1="value3" attribute2="value4" />
-     * ```  
-     * 
+     * ```
+     *
      * @param string $rootTag - The root tag name, e.g. "hooks"
      * @param string $childTag - The child tag name, e.g. "hook", can be set to null to only add the root tag with the provided content.
      * @param array $content - An array of child tag content, where each item is an associative array of attributes, e.g.: [["src" => "Hooks/Hook1@method", "on" => "api/v1/version" ],...]
@@ -251,7 +249,7 @@ class PluginTemplate implements Stringable {
 
     /***
      * Generates the info.xml file based on the plugin's properties and hooks.
-     * 
+     *
      * @param string|null $path Optional path for the info.xml file, defaults to "App/info.xml".
      * @return $this
      */
@@ -297,13 +295,12 @@ class PluginTemplate implements Stringable {
 
     /**
      * Returns the XML content.
-     * 
+     *
      * @return array
      */
     public function getXml(): array {
         return $this->xml;
     }
-
 
     /**
      * Set the template to install in CREATED state.
@@ -316,13 +313,13 @@ class PluginTemplate implements Stringable {
     }
 
     /**
-     * Sets the lifecycle state to INSTALLED to install the plugin 
+     * Sets the lifecycle state to INSTALLED to install the plugin
      * when generated.
-     * 
+     *
      * Note: Normally this is the default behavior, but some implementation
      * may want to change the default to skipped, so we need to be able to
-     * revert that in some cases. 
-     * 
+     * revert that in some cases.
+     *
      * @return $this
      */
     public function installed(): static {
@@ -353,8 +350,7 @@ class PluginTemplate implements Stringable {
     public function getLifecycleState(): PluginLifecycleState {
         return $this->lifecycleState;
     }
-    
-    
+
     private function printXMLRecursively($xml, $indent = 0): string {
         $text = str_repeat("    ", $indent);
         foreach($xml as $key => $value) {
@@ -366,7 +362,7 @@ class PluginTemplate implements Stringable {
         }
         return $text;
     }
-    
+
     public function __toString(): string {
         $output = "\n============  Plugin Template: " . $this->plugin->name . " ============\n";
         $output .= "Name: " . $this->plugin->name . "\n";
@@ -377,7 +373,5 @@ class PluginTemplate implements Stringable {
         $output .= $this->xml === [] ? "- EMPTY - \n" :  $this->printXMLRecursively($this->xml) . "\n";
         $output .= "END =========  Plugin Template: ". $this->plugin->name .   "======== END\n";
         return $output;
-    
     }
-    
 }

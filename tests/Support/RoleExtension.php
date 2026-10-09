@@ -4,14 +4,12 @@ namespace Tests\Support;
 
 use Exception;
 
-
 class RoleExtension {
-
     const ALLOWED_PERMISSIONS = [
-        'c' => "create", 
-        'r' => "read", 
-        'w' => "write", 
-        'd' => "delete", 
+        'c' => "create",
+        'r' => "read",
+        'w' => "write",
+        'd' => "delete",
         's' => "share"
     ];
 

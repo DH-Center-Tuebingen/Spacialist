@@ -6,20 +6,17 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 use RuntimeException;
 
-
 /**
- * Stores a compiled set of data, directly as php file inside Laravel's 'bootstrap/cache' 
+ * Stores a compiled set of data, directly as php file inside Laravel's 'bootstrap/cache'
  * directory to allow fast access with little to no overhead.
  */
-trait BootstrapCache
-{
-
+trait BootstrapCache {
     /**
     * Cached data.
     */
     protected ?array $data = null;
     protected bool $isDirty = false;
-    
+
     /**
      * Retrieves the cached data. If the cache is not loaded, it will attempt to load it from disk.
      * If the cache file does not exist or is invalid, it will throw an exception.
@@ -30,7 +27,7 @@ trait BootstrapCache
         }
 
         $filePath = $this->getCachFilePath();
-        try{
+        try {
             $this->cache();
         } catch(\Exception $e) {
             if(! File::exists($filePath)) {
@@ -49,7 +46,7 @@ trait BootstrapCache
     abstract protected function getCacheName(): string;
 
     /**
-     * Defines how the cache should be built from the source of truth. 
+     * Defines how the cache should be built from the source of truth.
      * This is used when the cache is built or rebuilt: e.g. from the Database.
      */
     abstract protected function fetch(): array;
@@ -72,17 +69,16 @@ trait BootstrapCache
     /**
      * Load the cache from disk.
      * This should be used when the cache is used in Laravel boot
-     * and the services are not yet fully booted. 
-     * 
+     * and the services are not yet fully booted.
+     *
      * Otherwise use the get() method as it automtically loads the cache if not already loaded.
      */
-    public function load(): array
-    {
+    public function load(): array {
         if($this->data !== null) {
             return $this->data;
         }
 
-        if(! File::exists($this->getCachFilePath())) {
+        if(!File::exists($this->getCachFilePath())) {
             throw new RuntimeException(
                 static::class . ' cached data not found. Run build.'
             );
@@ -90,7 +86,7 @@ trait BootstrapCache
 
         $data = require $this->getCachFilePath();
 
-        if(! is_array($data)) {
+        if(!is_array($data)) {
             throw new RuntimeException(
                 static::class . ' cached data is invalid.'
             );
@@ -110,7 +106,7 @@ trait BootstrapCache
             );
         }
 
-        // To ensure we don't use the same cache file for testing and production, 
+        // To ensure we don't use the same cache file for testing and production,
         // we append '-testing' to the file name when in testing environment.
         $fileName = $this->getCacheName();
         if(env('APP_ENV') === 'testing') {
@@ -120,20 +116,18 @@ trait BootstrapCache
         $phpFile = Str::finish($fileName, '.php');
         return base_path('bootstrap' . DIRECTORY_SEPARATOR . 'cache' .  Str::start($phpFile, DIRECTORY_SEPARATOR));
     }
-    
+
     /**
      * Determine if the cache exists.
      */
-    public function cacheExists(): bool
-    {
+    public function cacheExists(): bool {
         return File::exists($this->getCachFilePath());
     }
 
     /**
      * Delete the cache.
      */
-    public function clearCache(): void
-    {
+    public function clearCache(): void {
         File::delete($this->getCachFilePath());
         $this->data = null;
     }
@@ -141,8 +135,7 @@ trait BootstrapCache
     /**
      * Export array as a PHP file.
      */
-    protected function export(array $data): string
-    {
+    protected function export(array $data): string {
         return <<<PHP
 <?php
 return {$this->varExport($data)};
@@ -152,11 +145,10 @@ PHP;
     /**
      * Isolated var_export for easy override.
      */
-    protected function varExport(array $data): string
-    {
+    protected function varExport(array $data): string {
         return var_export($data, true);
     }
-    
+
     /**
      * Set's the cache dirty so that the next iteration will
      * fetch the data and update the cache.

@@ -1,9 +1,9 @@
 import { only } from '@/helpers/helpers.js';
 import useAttributeStore from './stores/attribute.js';
 import useEntityStore from './stores/entity.js';
-import usePluginStore from './stores/plugin.js';
-import useSystemStore from './stores/system.js';
-import useUserStore from './stores/user.js';
+import usePluginStore from '@/bootstrap/stores/plugin.js';
+import useSystemStore from '@/bootstrap/stores/system.js';
+import useUserStore from '@/bootstrap/stores/user.js';
 import i18n from './i18n.js';
 import {
     router,

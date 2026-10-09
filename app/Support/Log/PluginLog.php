@@ -8,7 +8,7 @@ use Illuminate\Support\Str;
 
 /*
  *  Should be overloaded inside a plugin to log with it's own name.
- * 
+ *
  * Log Levels as used in Laravel (RFC 5424)*:
  *  0       Emergency: system is unusable
  *  1       Alert: action must be taken immediately
@@ -25,17 +25,18 @@ class PluginLog extends Log {
     const CHANNEL_NAME = "plugin";
 
     public function __construct(private string $pluginName) {
+
     }
 
     protected function formatMessage(string $message, array $context = []): string {
         $pluginName = strtoupper(Str::kebab($this->pluginName));
         return "[$pluginName] " . $message;
     }
-    
+
     public static function forName(string $pluginName): PluginLog {
         return new PluginLog($pluginName);
     }
-    
+
     public static function for(Plugin $plugin): PluginLog {
         return new PluginLog($plugin->name);
     }

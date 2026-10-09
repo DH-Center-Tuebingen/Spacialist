@@ -14,7 +14,6 @@ use Tests\TestCase;
 use ZipArchive;
 
 class PluginUploaderTest extends TestCase {
-
     private const PLUGIN_NAME = 'UploadTestPlugin';
     private const PLUGIN_UUID = '00000000-0000-0000-0000-000000000099';
 
@@ -71,12 +70,11 @@ class PluginUploaderTest extends TestCase {
         }
         return $dir;
     }
-    
+
     private function getTmpZipPath(string $filename): string {
         return sys_get_temp_dir() . '/' . uniqid($filename . "_") . '.zip';
     }
 
-    
     public function testUploadCreatesNewPlugin(): void {
         $this->trackPluginDirs();
         $template = $this->makeTemplate('1.0.0')->addBasic()->generate();
@@ -104,7 +102,7 @@ class PluginUploaderTest extends TestCase {
         $this->assertTrue($this->uploader->doesPluginDirectoryExist(self::PLUGIN_NAME));
         $this->assertTrue(is_dir(PluginDirectory::getPath('_backups/' . self::PLUGIN_NAME)));
     }
-    
+
     public function testUpdateAllowsSameVersion(): void {
         $this->trackPluginDirs();
         $this->createPluginInDb('1.0.0');
@@ -113,7 +111,7 @@ class PluginUploaderTest extends TestCase {
         $zipPath = $this->makeZipFromTemplate($template);
 
         $result = $this->uploader->upload(new SplFileInfo($zipPath));
-        
+
         $this->assertEquals(self::PLUGIN_NAME, $result->pluginName);
         $this->assertTrue($result->isUpdate());
         $this->assertTrue($this->uploader->doesPluginDirectoryExist(self::PLUGIN_NAME));
@@ -143,7 +141,7 @@ class PluginUploaderTest extends TestCase {
         $this->expectException(HttpException::class);
         $this->uploader->upload(new SplFileInfo($fakePath));
     }
-    
+
     public function testUploadRejectsInvalidPluginName(): void {
         $template = $this->makeTemplate('1.0.0', 'Invalid Name')->addBasic()->generate();
         $zipPath = $this->makeZipFromTemplate($template);
@@ -153,7 +151,7 @@ class PluginUploaderTest extends TestCase {
         $this->expectExceptionMessage("Invalid plugin name: Invalid Name");
         $this->uploader->upload(new SplFileInfo($zipPath));
     }
-    
+
     public function testUploadRejectsInvalidDirectoryName(): void {
         $template = $this->makeTemplate('1.0.0')->addBasic()->generate();
         $zipPath = $this->makeZipFromTemplate($template, 'incorrect-name');
@@ -226,7 +224,6 @@ class PluginUploaderTest extends TestCase {
         $this->assertFalse(file_exists($pluginDir . '/old.txt'), 'Old plugin file should be removed');
         $this->assertTrue(file_exists($pluginDir . '/backup.txt'), 'Backup file should be in plugin dir');
     }
-
 
     public function testDoesPluginDirectoryExistReturnsTrueWhenDirectoryExists(): void {
         $dir = $this->createPluginDir();

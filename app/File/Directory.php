@@ -38,7 +38,7 @@ class Directory {
     public function getDirectory(): string {
         return $this->directory;
     }
-    
+
     public function getDirectoryPath(string $subpath = ""): string {
         $path = Str::finish($this->directory, DIRECTORY_SEPARATOR) . $subpath;
         return Storage::disk($this->disk)->path($path);
@@ -50,7 +50,7 @@ class Directory {
      * @param string $filepath Absolute path to the file
      * @return bool True if the filepath is inside the directory, false otherwise.
      */
-    public function contains(string $filepath): bool {    
+    public function contains(string $filepath): bool {
         return
             Str::startsWith($filepath, $this->directory) &&
             Storage::disk($this->disk)->exists($filepath);
@@ -74,14 +74,14 @@ class Directory {
         }
         return false;
     }
-    
+
     /**
      * Deletes a file from within the directory
      * @param string $fileName The name of the file to delete.
      * @return bool True if the file was deleted, false otherwise.
      */
     public function deleteFile(string $fileName) : bool{
-        $filepath = $this->directory . DIRECTORY_SEPARATOR . $fileName;
+        $filepath = Str::finish($this->directory, DIRECTORY_SEPARATOR) . $fileName;
         return $this->delete($filepath);
     }
 

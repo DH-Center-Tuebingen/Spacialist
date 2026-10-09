@@ -5,7 +5,6 @@ namespace Tests\Support\Templates;
 use Tests\Support\PluginTemplate;
 
 class HookTemplate extends PluginTemplate {
-
     public function __construct(?string $name = null, ?string $uuid = null, ?string $version = null) {
         parent::__construct(
             name: $name ?? "HookPlugin",
@@ -27,25 +26,25 @@ class VersionData {
         \$data['$key'] = '$content';
         \$response->setData(\$data);
     }
-        
+
     public static function addNameHook(Request \$request, JsonResponse \$response): void {
         \$data = \$response->getData(true);
         \$data['plugin_name'] = '{$this->plugin->name}';
         \$response->setData(\$data);
     }
-        
+
     public static function addFooHook(Request \$request, JsonResponse \$response): void {
         \$data = \$response->getData(true);
         \$data['foo'] = 'bar';
         \$response->setData(\$data);
     }
-        
+
     public function addBooHook(Request \$request, JsonResponse \$response): void {
         \$data = \$response->getData(true);
         \$data['boo'] = 'far';
         \$response->setData(\$data);
     }
-    
+
 }
 ADD_PRE_DATA;
     }
@@ -68,7 +67,6 @@ ADD_PRE_DATA;
         return $this;
     }
 
-    
     public function addHook(string $on, string $src, ?int $order = null): static {
         $this->addXml("hooks", "hook", [
             array_filter([
@@ -87,7 +85,7 @@ ADD_PRE_DATA;
             $order
         );
     }
-    
+
     public function addNameHook(string $on = "api/v1/version", ?int $order = null): static {
         return $this->addHook(
             $on,
@@ -95,7 +93,7 @@ ADD_PRE_DATA;
             $order
         );
     }
-    
+
     public function addFooHook(string $on = "api/v1/version", ?int $order = null): static {
         return $this->addHook(
             $on,
@@ -103,7 +101,7 @@ ADD_PRE_DATA;
             $order
         );
     }
-    
+
     public function addBooHook(string $on = "api/v1/version", ?int $order = null): static {
         return $this->addHook(
             $on,
@@ -115,7 +113,7 @@ ADD_PRE_DATA;
     /**
      * Adds the basic files to the template and additionally adds the default hook file
      * and xml configuration which targets the version endpoint and uses the addHookInfo method.
-     * 
+     *
      * @param mixed $key
      * @param mixed $content
      * @param mixed $order
@@ -158,5 +156,4 @@ ADD_PRE_DATA;
         }
         return "<hooks>\n" . $hooksXml . "</hooks>";
     }
-
 }

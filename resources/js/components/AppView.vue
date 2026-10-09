@@ -427,7 +427,7 @@
         router,
     } from '@/bootstrap/router.js';
 
-    import usePluginStore from '../bootstrap/stores/plugin';
+    import usePluginStore from '@/bootstrap/stores/plugin.js';
     import useSystemStore from '@/bootstrap/stores/system.js';
     import useUserStore from '@/bootstrap/stores/user.js';
     import { useI18n } from 'vue-i18n';
@@ -454,7 +454,7 @@
         setup(props) {
             const { t, locale } = useI18n();
             const currentRoute = useRoute();
-            
+
             const pluginStore = usePluginStore();
             const systemStore = useSystemStore();
             const userStore = useUserStore();

@@ -4,6 +4,7 @@ namespace App\Models\Plugin;
 
 use App\Plugin;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Dependencies extends Model {
     protected $table = 'plugin_service_dependencies';
@@ -16,7 +17,7 @@ class Dependencies extends Model {
     /**
      * The plugin this hook belongs to.
      */
-    public function plugin() {
+    public function plugin(): BelongsTo  {
         return $this->belongsTo(Plugin::class, 'plugin_id');
     }
 }

@@ -46,10 +46,10 @@ class Plugin extends Model {
 
     /**
      * Reads the plugin's Manifest file, extracts all the data
-     * 
+     *
      * checks if the plugin name matches any installed
      * plugin
-     * 
+     *
      * @param PluginManifest $manifest
      * @return Plugin|\stdClass
      */
@@ -71,7 +71,7 @@ class Plugin extends Model {
         if(version_compare($newPlugin->version, $manifest->getVersion(), '==') !== 0) {
             $newPlugin->version = $manifest->getVersion();
         }
-        
+
         static::updateMetadataFromManifest($newPlugin, $manifest);
 
         // Avoid bumping updated_at when nothing actually changed.
@@ -81,13 +81,12 @@ class Plugin extends Model {
 
         return $newPlugin;
     }
-    
-    
+
     /**
      * Reads the metadata from the manifest file and updates the table accordingly.
      * The plugin's metadata is updated but not saved yet.
-     * 
-     * @param Plugin $plugin 
+     *
+     * @param Plugin $plugin
      * @param PluginManifest $manifest
      * @return bool Returns true when the metadata was updated with new values otherwise false.
      */
@@ -97,13 +96,13 @@ class Plugin extends Model {
         $manifestLicence = $manifest->getLicence() ?? "";
 
         $metadata = $plugin->metadata ?? [];
-        
+
         // Either the array key does not exist at all or when it's null, we provide a default value.
         $authors = (isset($metadata['authors']) ? $metadata['authors'] : []) ?? [];
         $description = (isset($metadata['description']) ? $metadata['description'] : "") ?? "";
         $licence = (isset($metadata['licence']) ? $metadata['licence'] : "") ?? "";
 
-        
+
         // We only want to update the metadata if it has actually changed.
         if(
             count(array_diff($manifestAuthors, $authors)) > 0 ||

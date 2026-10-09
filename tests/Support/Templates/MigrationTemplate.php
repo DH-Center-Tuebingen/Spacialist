@@ -17,7 +17,6 @@ use Tests\Support\PluginTemplate;
  * avoid "Cannot declare class … already in use" fatal errors across tests.
  */
 class MigrationTemplate extends PluginTemplate {
-    
     protected $migrationDirectory = 'Migration';
 
     public function __construct(
@@ -111,7 +110,7 @@ PHP;
             'CreatePluginTable'
         );
     }
-    
+
     public function setMigrationPathXml(string $src): static {
         $this->migrationDirectory = $src;
         $this->addXml('migrations', null, [['src' => $src]]);

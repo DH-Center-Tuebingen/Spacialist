@@ -15,8 +15,8 @@ use Illuminate\Support\Facades\File;
  * Service for managing role presets.
  * Role presets are additions to existing role presets. When a new role is generated
  * using an existing preset, the plugin functionality will be automatically be takein into account.
- * 
- * 
+ *
+ *
  * '''xml
  * ...
  *    <role-presets>
@@ -26,18 +26,15 @@ use Illuminate\Support\Facades\File;
  * '''
  */
 class RolePresetService extends PluginService {
-
     const DEPRECATED_ROLE_FILE = 'role-presets.json';
 
     /**
      * Install role presets defined in a plugin's role-presets.json
      */
     public function install(Plugin $plugin, PluginManifest $manifest): void {
-        $rolePresets = $this->getRolePresetsForPlugin($plugin, $manifest);        
+        $rolePresets = $this->getRolePresetsForPlugin($plugin, $manifest);
         DB::transaction(function () use ($rolePresets, $plugin) {
-
             foreach($rolePresets as $preset) {
-
                 if(!$preset["rule_set"]) {
                     PluginLog::for($plugin)->warning("Role preset entry in plugin '{$plugin->name}' is missing 'rule_set'. Skipping.");
                     continue;
@@ -73,7 +70,7 @@ class RolePresetService extends PluginService {
         RolePresetPlugin::where('from', $plugin->id)->delete();
     }
 
-    /***
+    /**
      * Update role presets by uninstalling the old ones and installing the new ones.
      */
     public function update(Plugin $plugin, PluginManifest $manifest): void {
@@ -83,7 +80,7 @@ class RolePresetService extends PluginService {
 
     public function getRolePresetsForPlugin(Plugin $plugin, PluginManifest $manifest): array {
         $rolePresets = [];
-        
+
         // TODO:: Remove in future version, until then we need to check if the deprecated path
         // is already defined in the manifest to avoid loading it twice and not logging the warning.
         $deprecatedRouteDefined = false;
@@ -93,17 +90,17 @@ class RolePresetService extends PluginService {
             if($src === null) {
                 continue;
             }
-            
+
             if($src === self::DEPRECATED_ROLE_FILE) {
                 $deprecatedRouteDefined = true;
             }
-            
+
             $parsedjson = $this->getRolePresetfromObject($roleFilePreset, $plugin);
             if($parsedjson !== null) {
                 $rolePresets = array_merge($rolePresets, $parsedjson);
             }
         }
-        
+
         // TODO:: Remove in future version.
         if(!$deprecatedRouteDefined) {
             $deprecatedPresets = $this->getDeprecatedRolePresets($plugin, $manifest);
@@ -112,7 +109,7 @@ class RolePresetService extends PluginService {
 
         return $rolePresets;
     }
-    
+
     public function getDeprecatedRolePresets(Plugin $plugin, PluginManifest $manifest): array {
         $directory = PluginDirectory::fromPlugin($plugin);
         $deprecatedFilePath = $directory->getAbsolutePluginPath(self::DEPRECATED_ROLE_FILE);
@@ -135,7 +132,7 @@ class RolePresetService extends PluginService {
             PluginLog::for($plugin)->warning("Plugin '{$plugin->name}' has a role preset entry without 'src' field. Skipping.");
             return null;
         }
-        
+
         $pluginSrc = PluginDirectory::fromPlugin($plugin)->getAbsolutePluginPath($obj['attributes']['src']);
         if(!File::isFile($pluginSrc)) {
             PluginLog::for($plugin)->warning("Plugin '{$plugin->name}' has a role preset entry with 'src' field pointing to a non-existing file ('{$pluginSrc}'). Skipping.");
@@ -144,7 +141,7 @@ class RolePresetService extends PluginService {
 
         return $pluginSrc;
     }
-    
+
     private function getRolePresetfromObject(array $obj, Plugin $plugin): ?array {
         $pluginDirectory = PluginDirectory::fromPlugin($plugin);
         $pluginSrc = $pluginDirectory->getAbsolutePluginPath($obj['attributes']['src']);
@@ -156,5 +153,4 @@ class RolePresetService extends PluginService {
 
         return $parsedjson;
     }
-
 }

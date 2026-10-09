@@ -11,15 +11,15 @@ import {
     upload,
 } from '@/api/plugin.js';
 
-import { isInstalled } from '@/helpers/plugins.js';
-import { filterAllChildArrays } from "@/helpers/object";
 import {
     appendScripts,
     appendScriptsAndStyles,
     getPluginTitle,
+    isInstalled,
     removeScripts,
-    removeScriptsAndStyles
-} from "../../helpers/plugins";
+    removeScriptsAndStyles,
+} from '@/helpers/plugins.js';
+import { filterAllChildArrays } from '@/helpers/object.js';
 
 export const usePluginStore = defineStore('plugin', {
     state: _ => ({
@@ -53,13 +53,12 @@ export const usePluginStore = defineStore('plugin', {
         getPluginById(id) {
             return this.plugins.find(plugin => plugin.id === id)
         },
-
         /**
-         * Helper function to compose the plugin slot name. This is used to avoid conflicts between plugins, that want to register in the same slot, 
+         * Helper function to compose the plugin slot name. This is used to avoid conflicts between plugins, that want to register in the same slot,
          * e.g. "tab". The plugin slots are composed of the plugin name and the slot name, e.g. 'file-tab'.
-         * 
-         * @param {string} slotName - The name of the slot, e.g. "tab", "tools", "settings" 
-         * @param {string} pluginName - The plugin slots are composed of the plugin name and the slot name to avoid conflicts, e.g. 'file-tab'. 
+         *
+         * @param {string} slotName - The name of the slot, e.g. "tab", "tools", "settings"
+         * @param {string} pluginName - The plugin slots are composed of the plugin name and the slot name to avoid conflicts, e.g. 'file-tab'.
          * @returns {string} The composed slot name, e.g. 'file-tab'
          */
         getSlotName(slotName, pluginName) {
@@ -77,7 +76,6 @@ export const usePluginStore = defineStore('plugin', {
 
             return this.registeredSlots[slotName] ?? [];
         },
-
         async publishScript(plugin) {
             console.log('Publishing script for plugin', plugin);
             if(plugin.scripts) {
@@ -111,7 +109,6 @@ export const usePluginStore = defineStore('plugin', {
             const { datatype } = data;
             console.trace('Registering plugin attribute with datatype:', datatype, data);
 
-
             if(!datatype) {
                 console.error('Plugin attribute is missing datatype', data);
                 return;
@@ -139,9 +136,7 @@ export const usePluginStore = defineStore('plugin', {
                 return;
             }
 
-
             const preferenceCategory = this.registeredPreferences[category];
-
             const subcategory = data.subcategory;
             if(!subcategory) {
                 console.error('Plugin preference is missing subcategory', data);
@@ -200,7 +195,6 @@ export const usePluginStore = defineStore('plugin', {
             const plugin = data.plugin;
             const kebabedName = kebabCase(plugin.name);
             this.updateOrAdd(plugin)
-
 
             // We use the window element here, as it resulted in an error, when
             // trying to import the SpPS variable diretly:

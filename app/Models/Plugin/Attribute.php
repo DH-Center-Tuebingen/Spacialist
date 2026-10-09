@@ -1,11 +1,12 @@
 <?php
+
 namespace App\Models\Plugin;
 
 use App\Plugin;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class Attribute extends Model
-{
+class Attribute extends Model {
     protected $table = 'plugin_service_attributes';
 
     protected $fillable = [
@@ -16,8 +17,7 @@ class Attribute extends Model
     /**
      * The plugin this hook belongs to.
      */
-    public function plugin()
-    {
+    public function plugin(): BelongsTo  {
         return $this->belongsTo(Plugin::class, 'plugin_id');
     }
 }

@@ -8,14 +8,13 @@ use App\Plugin\PluginManifest;
 /**
  * Subclass for PluginServices. It provides the lifecycle methods: install, update, uninstall and remove.
  * Overwrite the functions your service needs to listen to.
- * 
+ *
  * Philosophy:  When considering how to design your service, you should try to keep all the relevant data
  *              while the plugin is present. So that the user can disable (uninstall) a plugin, reenable (install)
  *              it and still have the same functionality. E.g. roles should be the same after disabling and enabling the plugin
  *              and the user should not be forced to reapply all roles again.
  */
 abstract class PluginService {
-
     /**
      * Invoked when the a Plugin is installed
      * @param Plugin $plugin
@@ -37,7 +36,6 @@ abstract class PluginService {
      * @param PluginManifest $manifest
      */
     public function onAfterInstall(Plugin $plugin, PluginManifest $manifest): void {}
-
 
     /**
      * Invoked after a plugin has was updated
@@ -101,5 +99,4 @@ abstract class PluginService {
      * @param PluginManifest $manifest
      */
     public function onAfterRemove(Plugin $plugin, PluginManifest $manifest): void {}
-    
 }

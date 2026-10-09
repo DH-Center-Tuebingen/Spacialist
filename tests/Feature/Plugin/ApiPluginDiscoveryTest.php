@@ -10,7 +10,6 @@ use Tests\Support\PluginTemplate;
 use Tests\PluginTestCase;
 
 class ApiPluginDiscoveryTest extends PluginTestCase {
-
     private array $manualCleanupDirs = [];
     private ?PluginGenerator $generator = null;
 

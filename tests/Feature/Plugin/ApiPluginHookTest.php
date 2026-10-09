@@ -7,8 +7,6 @@ use Tests\Support\Templates\HookTemplate;
 use Tests\Support\PluginGenerator;
 
 class ApiPluginHookTest extends PluginTestCase {
-
-
     function testHookInteraction() {
         PluginGenerator::with(
             [HookTemplate::getBasic()->generate()],

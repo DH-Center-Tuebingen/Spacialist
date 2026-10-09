@@ -3,30 +3,29 @@ export const appendScriptsAndStyles = response => {
 
     if(scripts) {
         appendScripts(scripts);
-    }else {
-        console.warn("No scripts to append for plugin");
+    } else {
+        console.warn('No scripts to append for plugin');
     }
-    
+
     if(styles) {
         appendStyles(styles);
-    }else {
-        console.warn("No styles to append for plugin");
+    } else {
+        console.warn('No styles to append for plugin');
     }
-}
+};
 
 export const appendStyle = location => {
-    console.log('Appending style with location', location);
     const linkTag = document.createElement('link');
     linkTag.rel = 'stylesheet';
     linkTag.href = `${location}`;
     document.head.appendChild(linkTag);
-}
+};
 
 export const appendStyles = locations => {
     locations.forEach(location => {
         appendStyle(location);
     });
-}
+};
 
 export const appendScript = location => {
     console.log('Appending script with location', location);
@@ -40,19 +39,19 @@ export const appendScripts = locations => {
     locations.forEach(location => {
         appendScript(location);
     });
-}
+};
 
 export const removeScriptsAndStyles = response => {
     const { scripts, styles } = response;
     removeScripts(scripts);
     removeStyles(styles);
-}
+};
 
 export const removeStyles = locations => {
     locations.forEach(location => {
         removeStyle(location);
     });
-}
+};
 
 export const removeStyle = location => {
     const links = [
@@ -62,13 +61,13 @@ export const removeStyle = location => {
     if(oldLink) {
         document.head.removeChild(oldLink);
     }
-}
+};
 
 export const removeScripts = locations => {
     locations.forEach(location => {
         removeScript(location);
     });
-}
+};
 
 export const removeScript = location => {
     const scripts = [
@@ -82,11 +81,11 @@ export const removeScript = location => {
 
 export const isInstalled = (plugin) => {
     return plugin?.installed_at !== null;
-}
+};
 
 export const getPluginTitle = (plugin) => {
     let pluginName = plugin.metadata?.title || plugin.name;
     // Adds a space between camelCase words, e.g. "MyPlugin" becomes "My Plugin"
     pluginName = pluginName.replace(/([a-z])([A-Z])/g, '$1 $2');
     return pluginName;
-}
+};

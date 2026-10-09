@@ -34,9 +34,7 @@ class AttributeRegistry {
             $class = "App\\AttributeTypes\\{$className}";
 
             // Skip all abstract classes
-            if((new \ReflectionClass($class))->isAbstract()) {
-                continue;
-            }
+            if((new \ReflectionClass($class))->isAbstract()) continue;
 
             self::register(new $class());
         }

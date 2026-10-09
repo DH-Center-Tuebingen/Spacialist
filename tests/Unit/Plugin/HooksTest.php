@@ -8,39 +8,33 @@ use Tests\Support\Templates\HookTemplate;
 use Tests\Support\PluginGenerator;
 use Tests\TestCase;
 
-class HooksTest extends TestCase
-{
-
+class HooksTest extends TestCase {
     protected PluginGenerator $pluginGenerator;
     protected HookService $hookService;
     protected Plugin $plugin;
 
-    public function setUp(): void
-    {
+    public function setUp(): void {
         parent::setUp();
         $this->hookService = app(HookService::class);
-        
+
         $hookTemplate = HookTemplate::getBasic()->generate();
         $this->plugin = $hookTemplate->plugin;
         $this->pluginGenerator = new PluginGenerator([$hookTemplate]);
         $this->pluginGenerator->setUp();
     }
-    
-    public function tearDown(): void
-    {
-        // $this->pluginGenerator->tearDown();
+
+    public function tearDown(): void {
         parent::tearDown();
     }
 
-    public function testAddHookSuccessfully()
-    {
+    public function testAddHookSuccessfully() {
         $hookData = [
             'on'    => 'api/v1/version',
             'src'   => 'Hooks\\VersionData@addHookInfo',
             'order' => 1,
         ];
 
-        $hookModel            = $this->hookService->createHookFromJson($hookData, $this->plugin);
+        $hookModel = $this->hookService->createHookFromJson($hookData, $this->plugin);
         $hookModel->plugin_id = $this->plugin->id;
         $hookModel->save();
 
@@ -51,9 +45,8 @@ class HooksTest extends TestCase
             'order'     => 1,
         ]);
     }
-    
-    public function testAddHookWithForwardSlashes()
-    {
+
+    public function testAddHookWithForwardSlashes() {
         $hookData = [
             'on'    => 'api/v1/version',
             'src'   => 'Hooks/VersionData@addHookInfo',
@@ -78,15 +71,13 @@ class HooksTest extends TestCase
      * @return void
      */
     #[DataProvider('hookExceptionProvider')]
-     public function testAddHookExceptions($data, $message)
-    {
+     public function testAddHookExceptions($data, $message) {
         $this->expectException(\Exception::class);
         $this->expectExceptionMessage($message);
         $this->hookService->createHookFromJson($data, $this->plugin);
     }
 
-    public function testAddHookToServiceSuccessfully()
-    {
+    public function testAddHookToServiceSuccessfully() {
         $hookData = [
             'on'    => 'api/v1/version',
             'src'   => 'Hooks\\VersionData@addHookInfo',
@@ -101,7 +92,7 @@ class HooksTest extends TestCase
             'src'       => 'Hooks\\VersionData@addHookInfo',
             'order'     => 1,
         ]);
-    } 
+    }
 
     /**
      * Test addHook method of HookService class
@@ -109,15 +100,13 @@ class HooksTest extends TestCase
      * @return void
      */
     #[DataProvider('hookServiceExceptionProvider')]
-    public function testAddHookServiceExceptions($data, $message)
-    {
+    public function testAddHookServiceExceptions($data, $message) {
         $this->expectException(\Exception::class);
         $this->expectExceptionMessage($message);
         $this->hookService->addHook($data, $this->plugin);
-    } 
+    }
 
-    public static function hookExceptionProvider()
-    {
+    public static function hookExceptionProvider() {
         return [
             "no fields"             => [[], "Hook is missing field(s): on, src"],
             "on only"               => [['on' => 'api/v1/version'], "Hook is missing field(s): src"],
@@ -129,8 +118,7 @@ class HooksTest extends TestCase
         ];
     }
 
-    public static function hookServiceExceptionProvider()
-    {
+    public static function hookServiceExceptionProvider() {
         $hookExceptions        = static::hookExceptionProvider();
         $hookServiceExceptions = [
             "src class does not exist"  => [['on' => 'api/v1/version', 'src' => 'Hooks\\NonExistentClass@method'], "Hook src 'Hooks\\NonExistentClass@method' does not exist in plugin 'HookPlugin', Class was resolved to: 'App\\Plugins\\HookPlugin\\Hooks\\NonExistentClass'"],

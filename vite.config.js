@@ -7,9 +7,7 @@ import { watch } from 'fs';
 
 const isOpen = process.env.IS_OPEN === 'true';
 const buildDir = isOpen ? 'build_open' : 'build';
-
 const _dirname = dirname(fileURLToPath(import.meta.url));
-
 
 /**
  * Chokidar somehow does not detect the top level
@@ -28,7 +26,6 @@ const ignoredRootDirectories = new Set([
     'storage',
     'tests',
 ]);
-
 
 export default ({ mode }) => {
     const env = loadEnv(mode, process.cwd(), 'VITE_');

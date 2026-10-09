@@ -12,20 +12,18 @@ use App\Plugin;
 use App\Plugin\PluginDirectory;
 use App\Plugin\PluginManifest;
 
-
 /**
  * Plugins can define Migrations by declaring their directory inside their manifest file.
  * All migrations from all files are loaded and executed in the order of their creation as defined
  * by their file name, which must follow the Laravel migration file naming convention (e.g. "2024_01_01_000000_create_users_table.php").
- * 
+ *
  * LEGACY: The 'MyPlugin/Migration' directory is by default evaluated for migration files. This will be removed in a future version.
- * 
+ *
  * ```xml
  *     <migrations src="Migration" />
- * ``` 
+ * ```
  */
 class MigrationService extends PluginService {
-
     const LEGACY_MIGRATION_DIRECTORY = 'Migration';
 
     public function install(Plugin $plugin, PluginManifest $manifest): void {
@@ -108,8 +106,8 @@ class MigrationService extends PluginService {
     }
 
     /**
-     * 
-     * 
+     *
+     *
      * @param Plugin $plugin
      * @throws \Exception
      * @return string|null
@@ -136,7 +134,7 @@ class MigrationService extends PluginService {
      * Adds a migration entry to the database without running it.
      * This is required for legacy plugins that were not yet using the
      * plugin migration system and ran their migrations without supervision.
-     * 
+     *
      * @param mixed $migrationName
      * @param Plugin $plugin
      * @return void
@@ -144,7 +142,7 @@ class MigrationService extends PluginService {
     public function set($migrationName, Plugin $plugin): void {
         //Determine the next batch number
         $nextBatch = PluginMigration::getNextBatchNumber();
-        //Record the migration as run   
+        //Record the migration as run
         PluginMigration::create([
             'plugin_id' => $plugin->id,
             'migration' => $migrationName,
@@ -153,9 +151,9 @@ class MigrationService extends PluginService {
     }
 
     /**
-     * Gets the migration directory for the plugin. If the manifest defines a migration directory, 
+     * Gets the migration directory for the plugin. If the manifest defines a migration directory,
      * it will be returned, otherwise the legacy migration directory will be used.
-     * 
+     *
      * @param Plugin $plugin
      * @return string - The migration directory path defined in the manifest or the legacy migration directory if not defined in the manifest.
      */
@@ -169,9 +167,9 @@ class MigrationService extends PluginService {
     }
 
     /**
-     * Get's the absolute path to the migration directory of the plugin. 
-     * 
-     * 
+     * Get's the absolute path to the migration directory of the plugin.
+     *
+     *
      * @param Plugin $plugin
      * @return string
      */
@@ -182,7 +180,7 @@ class MigrationService extends PluginService {
 
     /**
      * Get's a list of migration files in the plugin on the filesystem.
-     * 
+     *
      * @param Plugin $plugin - The plugin to get the migration list for
      * @param mixed $rollback - If true, get the list in descending order. Required for rollbacks to get the last migration first.
      * @return array - A list of migration file names, e.g. ["2024_01_01_000000_create_users_table.php", "2024_01_02_000000_create_posts_table.php"]
@@ -223,7 +221,7 @@ class MigrationService extends PluginService {
 
     /**
      * Get path to the plugin's migration directory (./Migration)
-     * 
+     *
      * @param string $pluginName - The plugin to get the migration path for
      * @param mixed $migrationFile - optional name of specific migration file, e.g. "2024_01_01_000000_create_users_table.php"
      * @return string - The path to the plugin's migration directory or to a specific migration file if $migrationFile is provided
@@ -240,13 +238,13 @@ class MigrationService extends PluginService {
     /**
      * Validates if the migration file does match the Laravel migration file naming convention.
      * If it's a valid migration, the migration class will be returned, otherwise an exception will be thrown.
-     * 
+     *
      * @param Plugin $plugin - The plugin the migration belongs to
      * @param string $directory - Absolute path to the migration directory.
      * @param string $migrationFile - The migration file name, e.g. "2024_01_01_000000_create_users_table.php"
      * @throws \Exception throws an exeption if the migration has in incompatible name
      * @return mixed - LEGACY - This should return an instance of "Illuminate\Database\Migrations\Migration" currently plugins don't comply with that,
-     *                 this will be changed in a future version.  
+     *                 this will be changed in a future version.
      */
     function getMigrationClassName(Plugin $plugin, string $directory, string $migrationFile) {
         preg_match('/^(\d{4}_\d{2}_\d{2}_\d{6})_(.+)\.php$/', $migrationFile, $matches);
@@ -268,11 +266,10 @@ class MigrationService extends PluginService {
         }
     }
 
-
     /**
      * Get's all plugin migrations in the database and compares them with all file
-     * migrations and retuns all migrations that are not yet in the database.  
-     * 
+     * migrations and retuns all migrations that are not yet in the database.
+     *
      * @param Plugin $plugin - The plugin to check for missing migrations
      * @param mixed $rollback - If true, get all that are in the database and on the file system. To get a list of migrations that can be rolled back.
      * @return array - A list of migration file names that are missing in the database (or that can be rolled back if $rollback is true)
@@ -293,5 +290,4 @@ class MigrationService extends PluginService {
 
         return array_values($missingMigrations);
     }
-
 }

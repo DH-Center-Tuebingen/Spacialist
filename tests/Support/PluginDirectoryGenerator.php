@@ -2,8 +2,6 @@
 namespace Tests\Support;
 
 use App\Plugin;
-
-
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use RecursiveDirectoryIterator;
@@ -11,9 +9,9 @@ use RecursiveIteratorIterator;
 use ZipArchive;
 
 /**
- * This class provides helper methods to generate a plugin directory structure for testing purposes. 
- * It allows you to create a mock plugin directory with the necessary files and folders based on a 
- * given Plugin instance. The generated structure includes a package.json file, an info.xml file, and 
+ * This class provides helper methods to generate a plugin directory structure for testing purposes.
+ * It allows you to create a mock plugin directory with the necessary files and folders based on a
+ * given Plugin instance. The generated structure includes a package.json file, an info.xml file, and
  * any additional files or directories specified in the input.
  */
 class PluginDirectoryGenerator {
@@ -27,10 +25,9 @@ class PluginDirectoryGenerator {
         }
     }
 
-
     /**
      * Mocks a zipped plugin for data upload.
-     * 
+     *
      * @param PluginTemplate $template
      * @param string $zipFilePath
      * @param string|null $fakeDirName Optional fake directory name to use inside the zip file.
@@ -48,16 +45,16 @@ class PluginDirectoryGenerator {
                 new RecursiveDirectoryIterator($pluginDir),
                 RecursiveIteratorIterator::LEAVES_ONLY
             );
-            
+
             // We need to create the realpath of the tmpdir, on Windows the
-            // path may be shortened, leading to a problem when counting the 
+            // path may be shortened, leading to a problem when counting the
             // path length. This fixes that issue.
             $tempDirReal = realpath($tempDir) ?: $tempDir;
             $tempDirLength = strlen($tempDirReal) + 1; // +1 to account for the trailing slash
             foreach($files as $file) {
                 if(!$file->isDir()) {
                     $filePath = $file->getRealPath();
-                    $relativePath = substr($filePath, $tempDirLength);                    
+                    $relativePath = substr($filePath, $tempDirLength);
                     $zip->addFile($filePath, $relativePath);
                 }
             }
@@ -72,7 +69,7 @@ class PluginDirectoryGenerator {
 
     /**
      * Mocks the plugin directory by creating the necessary files and folders based on the defined structure.
-     * 
+     *
      * @param PluginTemplate $template The plugin template containing the structure and content for the plugin.
      * @param string $location The base location where the plugin directory should be created.
      * @return string The path to the created plugin directory.
@@ -83,7 +80,7 @@ class PluginDirectoryGenerator {
         // unexpected side effects such as trying to insert arrays into the DB).
         $pluginCopy = clone $template->plugin;
 
-        $required_fields = ['name', 'uuid', 'version'];        
+        $required_fields = ['name', 'uuid', 'version'];
         $missing_fields = [];
         foreach($required_fields as $field) {
             if(!isset($pluginCopy[$field]) || empty($pluginCopy[$field])) {
@@ -94,7 +91,7 @@ class PluginDirectoryGenerator {
         if(count($missing_fields) > 0) {
             throw new \Exception("Plugin is missing required fields: " . implode(", ", $missing_fields));
         }
-        
+
         if(file_exists($pluginDir)){
             // If the plugin directory already exists, clean it up first
             self::cleanup($pluginDir);
@@ -110,7 +107,7 @@ class PluginDirectoryGenerator {
 
         return $pluginDir;
     }
-    
+
     private static function recursivelyBuildStructure(string $basePath, array $structure): void {
         foreach($structure as $name => $content) {
             $path = $basePath . '/' . $name;
@@ -133,7 +130,6 @@ class PluginDirectoryGenerator {
         }
     }
 
-
     /**
      * Generates the content for the package.json file of the plugin based on the plugin's information.
      *
@@ -150,10 +146,6 @@ class PluginDirectoryGenerator {
 }
 JSON;
     }
-
-
-
-
 }
 
 

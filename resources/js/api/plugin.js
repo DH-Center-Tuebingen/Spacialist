@@ -1,5 +1,5 @@
 import {
-    default as http
+    default as http,
 } from '@/bootstrap/http.js';
 
 /**

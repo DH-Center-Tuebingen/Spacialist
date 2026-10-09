@@ -5,17 +5,17 @@ namespace App\Support;
 use Illuminate\Support\Str;
 
 class Method {
-
     public function __construct(public ?string $class, public ?string $method) {
+
     }
-    
+
     public function isValid(): bool {
         return !empty($this->class) && !empty($this->method);
     }
 
     /**
      * Expands the given string by a base namespace.
-     * 
+     *
      * @return string
      */
     public function expandNamespace(string $baseNamespace): string {
@@ -30,15 +30,15 @@ class Method {
     }
 
     /**
-     * Checks if the current method does exist. 
-     * 
+     * Checks if the current method does exist.
+     *
      * @param {string} $baseNamespace - Optional base bath to the class namespace.
      */
     public function exists(string $baseNamespace = null): bool {
         if(!$this->isValid()) {
             return false;
         }
-        
+
         $fullClass = $this->expandNamespace($baseNamespace);
         return class_exists($fullClass) && method_exists($fullClass, $this->method);
     }

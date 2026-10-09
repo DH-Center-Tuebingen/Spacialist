@@ -105,9 +105,9 @@
 
 <script>
         import {
-            reactive,
-            onMounted,
             computed,
+            onMounted,
+            reactive,
             watch,
         } from 'vue';
 
@@ -133,11 +133,11 @@
                     submitting: false,
                     error: {},
                 });
-                
-                const redirectRoute = computed(_=> {
+
+                const redirectRoute = computed(_ => {
                     const currentRoute = useRoute();
                     return currentRoute?.query?.redirectTo || { name: 'home' };
-                })
+                });
 
                 // FUNCTIONS
                 const login = async _ => {
@@ -175,7 +175,7 @@
                         console.log('User not logged in, showing login form'); // DEBUG
                     }
                 });
-                
+
                 watch(userStore.userLoggedIn, (loggedIn) => {
                     if(loggedIn) {
                         router.push(redirectRoute.value);

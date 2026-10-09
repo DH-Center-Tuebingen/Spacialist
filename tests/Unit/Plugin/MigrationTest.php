@@ -10,7 +10,6 @@ use Tests\Support\PluginGenerator;
 use Tests\TestCase;
 
 class MigrationTest extends TestCase {
-
     private const PLUGIN_NAME = 'MigUnitPlugin';
     private const PLUGIN_UUID = '00000000-0000-0000-0000-000000000001';
 
@@ -80,7 +79,7 @@ class MigrationTest extends TestCase {
         $this->assertNotNull($path);
         $this->assertEquals('CustomMigration', $path);
     }
-    
+
     public function testGetLegacyManifestMigration(): void {
         $template = MigrationTemplate::createFrom(
             name: self::PLUGIN_NAME,
@@ -145,7 +144,7 @@ class MigrationTest extends TestCase {
         $this->assertEquals('2024_01_02_000000_create_second_table.php', $migrations[0]);
         $this->assertEquals('2024_01_01_000000_create_first_table.php', $migrations[1]);
     }
-    
+
     public function testValidMigrationClassName(): void {
         $template = MigrationTemplate::createFrom(
             name: self::PLUGIN_NAME,
@@ -155,7 +154,7 @@ class MigrationTest extends TestCase {
 
         $plugin = $this->setupPlugin($template);
         $migrationService = app(MigrationService::class);
-        
+
         $absoluteDirectory = base_path(config('app.plugin_directory') . '/' . $plugin->name . '/Migration');
         $classInstance = $migrationService->getMigrationClassName($plugin, $absoluteDirectory, '2024_01_01_000000_create_first_table.php');
         $this->assertEquals('CreateFirstTable', class_basename(get_class($classInstance)));
@@ -174,9 +173,7 @@ class MigrationTest extends TestCase {
         $this->expectException(Exception::class);
         $this->expectExceptionMessage("Invalid migration file name: invalid_migration_name.php");
 
-        
+
         $migrationService->getMigrationClassName($plugin, "Doesn't matter", 'invalid_migration_name.php');
     }
-
-
 }

@@ -57,7 +57,7 @@
 
     export default {
         components: {
-            MarkdownText  
+            MarkdownText
         },
         props: {
             plugin: {
@@ -75,7 +75,7 @@
             const loadChangelog = async () => {
                 try {
                     loading.value = true;
-                    changelog.value = await getChangelog(props.plugin.id)
+                    changelog.value = await getChangelog(props.plugin.id);
 
                 } catch(error) {
                     console.error('Failed to load changelog', error);

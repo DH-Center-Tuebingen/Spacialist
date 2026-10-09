@@ -13,7 +13,6 @@ use Tests\Support\PluginGenerator;
 use Tests\Support\RoleExtensionFile;
 
 class ApiPluginRolePresetsTest extends PluginTestCase {
-    
     protected string $filePath = 'custom/dir/roles.json';
 
     protected function getTemplateDefnition() {
@@ -23,7 +22,7 @@ class ApiPluginRolePresetsTest extends PluginTestCase {
             version: "1.0.0"
         );
     }
-    
+
     protected function addManifestEntryToTemplate(PluginTemplate $template, array $files) {
         $template->addXml("role-presets", "file", array_map(fn($src) => ["src" => $src], $files));
     }
@@ -38,7 +37,7 @@ class ApiPluginRolePresetsTest extends PluginTestCase {
                 new RoleExtension("guest", 'simple', 'r')
             ]
         );
-        
+
         $this->addManifestEntryToTemplate($template, [$this->filePath]);
 
         return $template->addBasic()
@@ -67,7 +66,7 @@ class ApiPluginRolePresetsTest extends PluginTestCase {
                 new RoleExtension("guest", 'complex', 'r')
             ]
         );
-        
+
         $this->addManifestEntryToTemplate($template, [$extFile1->src, $extFile2->src]);
 
         return $template->addBasic()
@@ -105,7 +104,7 @@ class ApiPluginRolePresetsTest extends PluginTestCase {
         });
     }
 
-    function testMultipleFiles() {        
+    function testMultipleFiles() {
         $template = $this->multipleFilesTemplate();
         PluginGenerator::with([$template], function () {
             $response = $this->userRequest()->get('/api/v1/pre');

@@ -1,11 +1,12 @@
 <?php
+
 namespace App\Models\Plugin;
 
 use App\Plugin;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class Route extends Model
-{
+class Route extends Model {
     protected $table = 'plugin_service_routes';
 
     protected $fillable = [
@@ -19,9 +20,7 @@ class Route extends Model
     /**
      * The plugin this model belongs to.
      */
-    public function plugin()
-    {
+    public function plugin(): BelongsTo {
         return $this->belongsTo(Plugin::class, 'plugin_id');
     }
-    
 }

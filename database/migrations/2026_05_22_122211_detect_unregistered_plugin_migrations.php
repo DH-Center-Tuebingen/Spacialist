@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
-
+use Illuminate\Support\Facades\DB;
 
 /**
  * This migration is required after implementing the PluginMigration system.
@@ -11,7 +11,6 @@ use Illuminate\Database\Migrations\Migration;
  * inside the migration table.
  */
 class DetectUnregisteredPluginMigrations extends Migration {
-
     private function scanPluginsForExistingMigrationFile(callable $callback) {
         // Read all plugins from plugin directory
         $pluginDirectory = realpath("app/Plugins");
@@ -46,10 +45,10 @@ class DetectUnregisteredPluginMigrations extends Migration {
     public function up(): void {
         $this->scanPluginsForExistingMigrationFile(function (string $migrationPath, string $pluginName) {
             $this->scanMigrationsInPluginDirectory($migrationPath, function ($migrationFile) use ($migrationPath, $pluginName) {
-            
+
                 $plugin = DB::table('plugins')->where('name', $pluginName)->first();
                 $migrationExists = DB::table('plugin_service_migrations')->where('migration', $migrationFile)->exists();
-                
+
                 if($plugin && $plugin->installed_at && !$migrationExists) {
                     DB::table('plugin_service_migrations')->insert([
                         'plugin_id' => $plugin->id,
@@ -67,7 +66,7 @@ class DetectUnregisteredPluginMigrations extends Migration {
      * Reverse the migrations.
      */
     public function down(): void {
-        // We don't delete the migration records. 
+        // We don't delete the migration records.
     }
 }
 

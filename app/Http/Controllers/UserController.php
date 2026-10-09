@@ -40,7 +40,7 @@ class UserController extends Controller {
         $user->setPermissions();
 
         // Load notification source data into info property
-        $user->notifications->map(function ($n) {
+        $user->notifications->map(function($n) {
             if($n->type == 'App\Notifications\CommentPosted') {
                 $skip = false;
                 switch($n->data['resource']['type']) {
@@ -422,7 +422,7 @@ class UserController extends Controller {
                 'error' => __('This role does not exist')
             ], 400);
         }
-        
+
         // We need this transaction, as the detach would result
         // into the deletion of all role permissions, if any error occurs.
         DB::transaction(function () use ($request, $role) {

@@ -10,7 +10,6 @@ use Tests\Support\PluginTemplate;
 use Tests\PluginTestCase;
 
 class ApiPluginCssTest extends PluginTestCase {
-
     private const PLUGIN_NAME = 'CssPlugin';
     private const PLUGIN_UUID = '00000000-0000-0000-0000-000000000004';
 
@@ -52,7 +51,7 @@ class ApiPluginCssTest extends PluginTestCase {
         Carbon::setTestNow();
         $this->ensureTeardown();
     }
-    
+
     function testInstallSkipsEmptyCssPath() {
         $template = self::defaultCssTemplate()->addXml("css", "file", [['src' => '']])->created()->generate("plugin.xml");
         $this->generator = PluginGenerator::with([$template], function () use ($template) {
@@ -69,14 +68,14 @@ class ApiPluginCssTest extends PluginTestCase {
         $template = self::defaultCssTemplate(['style.css'])->created()->generate("plugin.xml");
         $this->generator = PluginGenerator::with([$template], function () use ($template) {
             Storage::disk("public")->assertMissing("plugin_css/cssplugin-00000000-0000-0000-0000-000000000004-style.css");
-            
+
             $this->assertDatabaseMissing('plugin_service_css_files', [
                 'plugin_id' => $template->plugin->id,
             ]);
-            
+
             $response = $this->userRequest()
             ->post("/api/v1/plugin/install/{$template->plugin->id}");
-            
+
             $response->assertStatus(200);
 
             $this->assertDatabaseHas('plugin_service_css_files', [
@@ -97,13 +96,13 @@ class ApiPluginCssTest extends PluginTestCase {
     function testUninstallRemovesCssRecordAndUnpublishesFile() {
         $template = self::defaultCssTemplate(['style.css'])->generate("plugin.xml");
         $this->generator = PluginGenerator::with([$template], function () use ($template) {
-            
+
             $this->assertDatabaseHas('plugin_service_css_files', [
                 'plugin_id' => $template->plugin->id,
                 'src' => 'style.css',
                 ]);
             Storage::disk("public")->assertExists("plugin_css/cssplugin-00000000-0000-0000-0000-000000000004-style.css");
-                
+
             $response = $this->userRequest()
                 ->post("/api/v1/plugin/uninstall/{$template->plugin->id}");
 

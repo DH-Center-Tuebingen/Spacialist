@@ -18,10 +18,8 @@ use Tests\Support\PluginGenerator;
 use Tests\Support\PluginTemplate;
 
 class ApiPluginTest extends TestCase {
-
     private PluginGenerator $generator;
     private ?string $tmpdir = null;
-
 
     private static function getFooPlugin(): array {
         return [
@@ -50,7 +48,6 @@ class ApiPluginTest extends TestCase {
     }
 
     private function removeTmpDir() {
-
         if(!$this->tmpdir || !is_dir($this->tmpdir)) {
             return;
         }
@@ -76,7 +73,7 @@ class ApiPluginTest extends TestCase {
 
     protected function setUp(): void {
         parent::setUp();
-        
+
         // The refresh database trait seems not to reset the id sequence
         // therefore we do it manually here to ensure the ids of the test plugins are always the same.
         DB::statement("ALTER SEQUENCE IF EXISTS plugins_id_seq RESTART");
@@ -229,7 +226,6 @@ class ApiPluginTest extends TestCase {
         Carbon::setTestNow();
     }
 
-
     #[TestDox('POST [403]    /v1/plugin : Plugin upload fails without permission - "plugin_write"')]
     public function testUploadPluginFailsWithoutPermission(): void {
         Carbon::setTestNow('2020-07-20 10:15:30');
@@ -290,7 +286,7 @@ class ApiPluginTest extends TestCase {
         Carbon::setTestNow('2020-07-20 10:15:30');
 
         $pluginFirectory = config('app.plugin_directory');
-        
+
         $directoryExists = file_exists("$pluginFirectory/BarPlugin");
         $this->assertTrue($directoryExists);
 
@@ -332,7 +328,6 @@ class ApiPluginTest extends TestCase {
 
         $response->assertStatus(403);
     }
-
 
     #[TestDox('GET           /v1/plugin/migrate/<id>/check : Get Migration State')]
     public function testGetPluginMigrationState() {

@@ -3,11 +3,10 @@
 namespace Tests\Support;
 
 /*
- * Provides an easy to use lifecycle utility to set the 
+ * Provides an easy to use lifecycle utility to set the
  * plugin state inside a test with a single command.
  */
 class PluginLifecycle {
-
     static function RequiresInstall(PluginLifecycleState $state): bool {
         switch($state){
             case PluginLifecycleState::INSTALLED:

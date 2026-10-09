@@ -1,4 +1,5 @@
 <?php
+
 namespace Tests\Unit\Plugin;
 
 use App\Models\Plugin\CssFile;
@@ -13,7 +14,6 @@ use Tests\TestCase;
 
 class CssTest extends TestCase {
     protected Plugin $plugin;
-
 
     public function generateXml(array $files): string {
         if($files === null || count($files) === 0) {
@@ -35,7 +35,6 @@ class CssTest extends TestCase {
         );
 
         $template->addBasic();
-        
         $template->addXml("css", "file", array_map(function ($entry) {
             return [
                 "src" => $entry

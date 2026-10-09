@@ -10,7 +10,6 @@ use Tests\Support\PluginTemplate;
 use Tests\PluginTestCase;
 
 class ApiPluginScriptTest extends PluginTestCase {
-
     private const PLUGIN_NAME = 'ScriptPlugin';
     private const PLUGIN_UUID = '00000000-0000-0000-0000-000000000007';
 
@@ -56,13 +55,12 @@ class ApiPluginScriptTest extends PluginTestCase {
             $scripts = $response->json('scripts');
             $this->assertCount(1, $scripts);
             $this->assertStringContainsString($template->plugin->slugName() . '-' . $template->plugin->uuid . '.js', $scripts[0]);
-            
+
             Storage::disk("public")->assertExists("plugins/scriptplugin-00000000-0000-0000-0000-000000000007.js");
             $this->assertEquals(
                 "console.log('Hello from ScriptPlugin');",
                 Storage::disk("public")->get("plugins/scriptplugin-00000000-0000-0000-0000-000000000007.js")
             );
-
         });
     }
 
@@ -78,7 +76,6 @@ class ApiPluginScriptTest extends PluginTestCase {
         });
     }
 
-    
     function testInstallFailsWhenScriptFileIsMissing() {
         $template = new PluginTemplate(
             name: static::PLUGIN_NAME,
@@ -86,7 +83,7 @@ class ApiPluginScriptTest extends PluginTestCase {
             version: "1.0.0"
         );
         $template->addBasicChangelog()->created()->generate("plugin.xml");
-        
+
         $this->generator = PluginGenerator::with([$template], function () use ($template) {
             $response = $this->userRequest()
                 ->post("/api/v1/plugin/install/{$template->plugin->id}");
@@ -94,5 +91,4 @@ class ApiPluginScriptTest extends PluginTestCase {
             $response->assertStatus(422);
         });
     }
-        
 }

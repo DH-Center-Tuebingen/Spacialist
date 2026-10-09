@@ -39,8 +39,8 @@
 </template>
 
 <script>
-    import router from '@/bootstrap/router';
-    import useUserStore from '@/bootstrap/stores/user';
+    import router from '@/bootstrap/router.js';
+    import useUserStore from '@/bootstrap/stores/user.js';
     import { useI18n } from 'vue-i18n';
     import {
         useRoute,

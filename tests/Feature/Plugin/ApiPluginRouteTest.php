@@ -9,13 +9,12 @@ use Tests\Support\PluginTemplate;
 use Tests\PluginTestCase;
 
 class ApiPluginRouteTest extends PluginTestCase {
-
     const ROUTES_DATABASE = "plugin_service_routes";
     const PLUGIN_NAME = 'RoutePlugin';
     const PLUGIN_SLUG = "routeplugin";
     const PLUGIN_UUID = '00000000-0000-0000-0000-000000000006';
 
-    const HELLO_WORLD_PHP = "<?php 
+    const HELLO_WORLD_PHP = "<?php
 use Illuminate\Support\Facades\Route;
 
 Route::get('', function() {
@@ -36,7 +35,7 @@ Route::get('', function() {
         $this->addManifestEntryToTemplate($template);
         return $template;
     }
-    
+
     protected function addManifestEntryToTemplate(PluginTemplate $template){
         $template->addXml("routes", null, [['src' => $this->filePath]]);
     }
@@ -86,7 +85,7 @@ Route::get('', function() {
             ->addFile($this->filePath, "<?php // no-op routes file")
             ->created()
             ->generate("plugin.xml");
-            
+
         $this->generator = PluginGenerator::with([$template], function () use ($template) {
             $this->assertDatabaseCount(self::ROUTES_DATABASE, 0);
             $response = $this->userRequest()

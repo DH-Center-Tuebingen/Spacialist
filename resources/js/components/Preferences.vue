@@ -108,7 +108,7 @@
     } from 'vue';
 
     import { useI18n } from 'vue-i18n';
-    import usePluginStore from '../bootstrap/stores/plugin';    
+    import usePluginStore from '@/bootstrap/stores/plugin.js';
     import useSystemStore from '@/bootstrap/stores/system.js';
     import useUserStore from '@/bootstrap/stores/user.js';
     import { useToast } from '@/plugins/toast.js';

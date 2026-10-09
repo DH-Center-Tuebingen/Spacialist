@@ -366,7 +366,7 @@
                 const item = eventData.data;
                 if(item.children.length < item.children_count) {
                     item.state.loading = true;
-                   const resp =  await entityStore.fetchChildren(item.id, state.sort)
+                    await entityStore.fetchChildren(item.id, state.sort);
                     item.state.loading = false;
                     item.childrenLoaded = true;
                 }

@@ -8,11 +8,8 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use App\File\Directory;
 
-class DirectoryTest extends TestCase
-{
-
-    public function setUp(): void
-    {
+class DirectoryTest extends TestCase {
+    public function setUp(): void {
         parent::setUp();
         Storage::persistentFake('test');
         Storage::disk('test')->makeDirectory('test');
@@ -29,21 +26,19 @@ class DirectoryTest extends TestCase
         Storage::disk('test')->put('application/file.txt', 'Application file content');
     }
 
-
     /**
      * Capture the file stream from a response
      *
      * @param Illuminate\Http\JsonResponse $response The response object
      * @return string The content of the file stream
      */
-    private function captureFileStream($response){
+    private function captureFileStream($response) {
         ob_start();
         $response->sendContent();
         return ob_get_clean();
     }
 
-    private function assertFileContents($response, $expectedContent)
-    {
+    private function assertFileContents($response, $expectedContent) {
         $content = $this->captureFileStream($response);
         $this->assertEquals($expectedContent, $content);
     }
@@ -53,28 +48,24 @@ class DirectoryTest extends TestCase
      *
      * @return void
      */
-    public function testDirectoryConstruction()
-    {
+    public function testDirectoryConstruction() {
         $directory = new Directory('test', 'test');
         $this->assertEquals('test', $directory->getDirectory());
         $this->assertEquals('test', $directory->getDisk());
     }
 
-    public function testDefaulDisk()
-    {
+    public function testDefaulDisk() {
         $directory = new Directory('test');
         $this->assertEquals('local', $directory->getDisk());
     }
 
-    public function testContains()
-    {
+    public function testContains() {
         $directory = new Directory('test', 'test');
         $this->assertTrue($directory->contains('test/dir1/file_1.txt'));
         $this->assertFalse($directory->contains('test/file.txt'));
     }
 
-    public function testDelete()
-    {
+    public function testDelete() {
         $directory = new Directory('test', 'test');
 
         // Delete a file inside the directory
@@ -90,8 +81,7 @@ class DirectoryTest extends TestCase
         $this->assertTrue(Storage::disk('test')->exists('external/subdir/file.txt'));
     }
 
-    public function testDownload()
-    {
+    public function testDownload() {
         $directory = new Directory('test', 'test');
 
         // Download a file inside the directory
@@ -108,7 +98,7 @@ class DirectoryTest extends TestCase
         $this->assertStatus($response, 404);
     }
 
-    public function testDownloadRelative(){
+    public function testDownloadRelative() {
         $directory = new Directory('test', 'test');
 
         // Download a file inside the directory with relative path
@@ -125,7 +115,7 @@ class DirectoryTest extends TestCase
         $this->assertStatus($response, 404);
     }
 
-    public function testStore(){
+    public function testStore() {
         $directory = new Directory('test', 'test');
 
         $uniqueFile = Carbon::now()->timestamp . '_tmp_test_file.txt';
@@ -135,7 +125,7 @@ class DirectoryTest extends TestCase
         $this->assertTrue(Storage::disk('test')->exists($filePath));
     }
 
-    public function testPut(){
+    public function testPut() {
         $directory = new Directory('test', 'test');
 
         $path = Storage::disk('test')->path("application/file.txt");

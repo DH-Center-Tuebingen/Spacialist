@@ -9,7 +9,7 @@ use App\Support\BootstrapCache;
 
 /**
  * Adds the capability for plugins to register custom attributes.
- * 
+ *
  * '''xml
  * ...
  *    <attributes>
@@ -18,18 +18,15 @@ use App\Support\BootstrapCache;
  * ...
  * '''
  */
-class AttributeService extends PluginService{
-
+class AttributeService extends PluginService {
     use BootstrapCache;
-    
-    public function getCacheName(): string
-    {
+
+    public function getCacheName(): string {
         return 'plugin-attributes';
     }
-    
-    protected function fetch(): array
-    {
-        $attributes = PluginAttribute::with('plugin')->get()->toArray();            
+
+    protected function fetch(): array {
+        $attributes = PluginAttribute::with('plugin')->get()->toArray();
         return array_map(function($attribute) {
             return [
                 'id' => $attribute['id'],
@@ -41,26 +38,26 @@ class AttributeService extends PluginService{
             ];
         }, $attributes);
     }
-    
+
     public function getAttributesFromManifest(Plugin $plugin, PluginManifest $manifest): array {
         $attributeXmlNodes = $manifest->getTagNodes('attributes/attribute');
         $attributes = [];
         foreach($attributeXmlNodes as $attributeXmlNode) {
 
             if(!isset($attributeXmlNode['attributes']) || !isset($attributeXmlNode['attributes']['src'])) {
-                throw new PluginLifecycleException($plugin, "Invalid attribute declaration in plugin manifest of {$manifest->getName()}. Missing 'src' attribute.");             
+                throw new PluginLifecycleException($plugin, "Invalid attribute declaration in plugin manifest of {$manifest->getName()}. Missing 'src' attribute.");
             }
-        
+
             $src = (string) $attributeXmlNode['attributes']['src'];
-            
+
             $attributes[] = [
                 'src' => $src,
             ];
         }
-    
+
         return $attributes;
     }
-    
+
     public function install(Plugin $plugin, PluginManifest $manifest): void {
         $attributes = $this->getAttributesFromManifest($plugin, $manifest);
         foreach($attributes as $attribute) {
@@ -69,21 +66,21 @@ class AttributeService extends PluginService{
             if(!class_exists($projectedClass)) {
                 throw new PluginLifecycleException($plugin, "Attribute class '{$attribute['src']}' not found for plugin '{$manifest->getName()}'.");
             }
-        
+
             PluginAttribute::create([
                 'plugin_id' => $plugin->id,
                 'src' => $projectedClass,
             ]);
         }
-        
+
         $this->cache();
     }
-    
+
     public function uninstall(Plugin $plugin, PluginManifest $manifest): void {
         PluginAttribute::where('plugin_id', $plugin->id)->delete();
         $this->cache();
     }
-    
+
     public function getMappedByPlugins(): array {
         $attributes = $this->getData();
         $mapped = [];

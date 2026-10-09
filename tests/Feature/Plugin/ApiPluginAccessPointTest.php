@@ -11,7 +11,6 @@ use Tests\Support\PluginTemplate;
 use Tests\PluginTestCase;
 
 class ApiPluginAccessPointtest extends PluginTestCase {
-
     private const PLUGIN_NAME = 'AccessPointPlugin';
     private const PLUGIN_UUID = '00000000-0000-0000-0000-000000000003';
 

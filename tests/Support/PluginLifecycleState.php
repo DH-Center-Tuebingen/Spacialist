@@ -2,7 +2,6 @@
 
 namespace Tests\Support;
 
-
 /**
  * Enum to dtermine current lifecyclestate of a plugin.
  */

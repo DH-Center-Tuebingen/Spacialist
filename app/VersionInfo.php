@@ -7,22 +7,24 @@ use Illuminate\Support\Str;
 class VersionInfo {
     function __construct(
         private int $major = 0,
-        private int $minor = 0, 
+        private int $minor = 0,
         private int $patch = 0,
         private string $release ="",
         private string $releaseName ="",
         private ?string $releaseHash = null,
         private string $time = "",
-    ) {}
+    ) {
+
+    }
 
     /**
      * Set's the version values according to the ouput of a 'git describe --tags' command and a timestamp.
-     * 
+     *
      * @param string $tag The git tag string, e.g. v1.3.10-rc-1-gabcdef
      * @param string $timestamp The timestamp of the commit associated with the tag.
      * @return void
      */
-    public function setByGitTag(string $tag, string $timestamp){
+    public function setByGitTag(string $tag, string $timestamp) {
         $parts = explode('-', $tag);
         $this->release = $parts[0];
         $this->releaseName = ucfirst($parts[1]);
@@ -35,14 +37,14 @@ class VersionInfo {
 
         $this->time = $timestamp;
     }
-    
-    public function fetchFromGit(){
+
+    public function fetchFromGit() {
         exec('git describe --tags', $tag, $exitcode);
         exec('git log -1 --format=%at', $timestamp, $exitcodeTs);
         if($exitcode === 0 && $exitcodeTs === 0) {
             $this->setByGitTag($tag[0], $timestamp[0]);
         } else {
-            // TODO ! DANGER ! 
+            // TODO ! DANGER !
             // When the fetching of the version from git fails
             // it sets the version to the lowest possible state.
             // E.g. there is an update on an actual lower version,
@@ -57,7 +59,7 @@ class VersionInfo {
             return;
         }
     }
-    
+
     /**
      * Get's the release version with the version prefix.
      * @return string - The release version with the version prefix, e.g. v1.3.10
@@ -65,7 +67,7 @@ class VersionInfo {
     public function getRelease() {
         return $this->release;
     }
-    
+
     /**
      * Get's the release version as string without prefix.
      * @return string - The release version as a string without the 'v' prefix, e.g. 1.3.10
@@ -110,7 +112,7 @@ class VersionInfo {
     public function getTime() {
         return $this->time;
     }
-    
+
     public function toObject(): array {
         return [
             'full' => $this->getFullRelease(),

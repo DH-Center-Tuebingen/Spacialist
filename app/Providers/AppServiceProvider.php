@@ -8,13 +8,13 @@ use App\Geodata;
 use App\Preference;
 use App\VersionInfo;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\View;
+use Illuminate\Support\ServiceProvider;
 use Illuminate\Pagination\Paginator;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\URL;
 
 class AppServiceProvider extends ServiceProvider {
     /**
@@ -118,11 +118,10 @@ class AppServiceProvider extends ServiceProvider {
      * @return void
      */
     public function register() {
-        
         // Creates a singleton instance of VersionInfo only when the application requests it for the first time.
         $this->app->singleton(VersionInfo::class, function ($app) {
             $versionInfo = new VersionInfo();
-            try{
+            try {
                 $versionInfo->fetchFromGit();
             } catch(\Exception $e) {
                 Log::error("Failed to fetch version info from Git: " . $e->getMessage());

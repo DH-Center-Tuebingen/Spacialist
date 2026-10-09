@@ -87,10 +87,9 @@
         useTemplateRef,
     } from 'vue';
 
-
     import { useI18n } from 'vue-i18n';
 
-    import usePluginStore from '../bootstrap/stores/plugin';
+    import usePluginStore from '@/bootstrap/stores/plugin.js';
 
     import {
         can,
@@ -100,7 +99,6 @@
     import LoadingContainer from './structure/LoadingContainer.vue';
     import { useLoad } from '../composables/load';
     import { useBootstrapDropdownZAdjust } from '@/composables/bootstrap-dropdown-z-adjust';
-
 
     export default {
         components: {
@@ -114,10 +112,9 @@
             const root = useTemplateRef('root')
 
             // When the Plugins are shown in more than 1 column, the dropdown
-            // is obscured by the next row, so we need to adjust the zIndex of 
+            // is obscured by the next row, so we need to adjust the zIndex of
             // the dropdown card when the dropdpwn opens.
-            const { updateAllDropdowns } = useBootstrapDropdownZAdjust(root)
-
+            const { updateAllDropdowns } = useBootstrapDropdownZAdjust(root);
 
             onMounted(() => {
                 // Ensure plugins are loaded
@@ -140,9 +137,8 @@
             };
             const uploadZip = async (file, component) => {
                 const result = await execAsync(async () => pluginStore.upload(file.file));
-                console.log("File uploaded", result)
                 // Currently we must reload the page when the plugin is
-                // updated, to remove the old script from the browser and 
+                // updated, to remove the old script from the browser and
                 // that the new script can run without collisions.
                 // TODO: This should be improved with a more sophisticated frontend
                 // system in a future release.

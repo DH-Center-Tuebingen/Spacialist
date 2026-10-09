@@ -101,18 +101,18 @@
                         <footer class="d-flex justify-content-between align-items-end gap-2">
                             <div class="form-check form-switch">
                                 <input
+                                    id="switchCheckChecked"
                                     ref="installationSwitch"
                                     class="form-check-input"
                                     type="checkbox"
                                     role="switch"
-                                    id="switchCheckChecked"
                                     :checked="isInstalled()"
                                     @change="toggleActiveState"
                                 >
                             </div>
 
                             <span class="opacity-50">
-                                <i class="fa-regular fa-circle-user"></i> {{ authors }}
+                                <i class="far fa-fw fa-circle-user" /> {{ authors }}
                             </span>
                         </footer>
                     </div>
@@ -136,8 +136,6 @@
     import { getPluginTitle } from '@/helpers/plugins';
 
     import MarkdownText from '@/components/mde/MarkdownText.vue';
-
-
 
     export default {
         components: {
@@ -166,12 +164,15 @@
             const showChangelog = _ => {
                 showChangelogModal(props.value);
             };
+
             const install = async _ => {
                 await pluiginStore.install(props.value.id);
             };
+
             const uninstall = async _ => {
                 await pluiginStore.uninstall(props.value.id);
             };
+
             const remove = _ => {
                 pluiginStore.remove(props.value.id);
             };

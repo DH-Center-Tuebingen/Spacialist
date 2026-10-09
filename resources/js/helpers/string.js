@@ -5,12 +5,12 @@
  * @param {string} prefix - Prefix that the string should start with.
  * @returns {string} - The original string if it already starts with the prefix, otherwise the string with the prefix prepended.
  */
-export function ensureStartsWith(str, prefix) {
+export const ensureStartsWith = (str, prefix) => {
     if(!str.startsWith(prefix)) {
         return prefix + str;
     }
     return str;
-}
+};
 
 /**
  * Ensures that a string does not start with the specified prefix.
@@ -19,12 +19,12 @@ export function ensureStartsWith(str, prefix) {
  * @param {string} prefix - Prefix that the string should not start with.
  * @returns {string} - The original string if it does not start with the prefix, otherwise the string with the prefix removed.
  */
-export function ensureNotToStartWith(str, prefix) {
+export const ensureNotToStartWith = (str, prefix) => {
     if(str.startsWith(prefix)) {
         return str.slice(prefix.length);
     }
     return str;
-}
+};
 
 export const kebabToPascal = kebabText => {
     const isKebabCase = /^[a-z]+(-[a-z]*)*$/.test(kebabText);

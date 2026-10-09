@@ -15,7 +15,6 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use App\Support\Log\PluginLog;
 
 class PluginLogTest extends TestCase {
-
     const LOG_MESSAGE = "This is a test log message.";
 
     public function setUp(): void {
@@ -31,11 +30,11 @@ class PluginLogTest extends TestCase {
         }
     }
 
-    private function getExpectedMessage(string $levelString){
+    private function getExpectedMessage(string $levelString) {
         return 'testing.'. strtoupper($levelString) . ': ' . self::LOG_MESSAGE;
     }
-    
-    private function getExpectedPluginMessage(string $pluginName,string $levelString){
+
+    private function getExpectedPluginMessage(string $pluginName,string $levelString) {
         return 'testing.'. strtoupper($levelString) . ': [' . strtoupper($pluginName) . '] ' . self::LOG_MESSAGE;
     }
 
@@ -77,5 +76,4 @@ class PluginLogTest extends TestCase {
             "debug" => ["debug", "debug"],
         ];
     }
-
 }

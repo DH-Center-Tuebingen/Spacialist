@@ -15,10 +15,16 @@ use Illuminate\Support\Facades\Log;
  *    });
  */
 class PluginGenerator {
+    private array $directoriesToCleanup = [];
+    private array $pluginMap = [];
+
+    public function __construct(private array $templates) {
+
+    }
 
     /**
      * Returns the full path to the plugin directory for a given plugin name.
-     * NOTE: This is important for testing purposes: the plugin directory should be changed to a temporary 
+     * NOTE: This is important for testing purposes: the plugin directory should be changed to a temporary
      * location to avoid conflicts with real plugins.
      *
      * @return string The full path to the plugin directory.
@@ -27,27 +33,20 @@ class PluginGenerator {
         return base_path(config('app.plugin_directory')) . '/' . $pluginName;
     }
 
-
-    private array $directoriesToCleanup = [];
-    private array $pluginMap = [];
-
-    public function __construct(private array $templates) {
-    }
-
     public static function with(array $templates, callable $callback, bool $skipTearDown = false): static {
         return (new static($templates))->use($callback, $skipTearDown);
     }
 
     /**
      * Run's the generator lifecycle:
-     * 
+     *
      * - Setup Plugin directory
      * - Executes callback function
      * - Removes the plugin from the filesystem and resets the generator state.
-     * 
+     *
      * The filesystem structure can be maintained by passing skipTearDown.
      * Primarily interesting, for inspecting the generated template structure.
-     * 
+     *
      * @param callable $callback
      * @param bool $skipTearDown
      * @return PluginGenerator
@@ -65,7 +64,7 @@ class PluginGenerator {
     /**
      * Cleans up the generator and the directories.
      * Directory cleanup can be skipped using $skiptTearDown;
-     * 
+     *
      * @param bool $skipTearDown
      * @return void
      */
@@ -80,11 +79,11 @@ class PluginGenerator {
 
     /**
      * Setup all templates according to their lifecycle state.
-     * 
+     *
      * The state of all plugins will be changed in order of appearance
      * before continuing to the next step. E.g. when all templates are marked as UNINStALLED
      * all plugins will be first installed in order, and then uninstalled in the same order.
-     * 
+     *
      * @return void
      */
     public function setUp(): void {
@@ -94,10 +93,9 @@ class PluginGenerator {
         $this->removeTemplates();
     }
 
-
     /**
      * Creates the provided template directories and stores the created plugins internally.
-     * 
+     *
      * @return void
      */
     private function createTemplates() {
@@ -112,7 +110,7 @@ class PluginGenerator {
 
     /**
      * Processes all templates and installs them if necessary.
-     * 
+     *
      * @return void
      */
     private function installTemplates() {
@@ -123,9 +121,9 @@ class PluginGenerator {
                 $this->overrideTimestamps($plugin, $template);
             }
         }
-        
+
         // When we set up plugins but some are not installed,
-        // we need to trigger a cache rebuild. 
+        // we need to trigger a cache rebuild.
         // In a real world scenario the cache should be rebuild
         // when the plugin is uploaded.
         app(PluginManager::class)->rebuildPluginCache();
@@ -133,7 +131,7 @@ class PluginGenerator {
 
     /**
      * Processes all templates and uninstalls them if necessary.
-     * 
+     *
      * @return void
      */
     private function uninstallTemplates() {
@@ -147,7 +145,7 @@ class PluginGenerator {
 
     /**
      * Processes all templates and removes them if necessary.
-     * 
+     *
      * @return void
      */
     private function removeTemplates() {

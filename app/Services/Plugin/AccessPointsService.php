@@ -12,8 +12,8 @@ use App\User;
 
 /**
  * Allows the definition of custom access_points for the application, that require special
- * permission to visit specific routes of the webiste. 
- * 
+ * permission to visit specific routes of the webiste.
+ *
  * '''xml
  * ...
  * <accesspoints>
@@ -23,7 +23,6 @@ use App\User;
  * '''
  */
 class AccessPointsService extends PluginService implements ManifestContent {
-
     use BootstrapCache;
 
     protected function getCacheName(): string {
@@ -46,7 +45,7 @@ class AccessPointsService extends PluginService implements ManifestContent {
     public function install(Plugin $plugin, PluginManifest $manifest): void {
         $manifest = PluginManifest::fromPlugin($plugin);
         $accesPoints = $this->retrieveManifestValues($manifest);
-        
+
         foreach($accesPoints as $key => $accessPoint) {
             PluginLog::for($plugin)->info("Installing access point with id '{$accessPoint['id']}' for plugin '{$plugin->name}'..." . json_encode($accessPoint));
             $this->installAccessPoint($accessPoint, $plugin, $manifest);
@@ -69,7 +68,7 @@ class AccessPointsService extends PluginService implements ManifestContent {
                 'label' => "plugin.{$plugin->slugName()}.{$accessPoint['label']}",
                 'path' => $accessPoint['path'],
             ]);
-            
+
             return true;
         }
     }

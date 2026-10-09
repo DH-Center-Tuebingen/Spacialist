@@ -10,7 +10,6 @@ use Tests\Support\Templates\ScopeTemplate;
 use Tests\Support\PluginGenerator;
 
 class ApiPluginScopeTest extends PluginTestCase {
-
     private ?PluginGenerator $generator = null;
 
     private function getScopePlugin(): array {
@@ -48,13 +47,11 @@ class ApiPluginScopeTest extends PluginTestCase {
         $this->ensureTeardown();
     }
 
-
     public function testInstallingScopePlugin(): void {
-
         $response = $this->userRequest()
             ->get('/api/v1/search/entity?q=');
 
-        // Before plugin installation 
+        // Before plugin installation
         // we get all 8 entitiies.
         $response->assertStatus(200);
         $response->assertJsonCount(8, 'data');
@@ -63,7 +60,7 @@ class ApiPluginScopeTest extends PluginTestCase {
             // As this all happens in the same cycle,
             // we need to manually reboot the model to trigger
             // the boot method and apply the new plugin scope.
-            // In a real scenario, this would be handled automatically 
+            // In a real scenario, this would be handled automatically
             // as the plugin would be installed in a separate request/cycle.
             self::rebootModel(Entity::class);
 
@@ -86,7 +83,7 @@ class ApiPluginScopeTest extends PluginTestCase {
             ]);
         });
     }
-    
+
     function testUninstallingScopePlugin(): void {
         $template = $this->getRestrictToType3Template()->uninstalled();
         PluginGenerator::with([$template], function() use ($template) {
@@ -99,5 +96,4 @@ class ApiPluginScopeTest extends PluginTestCase {
             $response->assertJsonCount(8, 'data');
         });
     }
-
 }

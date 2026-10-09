@@ -269,8 +269,7 @@
     } from 'vue';
 
     import useAttributeStore from '@/bootstrap/stores/attribute.js';
-    import usePluginStore from '../../bootstrap/stores/plugin';
-    
+    import usePluginStore from '@/bootstrap/stores/plugin.js';
 
     import {
         getEmptyAttributeValue,
