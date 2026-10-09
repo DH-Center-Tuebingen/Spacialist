@@ -35,13 +35,13 @@ export function hasPlugin(id) {
 export function getErrorMessages(error, suffix = '') {
     let msgObject = {};
     const r = error.response;
-    if(r.status == 422) {
+    if(r?.status == 422) {
         if(r.data.errors) {
             for(let k in r.data.errors) {
                 msgObject[`${k}${suffix}`] = r.data.errors[k];
             }
         }
-    } else if(r.status == 400) {
+    } else if(r?.status == 400) {
         msgObject.global = r.data.error;
     }
     return msgObject;

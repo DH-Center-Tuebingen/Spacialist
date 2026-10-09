@@ -10,6 +10,8 @@ const messages = {
 };
 const locale = navigator.language.split('-')[0];
 
+window.globalLocale = locale;
+
 const i18n = createI18n({
     legacy: false,
     locale,

@@ -14,6 +14,12 @@ export async function fetchEntityTypes() {
     );
 };
 
+export async function fetchAttributeValuesForEntityType(entityTypeId) {
+    return $httpQueue.add(
+        () => http.get(`/entity_type/${entityTypeId}/attribute_values`).then(response => response.data)
+    );
+};
+
 export async function fetchAttributes(entityTypeId = null, countData = false) {
     let url = '/attributes';
     if(entityTypeId) {
@@ -27,6 +33,18 @@ export async function fetchAttributes(entityTypeId = null, countData = false) {
         () => http.get(url).then(response => response.data)
     );
 };
+
+export async function getEntity(eid) {
+    return $httpQueue.add(
+        () => http.get(`/entity/${eid}`).then(response => response.data)
+    );
+};
+
+export async function getEntityData(eid) {
+    return $httpQueue.add(
+        () => http.get(`/entity/${eid}/data`).then(response => response.data)
+    );
+}
 
 export async function getFilterResults(entityTypeIds, attributeIds, page = 1) {
     const data = {

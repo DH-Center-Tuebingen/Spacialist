@@ -15,6 +15,7 @@
         >
             <form
                 role="form"
+                class="mh-50 overflow-y-auto overflow-x-hidden"
                 @submit.prevent="updateEntityType"
             >
                 <div class="row mb-3">
@@ -37,13 +38,14 @@
                     <div class="col align-items-center">
                         <div class="row align-items-center">
                             <label
-                                for="entity-color"
+                                for="entity-type-color"
                                 style="width: min-content;"
                             >
                                 {{ t('global.color') }}
                             </label>
                             <div class="col align-items-center">
                                 <input
+                                    id="entity-type-color"
                                     v-model="state.properties.color"
                                     type="color"
                                     class="form-control form-control-color w-100"
@@ -52,11 +54,32 @@
                         </div>
                     </div>
                 </div>
+                <div
+                    v-if="state.openAccessPreference"
+                    class="row mb-3"
+                >
+                    <div class="offset-3 col row align-items-center">
+                        <div class="form-check form-switch">
+                            <input
+                                id="entity-type-open-access-toggle"
+                                v-model="state.properties.in_open_access"
+                                class="form-check-input"
+                                type="checkbox"
+                            >
+                            <label
+                                class="form-check-label"
+                                for="entity-type-open-access-toggle"
+                            >
+                                {{ t('main.datamodel.detail.properties.show_open_access') }}
+                            </label>
+                        </div>
+                    </div>
+                </div>
 
                 <!-- TODO: This should be handled using a @PluginHook from within the map plugin! -->
                 <div
                     v-if="state.entityType?.layer?.type"
-                    class="mb-3 row"
+                    class="row mb-3"
                 >
                     <label
                         for="entity-geometrytype-ro"
@@ -73,7 +96,7 @@
                         </router-link> -->
                     </div>
                 </div>
-                <div class="mb-2 row">
+                <div class="row mb-3">
                     <label
                         for="dme-allowed-sub-entity-types-select"
                         class="col-form-label col-md-3 text-end"
@@ -142,6 +165,92 @@
                         </div>
                     </div>
                 </div>
+                <div
+                    v-if="state.properties.in_open_access"
+                >
+                    <h5
+                        class="clickable"
+                        @click="state.showOpenAccessOptions = !state.showOpenAccessOptions"
+                    >
+                        Open Access Eigenschaften
+                        <span
+                            v-show="state.showOpenAccessOptions"
+                            class="small"
+                        >
+                            <i class="fas fa-fw fa-eye" />
+                        </span>
+                        <span
+                            v-show="!state.showOpenAccessOptions"
+                            class="small"
+                        >
+                            <i class="fas fa-fw fa-eye-slash" />
+                        </span>
+                    </h5>
+                    <template v-if="state.showOpenAccessOptions">
+                        <div
+                            class="row mb-3"
+                        >
+                            <label
+                                for="entity-type-open-access-summary"
+                                class="col-form-label col-md-3 text-end"
+                            >
+                                {{ t('global.summary') }}
+                            </label>
+                            <div class="col-md-9">
+                                <textarea
+                                    id="entity-type-open-access-summary"
+                                    v-model="state.properties.metadata.open_access_summary"
+                                    class="form-control w-100"
+                                />
+                            </div>
+                        </div>
+                        <div class="row">
+                            <label
+                                class="col-form-label col-md-3 text-end"
+                            >
+                                {{ t('global.image') }}
+                            </label>
+                            <div class="col-md-9 d-flex flex-row align-items-center gap-2">
+                                <file-upload
+                                    ref="uploadAvatarInput"
+                                    v-model="state.fileQueue"
+                                    class="flex-grow-1"
+                                    accept="image/*"
+                                    :custom-action="uploadFile"
+                                    :directory="false"
+                                    :drop="true"
+                                    :multiple="false"
+                                    :disabled="state.uploadingFile"
+                                    @input-file="inputFile"
+                                >
+                                    <div
+                                        v-if="state.properties.metadata?.image"
+                                        class="position-relative"
+                                    >
+                                        <img
+                                            :src="`api/download/entity_type?path=${state.properties.metadata.image}`"
+                                            class="object-fit-contain z-1"
+                                            style="max-height: 200px;"
+                                        >
+                                        <button
+                                            type="button"
+                                            class="btn btn-outline-danger btn-sm btn-fab position-absolute top-0 start-50 translate-middle mt-2 z-2"
+                                            @click="deleteFile"
+                                        >
+                                            <i class="fas fa-fw fa-trash" />
+                                        </button>
+                                    </div>
+                                    <div
+                                        v-else
+                                        class="border-dashed border-2 p-3"
+                                    >
+                                        Noch kein Bild hochgeladen. Drop oder Klick.
+                                    </div>
+                                </file-upload>
+                            </div>
+                        </div>
+                    </template>
+                </div>
             </form>
             <hr>
             <h3>{{ t('main.datamodel.detail.attribute.title') }}</h3>
@@ -187,6 +296,7 @@
     import { useI18n } from 'vue-i18n';
 
     import useEntityStore from '@/bootstrap/stores/entity.js';
+    import useSystemStore from '@/bootstrap/stores/system.js';
 
     import { useToast } from '@/plugins/toast.js';
 
@@ -210,6 +320,7 @@
         setup(props, context) {
             const { t } = useI18n();
             const entityStore = useEntityStore();
+            const systemStore = useSystemStore();
             const currentRoute = useRoute();
             const toast = useToast();
             // FETCH
@@ -232,9 +343,44 @@
                             channel: 'success',
                         }
                     );
+                    // TODO reset dirty state (and rethink dirty handling?)
                 }).finally(_ => {
                     state.propertiesSaving = false;
                 });
+            };
+            const inputFile = (newFile, oldFile) => {
+                // Wait for response
+                if(newFile && oldFile && newFile.success && !oldFile.success) {
+                }
+
+                // Enable automatic upload
+                if(!!newFile && (Boolean(newFile) !== Boolean(oldFile) || oldFile.error !== newFile.error)) {
+                    if(!newFile.active) {
+                        newFile.active = true;
+                    }
+                }
+            };
+            const uploadFile = async (file, component) => {
+                try {
+                    state.uploadingFile = true;
+                    const filepath = await entityStore.setEntityTypeFile(state.entityType.id, file.file);
+                    state.properties.metadata.image = filepath;
+                    state.entityType.metadata.image = filepath;
+                } catch(e) {
+                    console.error(e);
+                } finally {
+                    state.uploadingFile = false;
+                }
+            };
+            const deleteFile = async _ => {
+                try {
+                    await entityStore.deleteEntityTypeFile(state.entityType.id);
+                } catch(e) {
+                    console.error(e);
+                } finally {
+                    delete state.properties.metadata.image;
+                    delete state.entityType.metadata.image;
+                }
             };
             const addAllEntityTypes = _ => {
                 state.properties.sub_entity_types = state.minimalEntityTypes.slice();
@@ -301,12 +447,14 @@
                 entityStore.reorderAttributes(currentRoute.params.id, e.element.id, e.from, e.to);
             };
 
-            const getDefaultPropertyValues = function () {
+            const getDefaultPropertyValues = () => {
                 return {
                     id: null,
                     is_root: undefined,
                     sub_entity_types: [],
                     color: undefined,
+                    in_open_access: true,
+                    metadata: {},
                 };
             };
 
@@ -325,13 +473,16 @@
                     if(!state.entityType) return false;
                     const rootDirty = state.entityType.is_root !== state.properties.is_root;
                     const colorDirty = state.entityType.color !== state.properties.color;
+                    const openAccessDirty = state.entityType.in_open_access !== state.properties.in_open_access;
+                    const openAccessSummaryDirty = state.entityType.metadata?.open_access_summary !== state.properties.metadata?.open_access_summary;
                     const subTypesDirty = state.entityType.sub_entity_types.length !== state.properties.sub_entity_types.length ||
                         state.properties.sub_entity_types.every((v, i) => v.id !== state.entityType.sub_entity_types[i].id);
 
-                    return rootDirty || colorDirty || subTypesDirty;
+                    return rootDirty || colorDirty || openAccessDirty || openAccessSummaryDirty || subTypesDirty;
                 }),
                 propertiesSaving: false,
                 properties: getDefaultPropertyValues(),
+                openAccessPreference: computed(_ => systemStore.getSystemPreference('prefs.enable-open-access')),
                 entityAttributes: computed(_ => getEntityTypeAttributes(currentRoute.params.id)),
                 entityValues: computed(_ => {
                     let data = {};
@@ -348,6 +499,8 @@
                 entitySelections: {},
                 entityDependencies: [],
                 entityAvailable: computed(_ => !!state.entityType),
+                fileQueue: [],
+                uploadingFile: false,
                 selectedDependency: {
                     attribute: {},
                     operator: undefined,
@@ -441,6 +594,8 @@
                     state.properties.is_root = entityType.is_root;
                     state.properties.sub_entity_types = entityType.sub_entity_types;
                     state.properties.color = entityType.color;
+                    state.properties.in_open_access = entityType.in_open_access;
+                    state.properties.metadata = {...entityType.metadata} || {};
                 } else {
                     state.properties = getDefaultPropertyValues();
                 }
@@ -463,6 +618,9 @@
                 translateConcept,
                 // LOCAL
                 updateEntityType,
+                inputFile,
+                uploadFile,
+                deleteFile,
                 addAllEntityTypes,
                 removeAllEntityTypes,
                 addAttributeToEntityType,

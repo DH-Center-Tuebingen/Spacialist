@@ -14,6 +14,7 @@ All notable changes to this project will be documented in this file.
 - Removed redundant calls to the entity endpoint
 - Metadata tab error on submit (unknown variable)
 - Errors in _map.js_
+- Values in disabled _Percentage_ attribute could be changed using mousewhell
 - Error on _Entity_ delete
 - Alignment of _User Label_ in _Metadata_ tab
 - Submit Epoch/Timeperiod without start or end value

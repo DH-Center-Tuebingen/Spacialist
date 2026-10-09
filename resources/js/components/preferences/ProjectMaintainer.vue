@@ -47,25 +47,6 @@
             </button>
         </div>
     </div>
-    <div class="row">
-        <label
-            class="col-md-2 col-form-label text-end"
-            for="public"
-        >{{ t('main.preference.key.project.public') }}:</label>
-        <div class="col-md-10 d-flex flex-row align-items-center">
-            <div class="form-check form-switch">
-                <input
-                    id="public"
-                    v-model="localData.public"
-                    type="checkbox"
-                    class="form-check-input"
-                    :readonly="readonly"
-                    :disabled="readonly"
-                    @input="onChange"
-                >
-            </div>
-        </div>
-    </div>
 </template>
 
 <script>
@@ -83,7 +64,7 @@ reactive,
     import {
         showMarkdownEditor
     } from '@/helpers/modal.js';
-    
+
     export default {
         props: {
             data: {
@@ -113,7 +94,6 @@ reactive,
                         name: localData.name,
                         email: localData.email,
                         description: localData.description,
-                        public: localData.public,
                 });
             }, 250);
             const openMdEditor = _ => {
