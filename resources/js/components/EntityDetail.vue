@@ -875,8 +875,8 @@
                 });
             };
             const setDetailPanelView = (tab = 'attributes-default') => {
-                // check if provided `view` query param is valid
-                if(!state.activeTabs.includes(tab)) {
+                // check if provided `view` query param is valid attribute tab
+                if(tab.startsWith('attributes-') && !state.activeTabs.includes(tab)) {
                     // if not either set it to the default tab (if exists)
                     // or set to first available group and also update
                     // route url if needed
