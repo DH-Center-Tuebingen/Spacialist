@@ -901,20 +901,22 @@
                     }
                 }
 
-                const tabId = tab.substring(tab.indexOf('-') + 1);
                 let newTab, oldTabs, newPanel, oldPanels;
-                if(tab === 'comments') {
-                    newTab = document.getElementById('active-entity-comments-tab');
-                    newPanel = document.getElementById('active-entity-comments-panel');
-                    if(!state.commentsFetched) {
-                        fetchComments();
+                if(tab) {
+                    const tabId = tab.substring(tab.indexOf('-') + 1);
+                    if(tab === 'comments') {
+                        newTab = document.getElementById('active-entity-comments-tab');
+                        newPanel = document.getElementById('active-entity-comments-panel');
+                        if(!state.commentsFetched) {
+                            fetchComments();
+                        }
+                    } else if(tab === 'metadata') {
+                        newTab = document.getElementById('active-entity-metadata-tab');
+                        newPanel = document.getElementById('active-entity-metadata-panel');
+                    } else {
+                        newTab = document.getElementById(`active-entity-attributes-group-${tabId}-tab`);
+                        newPanel = document.getElementById(`active-entity-attributes-panel-${tabId}`);
                     }
-                } else if(tab === 'metadata') {
-                    newTab = document.getElementById('active-entity-metadata-tab');
-                    newPanel = document.getElementById('active-entity-metadata-panel');
-                } else {
-                    newTab = document.getElementById(`active-entity-attributes-group-${tabId}-tab`);
-                    newPanel = document.getElementById(`active-entity-attributes-panel-${tabId}`);
                 }
                 oldTabs = document.getElementsByClassName('active-entity-detail-tab');
                 oldPanels = document.getElementsByClassName('active-entity-detail-panel');
