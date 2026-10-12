@@ -233,6 +233,16 @@ dl.dl-0-mb > dd:last-child {
     right: -5px;
 }
 
+.popup-list-group > .list-group-item {
+    @extend .px-0;
+}
+.popup-list-group > .list-group-item:first-child {
+    @extend .pt-0;
+}
+.popup-list-group > .list-group-item:last-child {
+    @extend .pb-0;
+}
+
 .table-cell-250 td, .table-cell-250 ul {
     max-height: 250px;
     overflow-y: auto;

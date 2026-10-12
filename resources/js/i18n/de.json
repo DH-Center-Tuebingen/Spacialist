@@ -27,6 +27,7 @@
         "move": "Verschieben",
         "parse": "Parsen",
         "conflict": "Konflikt",
+        "image": "Bild",
         "file": "Datei",
         "remove_file": "Datei entfernen",
         "no_file": "Keine Datei vorhanden",
@@ -803,6 +804,7 @@
                 "properties": {
                     "title": "Eigenschaften",
                     "top_level": "Top-Level",
+                    "show_open_access": "In Open Access anzeigen",
                     "sub_types": "Erlaubte Unter-Entitätstypen"
                 },
                 "attribute": {
@@ -827,7 +829,8 @@
                 "sub": {
                     "general": "Allgemein",
                     "layout": "Layout",
-                    "interface": "Benutzer-Interface"
+                    "interface": "Benutzer-Interface",
+                    "openaccess": "Freier Zugang (Open Access)"
                 },
                 "is_empty": "Keine Einstellungen in dieser Kategorie"
             },

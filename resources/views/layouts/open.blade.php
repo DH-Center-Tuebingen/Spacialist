@@ -9,7 +9,11 @@
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ $p['prefs.project-name'] }}</title>
+    <title>
+        {{ $p['prefs.project-name'] }}
+        -
+        Open Access
+    </title>
 
     @php
         $color = $p['prefs.color'] ?? '';

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Attribute;
 use App\Registries\AttributeRegistry;
+use App\Registries\PreferenceRegistry;
 use App\Services\AccessPointsService;
 use App\Bibliography;
 use App\Entity;
@@ -93,6 +94,7 @@ class HomeController extends Controller
             });
         $attributeSelections = Attribute::getSelectionsFor($attributes);
         $attributeTypes = AttributeRegistry::getTypes(true);
+        $preferenceSelection = PreferenceRegistry::getTypes(true);
 
         $users = User::with('roles')->withoutTrashed()->orderBy('id')->get();
         $deletedUsers = User::with('roles')->onlyTrashed()->orderBy('id')->get();
@@ -144,6 +146,7 @@ class HomeController extends Controller
             'plugins' => $plugins,
             'geometryTypes' => $geometryTypes,
             'attributeTypes' => $attributeTypes,
+            'preferenceSelection' => $preferenceSelection,
         ]);
     }
 
