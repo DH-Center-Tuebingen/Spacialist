@@ -1,12 +1,12 @@
 <template>
     <div>
-        <div class="bg-secondary bg-opacity-10 p-3 rounded mt-2">
+        <div class="bg-secondary bg-opacity-10 p-3 rounded mt-2 h-100 d-flex flex-column">
             <span v-if="state.loading">
                 <i class="fas fa-fw fa-spinner fa-spin" />
             </span>
             <div
                 v-else
-                class="d-flex flex-column h-100"
+                class="d-flex flex-column flex-grow-1 overflow-hidden"
             >
                 <div class="d-flex flex-row gap-2 justify-content-between">
                     <div class="flex-fill">
@@ -49,11 +49,11 @@
                         >
                     </div>
                 </div>
-                <form>
-                    <div>
+                <form class="flex-grow-1">
+                    <div class="h-100 d-flex flex-column gap-1">
                         <label
                             for="entity-metadata-summary"
-                            class="form-label mb-1"
+                            class="form-label mb-0"
                         >
                             <h6 class="mb-0">
                                 {{ t('global.summary') }}
@@ -61,7 +61,8 @@
                         </label>
                         <richtext
                             id="entity-metadata-summary"
-                            class="bg-white rounded"
+                            class="bg-white rounded overflow-hidden"
+                            classes="mt-0 bg-none h-100 form-control px-4 py-3 overflow-auto"
                             :value="state.metadata.summary"
                             @change="updateEntitySummary"
                         />
