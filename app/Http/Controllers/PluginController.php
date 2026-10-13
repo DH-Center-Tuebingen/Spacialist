@@ -9,8 +9,8 @@ use App\Services\PluginManager;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
-use App\Plugin\PluginDirectory;
-use App\Plugin\PluginUploader;
+use App\Plugin\Directory as PluginDirectory;
+use App\Plugin\Uploader as PluginUploader;
 use App\Services\Plugin\AttributeService;
 use App\Services\Plugin\MigrationService;
 use App\Services\Plugin\DiscoveryService;
@@ -122,15 +122,15 @@ class PluginController extends Controller {
 
         try {
             app(PluginManager::class)->install($plugin);
-        } catch (ModelNotFoundException $e) {
+        } catch(ModelNotFoundException $e) {
             return response()->json([
                 'error' => __('Error while installing plugin. Preset does not exist.')
             ], 403);
-        } catch (PluginLifecycleException $e) {
+        } catch(PluginLifecycleException $e) {
             return response()->json([
                 'error' => $e->getMessage()
             ], 422);
-        } catch (Exception $e) {
+        } catch(Exception $e) {
             report($e);
             PluginLog::for($plugin)->error("Unexpected error during plugin installation: " . $e->getMessage(), ['exception' => $e]);
             return response()->json([

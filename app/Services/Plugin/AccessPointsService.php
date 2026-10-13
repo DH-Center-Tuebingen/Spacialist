@@ -5,7 +5,7 @@ namespace App\Services\Plugin;
 use App\Interfaces\ManifestContent;
 use App\Models\Plugin\AccessPoint;
 use App\Plugin;
-use App\Plugin\PluginManifest;
+use App\Plugin\Manifest as PluginManifest;
 use App\Support\BootstrapCache;
 use App\Support\Log\PluginLog;
 use App\User;

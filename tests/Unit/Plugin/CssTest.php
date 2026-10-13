@@ -4,7 +4,7 @@ namespace Tests\Unit\Plugin;
 
 use App\Models\Plugin\CssFile;
 use App\Plugin;
-use App\Plugin\PluginManifest;
+use App\Plugin\Manifest as PluginManifest;
 use App\Services\Plugin\CssService;
 use App\Services\PluginManager;
 use Directory;

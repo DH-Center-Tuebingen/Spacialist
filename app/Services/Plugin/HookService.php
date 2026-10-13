@@ -3,8 +3,8 @@ namespace App\Services\Plugin;
 
 use App\Models\Plugin\Hook;
 use App\Plugin;
-use App\Plugin\PluginDirectory;
-use App\Plugin\PluginManifest;
+use App\Plugin\Directory as PluginDirectory;
+use App\Plugin\Manifest as PluginManifest;
 use App\Support\BootstrapCache;
 use App\Support\Method;
 use App\Validators\HookValidator;

@@ -101,7 +101,8 @@ class PluginGenerator {
     private function createTemplates() {
         foreach($this->templates as $template) {
             $plugin = clone ($template->plugin);
-            $pluginDir = self::getPluginDirectory($plugin['name']);            $this->directoriesToCleanup[] = PluginDirectoryGenerator::mockPluginDirectory($template, $pluginDir);
+            $pluginDir = self::getPluginDirectory($plugin['name']);            
+            $this->directoriesToCleanup[] = PluginDirectoryGenerator::mockPluginDirectory($template, $pluginDir);
             $plugin->save();
             $template->plugin->id = $plugin->id; // Update the template's plugin ID to match the saved plugin
             $this->pluginMap[$plugin->name] = $plugin;

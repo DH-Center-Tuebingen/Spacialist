@@ -6,8 +6,8 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\File;
 
 use App\Plugin;
-use App\Plugin\PluginDirectory;
-use App\Plugin\PluginManifest;
+use App\Plugin\Directory as PluginDirectory;
+use App\Plugin\Manifest as PluginManifest;
 use App\Services\Plugin\AccessPointsService;
 use App\Services\Plugin\AttributeService;
 use App\Services\Plugin\CssService;

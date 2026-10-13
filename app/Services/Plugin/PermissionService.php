@@ -4,8 +4,8 @@ namespace App\Services\Plugin;
 
 use App\Permission;
 use App\Plugin;
-use App\Plugin\PluginDirectory;
-use App\Plugin\PluginManifest;
+use App\Plugin\Directory as PluginDirectory;
+use App\Plugin\Manifest as PluginManifest;
 use Exception;
 use Illuminate\Support\Facades\File;
 

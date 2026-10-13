@@ -3,7 +3,7 @@
 namespace App\Interfaces;
 
 use App\Plugin;
-use App\Plugin\PluginManifest;
+use App\Plugin\Manifest as PluginManifest;
 
 interface ManifestContent {
     public function retrieveManifestValues(PluginManifest $manifest): array;

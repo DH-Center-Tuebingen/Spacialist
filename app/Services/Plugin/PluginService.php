@@ -3,7 +3,7 @@
 namespace App\Services\Plugin;
 
 use App\Plugin;
-use App\Plugin\PluginManifest;
+use App\Plugin\Manifest as PluginManifest;
 
 /**
  * Subclass for PluginServices. It provides the lifecycle methods: install, update, uninstall and remove.

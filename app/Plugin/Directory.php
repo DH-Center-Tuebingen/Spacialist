@@ -12,7 +12,7 @@ use Illuminate\Support\Str;
  * It concerns the plugin manifest (plugin.xml), components, options, classes,
  * and other files that are part of a plugin.
  */
-class PluginDirectory {
+class Directory {
     /**
      * Create's a plugin directory instance for the provided plugin name.
      * @param string $pluginName Name of plugin and it's directory.
@@ -62,9 +62,9 @@ class PluginDirectory {
     }
 
     /**
-     * Creates a new instance of PluginDirectory from a given Plugin model.
+     * Creates a new instance from a given Plugin model.
      * @param Plugin $plugin
-     * @return PluginDirectory
+     * @return Directory
      */
     public static function fromPlugin(Plugin $plugin): self {
         return new self($plugin->name);
@@ -113,10 +113,10 @@ class PluginDirectory {
      * for chaining.
      *
      * @param mixed $name
-     * @return Plugin\PluginDirectory
+     * @return Directory
      */
-    public static function fromName($name): PluginDirectory {
-        return new PluginDirectory($name);
+    public static function fromName($name): Directory {
+        return new Directory($name);
     }
 
     /**

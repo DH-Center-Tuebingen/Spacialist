@@ -3,14 +3,14 @@
 namespace App\Plugin;
 
 use App\Plugin;
-use App\Plugin\PluginDirectory;
-use App\Plugin\Support\PluginUploadResult;
+use App\Plugin\Directory as PluginDirectory;
+use App\Plugin\Support\UploadResult;
 use Exception;
 use Illuminate\Support\Str;
 use SplFileInfo;
 use ZipArchive;
 
-class PluginUploader {
+class Uploader {
     /**
      * Uploads a plugin zip file, extracts it to the plugin directory,
      * and returns the name of the uploaded plugin.
@@ -25,9 +25,9 @@ class PluginUploader {
      * it is removed before moving the existing plugin to the backup directory.
      *
      * @param SplFileInfo $file - The uploaded plugin zip file
-     * @return PluginUploadResult - The result of the upload, containing the plugin name and whether the plugin was updated or created.
+     * @return UploadResult - The result of the upload, containing the plugin name and whether the plugin was updated or created.
      */
-    public function upload(SplFileInfo $file): PluginUploadResult {
+    public function upload(SplFileInfo $file): UploadResult {
         $zipFile = $this->tryOpenZipFile($file);
         $pluginName = $this->getSingleRootDirectory($zipFile);
         $existingPlugin = Plugin::where('name', $pluginName)->first();
@@ -43,7 +43,7 @@ class PluginUploader {
         }
 
         $this->extractZipFile($zipFile, $pluginName);
-        return new PluginUploadResult($pluginName, $existingPlugin);
+        return new UploadResult($pluginName, $existingPlugin);
     }
 
     /**

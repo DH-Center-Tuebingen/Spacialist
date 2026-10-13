@@ -3,8 +3,8 @@
 namespace App\Services\Plugin;
 
 use App\Plugin;
-use App\Plugin\PluginDirectory;
-use App\Plugin\PluginManifest;
+use App\Plugin\Directory as PluginDirectory;
+use App\Plugin\Manifest as PluginManifest;
 use App\Support\Log\PluginLog;
 use Illuminate\Support\Facades\File;
 

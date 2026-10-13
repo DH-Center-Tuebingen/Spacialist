@@ -4,7 +4,7 @@ namespace App\Services\Plugin;
 use App\Exceptions\PluginLifecycleException;
 use App\Models\Plugin\Attribute as PluginAttribute;
 use App\Plugin;
-use App\Plugin\PluginManifest;
+use App\Plugin\Manifest as PluginManifest;
 use App\Support\BootstrapCache;
 
 /**

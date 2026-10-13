@@ -3,8 +3,8 @@
 namespace Tests\Unit\Plugin;
 
 use App\Plugin;
-use App\Plugin\PluginDirectory;
-use App\Plugin\PluginUploader;
+use App\Plugin\Directory as PluginDirectory;
+use App\Plugin\Uploader as PluginUploader;
 use Exception;
 use SplFileInfo;
 use Symfony\Component\HttpKernel\Exception\HttpException;

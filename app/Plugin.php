@@ -2,7 +2,7 @@
 
 namespace App;
 
-use App\Plugin\PluginManifest;
+use App\Plugin\Manifest as PluginManifest;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;

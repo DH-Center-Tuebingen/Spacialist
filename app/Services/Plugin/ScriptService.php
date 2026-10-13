@@ -6,8 +6,8 @@ use App\Enums\LifecycleOperation;
 use App\Exceptions\PluginLifecycleException;
 use App\File\Directory;
 use App\Plugin;
-use App\Plugin\PluginDirectory;
-use App\Plugin\PluginManifest;
+use App\Plugin\Directory as PluginDirectory;
+use App\Plugin\Manifest as PluginManifest;
 use App\Services\PluginManager;
 use App\Support\Log\PluginLog;
 

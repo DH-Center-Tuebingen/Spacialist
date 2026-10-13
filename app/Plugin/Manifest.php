@@ -3,6 +3,7 @@
 namespace App\Plugin;
 
 use App\Plugin;
+use App\Plugin\Directory as PluginDirectory;
 use App\Support\Log\PluginLog;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
@@ -18,7 +19,7 @@ use ZipArchive;
  * This utility class is responsible for parsing the plugin manifest
  * and providing access to its contents.
  */
-class PluginManifest {
+class Manifest {
     public const MANIFEST_FILE_PATHS = [
         'plugin.xml',
         'App/info.xml',
@@ -114,9 +115,9 @@ class PluginManifest {
      * but obtains the plugin path by just the pluginName.
      *
      * @param string $pluginName The name of the plugin (in PascalCase), which is also the name of the plugin directory.
-     * @return bool| PluginManifest
+     * @return bool| Manifest
      */
-    public static function readFromName(string $pluginName): PluginManifest|false {
+    public static function readFromName(string $pluginName): Manifest|false {
         $path = PluginDirectory::getPathByName($pluginName);
         return self::read($path);
     }
@@ -125,9 +126,9 @@ class PluginManifest {
      * Tries to read a manifest file
      *
      * @param mixed $path The absolute path to the plugin directory.
-     * @return bool|PluginManifest
+     * @return bool|Manifest
      */
-    public static function read(string $path): PluginManifest|false {
+    public static function read(string $path): Manifest|false {
         // TODO: Remove when releasing v1.0
         $manifest = false;
         foreach(self::MANIFEST_FILE_PATHS as $manifestFilePath) {
@@ -161,7 +162,7 @@ class PluginManifest {
         return Str::startsWith($filePath, 'App/');
     }
 
-    public static function parse(string $xmlString): PluginManifest|false {
+    public static function parse(string $xmlString): Manifest|false {
         $xmlObject = simplexml_load_string($xmlString);
 
         if($xmlObject === false) {
@@ -171,7 +172,7 @@ class PluginManifest {
         return new static($xmlObject);
     }
 
-    public static function fromPlugin(Plugin $plugin): PluginManifest {
+    public static function fromPlugin(Plugin $plugin): Manifest {
         $pluginPath = PluginDirectory::getPathByName($plugin->name);
         $manifest = self::read($pluginPath);
         if($manifest === false) {
@@ -180,7 +181,7 @@ class PluginManifest {
         return $manifest;
     }
 
-    public static function fromZip(ZipArchive $zip, ?string $pluginName = null): PluginManifest {
+    public static function fromZip(ZipArchive $zip, ?string $pluginName = null): Manifest {
         foreach(self::MANIFEST_FILE_PATHS as $manifestFilePath) {
             if($pluginName) {
                 $manifestFilePath = Str::finish($pluginName, '/') . $manifestFilePath;

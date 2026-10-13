@@ -4,7 +4,7 @@ namespace App\Plugin\Support;
 
 use App\Plugin;
 
-class PluginUploadResult {
+class UploadResult {
     public function __construct(
         public readonly string $pluginName,
         public readonly ?Plugin $plugin = null,

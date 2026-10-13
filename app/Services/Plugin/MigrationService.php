@@ -9,8 +9,8 @@ use Illuminate\Support\Str;
 
 use App\Models\Plugin\Migration as PluginMigration;
 use App\Plugin;
-use App\Plugin\PluginDirectory;
-use App\Plugin\PluginManifest;
+use App\Plugin\Directory as PluginDirectory;
+use App\Plugin\Manifest as PluginManifest;
 
 /**
  * Plugins can define Migrations by declaring their directory inside their manifest file.
