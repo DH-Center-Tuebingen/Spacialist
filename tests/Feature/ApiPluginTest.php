@@ -4,7 +4,6 @@ namespace Tests\Feature;
 
 use Tests\TestCase;
 use App\Plugin;
-use App\Entity;
 use App\Plugin\Directory as PluginDirectory;
 use Carbon\Carbon;
 use Illuminate\Http\UploadedFile;
@@ -12,7 +11,6 @@ use Illuminate\Support\Facades\DB;
 use PHPUnit\Framework\Attributes\TestDox;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
-use Tests\Support\Templates\ScopeTemplate;
 use Tests\Support\PluginDirectoryGenerator;
 use Tests\Support\PluginGenerator;
 use Tests\Support\PluginTemplate;

@@ -56,7 +56,7 @@ class DependencyService extends PluginService {
     /**
      * Checks if all dependencies are met.
      *
-     * @param Plugin\PluginManifest $manifest
+     * @param PluginManifest $manifest
      * @return array{ dependencies: Dependency[], errors: string[] } - Returns an array of the missing plugin names.
      */
     private function evaluateDependencies(Plugin $plugin, PluginManifest $manifest): array {

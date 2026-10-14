@@ -32,7 +32,7 @@ class Uploader {
         $pluginName = $this->getSingleRootDirectory($zipFile);
         $existingPlugin = Plugin::where('name', $pluginName)->first();
 
-        $manifest = PluginManifest::fromZip($zipFile, $pluginName);
+        $manifest = Manifest::fromZip($zipFile, $pluginName);
         $this->requireValidPluginName($manifest->getName());
         $this->requireDirectoryMatchesManifestName($pluginName, $manifest);
         $this->validateExistingVersionIsOlder($manifest, $existingPlugin);
@@ -59,7 +59,7 @@ class Uploader {
         }
     }
 
-    private function requireDirectoryMatchesManifestName(string $pluginName, PluginManifest $manifest): void {
+    private function requireDirectoryMatchesManifestName(string $pluginName, Manifest $manifest): void {
         if($pluginName !== $manifest->getName()) {
             throw new Exception(__("Directory name must match manifest name: :dirName ≠ :manifestName", ['dirName' => $pluginName, 'manifestName' => $manifest->getName()]));
         }
@@ -157,7 +157,7 @@ class Uploader {
         return file_exists($pluginPath);
     }
 
-    private function validateExistingVersionIsOlder(PluginManifest $manifest, ?Plugin $existingPlugin = null): void {
+    private function validateExistingVersionIsOlder(Manifest $manifest, ?Plugin $existingPlugin = null): void {
         if($existingPlugin == null) {
             return;
         }
