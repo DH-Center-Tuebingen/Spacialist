@@ -36,7 +36,9 @@ import {
     Node
 } from '@/helpers/tree.js';
 import {
-    kebabToPascal
+    ensureNotToStartWith,
+    ensureStartsWith,
+    kebabToPascal,
 } from '@/helpers/string.js';
 import {
     searchEntity,
@@ -50,7 +52,6 @@ import {
 
 import RouteRootDummy from '@/components/plugins/RouteRootDummy.vue';
 import * as buffer from 'buffer';
-import { ensureNotToStartWith, ensureStartsWith } from '@/helpers/string.js';
 
 const defaultPluginOptions = {
     id: null,

@@ -31,3 +31,9 @@ export const kebabToPascal = kebabText => {
     if(!isKebabCase) return kebabText;
     return kebabText.replace(/(^[a-z]|-[a-z])/g, t => t.replace(/-/, '').toUpperCase());
 };
+
+export const kebabCase = text => {
+    return text.replace(/([a-z])([A-Z])/g, '$1-$2')
+        .replace(/[\s_]+/g, "-")
+        .toLowerCase();
+};

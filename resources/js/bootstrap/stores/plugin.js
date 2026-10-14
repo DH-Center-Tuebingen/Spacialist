@@ -1,5 +1,5 @@
-import { defineStore } from "pinia";
-import { kebabCase } from 'lodash';
+import { defineStore } from 'pinia';
+import { kebabCase } from '@/helpers/string.js';
 
 import {
     install,
