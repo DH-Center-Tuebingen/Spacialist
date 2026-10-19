@@ -59,6 +59,7 @@ export const useSystemStore = defineStore('system', {
         hasAnalysis: false,
         colorSets: [],
         concepts: {},
+        conceptIdUrlMap: {},
         cachedConceptSelections: {},
         mainView: {
             tab: 'references',
@@ -126,7 +127,9 @@ export const useSystemStore = defineStore('system', {
     },
     actions: {
         getConceptById(id) {
-            return this.concepts[id];
+            const thesaurusUrl = this.conceptIdUrlMap[id]
+            if(!thesaurusUrl) return null;
+            return this.concepts[thesaurusUrl];
         },
         setAppState(state) {
             this.appInitialized = state;
@@ -135,7 +138,13 @@ export const useSystemStore = defineStore('system', {
             this.mainView.tab = tab;
         },
         setConcepts(concepts) {
+            let conceptIdUrlMap = {};
+            Object.entries(concepts).forEach(([thesaurusUrl, concept]) => {
+                concept.concept_url = thesaurusUrl;
+                conceptIdUrlMap[concept.id] = thesaurusUrl;
+            })
             this.concepts = concepts;
+            this.conceptIdUrlMap = conceptIdUrlMap;
         },
         addCachedConceptSelection(data) {
             this.cachedConceptSelections[data.id] = data.selection;
@@ -166,7 +175,7 @@ export const useSystemStore = defineStore('system', {
             const userStore = useUserStore();
 
             const preData = await fetchPreData();
-            this.concepts = preData.concepts;
+            this.setConcepts(preData.concepts);
             this.systemPreferences = preData.system_preferences;
             this.colorSets = preData.colorSets;
             this.hasAnalysis = preData.analysis;

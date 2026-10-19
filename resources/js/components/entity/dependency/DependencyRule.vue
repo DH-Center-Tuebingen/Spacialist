@@ -224,7 +224,7 @@
                 }
 
                 attributeData.value = attribute.value;
-                attributeValueWrapper.value = value;
+                attributeValueWrapper.value = { value };
             };
 
             const searchEntity = async query => {

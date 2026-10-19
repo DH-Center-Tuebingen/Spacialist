@@ -392,6 +392,7 @@
                 return attributeGroupItemCount(items) > 0;
             };
             const toEntityTypeNames = typeList => {
+                if(!typeList) return [];
                 return typeList.map(entityType => {
                     return translateConcept(entityType.thesaurus_url);
                 });
