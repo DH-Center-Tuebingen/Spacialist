@@ -16,7 +16,10 @@
                         class="card-img-top rounded-4"
                         :alt="`${translateConcept(entityType.thesaurus_url)} Image missing`"
                     >
-                    <div class="card-body position-absolute bottom-0 start-0 w-100 bg-white bg-opacity-75 rounded-bottom-4 p-2">
+                    <div
+                        class="card-body bg-white bg-opacity-75 p-2"
+                        :class="{'rounded-4': !entityType?.metadata?.image, 'rounded-bottom-4 position-absolute bottom-0 start-0 w-100': entityType?.metadata?.image}"
+                    >
                         <h5 class="card-title d-flex align-items-center justify-content-between">
                             <span>
                                 {{ translateConcept(entityType.thesaurus_url) }}
