@@ -11,6 +11,7 @@
                     @click.prevent="$emit('select', entityType)"
                 >
                     <img
+                        v-if="entityType?.metadata?.image"
                         :src="`api/v1/open/download/entity_type?path=${entityType.metadata.image}`"
                         class="card-img-top rounded-4"
                         :alt="`${translateConcept(entityType.thesaurus_url)} Image missing`"
