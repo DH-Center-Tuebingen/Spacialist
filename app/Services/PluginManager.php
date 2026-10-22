@@ -2,9 +2,13 @@
 
 namespace App\Services;
 
+use App\Support\Log\PluginLog;
+use Exception;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\File;
 
+use Illuminate\Support\Facades\DB;
+
+use App\Exceptions\PluginLifecycleException;
 use App\Plugin;
 use App\Plugin\Directory as PluginDirectory;
 use App\Plugin\Manifest as PluginManifest;
@@ -12,10 +16,10 @@ use App\Services\Plugin\AccessPointsService;
 use App\Services\Plugin\AttributeService;
 use App\Services\Plugin\CssService;
 use App\Services\Plugin\DependencyService;
+use App\Services\Plugin\DiscoveryService;
 use App\Services\Plugin\HookService;
 use App\Services\Plugin\MigrationService;
 use App\Services\Plugin\PermissionService;
-use App\Services\Plugin\DiscoveryService;
 use App\Services\Plugin\RolePresetService;
 use App\Services\Plugin\RouteService;
 use App\Services\Plugin\ScopeService;
@@ -62,17 +66,69 @@ class PluginManager {
         return Plugin::orderBy('id', 'asc')->get()->toArray();
     }
 
-    public function cleanup(array $list): void {
-        $pluginNames = [];
+    /**
+     * Every lifecycle event follows the same pattern.
+     * This function unifies this pattern while allowing specific
+     * actions after the (main) lifecycle event did complete.
+     * @throws Exception - Propagades exceptions that are thrown inside any lifecycle event.
+     * @param string $name - Name of the lifecycle event.
+     * @param Plugin $plugin - Plugin being processed.
+     * @param callable(Plugin, PluginManifest) $postAction - Action that should be executed after main function was called. Between main and onAfter call.
+     * @return void
+     */
+    protected function wrapLifecycleEvent(string $name, Plugin $plugin, callable $postAction = null) {
+        $manifest = PluginManifest::fromPlugin($plugin);
+        $name = strtolower($name);
+        $capitalName = ucfirst($name);
 
-        foreach($list as $p) {
-            $pluginNames[] = File::basename($p);
+        try {
+            DB::transaction(function () use ($plugin, $manifest, $name, $capitalName, $postAction) {
+
+                foreach($this->pluggableServices as $service) {
+                    call_user_func([$service, "onBefore$capitalName"], $plugin, $manifest);
+                }
+
+                foreach($this->pluggableServices as $service) {
+                    call_user_func([$service, $name], $plugin, $manifest);
+                }
+
+                if(isset($postAction)) {
+                    $postAction($plugin, $manifest);
+                }
+
+                foreach($this->pluggableServices as $service) {
+                    call_user_func([$service, "onAfter$capitalName"], $plugin, $manifest);
+                }
+            });
+
+        } catch(Exception $e) {
+            foreach($this->pluggableServices as $service) {
+                // The 'onFailed' hooks should not cancel the lifecycle operation,
+                // as it would leave the application in an unpredictable state.
+                // They are catched and errors are reported inside the plugin log.
+                try {
+                    call_user_func([$service, "on{$capitalName}Failed"], $plugin, $manifest);
+                } catch(Exception $e) {
+                    PluginLog::for($plugin)->error("Error while executing 'on{$capitalName}Failed' of " . get_class($service) . ": " . $e->getMessage());
+                }
+            }
+            // We need to rebuild the cache even when the installation fails to avoid a bad state of the cache.
+            $this->rebuildPluginCache();
+            throw $e;
         }
 
-        $nonExistingPlugins = Plugin::whereNotIn('name', $pluginNames)->get();
-        foreach($nonExistingPlugins as $removedPlugin) {
-            $removedPlugin->handleRemove();
+        foreach($this->pluggableServices as $service) {
+            // The 'onSuccess' hooks should not cancel the lifecycle operation,
+            // as it would leave the application in an unpredictable state.
+            // They are catched and errors are reported inside the plugin log.
+            try {
+                call_user_func([$service, "on{$capitalName}Success"], $plugin, $manifest);
+            } catch(Exception $e) {
+                PluginLog::for($plugin)->error("Error while executing 'on{$capitalName}Success' of " . get_class($service) . ": " . $e->getMessage());
+            }
         }
+
+        $this->rebuildPluginCache();
     }
 
     /**
@@ -90,7 +146,7 @@ class PluginManager {
             $plugin->uuid = $p['uuid'];
             $plugin->installed_at = $p['installed_at'];
 
-            if(!$slim){
+            if(!$slim) {
                 $plugin->version = $p['version'];
                 $plugin->update_available = $p['update_available'] ?? null;
                 $plugin->updated_at = $p['updated_at'];
@@ -114,23 +170,10 @@ class PluginManager {
     }
 
     public function install(Plugin $plugin): void {
-        $manifest = PluginManifest::fromPlugin($plugin);
-
-        foreach($this->pluggableServices as $service) {
-            $service->onBeforeInstall($plugin, $manifest);
-        }
-
-        foreach($this->pluggableServices as $service) {
-            $service->install($plugin, $manifest);
-        }
-
-        $plugin->installed_at = Carbon::now();
-        $plugin->save();
-        $this->rebuildPluginCache();
-
-        foreach($this->pluggableServices as $service) {
-            $service->onAfterInstall($plugin, $manifest);
-        }
+        $this->wrapLifecycleEvent("install", $plugin, function ($plugin) {
+            $plugin->installed_at = Carbon::now();
+            $plugin->save();
+        });
     }
 
     /**
@@ -141,25 +184,12 @@ class PluginManager {
      */
     public function update(Plugin $plugin): string {
         $oldVersion = $plugin->version;
-        $manifest = PluginManifest::fromPlugin($plugin);
 
-        foreach($this->pluggableServices as $service) {
-            $service->onBeforeUpdate($plugin, $manifest);
-        }
-
-        foreach($this->pluggableServices as $service) {
-            $service->update($plugin, $manifest);
-        }
-
-        $plugin->update_available = null;
-        $plugin->version = $manifest->getVersion();
-        $plugin->save();
-
-        $this->rebuildPluginCache();
-
-        foreach($this->pluggableServices as $service) {
-            $service->onAfterUpdate($plugin, $manifest);
-        }
+        $this->wrapLifecycleEvent("update", $plugin, function ($plugin, $manifest) {
+            $plugin->update_available = null;
+            $plugin->version = $manifest->getVersion();
+            $plugin->save();
+        });
 
         return $oldVersion;
     }
@@ -174,51 +204,21 @@ class PluginManager {
      * @return void
      */
     public function uninstall(Plugin $plugin, ?PluginManifest $manifest = null): void {
-        if($manifest === null) {
-            $manifest = PluginManifest::fromPlugin($plugin);
-        }
-
-        foreach($this->pluggableServices as $service) {
-            $service->onBeforeUninstall($plugin, $manifest);
-        }
-
-        foreach($this->pluggableServices as $service) {
-            $service->uninstall($plugin, $manifest);
-        }
-
-        $this->rebuildPluginCache();
-
-        $plugin->installed_at = null;
-        $plugin->save();
-
-        foreach($this->pluggableServices as $service) {
-            $service->onAfterUninstall($plugin, $manifest);
-        }
+        $this->wrapLifecycleEvent("uninstall", $plugin, function ($plugin) {
+            $plugin->installed_at = null;
+            $plugin->save();
+        });
     }
 
     public function remove(Plugin $plugin): void {
-        $manifest = PluginManifest::fromPlugin($plugin);
-
-        foreach($this->pluggableServices as $service) {
-            $service->onBeforeRemove($plugin, $manifest);
-        }
 
         if(isset($plugin->installed_at)) {
-            $this->uninstall($plugin, $manifest);
+            throw new PluginLifecycleException($plugin, "Cannot remove installed plugin. Uninstall it first!");
         }
-
-        foreach($this->pluggableServices as $service) {
-            $service->remove($plugin, $manifest);
-        }
-
+        $this->wrapLifecycleEvent("remove", $plugin, function($plugin){
+            $plugin->delete();   
+        });
         PluginDirectory::fromPlugin($plugin)->remove();
-        $plugin->delete();
-
-        foreach($this->pluggableServices as $service) {
-            $service->onAfterRemove($plugin, $manifest);
-        }
-
-        $this->cache();
     }
 
     public function rebuildPluginCache() {

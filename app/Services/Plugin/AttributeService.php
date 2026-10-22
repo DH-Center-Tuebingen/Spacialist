@@ -72,13 +72,10 @@ class AttributeService extends PluginService {
                 'src' => $projectedClass,
             ]);
         }
-
-        $this->cache();
     }
 
     public function uninstall(Plugin $plugin, PluginManifest $manifest): void {
         PluginAttribute::where('plugin_id', $plugin->id)->delete();
-        $this->cache();
     }
 
     public function getMappedByPlugins(): array {

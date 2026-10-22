@@ -3,6 +3,7 @@
 namespace Tests\Feature\Plugin;
 
 use App\Entity;
+use App\Services\Plugin\ScopeService;
 use Carbon\Carbon;
 use Tests\PluginTestCase;
 
@@ -29,13 +30,6 @@ class ApiPluginScopeTest extends PluginTestCase {
         return ScopeTemplate::fromSlugArray($this->getScopePlugin())->addBasic()->addEntityScope()->generate();
     }
 
-    private function ensureTeardown() {
-        if($this->generator !== null) {
-            $this->generator->tearDown();
-            $this->generator = null;
-        }
-    }
-
     protected function setUp(): void {
         parent::setUp();
         Carbon::setTestNow('2020-07-20 10:15:30');
@@ -44,7 +38,6 @@ class ApiPluginScopeTest extends PluginTestCase {
     protected function tearDown(): void {
         parent::tearDown();
         Carbon::setTestNow();
-        $this->ensureTeardown();
     }
 
     public function testInstallingScopePlugin(): void {

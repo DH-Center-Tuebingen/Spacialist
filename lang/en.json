@@ -99,9 +99,8 @@
     "You do not have the permission to add a new entity": "You do not have the permission to add a new entity",
     "This type is not an allowed sub-type.": "This type is not an allowed sub-type.",
     "This type is not an allowed root-type.": "This type is not an allowed root-type.",
-    "You do not have the permission to modify an entity' data": "You do not have the permission to modify an entity' data",
+    "You do not have the permission to modify an entity' data": "You do not have the permission to modify an entity's data",
     "Unknown operation": "Unknown operation",
-    "You do not have the permission to modify an entity's data": "You do not have the permission to modify an entity's data",
     "You do not have the permission to modify an entity": "You do not have the permission to modify an entity",
     "You do not have the permission to delete an entity": "You do not have the permission to delete an entity",
     "Could not compute citation key.": "Could not compute citation key.",
@@ -110,7 +109,9 @@
     "Presentations not yet supported!": "Presentations not yet supported!",
     "Start date of a time period must not be after it's end date": "Start date of a time period must not be after it's end date",
     
-    "This plugin is not installed.": "This plugin is not installed.",
+    "This plugin is not installed": "This plugin is not installed.",
+    "This plugin is already installed": "This plugin is already installed.",
+    
     "A plugin with the name ':pluginName' and the same or later version (:uploadedVersion and :existingVersion) already exists. Aborting.": "A plugin with the name ':pluginName' and the same or later version (:uploadedVersion and :existingVersion) already exists. Aborting.",
     "Installation requirements are not met: :dependencyError": "Installation requirements are not met: :dependencyError",
     "Required Plugin is missing ':pluginName'": "Required Plugin is missing ':pluginName'",

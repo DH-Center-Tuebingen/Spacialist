@@ -72,10 +72,6 @@ class RouteService extends PluginService {
         ]);
     }
 
-    public function onAfterInstall(Plugin $plugin, PluginManifest $manifest): void {
-        $this->cache();
-    }
-
     public function findDeprecatedDefaultRoutes(Plugin $plugin, PluginDirectory $pluginDirectory): ?string {
         $pluginDir = PluginDirectory::fromPlugin($plugin);
         $absoluteFilePath = $pluginDir->getAbsolutePluginPath(self::DEPRECATED_DEFAULT_ROUTES);
@@ -91,11 +87,7 @@ class RouteService extends PluginService {
     public function uninstall(Plugin $plugin, PluginManifest $manifest): void {
         RouteModel::where('plugin_id', $plugin->id)->delete();
     }
-
-    public function onAfterUninstall(Plugin $plugin, PluginManifest $manifest): void {
-        $this->cache();
-    }
-
+    
     public function update(Plugin $plugin, PluginManifest $manifest): void {
         $this->uninstall($plugin, $manifest);
         $this->install($plugin, $manifest);

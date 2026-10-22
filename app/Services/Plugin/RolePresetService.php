@@ -33,34 +33,32 @@ class RolePresetService extends PluginService {
      */
     public function install(Plugin $plugin, PluginManifest $manifest): void {
         $rolePresets = $this->getRolePresetsForPlugin($plugin, $manifest);
-        DB::transaction(function () use ($rolePresets, $plugin) {
-            foreach($rolePresets as $preset) {
-                if(!$preset["rule_set"]) {
-                    PluginLog::for($plugin)->warning("Role preset entry in plugin '{$plugin->name}' is missing 'rule_set'. Skipping.");
-                    continue;
-                }
-
-                if(!$preset["extends"]) {
-                    PluginLog::for($plugin)->warning("Role preset entry in plugin '{$plugin->name}' is missing 'extends'. Skipping.");
-                    continue;
-                }
-
-                $extends = $preset["extends"];
-                $ruleSet = $preset["rule_set"];
-
-                if(!is_array($ruleSet)) {
-                    PluginLog::for($plugin)->warning("Role preset entry in plugin '{$plugin->name}' has 'rule_set' attribute that is not an array. Skipping.");
-                    continue;
-                }
-
-                $baseRolePreset = RolePreset::where('name', $extends)->firstOrCreate(['name' => $extends]);
-                $pluginPreset = new RolePresetPlugin();
-                $pluginPreset->rule_set = $ruleSet;
-                $pluginPreset->extends = $baseRolePreset->id;
-                $pluginPreset->from = $plugin->id;
-                $pluginPreset->save();
+        foreach($rolePresets as $preset) {
+            if(!$preset["rule_set"]) {
+                PluginLog::for($plugin)->warning("Role preset entry in plugin '{$plugin->name}' is missing 'rule_set'. Skipping.");
+                continue;
             }
-        });
+
+            if(!$preset["extends"]) {
+                PluginLog::for($plugin)->warning("Role preset entry in plugin '{$plugin->name}' is missing 'extends'. Skipping.");
+                continue;
+            }
+
+            $extends = $preset["extends"];
+            $ruleSet = $preset["rule_set"];
+
+            if(!is_array($ruleSet)) {
+                PluginLog::for($plugin)->warning("Role preset entry in plugin '{$plugin->name}' has 'rule_set' attribute that is not an array. Skipping.");
+                continue;
+            }
+
+            $baseRolePreset = RolePreset::where('name', $extends)->firstOrCreate(['name' => $extends]);
+            $pluginPreset = new RolePresetPlugin();
+            $pluginPreset->rule_set = $ruleSet;
+            $pluginPreset->extends = $baseRolePreset->id;
+            $pluginPreset->from = $plugin->id;
+            $pluginPreset->save();
+        }
     }
 
     /**
@@ -127,7 +125,7 @@ class RolePresetService extends PluginService {
         }
     }
 
-    private function getPresetSrc(array $obj, Plugin $plugin): ?string{
+    private function getPresetSrc(array $obj, Plugin $plugin): ?string {
         if(empty($obj['attributes']['src'])) {
             PluginLog::for($plugin)->warning("Plugin '{$plugin->name}' has a role preset entry without 'src' field. Skipping.");
             return null;

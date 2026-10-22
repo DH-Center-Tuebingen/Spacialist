@@ -283,9 +283,9 @@ class ApiPluginTest extends TestCase {
 
         Carbon::setTestNow('2020-07-20 10:15:30');
 
-        $pluginFirectory = config('app.plugin_directory');
+        $pluginDirectory = config('app.plugin_directory');
 
-        $directoryExists = file_exists("$pluginFirectory/BarPlugin");
+        $directoryExists = file_exists("$pluginDirectory/BarPlugin");
         $this->assertTrue($directoryExists);
 
         $response = $this->userRequest()
@@ -300,7 +300,7 @@ class ApiPluginTest extends TestCase {
         ]);
 
         //File is missing
-        $directoryWasRemoved = file_exists("$pluginFirectory/BarPlugin");
+        $directoryWasRemoved = file_exists("$pluginDirectory/BarPlugin");
         $this->assertFalse($directoryWasRemoved);
 
         //Other plugins are still there
@@ -308,7 +308,7 @@ class ApiPluginTest extends TestCase {
             'name' => 'FooPlugin',
         ]);
 
-        $fooPluginDirectoryExists = file_exists("$pluginFirectory/FooPlugin");
+        $fooPluginDirectoryExists = file_exists("$pluginDirectory/FooPlugin");
         $this->assertTrue($fooPluginDirectoryExists);
 
         // Reset time after test
@@ -325,6 +325,44 @@ class ApiPluginTest extends TestCase {
             ->delete("/api/v1/plugin/remove/1");
 
         $response->assertStatus(403);
+    }
+
+    #[TestDox('DELETE        /v1/plugin/remove/<id> : Remove Plugin Not Working When Installed')]
+    public function testRemovePluginNotWorkingWhenInstalled(): void {
+
+        $this->useUserWithPermissions('plugin_delete');
+
+        Carbon::setTestNow('2020-07-20 10:15:30');
+
+        $pluginDirectory = config('app.plugin_directory');
+
+        $directoryExists = file_exists("$pluginDirectory/FooPlugin");
+        $this->assertTrue($directoryExists);
+
+        $response = $this->userRequest()
+            ->delete("/api/v1/plugin/remove/1");
+
+        $response->assertStatus(403);
+        $response->assertJsonPath('message', 'This plugin is already installed.');
+        
+        $this->assertDatabaseHas('plugins', [
+            'name' => 'FooPlugin',
+        ]);
+
+        //File is missing
+        $directoryExists = file_exists("$pluginDirectory/FooPlugin");
+        $this->assertTrue($directoryExists);
+
+        //Other plugins are still there
+        $this->assertDatabaseHas('plugins', [
+            'name' => 'BarPlugin',
+        ]);
+
+        $barPluginDirectoryExists = file_exists("$pluginDirectory/BarPlugin");
+        $this->assertTrue($barPluginDirectoryExists);
+
+        // Reset time after test
+        Carbon::setTestNow();
     }
 
     #[TestDox('GET           /v1/plugin/migrate/<id>/check : Get Migration State')]

@@ -109,6 +109,8 @@
     "Presentations not yet supported!": "Präsentationen werden noch nicht unterstützt!",
     "Start date of a time period must not be after it's end date": "Das Startdatum einer Zeitspanne darf nicht nach ihrem Enddatum liegen",
     
+    "This plugin is not installed": "Dieses Plugin ist nicht installiert.",
+    "This plugin is already installed": "Dieses Plugin ist bereits installiert.",
     "A plugin with the name ':pluginName' and the same or later version (:uploadedVersion and :existingVersion) already exists. Aborting.": "Ein Plugin mit dem Namen ':pluginName', hat aber die gleiche oder eine niedrigere Version (:uploadedVersion and :existingVersion). Abbruch.",
     "Installation requirements are not met: :dependencyError": "Voraussetzungen für die Installation sind nicht erfüllt: :dependencyError",
     "Required Plugin is missing ':pluginName'": "Benötigtes Plugin existiert nicht ':pluginName'",

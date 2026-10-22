@@ -104,60 +104,6 @@ class ScopeService extends PluginService implements ManifestContent {
         return $scopes;
     }
 
-    protected function getScopesOf(Plugin $plugin): array {
-        $info = $plugin->getInfo();
-        $scopes = [];
-        if($info !== false) {
-            if(array_key_exists('scopes', $info)) {
-                $pluginLogger = new PluginLog($plugin);
-                foreach($info['scopes'] as $scope) {
-                    if(isset($scope['@attributes'])) {
-                        // VERIFY
-                        // $attributes = $scope['@attributes'];
-                        // if(!array_key_exists('src', $attributes)) {
-                        //     $pluginLogger->error('<scope> attribute \'src\' is required');
-                        //     continue;
-                        // }
-                        // if(!array_key_exists('on', $attributes)) {
-                        //     $pluginLogger->error('<scope> attribute \'on\' is required');
-                        //     continue;
-                        // }
-
-                        $src = $attributes['src'];
-                        $on = $attributes['on'];
-
-                        $srcDir = $plugin->getPath(path: "Scopes");
-                        if(!file_exists($srcDir) || !is_dir($srcDir)) {
-                            $pluginLogger->error('Missing \'Scopes\' directory');
-                            continue;
-                        }
-                        $srcPath = $srcDir . DIRECTORY_SEPARATOR . $src;
-                        if(!file_exists($srcPath)) {
-                            $pluginLogger->error("Missing file '$src'");
-                            continue;
-                        }
-                        if(!class_exists($on)) {
-                            $pluginLogger->error("Class '{$on}' does not exist!");
-                            continue;
-                        }
-                        $className = Str::replaceEnd('.php', '', $src);
-                        $namespacedSrc = PluginDirectory::namespaceOf($plugin->name, "\\Scopes\\$className");
-
-                        if(!array_key_exists($on, $scopes)) {
-                            $scopes[$on] = [];
-                        }
-
-                        $scopes[$on][] = $namespacedSrc;
-                    } else {
-                        $pluginLogger->error('Scope entry is missing attributes. Skipping.');
-                        continue;
-                    }
-                }
-            }
-        }
-        return $scopes;
-    }
-
     /**
      * Get all scopes defined in Plugins for a given model class (e.g. App\Entity).
      */

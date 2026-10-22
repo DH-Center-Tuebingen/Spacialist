@@ -75,6 +75,15 @@ class PluginGenerator {
 
         $this->pluginMap = [];
         $this->directoriesToCleanup = [];
+        
+        /**
+         * So that we don't end up in an errorous state,
+         * we remove all cache files to be in a clean state
+         * for the next test. 
+         * 
+         * Even when teardown is skipped.
+         */
+        app(PluginManager::class)->clearPluginCache();
     }
 
     /**

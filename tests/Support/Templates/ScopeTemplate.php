@@ -12,20 +12,20 @@ class ScopeTemplate extends PluginTemplate {
         $this->addFile(
             "Scopes/EntityScope.php",
             <<<PHP
-<?php
+            <?php
 
-namespace App\Plugins\ScopePlugin\Scopes;
+            namespace App\Plugins\ScopePlugin\Scopes;
 
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Scope;
+            use Illuminate\Database\Eloquent\Builder;
+            use Illuminate\Database\Eloquent\Model;
+            use Illuminate\Database\Eloquent\Scope;
 
-class EntityScope implements Scope {
-    public function apply(Builder \$builder, Model \$model) {
-        \$builder->where('entity_type_id', 3);
-    }
-}
-PHP);
+            class EntityScope implements Scope {
+                public function apply(Builder \$builder, Model \$model) {
+                    \$builder->where('entity_type_id', 3);
+                }
+            }
+            PHP);
 
         return $this;
     }

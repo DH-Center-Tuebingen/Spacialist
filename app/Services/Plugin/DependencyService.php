@@ -90,7 +90,7 @@ class DependencyService extends PluginService {
      *
      * @param array<array<string, mixed>> $dependencies - The raw dependencies extracted from the manifest.
      */
-    private function decomposeDependencies(array $dependencies) : array {
+    private function decomposeDependencies(array $dependencies): array {
         $data = [
             'core' => [],
             'plugins' => [],
@@ -107,7 +107,6 @@ class DependencyService extends PluginService {
         return $data;
     }
 
-
     /**
      * Evaluates all unsupported dependencies and log them to the plugin log.
      *
@@ -117,10 +116,10 @@ class DependencyService extends PluginService {
      */
     private function logWarningOfUnsupportedDependencies(Plugin $plugin, array $dependencies): void {
         if(count($dependencies) == 0) return;
-        $dependencyList = array_reduce($dependencies, function($carry, Dependency $dependency) {
+        $dependencyList = array_reduce($dependencies, function ($carry, Dependency $dependency) {
             $carry[] = "[{$dependency->tag}]";
             return $carry;
-        } , []);
+        }, []);
         $dependencyText = implode(", ", $dependencyList);
         PluginLog::for($plugin)->warning("Dependencies are not supporter and ignored: $dependencyText");
     }
@@ -143,7 +142,7 @@ class DependencyService extends PluginService {
                 $errors[] = __("Required Plugin is not installed ':pluginName'");
             } else {
                 $supported = $dependency->supportsVersion($requiredPlugin->version);
-                if(!$supported){
+                if(!$supported) {
                     $errors[] = __("Required Plugin ':pluginName' does not meet the version requirements.", ['pluginName' => $dependency->name]);
                 }
             }
@@ -165,9 +164,6 @@ class DependencyService extends PluginService {
             $errors[] = __("Multiple core dependencies are present.");
         } else if(count($coreDependencies) === 1) {
             $dependency = $coreDependencies[0];
-            info("Dependency details:");
-            info($dependency->minVersion);
-            info($dependency->maxVersion);
             if(!$dependency->supportsVersion(app(VersionInfo::class)->getReleaseRaw())) {
                 $errors[] = __("Plugin is not compatible with the current Spacialist version.");
             }

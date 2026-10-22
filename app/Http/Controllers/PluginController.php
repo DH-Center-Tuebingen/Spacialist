@@ -35,13 +35,13 @@ class PluginController extends Controller {
 
     private function requireInstalled(Plugin $plugin) {
         if(!isset($plugin->installed_at)) {
-            abort(403, __('This plugin is not installed.'));
+            abort(403, __('This plugin is not installed'));
         }
     }
 
     private function requireNotInstalled(Plugin $plugin) {
         if(isset($plugin->installed_at)) {
-            abort(403, __('This plugin is already installed.'));
+            abort(403, __('This plugin is already installed'));
         }
     }
 

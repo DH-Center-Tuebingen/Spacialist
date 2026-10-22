@@ -8,7 +8,6 @@ use App\Plugin\Manifest as PluginManifest;
 use App\Support\BootstrapCache;
 use App\Support\Method;
 use App\Validators\HookValidator;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -86,16 +85,12 @@ class HookService extends PluginService {
         $manifest = PluginManifest::fromPlugin($plugin);
         $hookDefinitions = $manifest->getTagNodes('hooks/hook') ?? [];
 
-        DB::transaction(function () use ($hookDefinitions, $plugin) {
-            Hook::where('plugin_id', $plugin->id)->delete();
-            foreach($hookDefinitions as $hookXml) {
-                if(isset($hookXml['attributes'])) {
-                    $this->addHook($hookXml['attributes'], $plugin);
-                }
+        Hook::where('plugin_id', $plugin->id)->delete();
+        foreach($hookDefinitions as $hookXml) {
+            if(isset($hookXml['attributes'])) {
+                $this->addHook($hookXml['attributes'], $plugin);
             }
-        });
-
-        $this->cache();
+        }
     }
 
     public function addHook(array $hook, Plugin $plugin) {

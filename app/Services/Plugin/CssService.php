@@ -11,7 +11,6 @@ use App\Plugin\Manifest as PluginManifest;
 use App\Services\PluginManager;
 use App\Support\BootstrapCache;
 use App\Support\Log\PluginLog;
-use Illuminate\Support\Facades\DB;
 
 /**
  * Adds capability to publish custom CSS files to a plugin.
@@ -47,17 +46,20 @@ class CssService extends PluginService implements ManifestContent {
 
     public function uninstall(Plugin $plugin, PluginManifest $manifest): void {
         CssFile::where('plugin_id', $plugin->id)->delete();
-        $this->unpublishFiles($plugin);
         $this->markDirty();
+    }
+    
+    public function onInstallSuccess(Plugin $plugin, Plugin\Manifest $manifest): void {
+        $this->publish($plugin);
+    }
+    
+    public function onUninstallSuccess(Plugin $plugin, Plugin\Manifest $manifest): void {
+        $this->unpublishFiles($plugin);
     }
 
     private function updateOrInstall(Plugin $plugin, PluginManifest $manifest): void {
-        DB::transaction(function () use ($plugin, $manifest) {
-            $this->uninstall($plugin, $manifest);
-            $this->createFromManifest($plugin, $manifest);
-        });
-
-        $this->publish($plugin);
+        $this->uninstall($plugin, $manifest);
+        $this->createFromManifest($plugin, $manifest);
     }
 
     public function createFromManifest(Plugin $plugin, PluginManifest $manifest): void {

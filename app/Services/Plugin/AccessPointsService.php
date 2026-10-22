@@ -73,7 +73,7 @@ class AccessPointsService extends PluginService implements ManifestContent {
         }
     }
 
-    private function accessPointIdAlreadyExists(string  $identifier) {
+    private function accessPointIdAlreadyExists(string $identifier) {
         return AccessPoint::where('identifier', $identifier)->exists();
     }
 
