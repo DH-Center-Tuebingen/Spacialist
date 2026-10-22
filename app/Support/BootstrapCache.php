@@ -12,8 +12,8 @@ use RuntimeException;
  */
 trait BootstrapCache {
     /**
-    * Cached data.
-    */
+     * Cached data.
+     */
     protected ?array $data = null;
     protected bool $isDirty = false;
 
@@ -22,15 +22,19 @@ trait BootstrapCache {
      * If the cache file does not exist or is invalid, it will throw an exception.
      */
     public function getData(): array {
-        if($this->data !== null && !$this->isDirty) {
-            return $this->data;
+        if(!$this->isDirty) {
+            try {
+                return $this->getCachedData();
+            } catch(RuntimeException $e) {
+                // Ignore cache loading errors.
+            }
         }
 
         $filePath = $this->getCachFilePath();
         try {
             $this->cache();
         } catch(\Exception $e) {
-            if(! File::exists($filePath)) {
+            if(!File::exists($filePath)) {
                 throw new \Exception(
                     static::class . ' could not rebuild cache. File not found. Original error: ' . $e->getMessage()
                 );
@@ -67,17 +71,27 @@ trait BootstrapCache {
     }
 
     /**
-     * Load the cache from disk.
-     * This should be used when the cache is used in Laravel boot
-     * and the services are not yet fully booted.
-     *
-     * Otherwise use the get() method as it automtically loads the cache if not already loaded.
+     * Gets the cache from memory or tries to load it from disk.
+     * If it cannot be loaded it throws a RuntimeException
+     * @throws RuntimeException - When cache file doesn't exist or is corruted.
+     * @return array - Array of cached items.
      */
-    public function load(): array {
+    private function getCachedData(): array {
         if($this->data !== null) {
             return $this->data;
+        } else {
+            return $this->load();
         }
+    }
 
+    /**
+     * Load the cache from disk.
+     * If it cannot be loaded it throws a RuntimeException
+     *
+     * @throws RuntimeException - When cache file doesn't exist or is corruted.
+     * @return array - Array of cached items.
+     */
+    public function load(): array {
         if(!File::exists($this->getCachFilePath())) {
             throw new RuntimeException(
                 static::class . ' cached data not found. Run build.'
@@ -114,7 +128,7 @@ trait BootstrapCache {
         }
 
         $phpFile = Str::finish($fileName, '.php');
-        return base_path('bootstrap' . DIRECTORY_SEPARATOR . 'cache' .  Str::start($phpFile, DIRECTORY_SEPARATOR));
+        return base_path('bootstrap' . DIRECTORY_SEPARATOR . 'cache' . Str::start($phpFile, DIRECTORY_SEPARATOR));
     }
 
     /**
