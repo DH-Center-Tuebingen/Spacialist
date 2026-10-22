@@ -31,6 +31,7 @@ All notable changes to this project will be documented in this file.
 - Drag & Drop in _AttributeList_
 - Opening Attribute Tab in _Entity Detail_ if none or wrong name provided
 - Overflow of long summaries in _Metadata_ tab
+- Available operators for attribute dependencies
 ### Changed
 - Alerts can now be dismissed
 - Now entity metadata is only loaded when accessing the metadata tab

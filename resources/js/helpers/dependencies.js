@@ -114,6 +114,8 @@ export function getOperatorsForDatatype(datatype) {
 
     switch(datatype) {
         case 'boolean':
+        case 'serial':
+            return EQUALITY;
         case 'dimension':
         case 'entity-mc':
         case 'entity':
@@ -121,8 +123,11 @@ export function getOperatorsForDatatype(datatype) {
         case 'table':
         case 'timeperiod':
         case 'userlist':
-            return EQUALITY;
         case 'geography':
+            return [
+                ...EQUALITY,
+                ...SET,
+            ];
         case 'richtext':
             return SET;
         case 'iconclass':
@@ -141,11 +146,11 @@ export function getOperatorsForDatatype(datatype) {
         case 'double':
         case 'integer':
         case 'percentage':
-        case 'serial':
         case 'si-unit':
             return [
                 ...EQUALITY,
                 ...COMPARISON,
+                ...SET,
             ];
         default:
             throw new Error(`Unsupported datatype ${datatype}`);
