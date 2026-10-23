@@ -13,6 +13,7 @@ import {
     checkAccess,
     fetchPreData,
     searchConceptSelection,
+    patchPreferences as patchPreferencesApi,
     uploadPlugin,
     installPlugin,
     uninstallPlugin,
@@ -25,6 +26,7 @@ import {
 } from '@/bootstrap/router.js';
 
 import {
+    fetchEntityTypes,
     fetchGlobals,
 } from '@/open_api.js';
 
@@ -83,6 +85,7 @@ export const useSystemStore = defineStore('system', {
         geometryTypes: [],
         datatypeData: {},
         accessPoints: {},
+        preferenceConfig: {},
     }),
     getters: {
         translateConcept: state => url => {
@@ -100,8 +103,11 @@ export const useSystemStore = defineStore('system', {
         getPreference: state => key => {
             return useUserStore().getPreferenceByKey(key);
         },
+        getSystemPreference: state => key => {
+            return state.systemPreferences[key];
+        },
         getProjectName: state => slug => {
-            const projectName = useUserStore().getPreferenceByKey('prefs.project-name');
+            const projectName = state.getPreference('prefs.project-name');
             return slug ? slugify(projectName) : projectName;
         },
         hasPlugin: state => nameId => {
@@ -157,6 +163,42 @@ export const useSystemStore = defineStore('system', {
 
             return true;
         },
+        initializePreferenceConfig(configArray) {
+            // TODOX correctly handle user and system preferences
+            const hideConfigs = [];
+            configArray.forEach(config => {
+                config.categories.forEach(category => {
+                    if(!this.preferenceConfig[category]) {
+                        this.preferenceConfig[category] = {};
+                    }
+                    if(!this.preferenceConfig[category][config.subcategory]) {
+                        this.preferenceConfig[category][config.subcategory] = {
+                            hide: _ => false,
+                            preferences: [],
+                        };
+                    }
+                    this.preferenceConfig[category][config.subcategory].preferences.push({
+                        title: config.title,
+                        label: `prefs.${config.label}`,
+                        component: config.id,
+                    });
+                    if(config.isHiding) {
+                        hideConfigs.push({
+                            ...config.isHiding,
+                            causer: `prefs.${config.label}`,
+                            category: category,
+                        });
+                    }
+                });
+            });
+            hideConfigs.forEach(hide => {
+                if(hide.type == 'subcategory') {
+                    this.preferenceConfig[hide.category][hide.name].hide = _ => this.systemPreferences[hide.causer] == hide.condition;
+                } else {
+                    console.error(`The hiding type '${hide.type}' is currently not supported`);
+                }
+            });
+        },
         async initialize(locale) {
             resetState(this);
 
@@ -172,6 +214,7 @@ export const useSystemStore = defineStore('system', {
             this.hasAnalysis = preData.analysis;
             this.datatypeData = preData.datatype_data;
             this.accessPoints = preData.accesspoints;
+            this.initializePreferenceConfig(preData.preferenceSelection);
             entityStore.initializeEntityTypes(preData.entityTypes);
             userStore.setPreferences(preData.preferences);
 
@@ -192,10 +235,27 @@ export const useSystemStore = defineStore('system', {
             attributeStore.setAttributeTypes(preData.attributeTypes);
         },
         async initializeOpenAccess() {
-            return fetchGlobals().then(data => {
-                this.concepts = data.concepts;
-                this.preferences = data.preferences;
-                return data;
+            const userStore = useUserStore();
+            const globalData = await fetchGlobals();
+            const entityTypes = await fetchEntityTypes();
+            this.concepts = globalData.concepts;
+            this.systemPreferences = globalData.preferences;
+            userStore.setPreferences(globalData.preferences);
+            userStore.setUsers(globalData.users, globalData.deleted_users);
+            useEntityStore().initializeEntityTypes(entityTypes);
+        },
+        async patchPreferences(data) {
+            const patchData = {
+                changes: data,
+            };
+            await patchPreferencesApi(patchData);
+
+            data.forEach(pref => {
+                if(pref.user) {
+                    useUserStore().updatePreference(pref);
+                } else {
+                    this.systemPreferences[pref.label] = pref.value;
+                }
             });
         },
         addPlugin(data) {

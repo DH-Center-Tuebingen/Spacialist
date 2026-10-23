@@ -27,6 +27,7 @@
         "move": "Move",
         "parse": "Parse",
         "conflict": "Conflict",
+        "image": "Image",
         "file": "File",
         "remove_file": "Remove file",
         "no_file": "No file",
@@ -803,6 +804,7 @@
                 "properties": {
                     "title": "Properties",
                     "top_level": "Top-Level",
+                    "show_open_access": "Show in Open Access",
                     "sub_types": "Allowed Sub-Entity-Types"
                 },
                 "attribute": {
@@ -827,7 +829,8 @@
                 "sub": {
                     "general": "General",
                     "layout": "Layout",
-                    "interface": "User Interface"
+                    "interface": "User Interface",
+                    "openaccess": "Open Access"
                 },
                 "is_empty": "No preferences in this category"
             },
