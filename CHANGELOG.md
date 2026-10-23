@@ -1,12 +1,23 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## 0.11.2
+### Added
+- The user is now automatically logged out when they log out from other Spacialist related services (e.g. ThesauRex)
+### Fixed
+- Broadcasting exception in EntityObserver
+- Import of float values in Percentage Attribute
+### Changed
+- XSRF Token get's a custom name depending on the deployed app-name. Allows for deploying multiple instances on the same domain at different paths.
+- Removed legacy remember functionality (was replaced by Laravel Sanctum)
+    - Removed 'remember_token' from user table
+    - Removed 'remember_web' cookie
+- Moved _attempt_ logic into User model.
+- Removed "Remember Me" toggle from login screen
+
 ## 0.11.1
 ### Added
 - Unit Tests for Directory.php
-### Changed
-- Added path value to XSRF cookie to prevent overwriting by another instance at the same domain
-- _Show x replies_ button in comment list moved to header
 ### Fixed
 - Login not possible on instances in subfolder
 - Last editor not visible in _Entity Detail_ tab
@@ -14,7 +25,7 @@ All notable changes to this project will be documented in this file.
 - _Avatar_ image and literature download path were absolute
 - _Entity Type_ color not showing
 - Excluded _SQL_ attribute from export
-- Plugin script can now be loaded from private route
+- Plugin script is now loaded from private route
 - Attributes could be added multiple times to entity-type
 - Changing color of entity type
 - Changing _sub entity types_ only visible after page reload
@@ -22,6 +33,9 @@ All notable changes to this project will be documented in this file.
 - Fixed add/remove of plugin correctly setup in store and SpPS
 - Fixed error when generating cite key where bibliography title contained a space separated part of non-alphanumerical characters
 - Reply to comment from notification
+### Changed
+- Added path value to XSRF cookie to prevent overwriting by another instance at the same domain
+- _Show x replies_ button in comment list moved to header
 
 ## 0.11 - Kilcrea
 ### Added

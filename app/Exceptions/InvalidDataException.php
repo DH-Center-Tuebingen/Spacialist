@@ -49,6 +49,10 @@ class InvalidDataException extends Exception
         return new self(__('validation.between.numeric', ['attribute' => self::attributeString(),'min' => strval($from), 'max' => strval($to)]), $value);
     }
 
+    public static function requirePrecision(string $value) {
+        return new self(__('validation.definition', ['type' => self::attributeString()]), $value);
+    }
+
     public static function invalidConcept(string $concept) {
         return self::objectNotFound('concept', $concept);
     }
@@ -80,8 +84,8 @@ class InvalidDataException extends Exception
     public static function objectNotFound(string $name, mixed $object) {
         return self::stringNotFound($name, json_encode($object));
     }
-    
+
     public static function stringNotFound(string $name, string $object) {
         return new self(__('validation.object_missing', ['object' => $name]), $object);
-    }   
+    }
 }

@@ -1008,6 +1008,11 @@
                     undirtyList(grps);
                     resetDirtyStates(grps);
 
+                    // The toast caused a weird error in a table attribute, forcing a rerender on obsolete data
+                    // creating a duplicate at the last position of a table (when a multiselect-mc was present).
+                    // Waiting for next tick seems to fix the problem.
+                    await nextTick();
+
                     toast.$toast(
                         t('main.entity.toasts.updated.msg', {
                             name: data.entity.name

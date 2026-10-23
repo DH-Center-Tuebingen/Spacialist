@@ -68,13 +68,7 @@
                 });
             };
             const handleInput = value => {
-                if(!value) {
-                    v.handleChange(value);
-                } else {
-                    // add timezone offset before handle change
-                    const correctValue = new Date(value.getTime() - (value.getTimezoneOffset()*60*1000));
-                    v.handleChange(correctValue);
-                }
+                v.handleChange(value);
             };
 
             // DATA

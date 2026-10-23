@@ -47,7 +47,6 @@ export function getErrorMessages(error, suffix = '') {
     return msgObject;
 }
 
-
 const UNSET_CERTAINTY = {type: 'unset', icon: 'far fa-fw fa-circle-check', rangeFunction: (certainty) => certainty == null || certainty < 0 || certainty > 100};
 export function getCertainties() {
     function inRangeOf(lowIn, highEx) {

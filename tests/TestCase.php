@@ -30,10 +30,6 @@ abstract class TestCase extends BaseTestCase {
      */
     protected $seeder = TestingSeeder::class;
 
-    protected $connectionsToTransact = [
-        'testing'
-    ];
-
     public $user = null;
     public $token = null;
 
@@ -86,7 +82,7 @@ abstract class TestCase extends BaseTestCase {
         }
 
         Auth::guard('web')->logout(true);
-        }
+    }
 
     public function userRequest() {
         return $this->withHeaders([

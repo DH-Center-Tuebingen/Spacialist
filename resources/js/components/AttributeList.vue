@@ -484,6 +484,31 @@
                                     currValue = null;
                                 }
                             }
+                            // TODO might be irrelevant with another date picker package (currently "vue-datepicker-next")
+                            else if(datatype == 'date') {
+                                // add current timezone offset to date, because
+                                // date is stored in local timezone at 00:00:00 (midnight)
+                                // calling .toISOString() to get the correct date leads to
+                                // the day before at 23:00:00
+                                let offset = currValue.getTimezoneOffset();
+                                if(offset < 0) offset--;
+                                else if(offset > 0) offset++;
+
+                                offset *= 60000;
+
+                                const correctedDate = new Date(currValue.getTime() - offset);
+                                currValue = correctedDate.toISOString();
+                            } else if(datatype == 'daterange') {
+                                currValue = currValue.map(d => {
+                                    let offset = d.getTimezoneOffset();
+                                    if(offset < 0) offset--;
+                                    else if(offset > 0) offset++;
+
+                                    offset *= 60000;
+                                    const correctedDate = new Date(d.getTime() - offset);
+                                    return correctedDate.toISOString();
+                                });
+                            }
                             values[k] = currValue;
                         } else {
                             // null is allowed for date, string-sc

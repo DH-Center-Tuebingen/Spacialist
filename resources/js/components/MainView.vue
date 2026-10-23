@@ -102,6 +102,11 @@
         handleEntityUpdated,
         handleEntityDeleted,
     } from '@/handlers/system.js';
+    
+    import {
+        handleUserLogout,
+    } from '@/handlers/user.js';
+    
     import {
         handleNotifications,
     } from '@/handlers/notification.js';
@@ -167,6 +172,7 @@
                     handleBibliographyCreated,
                     handleBibliographyUpdated,
                     handleBibliographyDeleted,
+                    handleUserLogout,
                 ]);
                 channels.notification = subscribeNotifications(handleNotifications);
             });

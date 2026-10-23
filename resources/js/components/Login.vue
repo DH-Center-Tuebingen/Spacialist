@@ -20,13 +20,13 @@
                     <div class="mb-2">
                         <label
                             for="email"
-                            class="col-md-4 col-form-label"
+                            class="col-form-label"
                         >
                             {{ t('global.email_or_nick') }}
                             <i class="fas fa-fw fa-user" />
                         </label>
 
-                        <div class="col-md-6">
+                        <div>
                             <input
                                 id="email"
                                 v-model="state.user.email"
@@ -43,13 +43,13 @@
                     <div class="mb-2">
                         <label
                             for="password"
-                            class="col-md-4 col-form-label"
+                            class="col-form-label"
                         >
                             {{ t('global.password') }}
                             <i class="fas fa-fw fa-unlock-alt" />
                         </label>
 
-                        <div class="col-md-6">
+                        <div>
                             <input
                                 id="password"
                                 v-model="state.user.password"
@@ -66,22 +66,8 @@
                         v-if="state.error.global"
                         class="mb-2"
                     >
-                        <div class="col-md-6 text-danger small">
+                        <div class="text-danger small">
                             {{ state.error.global }}
-                        </div>
-                    </div>
-
-                    <div class="mb-2">
-                        <div class="col-md-6 col-md-offset-4">
-                            <div class="checkbox">
-                                <label>
-                                    <input
-                                        v-model="state.user.remember"
-                                        type="checkbox"
-                                        name="remember"
-                                    > {{ t('global.remember_me') }}
-                                </label>
-                            </div>
                         </div>
                     </div>
 
