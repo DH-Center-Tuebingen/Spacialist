@@ -3,7 +3,7 @@
 namespace App\Services\Plugin;
 
 use App\Exceptions\PluginLifecycleException;
-use App\Models\Plugin\Dependencies;
+use App\Models\Plugin\Dependency as DependencyModel;
 use App\Plugin;
 use App\Plugin\Manifest as PluginManifest;
 use App\Support\BootstrapCache;
@@ -32,7 +32,7 @@ class DependencyService extends PluginService {
     }
 
     protected function fetch(): array {
-        return Dependencies::all()->toArray();
+        return DependencyModel::all()->toArray();
     }
 
     public function onBeforeInstall(Plugin $plugin, PluginManifest $manifest): void {

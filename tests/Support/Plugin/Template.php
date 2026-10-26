@@ -1,12 +1,12 @@
 <?php
 
-namespace Tests\Support;
+namespace Tests\Support\Plugin;
 
 use App\Plugin;
 
 use Stringable;
 use Illuminate\Support\Str;
-use Tests\Support\PluginXml;
+use Tests\Support\Plugin\PluginXml;
 
 /**
  * The PluginTemplate class is used for testing to replicate PluginTemplates
@@ -20,7 +20,7 @@ use Tests\Support\PluginXml;
  * to mock templates more efficiently while keeping the test files tidy.
  *
  */
-class PluginTemplate implements Stringable {
+class Template implements Stringable {
     public Plugin $plugin;
     private $manifest = "plugin.xml";
     protected $structure = [];
@@ -41,7 +41,7 @@ class PluginTemplate implements Stringable {
      * @param mixed $createdAt - The creation timestamp of the plugin.
      * @param mixed $installedAt - The installation timestamp of the plugin.
      * @param mixed $updatedAt - The last update timestamp of the plugin.
-     * @param PluginLifecycleState $lifecycleState - The state the plugin should be setup to. Default is 'installed'.
+     * @param LifecycleState $lifecycleState - The state the plugin should be setup to. Default is 'installed'.
      * @param mixed $updateAvailable
      */
     public function __construct(
@@ -52,7 +52,7 @@ class PluginTemplate implements Stringable {
         ?string $installedAt = null,
         ?string $updatedAt = null,
         ?string $updateAvailable = null,
-        private PluginLifecycleState $lifecycleState = PluginLifecycleState::INSTALLED,
+        private LifecycleState $lifecycleState = LifecycleState::INSTALLED,
     ) {
         $this->plugin = new Plugin();
         $this->plugin->name = $name;
@@ -305,10 +305,10 @@ class PluginTemplate implements Stringable {
     /**
      * Set the template to install in CREATED state.
      * The plugin will not be installed when generated.
-     * @return PluginTemplate
+     * @return Template
      */
     public function created(): static {
-        $this->lifecycleState = PluginLifecycleState::CREATED;
+        $this->lifecycleState = LifecycleState::CREATED;
         return $this;
     }
 
@@ -323,31 +323,31 @@ class PluginTemplate implements Stringable {
      * @return $this
      */
     public function installed(): static {
-        $this->lifecycleState = PluginLifecycleState::INSTALLED;
+        $this->lifecycleState = LifecycleState::INSTALLED;
         return $this;
     }
 
     /**
      * Set the template in UNINSTALLED state.
      * When generated the plugin will be: installed > uninstalled
-     * @return PluginTemplate
+     * @return Template
      */
     public function uninstalled(): static {
-        $this->lifecycleState = PluginLifecycleState::UNINSTALLED;
+        $this->lifecycleState = LifecycleState::UNINSTALLED;
         return $this;
     }
 
     /**
      * Set the template in REMOVED state.
      * When generated the plugin will be: installed > uninstalled > removed
-     * @return PluginTemplate
+     * @return Template
      */
     public function removed(): static {
-        $this->lifecycleState = PluginLifecycleState::REMOVED;
+        $this->lifecycleState = LifecycleState::REMOVED;
         return $this;
     }
 
-    public function getLifecycleState(): PluginLifecycleState {
+    public function getLifecycleState(): LifecycleState {
         return $this->lifecycleState;
     }
 

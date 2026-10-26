@@ -1,8 +1,8 @@
 <?php
 
-namespace Tests\Support\Templates;
+namespace Tests\Support\Plugin\Templates;
 
-use Tests\Support\PluginTemplate;
+use Tests\Support\Plugin\Template as PluginTemplate;
 
 /**
  * A plugin template that sets up a plugin with migration files in its Migration/ directory.

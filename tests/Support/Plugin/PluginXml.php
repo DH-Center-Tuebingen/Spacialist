@@ -1,23 +1,21 @@
 <?php
 
-namespace Tests\Support;
-
-use Tests\Support\PluginTemplate;
+namespace Tests\Support\Plugin;
 
 /**
- * Generates the plugin.xml for a plugin template
+ * Generates the plugin.xml for a plugin template.
  */
 class PluginXml {
-    public function __construct(protected PluginTemplate $template) {
+    public function __construct(protected Template $template) {
 
     }
 
     /**
      * Generates the info xml for the template.
-     * @param PluginTemplate $template - The plugin template for which to generate the info XML.
+     * @param Template $template - The plugin template for which to generate the info XML.
      * @return string - String representation of the generated info XML.
      */
-    public static function generate(PluginTemplate $template): string {
+    public static function generate(Template $template): string {
         $pluginXML = new static($template);
         return $pluginXML->generateInfoXml();
     }

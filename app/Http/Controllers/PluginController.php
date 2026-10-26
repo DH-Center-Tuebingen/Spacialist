@@ -316,7 +316,7 @@ class PluginController extends Controller {
 
     /**
      * Runs all missing migrations of a plugin.
-     * @return \Illuminate\Http\JsonResponse - Returns the current migration state after execution
+     * @return JsonResponse - Returns the current migration state after execution
      */
     public function migrate(Request $request, Plugin $plugin) {
         $this->requireWritePermission();
@@ -327,7 +327,7 @@ class PluginController extends Controller {
 
     /**
      * Rolls back all applied migrations of a plugin.
-     * @return \Illuminate\Http\JsonResponse - Returns the current migration state after execution
+     * @return JsonResponse - Returns the current migration state after execution
      */
     public function rollback(Request $request, Plugin $plugin) {
         $this->requireWritePermission();
@@ -339,7 +339,7 @@ class PluginController extends Controller {
     /**
      * Adds a migration to the database without running it.
      * This is primarily used if the plugin was installed before the migration system was implemented.
-     * @return \Illuminate\Http\JsonResponse - Returns the current migration state after execution
+     * @return JsonResponse - Returns the current migration state after execution
      */
     public function addMigrationToDatabase(Request $request, Plugin $plugin) {
         $this->requireWritePermission();
@@ -362,7 +362,7 @@ class PluginController extends Controller {
 
     /**
      * Get the migration state for a plugin.
-     * @return \Illuminate\Http\JsonResponse - Returns the current migration state after execution
+     * @return JsonResponse - Returns the current migration state after execution
      */
     public function getMigrationState(Request $request, Plugin $plugin) {
         $migrationState = app(MigrationService::class)->inspect($plugin);
@@ -371,7 +371,7 @@ class PluginController extends Controller {
 
     /**
      * Rebuilds the plugin cache and returns all plugins with their metadata.
-     * @return \Illuminate\Http\JsonResponse - Returns all plugins with their metadata after rebuilding the cache.
+     * @return JsonResponse - Returns all plugins with their metadata after rebuilding the cache.
      */
     public function refresh(Request $request) {
         $this->requireWritePermission();
@@ -382,7 +382,7 @@ class PluginController extends Controller {
 
     /**
      * Refreshes the metadata of a plugin.
-     * @return \Illuminate\Http\JsonResponse - Returns the plugin with its metadata.
+     * @return JsonResponse - Returns the plugin with its metadata.
      */
     public function refreshInfo(Request $request, Plugin $plugin) {
         $this->requireWritePermission();

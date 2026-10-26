@@ -1,11 +1,11 @@
 <?php
 
-namespace Tests\Support;
+namespace Tests\Support\Plugin;
 
 /**
  * Enum to dtermine current lifecyclestate of a plugin.
  */
-enum PluginLifecycleState {
+enum LifecycleState {
     case CREATED;
     case INSTALLED;
     case UNINSTALLED;

@@ -6,8 +6,8 @@ use App\Models\Plugin\AccessPoint;
 use App\User;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
-use Tests\Support\PluginGenerator;
-use Tests\Support\PluginTemplate;
+use Tests\Support\Plugin\Generator as PluginGenerator;
+use Tests\Support\Plugin\Template as PluginTemplate;
 use Tests\PluginTestCase;
 
 class ApiPluginAccessPointtest extends PluginTestCase {

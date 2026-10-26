@@ -2,7 +2,7 @@
 
 namespace Tests\Feature\Plugin;
 
-use Tests\Support\PluginTemplate;
+use Tests\Support\Plugin\Template as PluginTemplate;
 
 class ApiPluginRolePresetsLegacyTest extends ApiPluginRolePresetsTest {
     protected string $filePath = 'role-presets.json';

@@ -5,7 +5,7 @@ namespace App\Services\Plugin;
 use App\Exceptions\LifecycleOperation;
 use App\Exceptions\PluginLifecycleException;
 use App\Interfaces\ManifestContent;
-use App\Models\Plugin\Scopes;
+use App\Models\Plugin\Scope;
 use App\Plugin;
 use App\Plugin\Directory as PluginDirectory;
 use App\Plugin\Manifest as PluginManifest;
@@ -68,13 +68,13 @@ class ScopeService extends PluginService implements ManifestContent {
     }
 
     protected function clearScopesOf(Plugin $plugin): void {
-        Scopes::where('plugin_id', $plugin->id)->delete();
+        Scope::where('plugin_id', $plugin->id)->delete();
     }
 
     protected function createScopesFor(Plugin $plugin, array $scopes): void {
         foreach($scopes as $on => $scopeClasses) {
             foreach($scopeClasses as $scopeClass) {
-                Scopes::create([
+                Scope::create([
                     'plugin_id' => $plugin->id,
                     'namespace' => $scopeClass,
                     'on' => $on,
@@ -118,7 +118,7 @@ class ScopeService extends PluginService implements ManifestContent {
     }
 
     public function fetch(): array {
-        return Scopes::all()->mapToGroups(function ($item) {
+        return Scope::all()->mapToGroups(function ($item) {
             return [$item->on => $item->namespace];
         })->toArray();
     }

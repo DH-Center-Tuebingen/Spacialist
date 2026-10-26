@@ -5,11 +5,11 @@ namespace Tests\Feature\Plugin;
 use Illuminate\Support\Collection;
 use Illuminate\Testing\Fluent\AssertableJson;
 
-use Tests\Support\PluginTemplate;
+use Tests\Support\Plugin\Template as PluginTemplate;
 use Tests\Support\RoleExtension;
 use Tests\PluginTestCase;
 
-use Tests\Support\PluginGenerator;
+use Tests\Support\Plugin\Generator as PluginGenerator;
 use Tests\Support\RoleExtensionFile;
 
 class ApiPluginRolePresetsTest extends PluginTestCase {

@@ -8,8 +8,8 @@ use App\Plugin\Uploader as PluginUploader;
 use Exception;
 use SplFileInfo;
 use Symfony\Component\HttpKernel\Exception\HttpException;
-use Tests\Support\PluginDirectoryGenerator;
-use Tests\Support\PluginTemplate;
+use Tests\Support\Plugin\DirectoryGenerator as PluginDirectoryGenerator;
+use Tests\Support\Plugin\Template as PluginTemplate;
 use Tests\TestCase;
 use ZipArchive;
 

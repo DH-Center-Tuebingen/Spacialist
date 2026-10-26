@@ -1,5 +1,5 @@
 <?php
-namespace Tests\Support;
+namespace Tests\Support\Plugin;
 
 use App\Plugin;
 use Illuminate\Support\Facades\File;
@@ -14,7 +14,7 @@ use ZipArchive;
  * given Plugin instance. The generated structure includes a package.json file, an info.xml file, and
  * any additional files or directories specified in the input.
  */
-class PluginDirectoryGenerator {
+class DirectoryGenerator {
     /**
      */
     public static function cleanup(string $pluginDir): bool {
@@ -28,12 +28,12 @@ class PluginDirectoryGenerator {
     /**
      * Mocks a zipped plugin for data upload.
      *
-     * @param PluginTemplate $template
+     * @param Template $template
      * @param string $zipFilePath
      * @param string|null $fakeDirName Optional fake directory name to use inside the zip file.
      * @return void
      */
-    public static function mockPluginZipFile(PluginTemplate $template, string $zipFilePath, string $fakeDirName = null): void {
+    public static function mockPluginZipFile(Template $template, string $zipFilePath, string $fakeDirName = null): void {
         $tempDir = sys_get_temp_dir() . '/' . uniqid('plugin_zip_');
         mkdir($tempDir, 0755, true);
         $dirName = $fakeDirName ? $fakeDirName : $template->plugin['name'];
@@ -70,11 +70,11 @@ class PluginDirectoryGenerator {
     /**
      * Mocks the plugin directory by creating the necessary files and folders based on the defined structure.
      *
-     * @param PluginTemplate $template The plugin template containing the structure and content for the plugin.
-     * @param string $location The base location where the plugin directory should be created.
+     * @param Template $template The plugin template containing the structure and content for the plugin.
+     * @param string $pluginDir The base location where the plugin directory should be created.
      * @return string The path to the created plugin directory.
      */
-    public static function mockPluginDirectory(PluginTemplate $template, string $pluginDir): string {
+    public static function mockPluginDirectory(Template $template, string $pluginDir): string {
         // Work on a clone so we don't mutate the caller's Plugin instance (array access
         // inside this helper may set attributes on the Eloquent model which causes
         // unexpected side effects such as trying to insert arrays into the DB).

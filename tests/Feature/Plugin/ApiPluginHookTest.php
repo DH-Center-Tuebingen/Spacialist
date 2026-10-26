@@ -3,8 +3,8 @@
 namespace Tests\Feature\Plugin;
 
 use Tests\PluginTestCase;
-use Tests\Support\Templates\HookTemplate;
-use Tests\Support\PluginGenerator;
+use Tests\Support\Plugin\Templates\HookTemplate;
+use Tests\Support\Plugin\Generator as PluginGenerator;
 
 class ApiPluginHookTest extends PluginTestCase {
     function testHookInteraction() {

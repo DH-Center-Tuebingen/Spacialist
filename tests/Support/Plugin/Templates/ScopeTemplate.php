@@ -1,8 +1,8 @@
 <?php
 
-namespace Tests\Support\Templates;
+namespace Tests\Support\Plugin\Templates;
 
-use Tests\Support\PluginTemplate;
+use Tests\Support\Plugin\Template as PluginTemplate;
 
 class ScopeTemplate extends PluginTemplate {
     public function addEntityScope() {

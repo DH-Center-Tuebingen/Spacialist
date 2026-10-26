@@ -5,8 +5,8 @@ use App\Plugin;
 use App\Services\Plugin\MigrationService;
 use Exception;
 use Illuminate\Support\Facades\DB;
-use Tests\Support\Templates\MigrationTemplate;
-use Tests\Support\PluginGenerator;
+use Tests\Support\Plugin\Templates\MigrationTemplate;
+use Tests\Support\Plugin\Generator as PluginGenerator;
 use Tests\TestCase;
 
 class MigrationTest extends TestCase {

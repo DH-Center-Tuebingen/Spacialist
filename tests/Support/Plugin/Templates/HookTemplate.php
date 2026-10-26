@@ -1,8 +1,8 @@
 <?php
 
-namespace Tests\Support\Templates;
+namespace Tests\Support\Plugin\Templates;
 
-use Tests\Support\PluginTemplate;
+use Tests\Support\Plugin\Template as PluginTemplate;
 
 class HookTemplate extends PluginTemplate {
     public function __construct(?string $name = null, ?string $uuid = null, ?string $version = null) {

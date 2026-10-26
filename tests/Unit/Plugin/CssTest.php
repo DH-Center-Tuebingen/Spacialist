@@ -8,8 +8,8 @@ use App\Plugin\Manifest as PluginManifest;
 use App\Services\Plugin\CssService;
 use App\Services\PluginManager;
 use Directory;
-use Tests\Support\PluginGenerator;
-use Tests\Support\PluginTemplate;
+use Tests\Support\Plugin\Generator as PluginGenerator;
+use Tests\Support\Plugin\Template as PluginTemplate;
 use Tests\TestCase;
 
 class CssTest extends TestCase {

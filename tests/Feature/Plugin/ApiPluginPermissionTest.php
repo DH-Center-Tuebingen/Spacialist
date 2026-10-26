@@ -3,8 +3,8 @@
 namespace Tests\Feature\Plugin;
 
 use Carbon\Carbon;
-use Tests\Support\PluginGenerator;
-use Tests\Support\PluginTemplate;
+use Tests\Support\Plugin\Generator as PluginGenerator;
+use Tests\Support\Plugin\Template as PluginTemplate;
 use Tests\PluginTestCase;
 
 class ApiPluginPermissionTest extends PluginTestCase {

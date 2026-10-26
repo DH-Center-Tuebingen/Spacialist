@@ -2,7 +2,7 @@
 
 namespace Tests\Feature\Plugin;
 
-use Tests\Support\PluginTemplate;
+use Tests\Support\Plugin\Template as PluginTemplate;
 
 /**
  *  Use the ApiPluginRouteTest and just override the filepath and legacy option.

@@ -2,7 +2,7 @@
 
 namespace Tests\Feature\Plugin;
 
-use Tests\Support\Templates\MigrationTemplate;
+use Tests\Support\Plugin\Templates\MigrationTemplate;
 /**
  * Tests the same functionalty as ApiPluginMigrationTest, but using the legacy path that is not explicitly defined in the manifest.
  */

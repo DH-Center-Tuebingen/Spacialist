@@ -3,12 +3,11 @@
 namespace Tests\Feature\Plugin;
 
 use App\Entity;
-use App\Services\Plugin\ScopeService;
 use Carbon\Carbon;
 use Tests\PluginTestCase;
 
-use Tests\Support\Templates\ScopeTemplate;
-use Tests\Support\PluginGenerator;
+use Tests\Support\Plugin\Templates\ScopeTemplate;
+use Tests\Support\Plugin\Generator as PluginGenerator;
 
 class ApiPluginScopeTest extends PluginTestCase {
     private ?PluginGenerator $generator = null;

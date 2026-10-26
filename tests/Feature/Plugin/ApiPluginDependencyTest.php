@@ -4,11 +4,11 @@ namespace Tests\Feature\Plugin;
 
 use App\VersionInfo;
 use Illuminate\Support\Str;
-use Tests\Support\PluginTemplate;
+use Tests\Support\Plugin\Template as PluginTemplate;
 use Carbon\Carbon;
 use Tests\PluginTestCase;
 
-use Tests\Support\PluginGenerator;
+use Tests\Support\Plugin\Generator as PluginGenerator;
 
 use PHPUnit\Framework\Attributes\DataProvider;
 

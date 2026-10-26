@@ -181,7 +181,6 @@ class MigrationService extends PluginService {
     /**
      * Get's a list of migration files in the plugin on the filesystem.
      *
-     * @param Plugin $plugin - The plugin to get the migration list for
      * @param mixed $rollback - If true, get the list in descending order. Required for rollbacks to get the last migration first.
      * @return array - A list of migration file names, e.g. ["2024_01_01_000000_create_users_table.php", "2024_01_02_000000_create_posts_table.php"]
      */

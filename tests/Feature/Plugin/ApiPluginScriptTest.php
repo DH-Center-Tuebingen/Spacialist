@@ -5,8 +5,8 @@ namespace Tests\Feature\Plugin;
 use App\Services\PluginManager;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
-use Tests\Support\PluginGenerator;
-use Tests\Support\PluginTemplate;
+use Tests\Support\Plugin\Generator as PluginGenerator;
+use Tests\Support\Plugin\Template as PluginTemplate;
 use Tests\PluginTestCase;
 
 class ApiPluginScriptTest extends PluginTestCase {

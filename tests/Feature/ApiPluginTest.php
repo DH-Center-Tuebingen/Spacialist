@@ -11,9 +11,9 @@ use Illuminate\Support\Facades\DB;
 use PHPUnit\Framework\Attributes\TestDox;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
-use Tests\Support\PluginDirectoryGenerator;
-use Tests\Support\PluginGenerator;
-use Tests\Support\PluginTemplate;
+use Tests\Support\Plugin\DirectoryGenerator as PluginDirectoryGenerator;
+use Tests\Support\Plugin\Generator as PluginGenerator;
+use Tests\Support\Plugin\Template as PluginTemplate;
 
 class ApiPluginTest extends TestCase {
     private PluginGenerator $generator;

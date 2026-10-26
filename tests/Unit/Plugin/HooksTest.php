@@ -4,8 +4,8 @@ namespace Tests\Unit\Plugin;
 use App\Services\Plugin\HookService;
 use App\Plugin;
 use PHPUnit\Framework\Attributes\DataProvider;
-use Tests\Support\Templates\HookTemplate;
-use Tests\Support\PluginGenerator;
+use Tests\Support\Plugin\Templates\HookTemplate;
+use Tests\Support\Plugin\Generator as PluginGenerator;
 use Tests\TestCase;
 
 class HooksTest extends TestCase {
