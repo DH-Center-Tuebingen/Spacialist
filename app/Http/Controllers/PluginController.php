@@ -237,7 +237,6 @@ class PluginController extends Controller {
         if($request->query('installed') == 1) {
             $plugins = app(PluginManager::class)->getInstalledPlugins();
         } else if($request->query('uninstalled') == 1) {
-            // We only cache installed plugins. When we need
             $plugins = Plugin::whereNull('installed_at')->get();
         } else {
             $plugins = app(PluginManager::class)->getPlugins();
