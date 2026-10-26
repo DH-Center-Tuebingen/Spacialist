@@ -6,7 +6,7 @@ use App\Plugin;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class Dependencies extends Model {
+class Dependency extends Model {
     protected $table = 'plugin_service_dependencies';
 
     protected $fillable = [

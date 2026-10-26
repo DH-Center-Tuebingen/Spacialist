@@ -4,7 +4,7 @@ namespace App\Models\Plugin;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Scopes extends Model {
+class Scope extends Model {
     protected $table = 'plugin_service_scopes';
 
     protected $fillable = [
