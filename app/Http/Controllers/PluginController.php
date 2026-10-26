@@ -44,8 +44,33 @@ class PluginController extends Controller {
             abort(403, __('This plugin is already installed'));
         }
     }
+    
+    private function requirePermission(string $permission) {
+        $user = auth()->user();
+        if(!$user || !$user->can($permission)) {
+            $parts = explode('_', $permission);
+            foreach($parts as &$part) {
+                $part = ucfirst($part);
+            }
+            $permission = implode(' ', $parts);
+            abort(403, __("Missing permission: :permission", ['permission' => $permission]));
+        }
+    }
+    
+    private function requireWritePermission() {
+        $this->requirePermission('plugin_write');
+    }
+    
+    private function requireCreatePermission() {
+        $this->requirePermission('plugin_create');
+    }
+    
+    private function requireDeletePermission() {
+        $this->requirePermission('plugin_delete');
+    }
 
     public function uploadPlugin(Request $request) {
+    $this->requireCreatePermission();
 
         $this->validate($request, [
             'file' => 'required|file'
@@ -67,7 +92,7 @@ class PluginController extends Controller {
         if($uploadResult->isUpdate()) {
             $plugin = $uploadResult->plugin;
             $fromVersion = $plugin->version;
-            $success = DB::transaction(function () use ($plugin) {
+            $success = DB::transaction(function() use ($plugin) {
                 app(PluginManager::class)->update($plugin);
                 // Return true if update was successful.
                 return true;
@@ -118,6 +143,7 @@ class PluginController extends Controller {
      * }>
      */
     public function installPlugin(Request $request, Plugin $plugin): JsonResponse {
+        $this->requireWritePermission();
         $this->requireNotInstalled($plugin);
 
         try {
@@ -157,6 +183,7 @@ class PluginController extends Controller {
      * }> | JsonResponse<array>[] - Returns the plugin with its scripts and styles. If the plugin was already uninstalled, a 204 No Content response will be returned.
      */
     public function uninstallPlugin(Request $request, Plugin $plugin): JsonResponse {
+        $this->requireWritePermission();
         $this->requireInstalled($plugin);
 
         try {
@@ -167,7 +194,7 @@ class PluginController extends Controller {
                 'scripts' => [app(PluginManager::class)->scriptService->getUrl($plugin)],
                 'styles' => app(PluginManager::class)->cssService->getUrls($plugin),
             ]);
-        }catch (ModelNotFoundException $e) {
+        } catch(ModelNotFoundException $e) {
             // Already uninstalled
             return response()->json([], 204);
         }
@@ -185,6 +212,7 @@ class PluginController extends Controller {
      * }>
      */
     public function removePlugin(Request $request, Plugin $plugin): JsonResponse {
+        $this->requireDeletePermission();
         $this->requireNotInstalled($plugin);
 
         app(PluginManager::class)->remove($plugin);
@@ -229,7 +257,8 @@ class PluginController extends Controller {
      * @param Plugin $plugin
      * @return JsonResponse<string> - Returns the URL of the published script.
      */
-    public function publishScript(Plugin $plugin) {
+    public function publishScript(Request $request, Plugin $plugin) {
+        $this->requireWritePermission();
         $this->requireInstalled($plugin);
         $scriptUrl = app(PluginManager::class)->scriptService->publish($plugin);
         return response()->json($scriptUrl);
@@ -291,6 +320,7 @@ class PluginController extends Controller {
      * @return \Illuminate\Http\JsonResponse - Returns the current migration state after execution
      */
     public function migrate(Request $request, Plugin $plugin) {
+        $this->requireWritePermission();
         app(MigrationService::class)->run($plugin);
         $migrationState = app(MigrationService::class)->inspect($plugin);
         return response()->json($migrationState);
@@ -301,6 +331,7 @@ class PluginController extends Controller {
      * @return \Illuminate\Http\JsonResponse - Returns the current migration state after execution
      */
     public function rollback(Request $request, Plugin $plugin) {
+        $this->requireWritePermission();
         app(MigrationService::class)->rollback($plugin);
         $migrationState = app(MigrationService::class)->inspect($plugin);
         return response()->json($migrationState);
@@ -312,6 +343,7 @@ class PluginController extends Controller {
      * @return \Illuminate\Http\JsonResponse - Returns the current migration state after execution
      */
     public function addMigrationToDatabase(Request $request, Plugin $plugin) {
+        $this->requireWritePermission();
         $this->validate($request, [
             'name' => 'required|string'
         ]);
@@ -343,6 +375,7 @@ class PluginController extends Controller {
      * @return \Illuminate\Http\JsonResponse - Returns all plugins with their metadata after rebuilding the cache.
      */
     public function refresh(Request $request) {
+        $this->requireWritePermission();
         app(DiscoveryService::class)->discover();
         app(PluginManager::class)->rebuildPluginCache();
         return response()->json(Plugin::all());
@@ -353,6 +386,7 @@ class PluginController extends Controller {
      * @return \Illuminate\Http\JsonResponse - Returns the plugin with its metadata.
      */
     public function refreshInfo(Request $request, Plugin $plugin) {
+        $this->requireWritePermission();
         $refreshedPlugin = app(DiscoveryService::class)->discoverByName($plugin->name);
         app(PluginManager::class)->rebuildPluginCache();
         return response()->json($refreshedPlugin);

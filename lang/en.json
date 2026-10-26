@@ -14,6 +14,7 @@
     "Presentation Files": "Presentation Files",
     "Invalid Credentials": "Invalid Credentials",
     "Copy": "Copy",
+    "Missing permission: :permission": "Missing permission: :permission",
     "You do not have the permission to view references": "You do not have the permission to view references",
     "You do not have the permission to add references": "You do not have the permission to add references",
     "This entity does not exist": "This entity does not exist",

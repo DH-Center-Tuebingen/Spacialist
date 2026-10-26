@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Route;
 | routes are loaded by the RouteServiceProvider within a group which
 | is assigned the "api" middleware group. Enjoy building your API!
 |
-*/
+ */
 Route::middleware('auth:sanctum')->prefix('download')->group(function() {
     Route::get('/avatar', 'UserController@downloadAvatar');
     Route::get('/bibliography', 'BibliographyController@downloadFile');
@@ -25,34 +25,28 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function() {
 
 // PLUGINS
 Route::middleware('auth:sanctum')->prefix('v1/plugin')->group(function() {
-    Route::get('', 'PluginController@getPlugins');
-    Route::get('/{plugin}/changelog', 'PluginController@getChangelog');
-    Route::get('/migrate/{plugin}/check', 'PluginController@getMigrationState');
-});
-
-Route::middleware('auth:sanctum')->middleware(['can:plugin_write'])->prefix('v1/plugin')->group(function() {
     // LEGACY: This route is kept for backward compatibility, the install post request should be used instead.
     Route::get('/{plugin}', 'PluginController@installPlugin');
 
+    Route::get('', 'PluginController@getPlugins');
+    Route::get('/{plugin}/changelog', 'PluginController@getChangelog');
+    Route::get('/migrate/{plugin}/check', 'PluginController@getMigrationState');
+
+    Route::post('', 'PluginController@uploadPlugin');
     Route::post('/install/{plugin}', 'PluginController@installPlugin');
     Route::post('/uninstall/{plugin}', 'PluginController@uninstallPlugin');
+    Route::post('/{plugin}/publish_script', 'PluginController@publishScript');
     Route::post('/refresh', 'PluginController@refresh');
     Route::post('/refresh_info/{plugin}', 'PluginController@refreshInfo');
-    Route::post('/{plugin}/publish_script', 'PluginController@publishScript');
     Route::post('/migrate/{plugin}', 'PluginController@migrate');
     Route::post('/migrate/{plugin}/rollback', 'PluginController@rollback');
     Route::post('/migrate/{plugin}/force_add', 'PluginController@addMigrationToDatabase');
 
+    Route::delete('/remove/{plugin}', 'PluginController@removePlugin');
+
     // LEGACY: This route is kept for backward compatibility, the uninstall post request should be used instead.
     Route::delete('/{plugin}', 'PluginController@uninstallPlugin');
-});
 
-Route::middleware('auth:sanctum')->middleware(['can:plugin_create'])->prefix('v1/plugin')->group(function() {
-    Route::post('', 'PluginController@uploadPlugin');
-});
-
-Route::middleware('auth:sanctum')->middleware(['can:plugin_delete'])->prefix('v1/plugin')->group(function() {
-    Route::delete('/remove/{plugin}', 'PluginController@removePlugin');
 });
 
 // ENTITY
@@ -133,7 +127,6 @@ Route::middleware('web')->prefix('v1')->group(function() {
     Route::post('/auth/login', 'UserController@login');
     Route::post('/auth/logout', 'UserController@logout');
 });
-
 
 Route::middleware('auth:sanctum')->prefix('v1')->group(function() {
     Route::get('/refresh', 'UserController@refreshSession');
