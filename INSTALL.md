@@ -64,7 +64,20 @@ However, since we switched to a different code base, you have to get the new dep
     git clone https://github.com/DH-Center-Tuebingen/Spacialist
     ```
 
-3. Download Dependencies
+3. Create a read_package token in your [Github Account](https://github.com/settings/tokens):
+    ```
+    Profile -> Settings -> Developer settings -> Personal access tokens -> Tokens (classic) -> Create New Token with (at least) the permission: read:packages
+    ``` 
+    
+    Store the token on your PC inside "~/.npmrc" 
+    
+    ```
+    # This allows npm to access packages hosted on Github (it's even required when they are public)
+    @YOUR-USERNAME:registry=https://npm.pkg.github.com
+    //npm.pkg.github.com/:_authToken=ghp_YOUR_ACCESS_TOKEN
+    ```
+
+4. Download Dependencies
 
     **Please note**: Before moving on, check your versions of composer (`composer -v`) and npm (`npm -v`). Older versions can cause problems (composer < 1.8, npm < 6.x). Update them manually if your OS has outdated versions.
 
