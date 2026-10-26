@@ -63,7 +63,7 @@ return [
     | This is usually used for plugin testing.
     |
     */
-    'plugin_directory' => env('APP_PLUGIN_DIRECTORY', 'app/Plugins'),
+    'plugin_directory' => env('APP_PLUGIN_TEST_DIRECTORY', 'app/Plugins'),
 
     /*
     |--------------------------------------------------------------------------

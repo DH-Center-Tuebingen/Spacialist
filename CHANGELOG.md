@@ -16,6 +16,7 @@ All notable changes to this project will be documented in this file.
 - Multi move in entity tree
 - Option to set entity attributes as required fields
 - Option to display _Single Choice Dropdowns_ as buttons instead of a dropdown
+- `APP_PLUGIN_TEST_DIRECTORY`: Defines the plugin directory for testing. Especially in a local dev environment the locally installed plugins would cause the plugin tests to fail.
 ### Fixed
 - Removed redundant calls to the entity endpoint
 - Metadata tab error on submit (unknown variable)
