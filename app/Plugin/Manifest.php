@@ -132,7 +132,7 @@ class Manifest {
         // TODO: Remove when releasing v1.0
         $manifest = false;
         foreach(self::MANIFEST_FILE_PATHS as $manifestFilePath) {
-            $fullPath = Str::finish($path, '/') . $manifestFilePath;
+            $fullPath = Str::finish($path, DIRECTORY_SEPARATOR) . $manifestFilePath;
             if(is_link($fullPath)) {
                 $fullPath = readlink($fullPath);
             }
@@ -184,7 +184,7 @@ class Manifest {
     public static function fromZip(ZipArchive $zip, ?string $pluginName = null): Manifest {
         foreach(self::MANIFEST_FILE_PATHS as $manifestFilePath) {
             if($pluginName) {
-                $manifestFilePath = Str::finish($pluginName, '/') . $manifestFilePath;
+                $manifestFilePath = Str::finish($pluginName, DIRECTORY_SEPARATOR) . $manifestFilePath;
             }
 
             $manifestFilePath = str_replace(["/", "\\"], DIRECTORY_SEPARATOR, $manifestFilePath);

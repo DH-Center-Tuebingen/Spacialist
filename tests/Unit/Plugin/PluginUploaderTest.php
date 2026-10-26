@@ -51,7 +51,7 @@ class PluginUploaderTest extends TestCase {
 
     private function trackPluginDirs(): void {
         $this->dirsToCleanup[] = PluginDirectory::getPath(self::PLUGIN_NAME);
-        $this->dirsToCleanup[] = PluginDirectory::getPath('_backups/' . self::PLUGIN_NAME);
+        $this->dirsToCleanup[] = PluginDirectory::getPath('.backups'. DIRECTORY_SEPARATOR . self::PLUGIN_NAME);
     }
 
     private function createPluginInDb(string $version): Plugin {
@@ -72,7 +72,7 @@ class PluginUploaderTest extends TestCase {
     }
 
     private function getTmpZipPath(string $filename): string {
-        return sys_get_temp_dir() . '/' . uniqid($filename . "_") . '.zip';
+        return sys_get_temp_dir() . DIRECTORY_SEPARATOR . uniqid($filename . "_") . '.zip';
     }
 
     public function testUploadCreatesNewPlugin(): void {
@@ -100,7 +100,7 @@ class PluginUploaderTest extends TestCase {
         $this->assertEquals(self::PLUGIN_NAME, $result->pluginName);
         $this->assertTrue($result->isUpdate());
         $this->assertTrue($this->uploader->doesPluginDirectoryExist(self::PLUGIN_NAME));
-        $this->assertTrue(is_dir(PluginDirectory::getPath('_backups/' . self::PLUGIN_NAME)));
+        $this->assertTrue(is_dir(PluginDirectory::getPath('.backups' . DIRECTORY_SEPARATOR . self::PLUGIN_NAME)));
     }
 
     public function testUpdateAllowsSameVersion(): void {
@@ -122,14 +122,14 @@ class PluginUploaderTest extends TestCase {
         $this->createPluginInDb('1.0.0');
         $existingDir = $this->createPluginDir();
         // Plant a sentinel file in the existing plugin dir so we can confirm it was backed up
-        file_put_contents($existingDir . '/sentinel.txt', 'old version marker');
+        file_put_contents($existingDir . DIRECTORY_SEPARATOR . 'sentinel.txt', 'old version marker');
 
         $template = $this->makeTemplate('1.0.1')->addBasic()->generate();
         $zipPath = $this->makeZipFromTemplate($template);
 
         $this->uploader->upload(new SplFileInfo($zipPath));
 
-        $backupSentinel = PluginDirectory::getPath('_backups/' . self::PLUGIN_NAME) . '/sentinel.txt';
+        $backupSentinel = PluginDirectory::getPath('.backups' . DIRECTORY_SEPARATOR . self::PLUGIN_NAME) . DIRECTORY_SEPARATOR .'sentinel.txt';
         $this->assertTrue(file_exists($backupSentinel));
     }
 
@@ -193,7 +193,7 @@ class PluginUploaderTest extends TestCase {
     }
 
     public function testRestoreBackupSucceeds(): void {
-        $backupDir = PluginDirectory::getPath('_backups/' . self::PLUGIN_NAME);
+        $backupDir = PluginDirectory::getPath('.backups' . DIRECTORY_SEPARATOR . self::PLUGIN_NAME);
         $this->dirsToCleanup[] = PluginDirectory::getPath(self::PLUGIN_NAME);
         $this->dirsToCleanup[] = $backupDir;
 
@@ -209,7 +209,7 @@ class PluginUploaderTest extends TestCase {
 
     public function testRestoreBackupReplacesExistingPlugin(): void {
         $pluginDir = PluginDirectory::getPath(self::PLUGIN_NAME);
-        $backupDir = PluginDirectory::getPath('_backups/' . self::PLUGIN_NAME);
+        $backupDir = PluginDirectory::getPath('.backups' . DIRECTORY_SEPARATOR . self::PLUGIN_NAME);
         $this->dirsToCleanup[] = $pluginDir;
         $this->dirsToCleanup[] = $backupDir;
 

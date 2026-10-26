@@ -209,7 +209,8 @@ class MigrationService extends PluginService {
     }
 
     function resolveDirectoryNamspace(Plugin $plugin, string $migrationDirectory):string {
-        $normalizedPath = str_replace('/', '\\', Str::after($migrationDirectory, PluginDirectory::getPathByName($plugin->name)));
+        $relativeMigrationPath = Str::after($migrationDirectory, PluginDirectory::getPathByName($plugin->name));
+        $normalizedPath = str_replace('/', '\\', $relativeMigrationPath);
         // Transform the path into a namespace e.g. app/plugins/my-plugin to App\Plugins\MyPlugin
         $namespace = collect(explode('\\', $normalizedPath))
             ->filter()

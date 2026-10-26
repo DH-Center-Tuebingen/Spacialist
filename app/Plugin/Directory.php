@@ -9,6 +9,7 @@ use Illuminate\Support\Str;
 /**
  * Manages a plugin directory and its contents.
  *
+ *
  * It concerns the plugin manifest (plugin.xml), components, options, classes,
  * and other files that are part of a plugin.
  */
@@ -48,7 +49,7 @@ class Directory {
      * Get's the absolute system path relative to the plugin directory.
      *
      * @param string $subpath - An optional subpath to a specific file or directory inside the plugin directory, e.g. "MyPlugin/Migrations" or "MyPlugin/Migrations/2024_01_01_000000_create_users_table.php"
-     * @return string The absolute system path to the plugin's directory or a subpath inside the plugin's directory
+     * @return string The absolute system path to the plugin's directory or a subpath inside the plugin's directory. Path is separated in system format.
      */
     public static function getPath(string $subpath = ""): string {
         $pluginDirectory = config('app.plugin_directory');
@@ -58,7 +59,7 @@ class Directory {
             $path .= Str::start($subpath, '/');
         }
 
-        return $path;
+        return str_replace(["/", "\\"], DIRECTORY_SEPARATOR, $path);
     }
 
     /**
@@ -132,6 +133,13 @@ class Directory {
         return $pluginDirectory->getNamespace($path);
     }
 
+    /**
+     * Creates the namespace of the provided path relative to the project root.
+     *
+     * @example When looking for the namespace of the file 'App/Directory' in the Plugin 'File', this produces 'App\Plugins\File\App\Directory'
+     * @param mixed $path
+     * @return string
+     */
     public function getNamespace($path = null): string {
         $basePath = "App\\Plugins\\$this->pluginName";
         if($path) {

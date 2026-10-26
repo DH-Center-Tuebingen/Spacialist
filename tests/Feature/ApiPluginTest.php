@@ -189,7 +189,7 @@ class ApiPluginTest extends TestCase {
         $this->assertNotNull($plugin);
         $this->assertEquals('1.0.0', $plugin->version);
 
-        $backupDirectory = PluginDirectory::getPath('_backups/' . $plugin->name);
+        $backupDirectory = PluginDirectory::getPath('.backups' . DIRECTORY_SEPARATOR . $plugin->name);
         $backupFooPlugin = PluginTemplate::fromSlugArray($this->getFooPlugin())
             ->addBasic()
             ->setChangelog('backup')

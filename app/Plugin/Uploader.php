@@ -11,6 +11,9 @@ use SplFileInfo;
 use ZipArchive;
 
 class Uploader {
+
+    const BACKUP_DIRECTORY = ".backups";
+
     /**
      * Uploads a plugin zip file, extracts it to the plugin directory,
      * and returns the name of the uploaded plugin.
@@ -20,7 +23,7 @@ class Uploader {
      *
      * If a plugin with the same name already exists,
      * it is moved to a backup directory before extracting the new plugin.
-     * The backup directory is located at "plugins/_backups" and is created if it does not exist.
+     * The backup directory is located at "plugins/.backups" and is created if it does not exist.
      * If a backup of the same plugin already exists in the backup directory,
      * it is removed before moving the existing plugin to the backup directory.
      *
@@ -72,7 +75,7 @@ class Uploader {
      * @return bool - Returns true if the backup was successfully restored, false if no backup exists for the given plugin name.
      */
     public function restoreBackup(string $pluginName): bool {
-        $backupPath = PluginDirectory::getPath("_backups/{$pluginName}");
+        $backupPath = PluginDirectory::getPath(self::BACKUP_DIRECTORY . DIRECTORY_SEPARATOR . $pluginName);
         if(!file_exists($backupPath)) {
             return false;
         }
@@ -176,7 +179,7 @@ class Uploader {
 
     private function moveExistingPluginToBackup(string $backupPath, string $pluginName) {
         $existingPluginPath = PluginDirectory::getPath($pluginName);
-        $backupPluginPath = $backupPath . '/' . $pluginName;
+        $backupPluginPath = $backupPath . DIRECTORY_SEPARATOR . $pluginName;
 
         if(!file_exists($existingPluginPath)) {
             return null;
@@ -185,7 +188,7 @@ class Uploader {
     }
 
     private function ensureBackupDirectoryExists(): string {
-        $backupDirectory = PluginDirectory::getPath("_backups");
+        $backupDirectory = PluginDirectory::getPath(self::BACKUP_DIRECTORY);
         if(!is_dir($backupDirectory)) {
             mkdir($backupDirectory, 0755, true);
         }
@@ -194,7 +197,7 @@ class Uploader {
     }
 
     private function removeExistingBackup(string $backupPath, string $pluginName): void {
-        $existingBackupPath = $backupPath . '/' . $pluginName;
+        $existingBackupPath = $backupPath . DIRECTORY_SEPARATOR . $pluginName;
         if(file_exists($existingBackupPath)) {
             sp_remove_dir($existingBackupPath);
         }
@@ -204,7 +207,7 @@ class Uploader {
         // As the zip file contains a single root directory with the same name as the plugin,
         // we can safely extract it directly to the plugin directory.
         $pluginDirectory = PluginDirectory::getPath();
-        $extractPath = Str::finish($pluginDirectory, '/');
+        $extractPath = Str::finish($pluginDirectory, DIRECTORY_SEPARATOR);
 
         $extracted = $zipFile->extractTo($extractPath);
         $zipFile->close();
