@@ -254,7 +254,7 @@ Route::middleware('auth:sanctum')->prefix('v1/analysis')->group(function() {
 });
 
 // Open Access
-Route::prefix('v1/open')->group(function() {
+Route::middleware('openaccess')->prefix('v1/open')->group(function() {
     Route::get('global', 'OpenAccessController@getGlobals');
     Route::get('types', 'OpenAccessController@getEntityTypes');
     Route::get('attributes', 'OpenAccessController@getAttributes');

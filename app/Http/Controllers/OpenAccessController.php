@@ -50,9 +50,6 @@ class OpenAccessController extends Controller {
 
     // GET
     public function getGlobals(Request $request) {
-        if(!Preference::hasPublicAccess()) {
-            return response()->json();
-        }
         $locale = App::getLocale();
         $concepts = ThConcept::getMap($locale);
         $preferences = Preference::getPreferences(true);
@@ -68,9 +65,6 @@ class OpenAccessController extends Controller {
     }
 
     public function getEntityTypes(Request $request) {
-        if(!Preference::hasPublicAccess()) {
-            return response()->json();
-        }
         return response()->json(
             EntityType::withCount('entities')
                 ->where('in_open_access', true)
@@ -80,10 +74,6 @@ class OpenAccessController extends Controller {
     }
 
     public function getAttributeValuesForEntityType(Request $request, EntityType $entityType) {
-        if(!Preference::hasPublicAccess()) {
-            return response()->json();
-        }
-
         $attributes = EntityAttribute::with('attribute')->where('entity_type_id', $entityType->id)->get();
         $attributeValues = [];
         foreach($attributes as $attr) {
@@ -111,10 +101,6 @@ class OpenAccessController extends Controller {
     }
 
     public function getAttributes(Request $request) {
-        if(!Preference::hasPublicAccess()) {
-            return response()->json();
-        }
-
         $forEntityType = $request->query('entity_type', null);
         $attributeQuery = EntityAttribute::with(['attribute', 'entity_type']);
         if(isset($forEntityType)) {
@@ -126,10 +112,6 @@ class OpenAccessController extends Controller {
     }
 
     public function getEntity(Request $request, int $id) {
-        if(!Preference::hasPublicAccess()) {
-            return response()->json();
-        }
-
         try {
             $entity = Entity::findOrFail($id);
         } catch(ModelNotFoundException $e) {
@@ -148,10 +130,6 @@ class OpenAccessController extends Controller {
     }
 
     public function getEntityData(Request $request, $id) {
-        if(!Preference::hasPublicAccess()) {
-            return response()->json();
-        }
-
         try {
             $entity = Entity::findOrFail($id);
         } catch(ModelNotFoundException $e) {
@@ -183,10 +161,6 @@ class OpenAccessController extends Controller {
 
     // POST
     public function getFilterResults(Request $request, $page = 1) {
-        if(!Preference::hasPublicAccess()) {
-            return response()->json();
-        }
-
         $types = $request->input('types', []);
         $attributes = $request->input('attributes', []);
 
@@ -213,10 +187,6 @@ class OpenAccessController extends Controller {
     }
 
     public function getFilterResultsForType(Request $request, $id, $page = 1) {
-        if(!Preference::hasPublicAccess()) {
-            return response()->json();
-        }
-
         $filters = $request->input('filters', []);
         $isOr = $request->input('or', false);
 
