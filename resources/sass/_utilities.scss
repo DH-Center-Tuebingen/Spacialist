@@ -89,12 +89,20 @@
     max-height: 300px !important;
 }
 
+.mh-50 {
+    max-height: 50% !important;
+}
+
 .mh-75v {
     max-height: 75vh !important;
 }
 
 .minw-30 {
     min-width: 30rem !important;
+}
+
+.mw-50 {
+    max-width: 50% !important;
 }
 
 .text-prewrap {
@@ -185,4 +193,8 @@
 
 .resize-none {
     resize: none;
+}
+
+.aspect-ratio-1 {
+    aspect-ratio: 1;
 }

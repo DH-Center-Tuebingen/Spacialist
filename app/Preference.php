@@ -52,9 +52,9 @@ class Preference extends Model
     }
 
     public static function hasPublicAccess() {
-        $value = self::where('label', 'prefs.project-maintainer')->value('default_value');
+        $value = self::where('label', 'prefs.enable-open-access')->value('default_value');
         $decodedValue = json_decode($value);
-        return sp_parse_boolean($decodedValue->public);
+        return sp_parse_boolean($decodedValue->enable);
     }
 
     public static function decodePreference($label, $value) {
@@ -77,6 +77,8 @@ class Preference extends Model
                 return $value->name;
             case 'prefs.project-maintainer':
                 return $value;
+            case 'prefs.enable-open-access':
+                return $value->enable;
             case 'prefs.map-projection':
                 $proj4 = DB::table('spatial_ref_sys')
                     ->where('auth_srid', $value->epsg)
@@ -118,6 +120,9 @@ class Preference extends Model
                 break;
             case 'prefs.project-maintainer':
                 $value = $decodedValue;
+                break;
+            case 'prefs.enable-open-access':
+                $value = json_encode(['enable' => $decodedValue]);
                 break;
             case 'prefs.map-projection':
                 $value = $decodedValue;

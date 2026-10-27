@@ -1,9 +1,13 @@
 <template>
     <div class="row">
-        <label class="col-md-2 form-label" />
+        <label
+            class="col-md-2 form-label"
+            for="show-tooltips-toggle"
+        />
         <div class="col-md-10">
             <div class="form-check form-switch">
                 <input
+                    id="show-tooltips-toggle"
                     v-model="state.enabled"
                     class="form-check-input"
                     type="checkbox"
@@ -27,7 +31,7 @@
     import {
         _debounce
     } from '@/helpers/helpers.js';
-    
+
     export default {
         props: {
             data: {
