@@ -33,6 +33,7 @@ All notable changes to this project will be documented in this file.
 - Overflow of long summaries in _Metadata_ tab
 - Available operators for attribute dependencies
 - Deleting concepts in _ThesauRex_ that used in any attributes
+- Loading _Entity Type_ with lots of attributes in _Data Model Editor_
 ### Changed
 - Alerts can now be dismissed
 - Now entity metadata is only loaded when accessing the metadata tab

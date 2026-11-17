@@ -42,7 +42,7 @@
                                 <DotIndicator :type="getAttributeChangeIndicator(element)" />
                             </div>
                             <div
-                                v-show="!!state.hoverStates[index]"
+                                v-if="!!state.hoverStates[index]"
                                 class="btn-fab-list btn-fab-list-md position-absolute start-0"
                             >
                                 <button
