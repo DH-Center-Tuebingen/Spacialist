@@ -4,7 +4,7 @@
         <div class="col-md-10">
             <multiselect
                 id="language-search"
-                :value="modelValue"
+                :value="data"
                 :hide-selected="true"
                 :mode="'single'"
                 :filterResults="true"
@@ -44,7 +44,7 @@
 
     export default {
         props: {
-            modelValue: {
+            data: {
                 required: true,
                 type: String,
             },
@@ -84,7 +84,7 @@
                 languageList: getSupportedLanguages(),
                 browserLanguage: computed(_ => navigator.language ? navigator.language.split('-')[0] : 'en'),
                 showSetButton: computed(_ => {
-                    return browserDefault.value && state.browserLanguage != props.modelValue && state.languageList.includes(state.browserLanguage);
+                    return browserDefault.value && state.browserLanguage != props.data && state.languageList.includes(state.browserLanguage);
                 }),
             });
 

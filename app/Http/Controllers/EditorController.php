@@ -15,9 +15,11 @@ use App\ThConcept;
 use App\AttributeTypes\AttributeBase;
 use App\Registries\AttributeRegistry;
 use Illuminate\Support\Arr;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class EditorController extends Controller {
     // GET
@@ -110,6 +112,11 @@ class EditorController extends Controller {
         } else {
             return response()->json();
         }
+    }
+
+    public function downloadFile(Request $request): JsonResponse|BinaryFileResponse {
+        $filepath = $request->query('path');
+        return EntityType::getDirectory()->download($filepath);
     }
 
     // POST
@@ -383,7 +390,7 @@ class EditorController extends Controller {
         }
         $relationData = Arr::only(
             $request->get('data'),
-            ['is_root', 'sub_entity_types', 'color'],
+            ['is_root', 'sub_entity_types', 'color', 'in_open_access', 'metadata'],
         );
         $propData = Arr::only(
             $request->get('data'),
@@ -412,6 +419,31 @@ class EditorController extends Controller {
         $entityType->load('sub_entity_types');
 
         return response()->json($entityType, 200);
+    }
+
+    public function patchEntityTypeFile(Request $request, $etid) {
+        $user = auth()->user();
+        if(!$user->can('entity_type_write')) {
+            return response()->json([
+                'error' => __('You do not have the permission to modify entity-type')
+            ], 403);
+        }
+        $this->validate($request, [
+            'file' => 'required|file',
+        ]);
+
+        try {
+            $entityType = EntityType::findOrFail($etid);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => __('This entity-type does not exist')
+            ], 400);
+        }
+
+        $file = $request->file('file');
+        $filepath = $entityType->uploadFile($file);
+
+        return response()->json($filepath, 200);
     }
 
     public function reorderAttribute(Request $request, $ctid, $aid) {
@@ -654,6 +686,21 @@ class EditorController extends Controller {
         $ea->removeFromEntityType();
         $ea->delete();
 
+        return response()->json(null, 204);
+    }
+
+    public function deleteEntityTypeFile($id) {
+        $user = auth()->user();
+
+        try {
+            $entityType = EntityType::findOrFail($id);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => __('This entity type does not exist')
+            ], 400);
+        }
+
+        $entityType->deleteFile();
         return response()->json(null, 204);
     }
 }

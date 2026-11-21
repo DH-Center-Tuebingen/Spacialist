@@ -3,7 +3,7 @@
         <label class="col-md-2 form-label" />
         <div class="col-md-10">
             <input
-                :value="modelValue"
+                :value="data"
                 class="form-control"
                 type="text"
                 :disabled="readonly"
@@ -25,7 +25,7 @@
 
     export default {
         props: {
-            modelValue: {
+            data: {
                 required: true,
                 type: String,
             },
