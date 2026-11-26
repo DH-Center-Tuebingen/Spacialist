@@ -127,7 +127,7 @@ export const useSystemStore = defineStore('system', {
     },
     actions: {
         getConceptById(id) {
-            const thesaurusUrl = this.conceptIdUrlMap[id]
+            const thesaurusUrl = this.conceptIdUrlMap[id];
             if(!thesaurusUrl) return null;
             return this.concepts[thesaurusUrl];
         },
