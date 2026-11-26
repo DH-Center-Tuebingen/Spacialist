@@ -223,30 +223,36 @@
             const confirmEdit = _ => {
                 const data = {
                     dependency: state.dependency,
-                    metadata: {},
+                    metadata: null,
                 };
 
+                const metadata = {}
+                
                 // Check for changes in width metadata
                 if(state.attribute.pivot &&
                     (!state.attribute.pivot.metadata || state.width != state.attribute.pivot.metadata.width)
                 ) {
-                    data.metadata.width = state.width;
+                    metadata.width = state.width;
                 }
                 if(state.attribute.pivot &&
                     (!state.attribute.pivot.metadata || state.required != state.attribute.pivot.metadata.required)
                 ) {
-                    data.metadata.required = state.required;
+                    metadata.required = state.required;
                 }
                 if(state.attribute.pivot &&
                     (!state.attribute.pivot.metadata || state.renderAsButtons != state.attribute.pivot.metadata.as_buttons)
                 ) {
-                    data.metadata.as_buttons = state.renderAsButtons;
+                    metadata.as_buttons = state.renderAsButtons;
                 }
                 if(state.attribute.is_system && state.separatorTitle && (!state.attribute.pivot.metadata?.title || state.separatorTitle != state.attribute.pivot.metadata.title)
                 ) {
-                    data.metadata.title = state.separatorTitle;
+                    metadata.title = state.separatorTitle;
                 }
-
+                
+                if(Object.entries(metadata).length > 0){
+                    data.metadata = metadata
+                }
+                
                 context.emit('confirm', data);
             };
             const closeModal = _ => {
